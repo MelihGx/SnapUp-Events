@@ -1,4 +1,4 @@
-const loginForm = document.getElementById("loginForm");
+﻿const loginForm = document.getElementById("loginForm");
 
 const loginMailInput = document.getElementById("loginMail");
 const loginPasswordInput = document.getElementById("loginPassword");
@@ -10,7 +10,7 @@ const loginSubmit = document.getElementById("loginSubmit");
 const loginResult = document.getElementById("loginResult");
 const toggleLoginPassword = document.getElementById("toggleLoginPassword");
 
-const API_URL = "http://localhost:3000/api/auth/login";
+const API_URL = "https://snapup-events-api.onrender.com";
 
 function clearLoginErrors() {
   loginMailError.textContent = "";

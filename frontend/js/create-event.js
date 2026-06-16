@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 import { $, $$ } from "./utils.js";
 import { createEvent } from "./events-api.js";
@@ -39,9 +39,9 @@ export function initCreateEvent() {
   };
 
   const packageDetails = {
-    starter: "Free · 50 guests · 500 MB",
-    standard: "₺149 · 150 guests · 2 GB",
-    premium: "₺299 · Unlimited guests · 10 GB",
+    starter: "Free Â· 50 guests Â· 500 MB",
+    standard: "â‚º149 Â· 150 guests Â· 2 GB",
+    premium: "â‚º299 Â· Unlimited guests Â· 10 GB",
   };
 
   function escapeHTML(value) {
@@ -283,7 +283,7 @@ export function initCreateEvent() {
     }
 
     if (paymentCardPreviewNumber) {
-      paymentCardPreviewNumber.textContent = demoCardNumber?.value.trim() || "•••• •••• •••• ••••";
+      paymentCardPreviewNumber.textContent = demoCardNumber?.value.trim() || "â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢";
     }
 
     if (paymentCardPreviewDate) {

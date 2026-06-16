@@ -1,6 +1,6 @@
-const token = localStorage.getItem("snapup_token");
+﻿const token = localStorage.getItem("snapup_token");
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
 const detailLoading = document.getElementById("detailLoading");
 const detailError = document.getElementById("detailError");
@@ -91,7 +91,7 @@ if (!token) {
 }
 
 if (!eventId) {
-  showError("Event ID bulunamadı. Account sayfasından tekrar giriş yap.");
+  showError("Event ID bulunamadÄ±. Account sayfasÄ±ndan tekrar giriÅŸ yap.");
 }
 
 function getAuthHeaders() {
@@ -699,7 +699,7 @@ function showGalleryLightboxItem(index) {
   galleryLightboxTitle.textContent = `Uploaded by ${item.guestName}`;
 
   const metaParts = [item.message, item.uploadedAt].filter(Boolean);
-  galleryLightboxMeta.textContent = metaParts.join(" · ");
+  galleryLightboxMeta.textContent = metaParts.join(" Â· ");
 
   const hasMultipleItems = galleryLightboxItems.length > 1;
 

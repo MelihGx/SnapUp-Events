@@ -1,4 +1,4 @@
-const token = localStorage.getItem("snapup_token");
+﻿const token = localStorage.getItem("snapup_token");
 
 const sidebarUserInitial = document.getElementById("sidebarUserInitial");
 const sidebarUserName = document.getElementById("sidebarUserName");
@@ -31,7 +31,7 @@ const confirmNewPassword = document.getElementById("confirmNewPassword");
 const passwordSaveButton = document.getElementById("passwordSaveButton");
 const passwordResult = document.getElementById("passwordResult");
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
 if (!token) {
   window.location.href = "login.html";
@@ -127,7 +127,7 @@ function renderNoEventsMessage() {
     <div class="account-empty">
       <h3>No existing events found.</h3>
       <p>
-        Your first memory wall is one click away — create your first SnapUp event now.
+        Your first memory wall is one click away â€” create your first SnapUp event now.
       </p>
       <a href="create-event.html" class="topbar-create-btn">
         Create Your First Event
@@ -421,7 +421,7 @@ passwordForm.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (response.status === 401) {
-      if (data.message === "Mevcut şifre hatalı.") {
+      if (data.message === "Mevcut ÅŸifre hatalÄ±.") {
         passwordResult.textContent = data.message;
         passwordResult.style.color = "#ff4d4d";
         return;

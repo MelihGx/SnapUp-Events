@@ -1,4 +1,4 @@
-const registerForm = document.getElementById("registerForm");
+﻿const registerForm = document.getElementById("registerForm");
 
 const userNameInput = document.getElementById("userName");
 const userMailInput = document.getElementById("userMail");
@@ -16,7 +16,7 @@ const registerSubmit = document.getElementById("registerSubmit");
 const registerResult = document.getElementById("registerResult");
 const togglePassword = document.getElementById("togglePassword");
 
-const API_URL = "http://localhost:3000/api/auth/register";
+const API_URL = "https://snapup-events-api.onrender.com/api/auth/register";
 
 function clearErrors() {
   userNameError.textContent = "";

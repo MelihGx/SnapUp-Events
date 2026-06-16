@@ -1,3 +1,3 @@
-"use strict";
+﻿"use strict";
 
-export const API_URL = "http://localhost:3000";
+export const API_URL = "https://snapup-events-api.onrender.com";

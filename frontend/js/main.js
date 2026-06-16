@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 import { initNav } from "./navbar.js";
 import { initReveal } from "./reveal.js";

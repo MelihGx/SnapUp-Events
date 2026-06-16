@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3000";
+﻿const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
 let selectedMediaType = "message";
 let selectedEvent = null;
@@ -141,7 +141,7 @@ function renderEventPreview(event) {
     event.event_code || "",
   ].filter(Boolean);
 
-  meta.textContent = parts.join(" · ");
+  meta.textContent = parts.join(" Â· ");
 
   if (event.allow_gallery_view === false) {
     galleryButton.hidden = true;

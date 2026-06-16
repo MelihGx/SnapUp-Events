@@ -1,5 +1,5 @@
-/* =========================================================
-   SnapUp Events — Camera Landing Page Interactions
+﻿/* =========================================================
+   SnapUp Events â€” Camera Landing Page Interactions
    ========================================================= */
 
 "use strict";
@@ -227,9 +227,9 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   let intervalId = null;
 
   const config = {
-    photo: { icon: "📸", name: "memory_photo.jpg", speed: 28 },
-    video: { icon: "🎥", name: "memory_video.mp4", speed: 20 },
-    message: { icon: "💬", name: "guest_message.txt", speed: 42 },
+    photo: { icon: "ğŸ“¸", name: "memory_photo.jpg", speed: 28 },
+    video: { icon: "ğŸ¥", name: "memory_video.mp4", speed: 20 },
+    message: { icon: "ğŸ’¬", name: "guest_message.txt", speed: 42 },
   };
 
   function simulate(type = "photo") {
@@ -321,15 +321,15 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 /* BACKEND CONNECTION TEST */
 (async function testBackendConnection() {
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://snapup-events-api.onrender.com";
 
   try {
     const response = await fetch(`${API_URL}/api/health`);
     const data = await response.json();
 
-    console.log("Backend bağlantısı başarılı:", data);
+    console.log("Backend baÄŸlantÄ±sÄ± baÅŸarÄ±lÄ±:", data);
   } catch (error) {
-    console.error("Backend bağlantı hatası:", error);
+    console.error("Backend baÄŸlantÄ± hatasÄ±:", error);
   }
 })();
 
@@ -339,7 +339,7 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const input = document.querySelector("#eventNameInput");
   const result = document.querySelector("#eventCreateResult");
 
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://snapup-events-api.onrender.com";
 
   if (!form || !input || !result) return;
 
@@ -350,13 +350,13 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
     if (!eventName) {
       result.className = "event-create-result error";
-      result.textContent = "Lütfen event adı gir.";
+      result.textContent = "LÃ¼tfen event adÄ± gir.";
       input.focus();
       return;
     }
 
     result.className = "event-create-result loading";
-    result.textContent = "Event oluşturuluyor...";
+    result.textContent = "Event oluÅŸturuluyor...";
 
     try {
       const response = await fetch(`${API_URL}/api/events`, {
@@ -370,21 +370,21 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Event oluşturulamadı");
+        throw new Error(data.message || "Event oluÅŸturulamadÄ±");
       }
 
       result.className = "event-create-result success";
       result.innerHTML = `
-        <strong>Event oluşturuldu!</strong>
-        <span>Event adı: ${data.event.eventName}</span>
+        <strong>Event oluÅŸturuldu!</strong>
+        <span>Event adÄ±: ${data.event.eventName}</span>
         <b>${data.event.eventCode}</b>
-        <small>Bu kodu misafirlerinle paylaşabilirsin.</small>
+        <small>Bu kodu misafirlerinle paylaÅŸabilirsin.</small>
       `;
 
       input.value = "";
     } catch (error) {
       result.className = "event-create-result error";
-      result.textContent = error.message || "Backend bağlantı hatası oluştu.";
+      result.textContent = error.message || "Backend baÄŸlantÄ± hatasÄ± oluÅŸtu.";
     }
   });
 })();

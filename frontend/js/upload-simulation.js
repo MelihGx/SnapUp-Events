@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 import { $, $$ } from "./utils.js";
 
@@ -18,9 +18,9 @@ export function initUploadSimulation() {
   let intervalId = null;
 
   const config = {
-    photo: { icon: "📸", name: "memory_photo.jpg", speed: 28 },
-    video: { icon: "🎥", name: "memory_video.mp4", speed: 20 },
-    message: { icon: "💬", name: "guest_message.txt", speed: 42 },
+    photo: { icon: "ğŸ“¸", name: "memory_photo.jpg", speed: 28 },
+    video: { icon: "ğŸ¥", name: "memory_video.mp4", speed: 20 },
+    message: { icon: "ğŸ’¬", name: "guest_message.txt", speed: 42 },
   };
 
   function simulate(type = "photo") {

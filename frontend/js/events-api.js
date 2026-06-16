@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 import { API_URL } from "./config.js";
 

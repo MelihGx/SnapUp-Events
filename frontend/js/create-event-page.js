@@ -1,4 +1,4 @@
-const token = localStorage.getItem("snapup_token");
+﻿const token = localStorage.getItem("snapup_token");
 
 const createEventForm = document.getElementById("createEventPageForm");
 const createEventSubmit = document.getElementById("createEventSubmit");
@@ -91,11 +91,11 @@ function getSelectedPackageInfo() {
     },
     standard: {
       name: "Standard",
-      price: "₺149",
+      price: "â‚º149",
     },
     premium: {
       name: "Premium",
-      price: "₺299",
+      price: "â‚º299",
     },
   };
 
@@ -193,7 +193,7 @@ function openPaymentPopup() {
   paymentDemoButton.textContent =
     packageInfo.price === "Free" ? "Continue Demo" : "Pay Demo";
 
-  paymentDemoNote.textContent = "Demo mode only — this step is for UI testing.";
+  paymentDemoNote.textContent = "Demo mode only â€” this step is for UI testing.";
 
   resetPaymentForm();
 
@@ -246,7 +246,7 @@ function renderQrCode(createdEvent) {
 }
 
 async function createEventOnBackend() {
-  const response = await fetch("http://localhost:3000/api/events", {
+  const response = await fetch("https://snapup-events-api.onrender.com", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -318,7 +318,7 @@ async function shareQrCode() {
       return;
     }
   } catch (error) {
-    // Görsel paylaşımı desteklenmezse link paylaşımına geçer.
+    // GÃ¶rsel paylaÅŸÄ±mÄ± desteklenmezse link paylaÅŸÄ±mÄ±na geÃ§er.
   }
 
   try {
