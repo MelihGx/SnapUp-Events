@@ -193,7 +193,8 @@ function openPaymentPopup() {
   paymentDemoButton.textContent =
     packageInfo.price === "Free" ? "Continue Demo" : "Pay Demo";
 
-  paymentDemoNote.textContent = "Demo mode only â€” this step is for UI testing.";
+  paymentDemoNote.textContent =
+    "Demo mode only â€” this step is for UI testing.";
 
   resetPaymentForm();
 
@@ -246,14 +247,17 @@ function renderQrCode(createdEvent) {
 }
 
 async function createEventOnBackend() {
-  const response = await fetch("https://snapup-events-api.onrender.com", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    "https://snapup-events-api.onrender.com/api/events",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(pendingEventPayload),
     },
-    body: JSON.stringify(pendingEventPayload),
-  });
+  );
 
   const data = await response.json();
 
