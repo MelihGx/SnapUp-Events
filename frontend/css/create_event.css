@@ -1,0 +1,1542 @@
+/* =========================================================
+   SnapUp Events — Create Event Popup
+   This file is only for the Create Event popup design.
+   ========================================================= */
+
+.create-event-launch-card {
+  position: relative;
+  margin-top: 28px;
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 106, 61, 0.18), transparent 35%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.create-event-launch-card::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  pointer-events: none;
+}
+
+.create-event-launch-icon {
+  width: 58px;
+  height: 42px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #1c1b20, #080708);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.04);
+}
+
+.create-event-launch-icon span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 18px rgba(255, 106, 61, 0.35);
+}
+
+.create-event-launch-card strong {
+  display: block;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.create-event-launch-card p {
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.65;
+}
+
+.create-event-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 106, 61, 0.16), transparent 30%),
+    rgba(5, 5, 8, 0.78);
+  backdrop-filter: blur(16px);
+}
+
+.create-event-popup-overlay.open {
+  display: flex;
+}
+
+.create-event-popup {
+  position: relative;
+  width: min(100%, 460px);
+  padding: 30px;
+  border-radius: 32px;
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(30, 28, 34, 0.98), rgba(9, 8, 10, 0.98)),
+    radial-gradient(circle at 85% 12%, rgba(255, 106, 61, 0.24), transparent 30%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 36px 120px rgba(0, 0, 0, 0.62);
+  overflow: hidden;
+  animation: createEventPopupIn 0.25s ease forwards;
+}
+
+.create-event-popup::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.create-event-popup::after {
+  content: "REC";
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+.create-event-popup-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.create-event-popup-close:hover {
+  transform: rotate(90deg);
+  background: rgba(255, 106, 61, 0.22);
+}
+
+.create-event-popup-camera {
+  display: flex;
+  justify-content: center;
+  margin: 22px 0 20px;
+}
+
+.create-event-camera-body {
+  position: relative;
+  width: 104px;
+  height: 70px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #242229, #070608);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 0 22px rgba(255, 255, 255, 0.05),
+    0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.create-event-camera-body::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: 20px;
+  width: 36px;
+  height: 18px;
+  border-radius: 10px 10px 4px 4px;
+  background: #17151a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.create-event-camera-lens {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #020203 0 31%, #ffffff 32% 36%, #24222c 37% 57%, #08070a 58%);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 24px rgba(255, 106, 61, 0.24);
+}
+
+.create-event-camera-dot {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 16px rgba(255, 59, 48, 0.95);
+  animation: createEventRecBlink 1.15s infinite;
+}
+
+.create-event-popup-header {
+  text-align: center;
+}
+
+.create-event-popup-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.58);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.create-event-popup-kicker i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.9);
+}
+
+.create-event-popup-header h2 {
+  margin: 12px 0 10px;
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.create-event-popup-header p {
+  max-width: 360px;
+  margin: 0 auto 24px;
+  color: rgba(255, 255, 255, 0.66);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.create-event-popup-form label {
+  display: block;
+  margin-bottom: 9px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.create-event-popup-input-row input {
+  width: 100%;
+  height: 54px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  outline: none;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.create-event-popup-input-row input::placeholder {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.create-event-popup-input-row input:focus {
+  border-color: rgba(255, 106, 61, 0.85);
+  box-shadow: 0 0 0 5px rgba(255, 106, 61, 0.13);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.create-event-popup-submit {
+  width: 100%;
+  height: 54px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 18px;
+  cursor: pointer;
+  color: #fff;
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #ff6a3d, #ff3030 55%, #b30000);
+  box-shadow: 0 16px 38px rgba(255, 60, 48, 0.26);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.create-event-popup-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 48px rgba(255, 60, 48, 0.35);
+}
+
+.create-event-popup-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+  transform: none;
+}
+
+.create-event-popup-result {
+  display: none;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.create-event-popup-result.show {
+  display: block;
+}
+
+.create-event-popup-result.success {
+  border-color: rgba(80, 220, 130, 0.26);
+  background: rgba(80, 220, 130, 0.09);
+}
+
+.create-event-popup-result.error {
+  border-color: rgba(255, 59, 48, 0.34);
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.create-event-popup-result.loading {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.create-event-result-title {
+  display: block;
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.create-event-result-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.create-event-result-code {
+  color: #fff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.create-event-copy-code {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 13px;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.create-event-copy-code:hover {
+  background: rgba(255, 106, 61, 0.24);
+}
+
+body.create-event-popup-open {
+  overflow: hidden;
+}
+
+@keyframes createEventPopupIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes createEventRecBlink {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.32;
+  }
+}
+
+@media (max-width: 560px) {
+  .create-event-popup-overlay {
+    padding: 14px;
+  }
+
+  .create-event-popup {
+    padding: 26px 20px 22px;
+    border-radius: 26px;
+  }
+
+  .create-event-popup::before {
+    inset: 10px;
+    border-radius: 20px;
+  }
+
+  .create-event-camera-body {
+    width: 94px;
+    height: 64px;
+  }
+
+  .create-event-result-code-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .create-event-copy-code {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Create Event Multi-Step Flow
+   Event name → Settings → Package → Code/QR
+   ========================================================= */
+
+.create-event-popup {
+  max-height: 92vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.create-event-stepper {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.create-event-step {
+  min-width: 0;
+  border: 0;
+  cursor: pointer;
+  border-radius: 15px;
+  padding: 9px 6px;
+  color: rgba(255, 255, 255, 0.52);
+  background: transparent;
+  font: inherit;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.create-event-step:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.create-event-step:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.create-event-step span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.09);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.create-event-step b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.create-event-step.active {
+  color: #fff;
+  background: rgba(255, 106, 61, 0.14);
+}
+
+.create-event-step.active span,
+.create-event-step.completed span {
+  color: #fff;
+  background: linear-gradient(135deg, #ff6a3d, #ff3030);
+  box-shadow: 0 0 18px rgba(255, 80, 55, 0.32);
+}
+
+.create-event-panel {
+  position: relative;
+  z-index: 1;
+  display: none;
+}
+
+.create-event-panel.active {
+  display: block;
+  animation: createEventPanelIn 0.22s ease both;
+}
+
+.create-event-panel-note,
+.create-event-error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.create-event-panel-note {
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.create-event-error {
+  min-height: 19px;
+  color: #ff8178;
+  font-weight: 700;
+}
+
+.create-event-popup-input-row input.input-error {
+  border-color: rgba(255, 59, 48, 0.8);
+  box-shadow: 0 0 0 5px rgba(255, 59, 48, 0.12);
+}
+
+.create-event-panel-title {
+  margin-bottom: 15px;
+}
+
+.create-event-panel-title strong {
+  display: block;
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.create-event-panel-title span {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.create-event-settings-list {
+  display: grid;
+  gap: 10px;
+}
+
+.create-event-toggle-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border-radius: 18px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-event-toggle-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 106, 61, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.create-event-toggle-card:has(input:checked) {
+  border-color: rgba(255, 106, 61, 0.46);
+  background:
+    radial-gradient(circle at 12% 50%, rgba(255, 106, 61, 0.15), transparent 34%),
+    rgba(255, 255, 255, 0.075);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.create-event-toggle-card input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  appearance: none;
+}
+
+.create-event-toggle-ui {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
+.create-event-toggle-ui::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.34),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.12);
+  transform: translate3d(0, -50%, 0);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s ease,
+    background 0.24s ease;
+  will-change: transform;
+}
+
+.create-event-toggle-card input:checked + .create-event-toggle-ui {
+  background: linear-gradient(135deg, #ff6a3d, #ff3030);
+  border-color: rgba(255, 106, 61, 0.68);
+  box-shadow:
+    0 0 0 5px rgba(255, 106, 61, 0.12),
+    inset 0 4px 12px rgba(120, 0, 0, 0.18);
+}
+
+.create-event-toggle-card input:checked + .create-event-toggle-ui::before {
+  transform: translate3d(20px, -50%, 0);
+}
+
+.create-event-toggle-card input:active + .create-event-toggle-ui::before {
+  width: 22px;
+}
+
+.create-event-toggle-card input:checked:active + .create-event-toggle-ui::before {
+  transform: translate3d(16px, -50%, 0);
+}
+
+.create-event-toggle-card input:focus-visible + .create-event-toggle-ui {
+  box-shadow:
+    0 0 0 5px rgba(255, 106, 61, 0.16),
+    inset 0 4px 12px rgba(0, 0, 0, 0.22);
+}
+
+.create-event-toggle-card b,
+.create-event-toggle-card small {
+  display: block;
+}
+
+.create-event-toggle-card b {
+  color: #fff;
+  font-size: 14px;
+}
+
+.create-event-toggle-card small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.54);
+  line-height: 1.35;
+}
+
+.create-event-number-card {
+  display: grid;
+  grid-template-columns: 1fr 132px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.create-event-number-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 106, 61, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.create-event-number-card b,
+.create-event-number-card small {
+  display: block;
+}
+
+.create-event-number-card b {
+  color: #fff;
+  font-size: 14px;
+}
+
+.create-event-number-card small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.54);
+  line-height: 1.35;
+}
+
+.create-event-number-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-event-number-row:focus-within {
+  border-color: rgba(255, 106, 61, 0.72);
+  box-shadow: 0 0 0 5px rgba(255, 106, 61, 0.12);
+}
+
+.create-event-number-row input {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+}
+
+.create-event-number-row em {
+  flex: 0 0 auto;
+  padding: 0 10px 0 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.create-event-package-grid {
+  display: grid;
+  gap: 11px;
+}
+
+.create-event-package-card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-event-package-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 106, 61, 0.3);
+}
+
+.create-event-package-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.create-event-package-card:has(input:checked) {
+  border-color: rgba(255, 106, 61, 0.74);
+  background:
+    radial-gradient(circle at 90% 20%, rgba(255, 106, 61, 0.24), transparent 32%),
+    rgba(255, 106, 61, 0.1);
+  box-shadow: 0 18px 38px rgba(255, 60, 48, 0.13);
+}
+
+.package-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.package-card-top b {
+  color: #fff;
+  font-size: 16px;
+}
+
+.package-card-top strong {
+  color: #fff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 15px;
+}
+
+.create-event-package-card small {
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.35;
+}
+
+.package-badge {
+  justify-self: start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 106, 61, 0.22);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+.create-event-package-info-btn {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 106, 61, 0.28);
+  border-radius: 16px;
+  background: rgba(255, 106, 61, 0.08);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-event-package-info-btn::after {
+  content: "↓";
+  font-size: 14px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.create-event-package-info-btn[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+.create-event-package-info-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 106, 61, 0.52);
+  background: rgba(255, 106, 61, 0.13);
+  box-shadow: 0 14px 28px rgba(255, 60, 48, 0.1);
+}
+
+.create-event-package-info {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: packageInfoOpen 0.22s ease both;
+}
+
+.create-event-package-info[hidden] {
+  display: none;
+}
+
+.create-event-package-info article {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  display: grid;
+  gap: 5px;
+}
+
+.create-event-package-info b {
+  color: #fff;
+  font-size: 13px;
+}
+
+.create-event-package-info span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@keyframes packageInfoOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.create-event-popup-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.create-event-popup-back,
+.create-event-popup-next,
+.create-event-popup-submit {
+  min-height: 52px;
+  border: 0;
+  border-radius: 18px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.create-event-popup-back {
+  flex: 0 0 auto;
+  min-width: 96px;
+  padding: 0 18px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.create-event-popup-next,
+.create-event-popup-submit {
+  flex: 1;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6a3d, #ff3030 55%, #b30000);
+  box-shadow: 0 16px 38px rgba(255, 60, 48, 0.26);
+}
+
+.create-event-popup-back:hover,
+.create-event-popup-next:hover,
+.create-event-popup-submit:hover {
+  transform: translateY(-2px);
+}
+
+.create-event-popup-submit {
+  width: auto;
+  margin-top: 0;
+}
+
+.create-event-popup-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+  transform: none;
+}
+
+.create-event-result-body {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.create-event-result-qr {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 3px;
+  width: 112px;
+  height: 112px;
+  padding: 9px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.24);
+}
+
+.create-event-result-qr span {
+  border-radius: 2px;
+  background: transparent;
+}
+
+.create-event-result-qr span.on {
+  background: #0b0a0d;
+}
+
+.create-event-result-details small,
+.create-event-result-summary span {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.create-event-result-code-row {
+  padding: 10px;
+}
+
+.create-event-result-summary {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.create-event-result-summary b {
+  color: #fff;
+}
+
+.create-event-settings-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 14px 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.create-event-settings-summary li {
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes createEventPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports not selector(:has(*)) {
+  .create-event-package-card input:checked ~ .package-card-top b,
+  .create-event-package-card input:checked ~ .package-card-top strong {
+    color: #ffb19c;
+  }
+}
+
+@media (max-width: 560px) {
+  .create-event-stepper {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .create-event-step {
+    padding: 8px 3px;
+  }
+
+  .create-event-step span {
+    width: 24px;
+    height: 24px;
+  }
+
+  .create-event-step b {
+    font-size: 10px;
+  }
+
+  .create-event-popup-actions {
+    flex-direction: column;
+  }
+
+  .create-event-popup-back,
+  .create-event-popup-next,
+  .create-event-popup-submit {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .create-event-result-body {
+    grid-template-columns: 1fr;
+  }
+
+  .create-event-result-qr {
+    justify-self: center;
+  }
+
+  .create-event-settings-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .create-event-number-card {
+    grid-template-columns: 1fr;
+  }
+
+  .create-event-number-row {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Create Event Popup — Cleaner Scroll Box
+   The outer popup stays fixed; only the active step content scrolls.
+   ========================================================= */
+
+.create-event-popup-overlay {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.create-event-popup {
+  width: min(100%, 500px);
+  max-height: min(92vh, 820px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+.create-event-popup::-webkit-scrollbar {
+  display: none;
+}
+
+.create-event-popup-camera,
+.create-event-popup-header,
+.create-event-stepper {
+  flex: 0 0 auto;
+}
+
+.create-event-popup-form {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-event-panel {
+  min-height: 0;
+}
+
+.create-event-panel.active {
+  max-height: clamp(260px, 46vh, 440px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.create-event-panel.active::-webkit-scrollbar {
+  width: 7px;
+}
+
+.create-event-panel.active::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.create-event-panel.active::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 106, 61, 0.85), rgba(255, 48, 48, 0.58));
+}
+
+.create-event-panel.active::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 126, 85, 0.95), rgba(255, 64, 64, 0.72));
+}
+
+.create-event-panel.active {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 106, 61, 0.75) rgba(255, 255, 255, 0.055);
+}
+
+.create-event-popup-actions {
+  flex: 0 0 auto;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  background: linear-gradient(180deg, rgba(9, 8, 10, 0), rgba(9, 8, 10, 0.92) 30%, rgba(9, 8, 10, 0.98));
+}
+
+.create-event-settings-list,
+.create-event-package-grid,
+.create-event-package-info {
+  padding-bottom: 4px;
+}
+
+@media (max-width: 560px) {
+  .create-event-popup-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .create-event-popup {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 24px 18px 18px;
+  }
+
+  .create-event-popup-camera {
+    margin: 14px 0 14px;
+  }
+
+  .create-event-popup-header h2 {
+    margin: 8px 0 8px;
+  }
+
+  .create-event-popup-header p {
+    margin-bottom: 16px;
+  }
+
+  .create-event-stepper {
+    margin-bottom: 14px;
+  }
+
+  .create-event-panel.active {
+    max-height: clamp(270px, 52dvh, 480px);
+    padding-right: 6px;
+  }
+
+  .create-event-panel.active::-webkit-scrollbar {
+    width: 5px;
+  }
+}
+
+/* =========================================================
+   Demo Payment Step
+   Visual-only card form after package selection
+   ========================================================= */
+
+.create-event-stepper {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.create-event-payment-summary {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.create-event-payment-summary span,
+.create-event-payment-summary small {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.create-event-payment-summary span {
+  color: rgba(255, 255, 255, 0.52);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.create-event-payment-summary strong {
+  color: #fff;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.create-event-payment-demo {
+  display: grid;
+  gap: 16px;
+}
+
+.create-event-card-preview {
+  position: relative;
+  min-height: 176px;
+  padding: 20px;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.28), transparent 24%),
+    linear-gradient(135deg, #2c2424, #111014 52%, #3a1512);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.28);
+}
+
+.create-event-card-preview::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  right: -80px;
+  top: -75px;
+  border-radius: 50%;
+  background: rgba(255, 106, 61, 0.26);
+  filter: blur(2px);
+}
+
+.create-event-card-preview::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.card-preview-top,
+.card-preview-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.card-preview-top span {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.card-preview-top i {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.1);
+  font-style: normal;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.card-preview-chip {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 30px;
+  margin: 25px 0 18px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #ffe0a5, #bc7d2a);
+  box-shadow: inset 0 0 0 1px rgba(80, 45, 10, 0.22);
+}
+
+.create-event-card-preview > strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-bottom: 22px;
+  color: #fff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: clamp(17px, 4vw, 21px);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.card-preview-bottom span {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.create-event-payment-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.create-event-payment-fields label {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.create-event-payment-fields label span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.create-event-payment-fields input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.065);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.create-event-payment-fields input::placeholder {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.create-event-payment-fields input:focus {
+  border-color: rgba(255, 106, 61, 0.82);
+  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.12);
+  background: rgba(255, 255, 255, 0.085);
+}
+
+.create-event-payment-row {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 12px;
+}
+
+.create-event-payment-note {
+  margin: 2px 0 0;
+  padding: 11px 13px;
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .create-event-stepper {
+    gap: 5px;
+    padding: 7px;
+  }
+
+  .create-event-step {
+    padding: 8px 3px;
+  }
+
+  .create-event-step span {
+    width: 23px;
+    height: 23px;
+    margin-bottom: 5px;
+  }
+
+  .create-event-step b {
+    font-size: 9px;
+  }
+
+  .create-event-payment-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =========================================================
+   Desktop-only wider layout for Settings and Demo Payment
+   Mobile layout intentionally stays unchanged.
+   ========================================================= */
+
+@media (min-width: 760px) {
+  .create-event-popup:has([data-create-event-panel="1"].active),
+  .create-event-popup:has([data-create-event-panel="3"].active) {
+    width: min(100%, 780px);
+    max-height: min(92vh, 840px);
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-popup-header p,
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-popup-header p {
+    max-width: 560px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-panel.active,
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-panel.active {
+    max-height: clamp(360px, 54vh, 560px);
+    padding-right: 10px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-settings-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-toggle-card,
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-number-card {
+    min-height: 96px;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-toggle-card b,
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-number-card b {
+    font-size: 15px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-toggle-card small,
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-number-card small {
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+
+  .create-event-popup:has([data-create-event-panel="1"].active) .create-event-number-card {
+    grid-template-columns: 1fr 150px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-summary {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-summary small {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-demo {
+    grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1.05fr);
+    align-items: start;
+    gap: 22px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-card-preview {
+    min-height: 228px;
+    padding: 24px;
+    border-radius: 28px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-card-preview > strong {
+    margin: 26px 0 28px;
+    font-size: 21px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .card-preview-chip {
+    margin: 30px 0 0;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-fields {
+    gap: 14px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-fields input {
+    height: 52px;
+    border-radius: 17px;
+  }
+
+  .create-event-popup:has([data-create-event-panel="3"].active) .create-event-payment-note {
+    padding: 13px 15px;
+  }
+}

@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Detail — SnapUp Events</title>
+
+    <link rel="stylesheet" href="css/event-detail.css" />
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#0D0B0A" />
+  </head>
+
+  <body>
+    <main class="event-detail-page">
+      <header class="detail-header">
+        <a href="index.html" class="detail-brand">
+          <span class="detail-brand-logo" aria-hidden="true">
+            <svg
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <circle cx="24" cy="24" r="20" fill="#0D0B0A" />
+              <circle
+                cx="24"
+                cy="24"
+                r="18.25"
+                stroke="rgba(255,255,255,.16)"
+                stroke-width="1.5"
+              />
+              <g transform="translate(24 24)">
+                <path d="M0 -10.5 L6.8 -3.6 L1.2 -1.1 Z" fill="#ffffff" />
+                <path d="M9.1 -5.2 L9.8 4.4 L3.6 1.2 Z" fill="#F4EEE4" />
+                <path d="M9.1 5.2 L1.2 10.6 L1.3 3.6 Z" fill="#ffffff" />
+                <path d="M0 10.5 L-6.8 3.6 L-1.2 1.1 Z" fill="#FF6A3D" />
+                <path d="M-9.1 5.2 L-9.8 -4.4 L-3.6 -1.2 Z" fill="#F7B14C" />
+                <path d="M-9.1 -5.2 L-1.2 -10.6 L-1.3 -3.6 Z" fill="#ffffff" />
+              </g>
+              <circle
+                cx="24"
+                cy="24"
+                r="4.8"
+                fill="#0D0B0A"
+                stroke="#ffffff"
+                stroke-width="1.8"
+              />
+              <circle cx="24" cy="24" r="1.4" fill="#ffffff" />
+            </svg>
+          </span>
+
+          <strong>SnapUp<span>Events</span></strong>
+        </a>
+
+        <div class="detail-header-actions">
+          <a href="account.html">My Account</a>
+          <a href="create-event.html">Create Event</a>
+          <a href="index.html">Home</a>
+        </div>
+      </header>
+
+      <section class="detail-loading" id="detailLoading">
+        <div class="loader"></div>
+        <p>Loading event detail...</p>
+      </section>
+
+      <section class="detail-error" id="detailError" hidden>
+        <h2>Event could not be loaded.</h2>
+        <p id="detailErrorText">Please try again later.</p>
+        <a href="account.html">Back to My Events</a>
+      </section>
+
+      <section class="detail-content" id="detailContent" hidden>
+        <section class="detail-hero">
+          <div class="detail-cover" id="eventCover">
+            <div class="detail-cover-overlay">
+              <span class="rec-chip"><i></i> EVENT DETAIL</span>
+              <h1 id="eventTitle">Event title</h1>
+              <p id="eventDescription">Event description</p>
+            </div>
+          </div>
+
+          <aside class="detail-side-card">
+            <span class="side-label">Event Code</span>
+
+            <div class="event-code-box" id="eventCode">------</div>
+
+            <div class="qr-box" id="qrBox">
+              <span>QR code will appear here.</span>
+            </div>
+
+            <div class="detail-actions">
+              <button type="button" id="copyCodeButton">Copy Code</button>
+              <button type="button" id="copyJoinLinkButton">
+                Copy Join Link
+              </button>
+              <button type="button" id="downloadQrButton">Download QR</button>
+
+              <button
+                type="button"
+                id="openSettingsButton"
+                class="settings-action-button"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                  <path
+                    d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.8 12 8.8C10.2327 8.8 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                  />
+                  <path
+                    d="M19.4 13.4C19.46 12.94 19.5 12.48 19.5 12C19.5 11.52 19.46 11.06 19.4 10.6L21.25 9.15L19.25 5.7L17.05 6.6C16.31 6.03 15.5 5.56 14.6 5.28L14.25 3H9.75L9.4 5.28C8.5 5.56 7.69 6.03 6.95 6.6L4.75 5.7L2.75 9.15L4.6 10.6C4.54 11.06 4.5 11.52 4.5 12C4.5 12.48 4.54 12.94 4.6 13.4L2.75 14.85L4.75 18.3L6.95 17.4C7.69 17.97 8.5 18.44 9.4 18.72L9.75 21H14.25L14.6 18.72C15.5 18.44 16.31 17.97 17.05 17.4L19.25 18.3L21.25 14.85L19.4 13.4Z"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Settings
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <section class="detail-info-grid">
+          <div class="info-card">
+            <span>Location</span>
+            <strong id="eventLocation">-</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Date</span>
+            <strong id="eventDate">-</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Time</span>
+            <strong id="eventTime">-</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Created</span>
+            <strong id="eventCreatedAt">-</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Status</span>
+            <strong id="eventStatus">-</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Privacy</span>
+            <strong id="eventPrivacy">-</strong>
+          </div>
+        </section>
+
+        <section class="admin-workspace-grid">
+          <section class="upload-panel">
+            <div class="upload-panel-header">
+              <span class="upload-kicker">Quick Upload</span>
+              <h2>Share your moment</h2>
+              <p>Upload a photo to this event album from the dashboard.</p>
+            </div>
+
+            <div class="upload-form">
+              <label for="guestName">Your name</label>
+              <input
+                type="text"
+                id="guestName"
+                placeholder="Enter your name"
+                autocomplete="name"
+              />
+
+              <label for="photoInput">Choose photo</label>
+              <input
+                type="file"
+                id="photoInput"
+                accept="image/jpeg,image/png,image/webp"
+              />
+
+              <div id="photoPreviewBox" class="photo-preview-box hidden">
+                <img id="photoPreview" alt="Selected photo preview" />
+              </div>
+
+              <button type="button" id="uploadPhotoBtn">Upload Photo</button>
+
+              <p id="uploadMessage" class="upload-message"></p>
+            </div>
+          </section>
+
+          <article class="detail-card settings-workspace-card">
+            <div class="section-head">
+              <span>Settings</span>
+              <h2>Event permissions</h2>
+            </div>
+
+            <div class="settings-list" id="settingsList"></div>
+          </article>
+        </section>
+
+        <section class="detail-card guests-panel">
+          <div class="guests-panel-head">
+            <div class="section-head">
+              <span>Guests</span>
+              <h2>
+                Event guests
+                <span class="guest-total-badge" id="guestTotalBadge">
+                  0 guests
+                </span>
+              </h2>
+              <p class="gallery-helper-text">
+                See who joined this event and how many memories they uploaded.
+              </p>
+            </div>
+
+            <label class="guest-search-box" for="guestSearchInput">
+              <span>Search guest</span>
+              <input
+                type="search"
+                id="guestSearchInput"
+                placeholder="Search by guest name..."
+                autocomplete="off"
+              />
+            </label>
+          </div>
+
+          <div class="guest-result-count" id="guestResultCount">
+            Guests will appear here.
+          </div>
+
+          <div class="guest-list-scroll">
+            <div class="guest-list" id="guestList">
+              <div class="guest-empty">Guests will appear here.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section-grid gallery-only-section">
+          <article class="detail-card gallery-admin-card">
+            <div class="section-head">
+              <span>Gallery</span>
+              <h2>Uploaded memories</h2>
+              <p class="gallery-helper-text">
+                Filter, approve, reject or delete uploaded memories.
+              </p>
+            </div>
+
+            <div class="gallery-grid" id="mediaGallery"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <div class="gallery-lightbox" id="galleryLightbox" aria-hidden="true">
+      <div class="gallery-lightbox-backdrop" id="galleryLightboxBackdrop"></div>
+
+      <button
+        type="button"
+        class="gallery-lightbox-close"
+        id="galleryLightboxClose"
+        aria-label="Close gallery preview"
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        class="gallery-lightbox-arrow gallery-lightbox-prev"
+        id="galleryLightboxPrev"
+        aria-label="Previous photo"
+      >
+        ‹
+      </button>
+
+      <figure class="gallery-lightbox-frame">
+        <img id="galleryLightboxImage" alt="Gallery preview" />
+
+        <figcaption>
+          <strong id="galleryLightboxTitle">Uploaded by Guest</strong>
+          <span id="galleryLightboxMeta"></span>
+        </figcaption>
+      </figure>
+
+      <button
+        type="button"
+        class="gallery-lightbox-arrow gallery-lightbox-next"
+        id="galleryLightboxNext"
+        aria-label="Next photo"
+      >
+        ›
+      </button>
+    </div>
+
+    <div class="settings-modal-overlay" id="settingsModal" aria-hidden="true">
+      <div class="settings-modal">
+        <button
+          type="button"
+          class="settings-modal-close"
+          id="settingsModalClose"
+          aria-label="Close settings modal"
+        >
+          ×
+        </button>
+
+        <div class="settings-modal-head">
+          <span>Event Settings</span>
+          <h2>Manage this event</h2>
+          <p>Update guest permissions or delete this event permanently.</p>
+        </div>
+
+        <form class="settings-modal-form" id="settingsForm">
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingAllowUpload" />
+            <span>Allow Upload</span>
+          </label>
+
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingOnlyUsers" />
+            <span>Only Registered Users</span>
+          </label>
+
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingAllowComments" />
+            <span>Allow Comments</span>
+          </label>
+
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingAllowLikes" />
+            <span>Allow Likes</span>
+          </label>
+
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingRequireApproval" />
+            <span>Require Approval</span>
+          </label>
+
+          <label class="settings-switch-row">
+            <input type="checkbox" id="settingAllowGalleryView" />
+            <span>Allow Public Gallery</span>
+          </label>
+
+          <div class="settings-number-grid">
+            <label>
+              Max storage / guest MB
+              <input type="number" id="settingMaxStorage" min="50" step="50" />
+            </label>
+
+            <label>
+              Max upload / guest
+              <input type="number" id="settingMaxUpload" min="1" step="1" />
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            class="settings-save-button"
+            id="settingsSaveButton"
+          >
+            Save Settings
+          </button>
+
+          <button
+            type="button"
+            class="delete-event-button"
+            id="deleteEventButton"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+              <path
+                d="M9 4H15M4.5 7H19.5M10 11V17M14 11V17M6.5 7L7.2 19C7.3 20.1 8.2 21 9.3 21H14.7C15.8 21 16.7 20.1 16.8 19L17.5 7"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Delete Event
+          </button>
+
+          <p class="settings-result" id="settingsResult"></p>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="js/event-detail.js"></script>
+  </body>
+</html>

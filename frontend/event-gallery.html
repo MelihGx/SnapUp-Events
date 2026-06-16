@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Gallery — SnapUp Events</title>
+
+    <link rel="stylesheet" href="css/event-gallery.css" />
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#0D0B0A" />
+  </head>
+
+  <body>
+    <main class="public-gallery-page">
+      <header class="gallery-header">
+        <a href="index.html" class="gallery-brand">
+          <strong>SnapUp<span>Events</span></strong>
+        </a>
+
+        <a href="index.html" class="gallery-back-link">Back Home</a>
+      </header>
+
+      <section class="gallery-loading" id="galleryLoading">
+        <div class="loader"></div>
+        <p>Loading approved gallery...</p>
+      </section>
+
+      <section class="gallery-error" id="galleryError" hidden>
+        <h1>Gallery could not be loaded.</h1>
+        <p id="galleryErrorText">Please check the event code.</p>
+        <a href="index.html">Back Home</a>
+      </section>
+
+      <section class="gallery-content" id="galleryContent" hidden>
+        <section class="gallery-hero" id="galleryHero">
+          <div>
+            <span class="gallery-kicker">Approved Event Gallery</span>
+            <h1 id="galleryEventTitle">Event name</h1>
+            <p id="galleryEventMeta">Location · Date · Code</p>
+            <p id="galleryEventDescription"></p>
+          </div>
+        </section>
+
+        <section class="participants-panel">
+          <div class="section-head">
+            <span>Participants</span>
+            <h2 id="guestCountTitle">Event guests</h2>
+          </div>
+
+          <div class="participant-list" id="participantList"></div>
+        </section>
+
+        <section class="approved-gallery-panel">
+          <div class="section-head">
+            <span>Photos</span>
+            <h2>Approved memories</h2>
+            <p>Only photos approved by the event admin are shown here.</p>
+          </div>
+
+          <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="public-lightbox" id="publicLightbox" aria-hidden="true">
+      <div class="public-lightbox-backdrop" id="publicLightboxBackdrop"></div>
+
+      <button
+        type="button"
+        class="public-lightbox-close"
+        id="publicLightboxClose"
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        class="public-lightbox-arrow public-lightbox-prev"
+        id="publicLightboxPrev"
+      >
+        ‹
+      </button>
+
+      <figure class="public-lightbox-frame">
+        <img id="publicLightboxImage" alt="Approved gallery preview" />
+        <figcaption>
+          <strong id="publicLightboxTitle">Uploaded by Guest</strong>
+          <span id="publicLightboxMeta"></span>
+        </figcaption>
+      </figure>
+
+      <button
+        type="button"
+        class="public-lightbox-arrow public-lightbox-next"
+        id="publicLightboxNext"
+      >
+        ›
+      </button>
+    </div>
+
+    <script type="module" src="js/event-gallery.js"></script>
+  </body>
+</html>

@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapUp Events — Capture Every Memory</title>
+    <meta
+      name="description"
+      content="SnapUp Events lets guests scan one QR code and upload event photos, videos, and messages instantly."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/pricing.css" />
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#0D0B0A" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <!-- NAVBAR -->
+    <header class="site-header" id="siteHeader">
+      <nav class="nav-shell" aria-label="Primary navigation">
+        <a href="#home" class="brand" aria-label="SnapUp Events home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg
+              class="brand-logo-svg"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <circle cx="24" cy="24" r="20" fill="#0D0B0A" />
+              <circle
+                cx="24"
+                cy="24"
+                r="18.25"
+                stroke="rgba(255,255,255,.16)"
+                stroke-width="1.5"
+              />
+              <g class="shutter-blades" transform="translate(24 24)">
+                <path d="M0 -10.5 L6.8 -3.6 L1.2 -1.1 Z" fill="#ffffff" />
+                <path d="M9.1 -5.2 L9.8 4.4 L3.6 1.2 Z" fill="#F4EEE4" />
+                <path d="M9.1 5.2 L1.2 10.6 L1.3 3.6 Z" fill="#ffffff" />
+                <path d="M0 10.5 L-6.8 3.6 L-1.2 1.1 Z" fill="#FF6A3D" />
+                <path d="M-9.1 5.2 L-9.8 -4.4 L-3.6 -1.2 Z" fill="#F7B14C" />
+                <path d="M-9.1 -5.2 L-1.2 -10.6 L-1.3 -3.6 Z" fill="#ffffff" />
+              </g>
+              <circle
+                cx="24"
+                cy="24"
+                r="4.8"
+                fill="#0D0B0A"
+                stroke="#ffffff"
+                stroke-width="1.8"
+              />
+              <circle cx="24" cy="24" r="1.4" fill="#ffffff" />
+            </svg>
+            <span class="brand-signal" aria-hidden="true"></span>
+          </span>
+          <span class="brand-text"
+            ><span class="brand-light">SnapUp</span
+            ><span class="brand-accent">Events</span></span
+          >
+        </a>
+
+        <div class="nav-links" id="navLinks">
+          <a href="#home" class="active">Home</a>
+          <a href="#process">Process</a>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#preview">Preview</a>
+          <a href="#upload">Upload</a>
+        </div>
+
+        <div class="nav-actions" id="navAuth">
+          <a href="login.html" class="btn btn-ghost">Login</a>
+          <a href="register.html" class="btn btn-hot">Register</a>
+        </div>
+
+        <button
+          class="burger"
+          id="burger"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="mobileMenu"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+
+      <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+        <a href="#home">Home</a>
+        <a href="#process">Process</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#preview">Preview</a>
+        <a href="#upload">Upload</a>
+        <div class="mobile-actions" id="mobileNavAuth">
+          <a href="login.html" class="btn btn-ghost">Login</a>
+          <a href="register.html" class="btn btn-hot">Register</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero section-dark" id="home">
+        <div class="hero-bg" aria-hidden="true">
+          <span class="lens-ring ring-one"></span>
+          <span class="lens-ring ring-two"></span>
+          <span class="lens-ring ring-three"></span>
+          <span class="flash"></span>
+        </div>
+
+        <div class="viewfinder" aria-hidden="true">
+          <span class="vf-corner top-left"></span>
+          <span class="vf-corner top-right"></span>
+          <span class="vf-corner bottom-left"></span>
+          <span class="vf-corner bottom-right"></span>
+          <span class="vf-label rec"><i></i> REC</span>
+          <span class="vf-label iso">ISO 800<br />1/60</span>
+          <span class="vf-label live"><i></i> LIVE</span>
+          <span class="vf-label battery"></span>
+          <span class="vf-label quality">4K&nbsp;&nbsp;30 FPS</span>
+          <span class="vf-label aperture">F2.8</span>
+        </div>
+
+        <div class="container hero-grid">
+          <div class="hero-copy reveal">
+            <div class="eyebrow">
+              <span></span> Event memory capture platform
+            </div>
+            <h1>Every memory,<br /><strong>instantly</strong> shared.</h1>
+            <p>
+              Create your event, share one QR code, and let guests upload
+              photos, videos, and messages in real time. No app. No login. Just
+              memories that come together.
+            </p>
+
+            <div class="hero-buttons">
+              <a class="btn btn-hot btn-large" href="create-event.html">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 8h4l1.8-2h4.4L16 8h4v10H4V8Zm8 8a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                  />
+                </svg>
+                Create Your Event
+              </a>
+              <a class="btn btn-glass btn-large" href="#" data-join-upload-open>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 11a4 4 0 1 1 3.2-6.4A4.8 4.8 0 0 1 19 7.5V8a3.5 3.5 0 0 1-.7 6.9H8a4 4 0 0 1-1-7.9v4Z"
+                  />
+                </svg>
+                Join with Code
+              </a>
+            </div>
+
+            <div class="mini-proof">
+              <span
+                ><svg viewBox="0 0 24 24">
+                  <path d="M6 4h12v16H6V4Zm3 3h6M9 11h6M9 15h4" /></svg
+                >No App Needed</span
+              >
+              <span
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    d="M5 12a7 7 0 0 1 14 0M8 12a4 4 0 0 1 8 0M12 12v8"
+                  /></svg
+                >Live Uploads</span
+              >
+              <span
+                ><svg viewBox="0 0 24 24">
+                  <path d="M4 6h16v12H4V6Zm3 9 3.5-4 3 3 2-2 2.5 3" /></svg
+                >All Memories in One Place</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="hero-device reveal delay-1"
+            aria-label="SnapUp Events phone preview"
+          >
+            <div class="photo-card floating-card card-left">
+              <img
+                src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=120&q=70"
+                alt=""
+              />
+              <div><b>Sarah</b><span>uploaded a photo · 2m ago</span></div>
+            </div>
+
+            <div class="phone-wrap" id="phoneTilt">
+              <div class="phone-frame">
+                <div class="phone-top">
+                  <span>9:41</span>
+                  <span class="phone-camera"></span>
+                  <span>◴</span>
+                </div>
+
+                <div class="phone-screen">
+                  <div class="app-head">
+                    <div>
+                      <b>Emma & Jake's Wedding</b>
+                      <span><i></i> LIVE · 128 guests</span>
+                    </div>
+                    <button aria-label="Guests">⌁</button>
+                  </div>
+
+                  <div class="gallery-grid">
+                    <article class="memory m1">
+                      <span class="play">▶</span>
+                    </article>
+                    <article class="memory m2"></article>
+                    <article class="memory m3"></article>
+                    <article class="memory m4">
+                      <span class="duration">0:12</span>
+                    </article>
+                    <article class="memory m5"></article>
+                    <article class="memory m6">
+                      <span class="play">▶</span>
+                    </article>
+                  </div>
+
+                  <div class="upload-strip">
+                    <strong>Upload your memory</strong>
+                    <div>
+                      <button>
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 6h16v12H4V6Zm3 9 4-4 3 3 2-2 2 3" /></svg
+                        >Photo
+                      </button>
+                      <button>
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="M4 7h11v10H4V7Zm11 3 5-2.5v9L15 14v-4Z"
+                          /></svg
+                        >Video
+                      </button>
+                      <button>
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 5h16v12H8l-4 4V5Z" /></svg
+                        >Message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="new-card floating-card card-right">
+              <strong>+3</strong>
+              <span>new memories<br />just now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="film-strip" aria-hidden="true">
+          <div class="film-track">
+            <span class="frame f1"></span><span class="frame f2"></span
+            ><span class="frame f3"></span><span class="frame f4"></span
+            ><span class="frame f5"></span><span class="frame f6"></span>
+            <span class="frame f1"></span><span class="frame f2"></span
+            ><span class="frame f3"></span><span class="frame f4"></span
+            ><span class="frame f5"></span><span class="frame f6"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROCESS -->
+      <section class="process" id="process">
+        <div class="container">
+          <div class="section-head center reveal">
+            <span class="section-kicker">How it works</span>
+            <h2>Four simple steps. Unlimited memories.</h2>
+          </div>
+
+          <div class="steps">
+            <article class="step reveal">
+              <span class="step-no">1</span>
+              <div class="icon-box">
+                <svg viewBox="0 0 24 24">
+                  <path d="M7 3v3M17 3v3M4 8h16M5 5h14v15H5V5Z" />
+                </svg>
+              </div>
+              <h3>Create Event</h3>
+              <p>Set up your event in seconds and get your unique QR code.</p>
+            </article>
+
+            <article class="step reveal delay-1">
+              <span class="step-no">2</span>
+              <div class="icon-box">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h2v2h-2v-2Zm4 0h2v6h-6v-2h4v-4Z"
+                  />
+                </svg>
+              </div>
+              <h3>Share QR Code</h3>
+              <p>
+                Print it, display it, or send it anywhere your guests will see
+                it.
+              </p>
+            </article>
+
+            <article class="step reveal delay-2">
+              <span class="step-no">3</span>
+              <div class="icon-box">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 4v10M8 8l4-4 4 4M5 15v4h14v-4" />
+                </svg>
+              </div>
+              <h3>Guests Upload</h3>
+              <p>
+                Guests scan and upload photos, videos, and messages instantly.
+              </p>
+            </article>
+
+            <article class="step reveal delay-3">
+              <span class="step-no">4</span>
+              <div class="icon-box">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 6h16v12H4V6Zm3 9 4-5 3 3 2-2 2 4" />
+                </svg>
+              </div>
+              <h3>Relive Together</h3>
+              <p>
+                All memories live in one beautiful gallery ready to download and
+                share.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section class="features" id="features">
+        <div class="container">
+          <div class="feature-top reveal">
+            <div>
+              <span class="section-kicker">Built for every moment</span>
+              <h2>Everything your guests need to capture the night.</h2>
+            </div>
+            <p>
+              SnapUp turns every phone into a shared event camera. Guests scan,
+              upload, and the live gallery updates like a real-time memory wall.
+            </p>
+          </div>
+
+          <div class="feature-studio">
+            <article class="feature-hero-card reveal">
+              <div class="feature-hero-content">
+                <span class="camera-chip"><i></i> LIVE CAPTURE MODE</span>
+                <h3>One QR code. A whole event through everyone’s lens.</h3>
+                <p>
+                  Photos, videos, and messages arrive instantly in one organized
+                  gallery — ready for screens, downloads, and sharing.
+                </p>
+
+                <div class="feature-metrics">
+                  <div><strong>128</strong><span>guests live</span></div>
+                  <div><strong>4K</strong><span>quality ready</span></div>
+                  <div><strong>3 sec</strong><span>upload flow</span></div>
+                </div>
+              </div>
+
+              <div class="feature-lens-visual" aria-hidden="true">
+                <div class="lens-core">
+                  <span></span><span></span><span></span><span></span
+                  ><span></span><span></span>
+                </div>
+                <div class="focus-box"></div>
+              </div>
+            </article>
+
+            <div class="feature-bento">
+              <article class="bento-card reveal delay-1">
+                <span class="bento-icon">▣</span>
+                <h3>Live Gallery Wall</h3>
+                <p>
+                  Show uploaded memories instantly on a venue screen or shared
+                  gallery.
+                </p>
+              </article>
+
+              <article class="bento-card reveal delay-2">
+                <span class="bento-icon">⌁</span>
+                <h3>No App Needed</h3>
+                <p>
+                  Guests join from any phone browser with only a QR code or
+                  event code.
+                </p>
+              </article>
+
+              <article class="bento-card bento-card-wide reveal delay-1">
+                <div>
+                  <span class="bento-icon">◎</span>
+                  <h3>Photo, Video & Message Uploads</h3>
+                  <p>
+                    Collect every kind of memory in the same event timeline.
+                  </p>
+                </div>
+                <div class="mini-memory-stack" aria-hidden="true">
+                  <span class="mini-photo one"></span>
+                  <span class="mini-photo two"></span>
+                  <span class="mini-photo three"></span>
+                </div>
+              </article>
+
+              <article class="bento-card reveal delay-2">
+                <span class="bento-icon">◈</span>
+                <h3>Private Event Access</h3>
+                <p>
+                  Only invited guests with the code can upload and view
+                  memories.
+                </p>
+              </article>
+
+              <article class="bento-card reveal delay-3">
+                <span class="bento-icon">⇩</span>
+                <h3>Download & Share</h3>
+                <p>
+                  Export your event memories or keep the gallery link alive.
+                </p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRICING -->
+      <section class="pricing" id="pricing">
+        <div class="container">
+          <div class="section-head center reveal">
+            <span class="section-kicker">Pricing & packages</span>
+            <h2>Choose the right package for your event.</h2>
+            <p>
+              Start small, scale when your guest count grows. Each package keeps
+              the same simple SnapUp flow: create event, share code, collect
+              memories.
+            </p>
+          </div>
+
+          <div class="pricing-grid">
+            <article class="pricing-card reveal">
+              <div class="pricing-card-head">
+                <span class="pricing-tag">Starter</span>
+                <h3>Small events</h3>
+                <p>For test events, small birthdays, and private gatherings.</p>
+              </div>
+
+              <div class="pricing-price">
+                <strong>Free</strong>
+                <span>/ event</span>
+              </div>
+
+              <ul class="pricing-features">
+                <li>Up to 50 guests</li>
+                <li>500 MB event storage</li>
+                <li>Photo and message uploads</li>
+                <li>Basic QR and event code</li>
+                <li>Guest upload limits</li>
+              </ul>
+
+              <button
+                type="button"
+                class="btn btn-glass pricing-btn"
+                onclick="
+                  window.location.href = 'create-event.html?package=starter'
+                "
+                data-package="starter"
+              >
+                Choose Starter
+              </button>
+            </article>
+
+            <article class="pricing-card pricing-card-featured reveal delay-1">
+              <span class="pricing-popular">Recommended</span>
+
+              <div class="pricing-card-head">
+                <span class="pricing-tag">Standard</span>
+                <h3>Most events</h3>
+                <p>
+                  Best for graduations, birthdays, engagement parties, and
+                  medium-size events.
+                </p>
+              </div>
+
+              <div class="pricing-price">
+                <strong>₺149</strong>
+                <span>/ event</span>
+              </div>
+
+              <ul class="pricing-features">
+                <li>Up to 150 guests</li>
+                <li>2 GB event storage</li>
+                <li>Photo, video, and message uploads</li>
+                <li>Approval mode for uploads</li>
+                <li>Gallery view and likes</li>
+              </ul>
+
+              <button
+                type="button"
+                class="btn btn-hot pricing-btn"
+                onclick="
+                  window.location.href = 'create-event.html?package=standard'
+                "
+                data-package="standard"
+              >
+                Choose Standard
+              </button>
+            </article>
+
+            <article class="pricing-card reveal delay-2">
+              <div class="pricing-card-head">
+                <span class="pricing-tag">Premium</span>
+                <h3>Large events</h3>
+                <p>
+                  For weddings, corporate events, crowded celebrations, and long
+                  galleries.
+                </p>
+              </div>
+
+              <div class="pricing-price">
+                <strong>₺299</strong>
+                <span>/ event</span>
+              </div>
+
+              <ul class="pricing-features">
+                <li>Unlimited guests</li>
+                <li>10 GB event storage</li>
+                <li>High-volume video uploads</li>
+                <li>Advanced moderation settings</li>
+                <li>Best for live gallery screens</li>
+              </ul>
+
+              <button
+                type="button"
+                class="btn btn-glass pricing-btn"
+                onclick="
+                  window.location.href = 'create-event.html?package=premium'
+                "
+                data-package="premium"
+              >
+                Choose Premium
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- QR PREVIEW -->
+      <section class="preview" id="preview">
+        <div class="container preview-grid">
+          <div class="qr-area reveal">
+            <span class="section-kicker">Your event. Your code.</span>
+            <h2>Scan. Upload. Celebrate.</h2>
+
+            <div class="event-card">
+              <div class="event-card-head">
+                <b>Emma & Jake's Wedding</b>
+                <span>May 24, 2026</span>
+              </div>
+              <div
+                class="qr-code"
+                id="qrCode"
+                aria-label="Decorative QR code"
+              ></div>
+              <div class="code-box">
+                <strong id="eventCode">EJ2026</strong>
+                <button
+                  id="copyCode"
+                  type="button"
+                  aria-label="Copy event code"
+                >
+                  Copy
+                </button>
+              </div>
+              <p>Guests scan to upload memories instantly.</p>
+            </div>
+          </div>
+
+          <div class="polaroids reveal delay-1" aria-hidden="true">
+            <figure class="polaroid p-top">
+              <span class="photo-photo pf1"></span>
+              <figcaption>Best night ever! ♡</figcaption>
+            </figure>
+            <figure class="polaroid p-bottom">
+              <span class="photo-photo pf2"></span>
+              <figcaption>Thank you for celebrating with us! ♡</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- UPLOAD EXPERIENCE -->
+      <section class="upload" id="upload">
+        <div class="container upload-grid">
+          <div class="upload-intro reveal">
+            <span class="section-kicker">Create event</span>
+            <h2>Create your SnapUp event and get your private code.</h2>
+            <p>
+              Enter your event name, generate a unique event code, and share it
+              with your guests.
+            </p>
+
+            <div class="create-event-launch-card" id="create-event">
+              <div class="create-event-launch-icon" aria-hidden="true">
+                <span></span>
+              </div>
+
+              <div>
+                <strong>Ready to create your event?</strong>
+                <p>
+                  Open the create event page, enter the event name, and get your
+                  private event code instantly.
+                </p>
+              </div>
+
+              <a href="create-event.html" class="btn btn-hot btn-large">
+                Create Event
+              </a>
+            </div>
+          </div>
+
+          <div class="upload-card reveal delay-1">
+            <div class="upload-card-head">
+              <div>
+                <strong>Upload your memory</strong>
+                <span>Emma & Jake’s Wedding · EJ2026</span>
+              </div>
+              <i class="live-pill"><b></b>LIVE</i>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4v10M8 8l4-4 4 4M5 15v4h14v-4" />
+              </svg>
+              <strong>Drop photo or video here</strong>
+              <span>or click one option below</span>
+            </div>
+
+            <div class="upload-options">
+              <button type="button" data-upload="photo">Photo</button>
+              <button type="button" data-upload="video">Video</button>
+              <button type="button" data-upload="message">Message</button>
+            </div>
+
+            <div class="message-box" id="messageBox">
+              <textarea
+                id="memoryMessage"
+                maxlength="180"
+                placeholder="Write a memory or wish..."
+              ></textarea>
+              <div>
+                <span id="charCount">0 / 180</span>
+                <button type="button" id="sendMessage">Send</button>
+              </div>
+            </div>
+
+            <div class="progress-box" id="progressBox">
+              <div class="progress-row">
+                <span id="fileIcon">📸</span>
+                <b id="fileName">memory_photo.jpg</b>
+                <small id="progressStatus">Uploading...</small>
+              </div>
+              <div class="progress-track"><span id="progressFill"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container thumbnail-line reveal">
+          <article class="thumb t1"></article>
+          <article class="thumb t2"></article>
+          <article class="thumb t3"><span>▶</span></article>
+          <article class="thumb t4"></article>
+        </div>
+      </section>
+
+      <!-- FOOTER CTA -->
+      <section class="final-cta section-dark">
+        <div class="container final-cta-inner reveal">
+          <div>
+            <span class="camera-icon">▣</span>
+            <h2>Capture it. Share it. Cherish it forever.</h2>
+            <p>SnapUp Events helps every moment find its place.</p>
+          </div>
+          <div class="final-actions">
+            <a href="create-event.html" class="btn btn-hot btn-large"
+              >Create Your Event</a
+            >
+            <a href="#" class="btn btn-glass btn-large" data-join-upload-open>
+              Join with Code
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="join-upload-modal" id="joinUploadModal" aria-hidden="true">
+      <div class="join-upload-backdrop" data-join-upload-close></div>
+
+      <div class="join-upload-panel" role="dialog" aria-modal="true">
+        <button
+          type="button"
+          class="join-upload-close"
+          data-join-upload-close
+          aria-label="Close upload modal"
+        >
+          ×
+        </button>
+
+        <div class="join-upload-head">
+          <span><i></i> JOIN EVENT</span>
+          <h2>Upload your memory</h2>
+          <p>Enter the event code, choose media type, and send your memory.</p>
+        </div>
+
+        <form class="join-upload-form" id="joinUploadForm">
+          <div class="join-upload-grid">
+            <label>
+              Event Code
+              <input
+                type="text"
+                id="joinEventCode"
+                placeholder="Example: A7K92P"
+                maxlength="12"
+                autocomplete="off"
+              />
+            </label>
+
+            <label>
+              Your Name
+              <input
+                type="text"
+                id="joinGuestName"
+                placeholder="Enter your name"
+                autocomplete="name"
+              />
+            </label>
+          </div>
+
+          <div class="join-event-preview" id="joinEventPreview" hidden>
+            <strong id="joinEventName">Event name</strong>
+            <span id="joinEventMeta">Event details</span>
+          </div>
+
+          <div class="join-media-type">
+            <span>Choose Media</span>
+
+            <div>
+              <button
+                type="button"
+                class="active"
+                data-join-media-type="message"
+              >
+                Text
+              </button>
+              <button type="button" data-join-media-type="image">Image</button>
+              <button type="button" data-join-media-type="video">Video</button>
+            </div>
+          </div>
+
+          <div class="join-message-field" id="joinMessageField">
+            <label>
+              Message
+              <textarea
+                id="joinMessageText"
+                maxlength="250"
+                placeholder="Write your memory or wish..."
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="join-file-field" id="joinFileField" hidden>
+            <label>
+              Select File
+              <input type="file" id="joinMediaFile" />
+            </label>
+
+            <div class="join-file-preview" id="joinFilePreview" hidden></div>
+          </div>
+
+          <button
+            type="submit"
+            class="join-submit-button"
+            id="joinSubmitButton"
+          >
+            Send to Event
+          </button>
+
+          <p class="join-upload-result" id="joinUploadResult"></p>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

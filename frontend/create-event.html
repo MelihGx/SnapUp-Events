@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Event — SnapUp Events</title>
+
+    <link rel="stylesheet" href="css/create-event-page.css" />
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#0D0B0A" />
+  </head>
+
+  <body>
+    <main class="create-page">
+      <header class="create-header">
+        <a href="index.html" class="create-brand">
+          <span class="create-brand-logo" aria-hidden="true">
+            <svg
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <circle cx="24" cy="24" r="20" fill="#0D0B0A" />
+              <circle
+                cx="24"
+                cy="24"
+                r="18.25"
+                stroke="rgba(255,255,255,.16)"
+                stroke-width="1.5"
+              />
+              <g transform="translate(24 24)">
+                <path d="M0 -10.5 L6.8 -3.6 L1.2 -1.1 Z" fill="#ffffff" />
+                <path d="M9.1 -5.2 L9.8 4.4 L3.6 1.2 Z" fill="#F4EEE4" />
+                <path d="M9.1 5.2 L1.2 10.6 L1.3 3.6 Z" fill="#ffffff" />
+                <path d="M0 10.5 L-6.8 3.6 L-1.2 1.1 Z" fill="#FF6A3D" />
+                <path d="M-9.1 5.2 L-9.8 -4.4 L-3.6 -1.2 Z" fill="#F7B14C" />
+                <path d="M-9.1 -5.2 L-1.2 -10.6 L-1.3 -3.6 Z" fill="#ffffff" />
+              </g>
+              <circle
+                cx="24"
+                cy="24"
+                r="4.8"
+                fill="#0D0B0A"
+                stroke="#ffffff"
+                stroke-width="1.8"
+              />
+              <circle cx="24" cy="24" r="1.4" fill="#ffffff" />
+            </svg>
+          </span>
+
+          <strong>SnapUp<span>Events</span></strong>
+        </a>
+
+        <div class="create-header-actions">
+          <a href="account.html">My Account</a>
+          <a href="index.html">Home</a>
+        </div>
+      </header>
+
+      <section class="create-hero">
+        <span>Create Event</span>
+        <h1>Create a private SnapUp event.</h1>
+        <p>
+          Set your event details, choose a package, configure guest permissions,
+          and generate your private event code.
+        </p>
+      </section>
+
+      <section class="create-layout">
+        <form class="create-form-card" id="createEventPageForm">
+          <div class="form-section">
+            <span>Step 1</span>
+            <h2>Event details</h2>
+
+            <label>
+              Event name
+              <input
+                type="text"
+                id="eventName"
+                placeholder="Example: Melih Graduation Party"
+                autocomplete="off"
+              />
+            </label>
+
+            <label>
+              Location
+              <input
+                type="text"
+                id="eventLocation"
+                placeholder="Example: Istanbul"
+                autocomplete="off"
+              />
+            </label>
+
+            <div class="form-row">
+              <label>
+                Event date
+                <input type="date" id="eventDate" />
+              </label>
+
+              <label>
+                Start time
+                <input type="time" id="eventStartTime" step="60" />
+              </label>
+
+              <label>
+                Finish time
+                <input type="time" id="eventFinishTime" step="60" />
+              </label>
+            </div>
+
+            <label>
+              Description
+              <textarea
+                id="eventDescription"
+                rows="4"
+                placeholder="Write a short description for your event..."
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="form-section">
+            <span>Step 2</span>
+            <h2>Event settings</h2>
+
+            <div class="settings-grid">
+              <label class="setting-card">
+                <input type="checkbox" id="allowUpload" checked />
+                <strong>Allow Upload</strong>
+                <small>Guests can upload photos and videos.</small>
+              </label>
+
+              <label class="setting-card">
+                <input type="checkbox" id="allowComments" checked />
+                <strong>Allow Comments</strong>
+                <small>Guests can leave comments and memories.</small>
+              </label>
+
+              <label class="setting-card">
+                <input type="checkbox" id="allowLikes" checked />
+                <strong>Allow Likes</strong>
+                <small>Guests can like uploaded memories.</small>
+              </label>
+
+              <label class="setting-card">
+                <input type="checkbox" id="requireApproval" />
+                <strong>Require Approval</strong>
+                <small>Uploads wait for your approval.</small>
+              </label>
+
+              <label class="setting-card">
+                <input type="checkbox" id="onlyUsers" />
+                <strong>Only Users</strong>
+                <small>Only registered users can upload.</small>
+              </label>
+            </div>
+
+            <div class="form-row two">
+              <label>
+                Max storage per guest / MB
+                <input
+                  type="number"
+                  id="maxStoragePerGuest"
+                  value="500"
+                  min="50"
+                  step="50"
+                />
+              </label>
+
+              <label>
+                Max upload per guest
+                <input
+                  type="number"
+                  id="maxUploadPerGuest"
+                  value="20"
+                  min="1"
+                  step="1"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <span>Step 3</span>
+            <h2>Choose package</h2>
+
+            <div class="package-grid">
+              <label class="package-card">
+                <input
+                  type="radio"
+                  name="eventPackage"
+                  value="starter"
+                  checked
+                />
+
+                <div class="package-card-content">
+                  <div class="package-card-head">
+                    <strong>Starter</strong>
+                  </div>
+
+                  <p>
+                    Best for small events, test usage, birthdays, and private
+                    gatherings.
+                  </p>
+
+                  <div class="package-meta">
+                    <span>50 guests</span>
+                    <span>500 MB storage</span>
+                  </div>
+
+                  <ul class="package-features">
+                    <li>Photo uploads</li>
+                    <li>Message uploads</li>
+                    <li>Basic event code</li>
+                  </ul>
+
+                  <div class="package-price-row">
+                    <span>Package price</span>
+                    <strong>Free</strong>
+                  </div>
+                </div>
+              </label>
+
+              <label class="package-card recommended">
+                <input type="radio" name="eventPackage" value="standard" />
+
+                <b>Recommended</b>
+
+                <div class="package-card-content">
+                  <div class="package-card-head">
+                    <strong>Standard</strong>
+                  </div>
+
+                  <p>
+                    Ideal for graduations, engagements, birthdays, and
+                    medium-size events.
+                  </p>
+
+                  <div class="package-meta">
+                    <span>150 guests</span>
+                    <span>2 GB storage</span>
+                  </div>
+
+                  <ul class="package-features">
+                    <li>Photo and video uploads</li>
+                    <li>Approval mode</li>
+                    <li>Likes and comments</li>
+                  </ul>
+
+                  <div class="package-price-row">
+                    <span>Package price</span>
+                    <strong>₺149</strong>
+                  </div>
+                </div>
+              </label>
+
+              <label class="package-card">
+                <input type="radio" name="eventPackage" value="premium" />
+
+                <div class="package-card-content">
+                  <div class="package-card-head">
+                    <strong>Premium</strong>
+                  </div>
+
+                  <p>
+                    Designed for weddings, corporate events, crowded
+                    celebrations, and live galleries.
+                  </p>
+
+                  <div class="package-meta">
+                    <span>Unlimited guests</span>
+                    <span>10 GB storage</span>
+                  </div>
+
+                  <ul class="package-features">
+                    <li>High-volume uploads</li>
+                    <li>Advanced moderation</li>
+                    <li>Live gallery ready</li>
+                  </ul>
+
+                  <div class="package-price-row">
+                    <span>Package price</span>
+                    <strong>₺299</strong>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="create-submit" id="createEventSubmit">
+            Generate Event Code
+          </button>
+
+          <div class="create-result" id="createEventResult"></div>
+        </form>
+
+        <aside class="create-side-card">
+          <div class="rec-chip"><i></i> READY</div>
+
+          <h2>Your event code will appear here.</h2>
+
+          <p>
+            After creating your event, share the generated code or QR with your
+            guests.
+          </p>
+
+          <div class="code-preview" id="eventCodePreview">------</div>
+
+          <div class="qr-preview-box" id="qrPreviewBox">
+            <span>QR code will appear here.</span>
+          </div>
+
+          <div class="qr-actions" id="qrActions" hidden>
+            <button type="button" id="downloadQrButton">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 3V15M12 15L7 10M12 15L17 10"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M5 19H19"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Download QR
+            </button>
+
+            <button type="button" id="shareQrButton">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.2546 15.0317 5.50179 15.0914 5.73791L8.7086 9.26209C8.16552 8.49323 7.27132 8 6.25 8C4.59315 8 3.25 9.34315 3.25 11C3.25 12.6569 4.59315 14 6.25 14C7.27132 14 8.16552 13.5068 8.7086 12.7379L15.0914 16.2621C15.0317 16.4982 15 16.7454 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C16.9787 14 16.0845 14.4932 15.5414 15.2621L9.1586 11.7379C9.21828 11.5018 9.25 11.2546 9.25 11C9.25 10.7454 9.21828 10.4982 9.1586 10.2621L15.5414 6.73791C16.0845 7.50677 16.9787 8 18 8Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Share QR
+            </button>
+          </div>
+
+          <a href="account.html" class="account-link"> View My Events </a>
+        </aside>
+      </section>
+    </main>
+
+    <!-- DEMO PAYMENT POPUP -->
+    <div class="payment-popup-overlay" id="paymentPopup" aria-hidden="true">
+      <div
+        class="payment-popup payment-popup-wide"
+        role="dialog"
+        aria-modal="true"
+      >
+        <button
+          type="button"
+          class="payment-popup-close"
+          id="paymentPopupClose"
+          aria-label="Close payment popup"
+        >
+          ×
+        </button>
+
+        <div class="payment-popup-head">
+          <span><i></i> DEMO PAYMENT</span>
+          <h2>Complete demo payment</h2>
+          <p>
+            This is a demo payment screen. No real payment will be processed.
+          </p>
+        </div>
+
+        <div class="payment-summary-card">
+          <div>
+            <span>Selected package</span>
+            <strong id="paymentPackageName">Standard</strong>
+          </div>
+
+          <div>
+            <span>Package price</span>
+            <strong id="paymentPackagePrice">₺149</strong>
+          </div>
+        </div>
+
+        <div class="payment-live-layout">
+          <div class="payment-live-preview">
+            <div class="modern-demo-card">
+              <div class="demo-card-top">
+                <span>SnapUp Card</span>
+                <strong>DEMO</strong>
+              </div>
+
+              <div class="demo-card-chip-row">
+                <span class="demo-card-chip"></span>
+                <span class="demo-card-wave">)))</span>
+              </div>
+
+              <div class="demo-card-number" id="liveCardNumber">
+                <span>4242</span>
+                <span>4242</span>
+                <span>4242</span>
+                <span>4242</span>
+              </div>
+
+              <div class="demo-card-bottom">
+                <div>
+                  <small>Card holder</small>
+                  <strong id="liveCardHolder">SNAPUP USER</strong>
+                </div>
+
+                <div>
+                  <small>Expires</small>
+                  <strong id="liveCardExpiry">12/28</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-live-form">
+            <div class="payment-method-card">
+              <span>Payment details</span>
+
+              <label>
+                Card holder
+                <input
+                  type="text"
+                  id="cardHolderInput"
+                  placeholder="Enter card holder name"
+                  autocomplete="cc-name"
+                />
+              </label>
+
+              <label>
+                Card number
+                <input
+                  type="text"
+                  id="cardNumberInput"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  inputmode="numeric"
+                  autocomplete="cc-number"
+                />
+              </label>
+
+              <div class="demo-card-row">
+                <label>
+                  Expiry
+                  <input
+                    type="text"
+                    id="cardExpiryInput"
+                    placeholder="MM/YY"
+                    maxlength="5"
+                    inputmode="numeric"
+                    autocomplete="cc-exp"
+                  />
+                </label>
+
+                <label>
+                  CVC
+                  <input
+                    type="text"
+                    id="cardCvcInput"
+                    placeholder="123"
+                    maxlength="4"
+                    inputmode="numeric"
+                    autocomplete="cc-csc"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="payment-demo-btn" id="paymentDemoButton">
+          Pay Demo
+        </button>
+
+        <p class="payment-demo-note" id="paymentDemoNote">
+          Demo mode only — this step is for UI testing.
+        </p>
+      </div>
+    </div>
+
+    <!-- PAYMENT SUCCESS POPUP -->
+    <div
+      class="payment-success-overlay"
+      id="paymentSuccessPopup"
+      aria-hidden="true"
+    >
+      <div class="payment-success-popup">
+        <div class="success-icon">✓</div>
+
+        <h2>Payment successful!</h2>
+
+        <p>Your demo payment has been completed. Enjoy your event!</p>
+
+        <button type="button" id="paymentSuccessClose">Continue</button>
+      </div>
+    </div>
+
+    <script type="module" src="js/create-event-page.js"></script>
+  </body>
+</html>
