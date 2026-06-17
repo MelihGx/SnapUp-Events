@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = "https://snapup-events-api.onrender.com";
+const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
 const galleryLoading = document.getElementById("galleryLoading");
 const galleryError = document.getElementById("galleryError");
@@ -103,7 +103,7 @@ function renderEvent(event) {
     event.event_code || "",
   ].filter(Boolean);
 
-  galleryEventMeta.textContent = metaParts.join(" Â· ");
+  galleryEventMeta.textContent = metaParts.join(" · ");
   galleryEventDescription.textContent =
     event.description || "Approved memories from this event.";
 
@@ -155,7 +155,7 @@ function getLikeButtonHtml(item) {
       aria-pressed="${userLiked ? "true" : "false"}"
       aria-label="${userLiked ? "Unlike this photo" : "Like this photo"}"
     >
-      <span>${userLiked ? "â™¥" : "â™¡"}</span>
+      <span>${userLiked ? "♥" : "♡"}</span>
       <strong>${likesCount}</strong>
     </button>
   `;
@@ -232,11 +232,11 @@ function showLightboxItem(index) {
   publicLightboxTitle.textContent = `Uploaded by ${guestName}`;
 
   const likeText = gallerySettings.allow_likes
-    ? `â™¥ ${Number(item.likes_count || 0)}`
+    ? `♥ ${Number(item.likes_count || 0)}`
     : "";
 
   const metaParts = [item.message || "", uploadedAt, likeText].filter(Boolean);
-  publicLightboxMeta.textContent = metaParts.join(" Â· ");
+  publicLightboxMeta.textContent = metaParts.join(" · ");
 
   const hasMultiplePhotos = approvedPhotos.length > 1;
   publicLightboxPrev.hidden = !hasMultiplePhotos;
@@ -275,7 +275,7 @@ function updateLikeButtons(mediaId, liked, likesCount) {
     const count = button.querySelector("strong");
 
     if (icon) {
-      icon.textContent = liked ? "â™¥" : "â™¡";
+      icon.textContent = liked ? "♥" : "♡";
     }
 
     if (count) {

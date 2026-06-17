@@ -1,4 +1,4 @@
-﻿const token = localStorage.getItem("snapup_token");
+const token = localStorage.getItem("snapup_token");
 
 const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
@@ -42,6 +42,9 @@ const galleryLightboxMeta = document.getElementById("galleryLightboxMeta");
 const copyCodeButton = document.getElementById("copyCodeButton");
 const copyJoinLinkButton = document.getElementById("copyJoinLinkButton");
 const downloadQrButton = document.getElementById("downloadQrButton");
+const downloadSlideshowButton = document.getElementById(
+  "downloadSlideshowButton",
+);
 
 const openSettingsButton = document.getElementById("openSettingsButton");
 const settingsModal = document.getElementById("settingsModal");
@@ -91,7 +94,7 @@ if (!token) {
 }
 
 if (!eventId) {
-  showError("Event ID bulunamadÄ±. Account sayfasÄ±ndan tekrar giriÅŸ yap.");
+  showError("Event ID bulunamadı. Account sayfasından tekrar giriş yap.");
 }
 
 function getAuthHeaders() {
@@ -699,7 +702,7 @@ function showGalleryLightboxItem(index) {
   galleryLightboxTitle.textContent = `Uploaded by ${item.guestName}`;
 
   const metaParts = [item.message, item.uploadedAt].filter(Boolean);
-  galleryLightboxMeta.textContent = metaParts.join(" Â· ");
+  galleryLightboxMeta.textContent = metaParts.join(" · ");
 
   const hasMultipleItems = galleryLightboxItems.length > 1;
 
@@ -1208,6 +1211,75 @@ if (downloadQrButton) {
       window.open(qrImageUrl, "_blank");
     }
   });
+  if (downloadSlideshowButton) {
+    downloadSlideshowButton.addEventListener("click", async () => {
+      if (!eventId) {
+        return;
+      }
+
+      try {
+        downloadSlideshowButton.disabled = true;
+        downloadSlideshowButton.textContent = "Preparing...";
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/events/detail/${eventId}/slideshow`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+
+          throw new Error(
+            errorData?.message ||
+              errorData?.error ||
+              "Slideshow could not be downloaded.",
+          );
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const contentDisposition =
+          response.headers.get("Content-Disposition") ||
+          response.headers.get("content-disposition");
+
+        let fileName = `snapup-${currentEvent?.event_code || "event"}-slideshow.pptx`;
+
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+
+          if (fileNameMatch?.[1]) {
+            fileName = fileNameMatch[1];
+          }
+        }
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = objectUrl;
+        downloadLink.download = fileName;
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+
+        URL.revokeObjectURL(objectUrl);
+      } catch (error) {
+        alert(error.message || "Slideshow could not be downloaded.");
+      } finally {
+        downloadSlideshowButton.disabled = false;
+        downloadSlideshowButton.textContent = "Download Slideshow";
+      }
+    });
+  }
 }
 
 if (openSettingsButton) {
@@ -1453,6 +1525,85 @@ if (uploadPhotoBtn) {
     } finally {
       uploadPhotoBtn.disabled = false;
       uploadPhotoBtn.textContent = "Upload Photo";
+    }
+  });
+}
+
+const slideshowButtonFix = document.getElementById("downloadSlideshowButton");
+
+if (slideshowButtonFix) {
+  slideshowButtonFix.addEventListener("click", async () => {
+    const token = localStorage.getItem("snapup_token");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventIdFromUrl =
+      urlParams.get("event_id") ||
+      urlParams.get("eventId") ||
+      urlParams.get("id");
+
+    if (!eventIdFromUrl) {
+      alert("Event ID bulunamadı.");
+      return;
+    }
+
+    if (!token) {
+      alert("Slideshow indirmek için giriş yapmalısın.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    try {
+      slideshowButtonFix.disabled = true;
+      slideshowButtonFix.textContent = "Preparing...";
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/events/detail/${eventIdFromUrl}/slideshow`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+        throw new Error(
+          errorData?.message || errorData?.error || "Slideshow indirilemedi.",
+        );
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+
+      let fileName = "snapup-event-slideshow.pptx";
+
+      const contentDisposition =
+        response.headers.get("Content-Disposition") ||
+        response.headers.get("content-disposition");
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match?.[1]) {
+          fileName = match[1];
+        }
+      }
+
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      alert(error.message || "Slideshow indirilemedi.");
+      console.error("Slideshow download error:", error);
+    } finally {
+      slideshowButtonFix.disabled = false;
+      slideshowButtonFix.textContent = "Download Slideshow";
     }
   });
 }
