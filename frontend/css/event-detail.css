@@ -1805,3 +1805,14 @@ body.gallery-lightbox-open {
     justify-content: flex-start;
   }
 }
+
+.slideshow-download-button {
+  background: linear-gradient(135deg, #ff6a3d, #f7b14c) !important;
+  color: #0d0b0a !important;
+  font-weight: 950;
+}
+
+.slideshow-download-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
