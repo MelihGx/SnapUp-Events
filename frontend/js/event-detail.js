@@ -1253,7 +1253,7 @@ if (downloadQrButton) {
           response.headers.get("Content-Disposition") ||
           response.headers.get("content-disposition");
 
-        let fileName = `snapup-${currentEvent?.event_code || "event"}-slideshow.pptx`;
+        let fileName = `snapup-${currentEvent?.event_code || "event"}-slideshow.pdf`;
 
         if (contentDisposition) {
           const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
@@ -1577,7 +1577,7 @@ if (slideshowButtonFix) {
       const blob = await response.blob();
       const downloadUrl = URL.createObjectURL(blob);
 
-      let fileName = "snapup-event-slideshow.pptx";
+      let fileName = "snapup-event-slideshow.pdf";
 
       const contentDisposition =
         response.headers.get("Content-Disposition") ||
