@@ -106,38 +106,43 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString("tr-TR");
 }
 
-function getImageExtensionFromUrl(url) {
-  const cleanUrl = String(url || "")
-    .split("?")[0]
-    .toLowerCase();
+function getCloudinaryJpgUrl(imageUrl) {
+  if (!imageUrl || !imageUrl.includes("/upload/")) {
+    return imageUrl;
+  }
 
-  if (cleanUrl.endsWith(".png")) return "png";
-  if (cleanUrl.endsWith(".webp")) return "png";
-  if (cleanUrl.endsWith(".jpg")) return "jpg";
-  if (cleanUrl.endsWith(".jpeg")) return "jpg";
-
-  return "jpg";
+  return imageUrl.replace("/upload/", "/upload/f_jpg,q_auto/");
 }
 
 async function getImageAsDataUri(imageUrl) {
-  const response = await fetch(imageUrl);
+  const safeImageUrl = getCloudinaryJpgUrl(imageUrl);
+
+  const response = await fetch(safeImageUrl);
 
   if (!response.ok) {
-    throw new Error(`Image could not be downloaded: ${imageUrl}`);
+    throw new Error(`Image could not be downloaded: ${safeImageUrl}`);
   }
 
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const contentType =
-    response.headers.get("content-type") ||
-    `image/${getImageExtensionFromUrl(imageUrl)}`;
+  const contentType = response.headers.get("content-type") || "image/jpeg";
 
-  return `data:${contentType};base64,${buffer.toString("base64")}`;
+  let mimeType = "image/jpeg";
+
+  if (contentType.includes("png")) {
+    mimeType = "image/png";
+  }
+
+  if (contentType.includes("jpeg") || contentType.includes("jpg")) {
+    mimeType = "image/jpeg";
+  }
+
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
 }
 
 function addText(slide, text, x, y, w, h, options = {}) {
-  slide.addText(text, {
+  slide.addText(String(text || ""), {
     x,
     y,
     w,
@@ -893,27 +898,22 @@ async function downloadEventSlideshow(req, res) {
       });
     }
 
-    const approvedImages = media || [];
+    const validImages = (media || []).filter(
+      (item) =>
+        item &&
+        item.media_url &&
+        item.media_status === "approved" &&
+        item.media_type === "image",
+    );
 
-    if (approvedImages.length === 0) {
+    if (validImages.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No approved photos found for slideshow.",
+        message: "No valid approved photos found for slideshow.",
       });
     }
 
     const pptx = new pptxgen();
-    pptx.layout = "LAYOUT_WIDE";
-    pptx.author = "SnapUp Events";
-    pptx.subject = "Event slideshow";
-    pptx.title = `${event.event_name || "SnapUp Event"} Slideshow`;
-    pptx.company = "SnapUp Events";
-    pptx.lang = "tr-TR";
-    pptx.theme = {
-      headFontFace: "Aptos Display",
-      bodyFontFace: "Aptos",
-      lang: "tr-TR",
-    };
 
     pptx.defineLayout({
       name: "SNAPUP_WIDE",
@@ -922,6 +922,17 @@ async function downloadEventSlideshow(req, res) {
     });
 
     pptx.layout = "SNAPUP_WIDE";
+    pptx.author = "SnapUp Events";
+    pptx.subject = "Event slideshow";
+    pptx.title = `${event.event_name || "SnapUp Event"} Slideshow`;
+    pptx.company = "SnapUp Events";
+    pptx.lang = "tr-TR";
+
+    pptx.theme = {
+      headFontFace: "Aptos Display",
+      bodyFontFace: "Aptos",
+      lang: "tr-TR",
+    };
 
     const coverSlide = pptx.addSlide();
     coverSlide.background = { color: "0D0B0A" };
@@ -933,15 +944,6 @@ async function downloadEventSlideshow(req, res) {
       h: 7.5,
       fill: { color: "0D0B0A" },
       line: { color: "0D0B0A" },
-    });
-
-    coverSlide.addShape(pptx.ShapeType.arc, {
-      x: 8.8,
-      y: -1.1,
-      w: 5.8,
-      h: 5.8,
-      line: { color: "FF6A3D", transparency: 40, width: 3 },
-      adjustPoint: 0.4,
     });
 
     addText(coverSlide, "SNAPUP EVENTS", 0.75, 0.7, 4.8, 0.4, {
@@ -995,7 +997,7 @@ async function downloadEventSlideshow(req, res) {
 
     addText(
       coverSlide,
-      `${approvedImages.length} approved photos`,
+      `${validImages.length} approved photos`,
       0.75,
       6.36,
       3.6,
@@ -1007,8 +1009,10 @@ async function downloadEventSlideshow(req, res) {
       },
     );
 
-    for (let index = 0; index < approvedImages.length; index++) {
-      const item = approvedImages[index];
+    let addedImageCount = 0;
+
+    for (let index = 0; index < validImages.length; index++) {
+      const item = validImages[index];
       const slide = pptx.addSlide();
 
       slide.background = { color: "FFFAF2" };
@@ -1029,25 +1033,52 @@ async function downloadEventSlideshow(req, res) {
         h: 6.45,
         fill: { color: "FFFFFF" },
         line: { color: "E9DED2", width: 1 },
-        radius: 0.22,
       });
 
-      const imageData = await getImageAsDataUri(item.media_url);
+      let imageData = null;
 
-      slide.addImage({
-        data: imageData,
-        x: 0.78,
-        y: 0.75,
-        w: 8.3,
-        h: 5.78,
-        sizing: {
-          type: "contain",
+      try {
+        imageData = await getImageAsDataUri(item.media_url);
+      } catch (imageError) {
+        console.error("Slideshow image error:", {
+          media_id: item.media_id,
+          media_url: item.media_url,
+          error: imageError.message,
+        });
+      }
+
+      if (imageData) {
+        slide.addImage({
+          data: imageData,
           x: 0.78,
           y: 0.75,
           w: 8.3,
           h: 5.78,
-        },
-      });
+        });
+
+        addedImageCount++;
+      } else {
+        addText(slide, "Photo could not be loaded.", 1.0, 2.85, 7.7, 0.5, {
+          fontSize: 22,
+          bold: true,
+          color: "FF6A3D",
+          align: "center",
+        });
+
+        addText(
+          slide,
+          "This image was skipped because it could not be downloaded from storage.",
+          1.1,
+          3.42,
+          7.5,
+          0.45,
+          {
+            fontSize: 12,
+            color: "776E68",
+            align: "center",
+          },
+        );
+      }
 
       slide.addShape(pptx.ShapeType.rect, {
         x: 9.38,
@@ -1056,7 +1087,6 @@ async function downloadEventSlideshow(req, res) {
         h: 5.78,
         fill: { color: "0D0B0A" },
         line: { color: "0D0B0A" },
-        radius: 0.18,
       });
 
       addText(slide, `PHOTO ${index + 1}`, 9.7, 1.05, 2.4, 0.25, {
@@ -1105,7 +1135,7 @@ async function downloadEventSlideshow(req, res) {
 
       addText(
         slide,
-        `${index + 1} / ${approvedImages.length}`,
+        `${index + 1} / ${validImages.length}`,
         9.7,
         5.76,
         2.35,
@@ -1169,9 +1199,29 @@ async function downloadEventSlideshow(req, res) {
       },
     );
 
-    const pptxBuffer = await pptx.write({
+    addText(
+      endSlide,
+      `Generated with ${addedImageCount} photo${
+        addedImageCount === 1 ? "" : "s"
+      }.`,
+      1.4,
+      4.72,
+      10.5,
+      0.35,
+      {
+        fontSize: 12,
+        color: "AFA39A",
+        align: "center",
+      },
+    );
+
+    const rawBuffer = await pptx.write({
       outputType: "nodebuffer",
     });
+
+    const pptxBuffer = Buffer.isBuffer(rawBuffer)
+      ? rawBuffer
+      : Buffer.from(rawBuffer);
 
     const fileName = `${cleanFileName(
       event.event_name || "snapup-event",
