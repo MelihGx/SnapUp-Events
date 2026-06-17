@@ -18,6 +18,7 @@ router.post("/", authMiddleware, createEvent);
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
+
 router.get(
   "/detail/:eventId/slideshow",
   authMiddleware,

@@ -1,5 +1,8 @@
-const pptxgen = require("pptxgenjs");
+const PDFDocument = require("pdfkit");
 const supabase = require("../config/supabaseClient");
+
+const PDF_WIDTH = 960;
+const PDF_HEIGHT = 540;
 
 function generateEventCode() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -106,6 +109,16 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString("tr-TR");
 }
 
+function limitText(value, maxLength = 220) {
+  const text = String(value || "").trim();
+
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return `${text.slice(0, maxLength - 3)}...`;
+}
+
 function getCloudinaryJpgUrl(imageUrl) {
   if (!imageUrl || !imageUrl.includes("/upload/")) {
     return imageUrl;
@@ -114,7 +127,7 @@ function getCloudinaryJpgUrl(imageUrl) {
   return imageUrl.replace("/upload/", "/upload/f_jpg,q_auto/");
 }
 
-async function getImageAsDataUri(imageUrl) {
+async function getImageBuffer(imageUrl) {
   const safeImageUrl = getCloudinaryJpgUrl(imageUrl);
 
   const response = await fetch(safeImageUrl);
@@ -124,65 +137,259 @@ async function getImageAsDataUri(imageUrl) {
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
 
-  const contentType = response.headers.get("content-type") || "image/jpeg";
-
-  let mimeType = "image/jpeg";
-
-  if (contentType.includes("png")) {
-    mimeType = "image/png";
-  }
-
-  if (contentType.includes("jpeg") || contentType.includes("jpg")) {
-    mimeType = "image/jpeg";
-  }
-
-  return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  return Buffer.from(arrayBuffer);
 }
 
-function addText(slide, text, x, y, w, h, options = {}) {
-  slide.addText(String(text || ""), {
-    x,
-    y,
-    w,
-    h,
-    fontFace: "Aptos",
-    color: options.color || "17110F",
-    fontSize: options.fontSize || 16,
-    bold: options.bold || false,
-    align: options.align || "left",
-    valign: options.valign || "mid",
-    margin: options.margin ?? 0.04,
-    breakLine: options.breakLine || false,
-    fit: options.fit || "shrink",
-  });
+function drawFooter(doc, eventCode) {
+  doc
+    .moveTo(45, PDF_HEIGHT - 34)
+    .lineTo(PDF_WIDTH - 45, PDF_HEIGHT - 34)
+    .lineWidth(1)
+    .strokeColor("#E9DED2")
+    .stroke();
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .fillColor("#0D0B0A")
+    .text("SnapUp Events", 45, PDF_HEIGHT - 24, {
+      width: 220,
+      align: "left",
+    });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .fillColor("#FF6A3D")
+    .text(eventCode || "", PDF_WIDTH - 250, PDF_HEIGHT - 24, {
+      width: 205,
+      align: "right",
+    });
 }
 
-function addFooter(slide, eventCode) {
-  slide.addShape(pptx.ShapeType.line, {
-    x: 0.55,
-    y: 7.08,
-    w: 12.23,
-    h: 0,
-    line: {
-      color: "E9DED2",
-      width: 1,
-    },
-  });
+function drawCoverPage(doc, event, photoCount) {
+  doc.addPage();
 
-  addText(slide, "SnapUp Events", 0.55, 7.16, 2.4, 0.25, {
-    fontSize: 9,
-    bold: true,
-    color: "0D0B0A",
-  });
+  doc.rect(0, 0, PDF_WIDTH, PDF_HEIGHT).fill("#0D0B0A");
 
-  addText(slide, eventCode || "", 10.6, 7.16, 2.18, 0.25, {
-    fontSize: 9,
-    bold: true,
-    color: "FF6A3D",
-    align: "right",
-  });
+  doc.save();
+  doc.fillOpacity(0.14).circle(830, 65, 165).fill("#FF6A3D");
+  doc.fillOpacity(0.12).circle(805, 430, 85).fill("#F7B14C");
+  doc.restore();
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(14)
+    .fillColor("#F7B14C")
+    .text("SNAPUP EVENTS", 58, 58, {
+      width: 320,
+    });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(42)
+    .fillColor("#FFFAF2")
+    .text(event.event_name || "Untitled Event", 58, 160, {
+      width: 640,
+      height: 105,
+      lineGap: 2,
+    });
+
+  const eventMeta = [
+    event.event_location || "",
+    formatDate(event.event_date),
+    event.event_code ? `Code: ${event.event_code}` : "",
+  ]
+    .filter(Boolean)
+    .join("  •  ");
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(16)
+    .fillColor("#F7B14C")
+    .text(eventMeta, 58, 285, {
+      width: 720,
+    });
+
+  doc
+    .font("Helvetica")
+    .fontSize(15)
+    .fillColor("#E9DED2")
+    .text(
+      limitText(event.description || "Approved memories from this event.", 180),
+      58,
+      335,
+      {
+        width: 680,
+        lineGap: 4,
+      },
+    );
+
+  doc.roundedRect(58, 455, 230, 38, 19).fill("#FF6A3D");
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(15)
+    .fillColor("#0D0B0A")
+    .text(`${photoCount} approved photos`, 78, 466, {
+      width: 190,
+      align: "center",
+    });
+}
+
+function drawPhotoPage(doc, item, index, total, imageBuffer) {
+  doc.addPage();
+
+  doc.rect(0, 0, PDF_WIDTH, PDF_HEIGHT).fill("#FFFAF2");
+
+  doc
+    .roundedRect(42, 38, PDF_WIDTH - 84, PDF_HEIGHT - 82, 20)
+    .fill("#FFFFFF")
+    .strokeColor("#E9DED2")
+    .lineWidth(1)
+    .stroke();
+
+  doc.roundedRect(62, 58, 610, 380, 16).fill("#F7F1EA");
+
+  if (imageBuffer) {
+    doc.image(imageBuffer, 78, 74, {
+      fit: [578, 348],
+      align: "center",
+      valign: "center",
+    });
+  } else {
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(24)
+      .fillColor("#FF6A3D")
+      .text("Photo could not be loaded.", 95, 220, {
+        width: 540,
+        align: "center",
+      });
+
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor("#776E68")
+      .text(
+        "This image was skipped because it could not be downloaded.",
+        95,
+        258,
+        {
+          width: 540,
+          align: "center",
+        },
+      );
+  }
+
+  doc.roundedRect(700, 58, 215, 380, 16).fill("#0D0B0A");
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .fillColor("#F7B14C")
+    .text(`PHOTO ${index + 1}`, 725, 88, {
+      width: 165,
+    });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(19)
+    .fillColor("#FFFAF2")
+    .text(`Uploaded by\n${item.guest_name || "Guest"}`, 725, 125, {
+      width: 165,
+      lineGap: 4,
+    });
+
+  doc
+    .font("Helvetica")
+    .fontSize(12)
+    .fillColor("#E9DED2")
+    .text(limitText(item.message || "No caption added.", 170), 725, 225, {
+      width: 165,
+      height: 95,
+      lineGap: 3,
+    });
+
+  doc
+    .font("Helvetica")
+    .fontSize(9)
+    .fillColor("#AFA39A")
+    .text(
+      item.media_created_at
+        ? new Date(item.media_created_at).toLocaleString("tr-TR")
+        : "",
+      725,
+      350,
+      {
+        width: 165,
+      },
+    );
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(14)
+    .fillColor("#FF6A3D")
+    .text(`${index + 1} / ${total}`, 725, 395, {
+      width: 165,
+    });
+
+  drawFooter(doc, item.event_code);
+}
+
+function drawEndPage(doc, event, addedImageCount) {
+  doc.addPage();
+
+  doc.rect(0, 0, PDF_WIDTH, PDF_HEIGHT).fill("#0D0B0A");
+
+  doc.save();
+  doc.fillOpacity(0.13).circle(165, 85, 105).fill("#FF6A3D");
+  doc.fillOpacity(0.1).circle(805, 435, 125).fill("#F7B14C");
+  doc.restore();
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(44)
+    .fillColor("#FFFAF2")
+    .text("SnapUp Events", 90, 190, {
+      width: 780,
+      align: "center",
+    });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(19)
+    .fillColor("#F7B14C")
+    .text("Capture it. Share it. Cherish it forever.", 90, 260, {
+      width: 780,
+      align: "center",
+    });
+
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(14)
+    .fillColor("#FF6A3D")
+    .text(event.event_code ? `Event Code: ${event.event_code}` : "", 90, 320, {
+      width: 780,
+      align: "center",
+    });
+
+  doc
+    .font("Helvetica")
+    .fontSize(12)
+    .fillColor("#AFA39A")
+    .text(
+      `Generated with ${addedImageCount} photo${
+        addedImageCount === 1 ? "" : "s"
+      }.`,
+      90,
+      355,
+      {
+        width: 780,
+        align: "center",
+      },
+    );
 }
 
 const createEvent = async (req, res) => {
@@ -913,334 +1120,56 @@ async function downloadEventSlideshow(req, res) {
       });
     }
 
-    const pptx = new pptxgen();
+    const fileName = `${cleanFileName(
+      event.event_name || "snapup-event",
+    )}-slideshow.pdf`;
 
-    pptx.defineLayout({
-      name: "SNAPUP_WIDE",
-      width: 13.333,
-      height: 7.5,
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    const doc = new PDFDocument({
+      size: [PDF_WIDTH, PDF_HEIGHT],
+      margin: 0,
+      autoFirstPage: false,
     });
 
-    pptx.layout = "SNAPUP_WIDE";
-    pptx.author = "SnapUp Events";
-    pptx.subject = "Event slideshow";
-    pptx.title = `${event.event_name || "SnapUp Event"} Slideshow`;
-    pptx.company = "SnapUp Events";
-    pptx.lang = "tr-TR";
+    doc.pipe(res);
 
-    pptx.theme = {
-      headFontFace: "Aptos Display",
-      bodyFontFace: "Aptos",
-      lang: "tr-TR",
-    };
-
-    const coverSlide = pptx.addSlide();
-    coverSlide.background = { color: "0D0B0A" };
-
-    coverSlide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0,
-      w: 13.333,
-      h: 7.5,
-      fill: { color: "0D0B0A" },
-      line: { color: "0D0B0A" },
-    });
-
-    addText(coverSlide, "SNAPUP EVENTS", 0.75, 0.7, 4.8, 0.4, {
-      fontSize: 14,
-      bold: true,
-      color: "F7B14C",
-    });
-
-    addText(
-      coverSlide,
-      event.event_name || "Untitled Event",
-      0.75,
-      2.25,
-      8.5,
-      1.25,
-      {
-        fontSize: 42,
-        bold: true,
-        color: "FFFAF2",
-        fit: "shrink",
-      },
-    );
-
-    const eventMeta = [
-      event.event_location || "",
-      formatDate(event.event_date),
-      event.event_code ? `Code: ${event.event_code}` : "",
-    ]
-      .filter(Boolean)
-      .join("  ·  ");
-
-    addText(coverSlide, eventMeta, 0.75, 3.72, 9.2, 0.4, {
-      fontSize: 16,
-      bold: true,
-      color: "F7B14C",
-    });
-
-    addText(
-      coverSlide,
-      event.description || "Approved memories from this event.",
-      0.75,
-      4.35,
-      8.9,
-      0.9,
-      {
-        fontSize: 15,
-        color: "E9DED2",
-        fit: "shrink",
-      },
-    );
-
-    addText(
-      coverSlide,
-      `${validImages.length} approved photos`,
-      0.75,
-      6.36,
-      3.6,
-      0.35,
-      {
-        fontSize: 15,
-        bold: true,
-        color: "FF6A3D",
-      },
-    );
+    drawCoverPage(doc, event, validImages.length);
 
     let addedImageCount = 0;
 
     for (let index = 0; index < validImages.length; index++) {
-      const item = validImages[index];
-      const slide = pptx.addSlide();
+      const item = {
+        ...validImages[index],
+        event_code: event.event_code,
+      };
 
-      slide.background = { color: "FFFAF2" };
-
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0,
-        y: 0,
-        w: 13.333,
-        h: 7.5,
-        fill: { color: "FFFAF2" },
-        line: { color: "FFFAF2" },
-      });
-
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 0.45,
-        y: 0.42,
-        w: 12.43,
-        h: 6.45,
-        fill: { color: "FFFFFF" },
-        line: { color: "E9DED2", width: 1 },
-      });
-
-      let imageData = null;
+      let imageBuffer = null;
 
       try {
-        imageData = await getImageAsDataUri(item.media_url);
+        imageBuffer = await getImageBuffer(item.media_url);
+        addedImageCount++;
       } catch (imageError) {
-        console.error("Slideshow image error:", {
+        console.error("PDF slideshow image error:", {
           media_id: item.media_id,
           media_url: item.media_url,
           error: imageError.message,
         });
       }
 
-      if (imageData) {
-        slide.addImage({
-          data: imageData,
-          x: 0.78,
-          y: 0.75,
-          w: 8.3,
-          h: 5.78,
-        });
-
-        addedImageCount++;
-      } else {
-        addText(slide, "Photo could not be loaded.", 1.0, 2.85, 7.7, 0.5, {
-          fontSize: 22,
-          bold: true,
-          color: "FF6A3D",
-          align: "center",
-        });
-
-        addText(
-          slide,
-          "This image was skipped because it could not be downloaded from storage.",
-          1.1,
-          3.42,
-          7.5,
-          0.45,
-          {
-            fontSize: 12,
-            color: "776E68",
-            align: "center",
-          },
-        );
-      }
-
-      slide.addShape(pptx.ShapeType.rect, {
-        x: 9.38,
-        y: 0.75,
-        w: 3.08,
-        h: 5.78,
-        fill: { color: "0D0B0A" },
-        line: { color: "0D0B0A" },
-      });
-
-      addText(slide, `PHOTO ${index + 1}`, 9.7, 1.05, 2.4, 0.25, {
-        fontSize: 10,
-        bold: true,
-        color: "F7B14C",
-      });
-
-      addText(
-        slide,
-        `Uploaded by\n${item.guest_name || "Guest"}`,
-        9.7,
-        1.55,
-        2.35,
-        0.8,
-        {
-          fontSize: 18,
-          bold: true,
-          color: "FFFAF2",
-          fit: "shrink",
-        },
-      );
-
-      const caption = item.message || "No caption added.";
-
-      addText(slide, caption, 9.7, 2.62, 2.35, 1.4, {
-        fontSize: 13,
-        color: "E9DED2",
-        fit: "shrink",
-      });
-
-      addText(
-        slide,
-        item.media_created_at
-          ? new Date(item.media_created_at).toLocaleString("tr-TR")
-          : "",
-        9.7,
-        4.45,
-        2.35,
-        0.32,
-        {
-          fontSize: 10,
-          color: "AFA39A",
-        },
-      );
-
-      addText(
-        slide,
-        `${index + 1} / ${validImages.length}`,
-        9.7,
-        5.76,
-        2.35,
-        0.35,
-        {
-          fontSize: 14,
-          bold: true,
-          color: "FF6A3D",
-        },
-      );
-
-      addFooter(slide, event.event_code);
+      drawPhotoPage(doc, item, index, validImages.length, imageBuffer);
     }
 
-    const endSlide = pptx.addSlide();
-    endSlide.background = { color: "0D0B0A" };
+    drawEndPage(doc, event, addedImageCount);
 
-    endSlide.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 0,
-      w: 13.333,
-      h: 7.5,
-      fill: { color: "0D0B0A" },
-      line: { color: "0D0B0A" },
-    });
-
-    addText(endSlide, "SnapUp Events", 0.9, 2.45, 11.5, 0.8, {
-      fontSize: 44,
-      bold: true,
-      color: "FFFAF2",
-      align: "center",
-    });
-
-    addText(
-      endSlide,
-      "Capture it. Share it. Cherish it forever.",
-      1.4,
-      3.46,
-      10.5,
-      0.45,
-      {
-        fontSize: 19,
-        bold: true,
-        color: "F7B14C",
-        align: "center",
-      },
-    );
-
-    addText(
-      endSlide,
-      event.event_code ? `Event Code: ${event.event_code}` : "",
-      1.4,
-      4.22,
-      10.5,
-      0.35,
-      {
-        fontSize: 14,
-        bold: true,
-        color: "FF6A3D",
-        align: "center",
-      },
-    );
-
-    addText(
-      endSlide,
-      `Generated with ${addedImageCount} photo${
-        addedImageCount === 1 ? "" : "s"
-      }.`,
-      1.4,
-      4.72,
-      10.5,
-      0.35,
-      {
-        fontSize: 12,
-        color: "AFA39A",
-        align: "center",
-      },
-    );
-
-    const rawBuffer = await pptx.write({
-      outputType: "nodebuffer",
-    });
-
-    const pptxBuffer = Buffer.isBuffer(rawBuffer)
-      ? rawBuffer
-      : Buffer.from(rawBuffer);
-
-    const fileName = `${cleanFileName(
-      event.event_name || "snapup-event",
-    )}-slideshow.pptx`;
-
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    );
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
-    res.setHeader("Content-Length", pptxBuffer.length);
-
-    return res.status(200).send(pptxBuffer);
+    doc.end();
   } catch (error) {
-    console.error("Slideshow download error:", error);
+    console.error("PDF slideshow download error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Slideshow could not be generated.",
+      message: "PDF slideshow could not be generated.",
       error: error.message,
     });
   }
