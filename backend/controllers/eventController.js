@@ -1,3 +1,4 @@
+const pptxgen = require("pptxgenjs");
 const supabase = require("../config/supabaseClient");
 
 function generateEventCode() {
@@ -75,6 +76,108 @@ async function getPacketLevelId(packageName) {
   }
 
   return data.packet_level_id;
+}
+
+function cleanFileName(value) {
+  return String(value || "snapup-event")
+    .trim()
+    .toLowerCase()
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 70);
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-");
+    return `${day}.${month}.${year}`;
+  }
+
+  return new Date(value).toLocaleDateString("tr-TR");
+}
+
+function getImageExtensionFromUrl(url) {
+  const cleanUrl = String(url || "")
+    .split("?")[0]
+    .toLowerCase();
+
+  if (cleanUrl.endsWith(".png")) return "png";
+  if (cleanUrl.endsWith(".webp")) return "png";
+  if (cleanUrl.endsWith(".jpg")) return "jpg";
+  if (cleanUrl.endsWith(".jpeg")) return "jpg";
+
+  return "jpg";
+}
+
+async function getImageAsDataUri(imageUrl) {
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new Error(`Image could not be downloaded: ${imageUrl}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const contentType =
+    response.headers.get("content-type") ||
+    `image/${getImageExtensionFromUrl(imageUrl)}`;
+
+  return `data:${contentType};base64,${buffer.toString("base64")}`;
+}
+
+function addText(slide, text, x, y, w, h, options = {}) {
+  slide.addText(text, {
+    x,
+    y,
+    w,
+    h,
+    fontFace: "Aptos",
+    color: options.color || "17110F",
+    fontSize: options.fontSize || 16,
+    bold: options.bold || false,
+    align: options.align || "left",
+    valign: options.valign || "mid",
+    margin: options.margin ?? 0.04,
+    breakLine: options.breakLine || false,
+    fit: options.fit || "shrink",
+  });
+}
+
+function addFooter(slide, eventCode) {
+  slide.addShape(pptx.ShapeType.line, {
+    x: 0.55,
+    y: 7.08,
+    w: 12.23,
+    h: 0,
+    line: {
+      color: "E9DED2",
+      width: 1,
+    },
+  });
+
+  addText(slide, "SnapUp Events", 0.55, 7.16, 2.4, 0.25, {
+    fontSize: 9,
+    bold: true,
+    color: "0D0B0A",
+  });
+
+  addText(slide, eventCode || "", 10.6, 7.16, 2.18, 0.25, {
+    fontSize: 9,
+    bold: true,
+    color: "FF6A3D",
+    align: "right",
+  });
 }
 
 const createEvent = async (req, res) => {
@@ -723,6 +826,376 @@ async function getPublicEventGallery(req, res) {
   }
 }
 
+async function downloadEventSlideshow(req, res) {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select(
+        `
+        event_id,
+        event_name,
+        event_location,
+        event_date,
+        event_start_time,
+        event_finish_time,
+        event_code,
+        description,
+        event_cover_url,
+        user_id
+      `,
+      )
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event could not be checked.",
+        error: eventError.message,
+      });
+    }
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found or you do not have permission.",
+      });
+    }
+
+    const { data: media, error: mediaError } = await supabase
+      .from("events_media")
+      .select(
+        `
+        media_id,
+        guest_name,
+        media_type,
+        media_url,
+        message,
+        media_status,
+        media_created_at
+      `,
+      )
+      .eq("event_id", eventId)
+      .eq("media_status", "approved")
+      .eq("media_type", "image")
+      .not("media_url", "is", null)
+      .order("media_created_at", { ascending: true });
+
+    if (mediaError) {
+      return res.status(500).json({
+        success: false,
+        message: "Approved photos could not be loaded.",
+        error: mediaError.message,
+      });
+    }
+
+    const approvedImages = media || [];
+
+    if (approvedImages.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No approved photos found for slideshow.",
+      });
+    }
+
+    const pptx = new pptxgen();
+    pptx.layout = "LAYOUT_WIDE";
+    pptx.author = "SnapUp Events";
+    pptx.subject = "Event slideshow";
+    pptx.title = `${event.event_name || "SnapUp Event"} Slideshow`;
+    pptx.company = "SnapUp Events";
+    pptx.lang = "tr-TR";
+    pptx.theme = {
+      headFontFace: "Aptos Display",
+      bodyFontFace: "Aptos",
+      lang: "tr-TR",
+    };
+
+    pptx.defineLayout({
+      name: "SNAPUP_WIDE",
+      width: 13.333,
+      height: 7.5,
+    });
+
+    pptx.layout = "SNAPUP_WIDE";
+
+    const coverSlide = pptx.addSlide();
+    coverSlide.background = { color: "0D0B0A" };
+
+    coverSlide.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 0,
+      w: 13.333,
+      h: 7.5,
+      fill: { color: "0D0B0A" },
+      line: { color: "0D0B0A" },
+    });
+
+    coverSlide.addShape(pptx.ShapeType.arc, {
+      x: 8.8,
+      y: -1.1,
+      w: 5.8,
+      h: 5.8,
+      line: { color: "FF6A3D", transparency: 40, width: 3 },
+      adjustPoint: 0.4,
+    });
+
+    addText(coverSlide, "SNAPUP EVENTS", 0.75, 0.7, 4.8, 0.4, {
+      fontSize: 14,
+      bold: true,
+      color: "F7B14C",
+    });
+
+    addText(
+      coverSlide,
+      event.event_name || "Untitled Event",
+      0.75,
+      2.25,
+      8.5,
+      1.25,
+      {
+        fontSize: 42,
+        bold: true,
+        color: "FFFAF2",
+        fit: "shrink",
+      },
+    );
+
+    const eventMeta = [
+      event.event_location || "",
+      formatDate(event.event_date),
+      event.event_code ? `Code: ${event.event_code}` : "",
+    ]
+      .filter(Boolean)
+      .join("  ·  ");
+
+    addText(coverSlide, eventMeta, 0.75, 3.72, 9.2, 0.4, {
+      fontSize: 16,
+      bold: true,
+      color: "F7B14C",
+    });
+
+    addText(
+      coverSlide,
+      event.description || "Approved memories from this event.",
+      0.75,
+      4.35,
+      8.9,
+      0.9,
+      {
+        fontSize: 15,
+        color: "E9DED2",
+        fit: "shrink",
+      },
+    );
+
+    addText(
+      coverSlide,
+      `${approvedImages.length} approved photos`,
+      0.75,
+      6.36,
+      3.6,
+      0.35,
+      {
+        fontSize: 15,
+        bold: true,
+        color: "FF6A3D",
+      },
+    );
+
+    for (let index = 0; index < approvedImages.length; index++) {
+      const item = approvedImages[index];
+      const slide = pptx.addSlide();
+
+      slide.background = { color: "FFFAF2" };
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0,
+        y: 0,
+        w: 13.333,
+        h: 7.5,
+        fill: { color: "FFFAF2" },
+        line: { color: "FFFAF2" },
+      });
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 0.45,
+        y: 0.42,
+        w: 12.43,
+        h: 6.45,
+        fill: { color: "FFFFFF" },
+        line: { color: "E9DED2", width: 1 },
+        radius: 0.22,
+      });
+
+      const imageData = await getImageAsDataUri(item.media_url);
+
+      slide.addImage({
+        data: imageData,
+        x: 0.78,
+        y: 0.75,
+        w: 8.3,
+        h: 5.78,
+        sizing: {
+          type: "contain",
+          x: 0.78,
+          y: 0.75,
+          w: 8.3,
+          h: 5.78,
+        },
+      });
+
+      slide.addShape(pptx.ShapeType.rect, {
+        x: 9.38,
+        y: 0.75,
+        w: 3.08,
+        h: 5.78,
+        fill: { color: "0D0B0A" },
+        line: { color: "0D0B0A" },
+        radius: 0.18,
+      });
+
+      addText(slide, `PHOTO ${index + 1}`, 9.7, 1.05, 2.4, 0.25, {
+        fontSize: 10,
+        bold: true,
+        color: "F7B14C",
+      });
+
+      addText(
+        slide,
+        `Uploaded by\n${item.guest_name || "Guest"}`,
+        9.7,
+        1.55,
+        2.35,
+        0.8,
+        {
+          fontSize: 18,
+          bold: true,
+          color: "FFFAF2",
+          fit: "shrink",
+        },
+      );
+
+      const caption = item.message || "No caption added.";
+
+      addText(slide, caption, 9.7, 2.62, 2.35, 1.4, {
+        fontSize: 13,
+        color: "E9DED2",
+        fit: "shrink",
+      });
+
+      addText(
+        slide,
+        item.media_created_at
+          ? new Date(item.media_created_at).toLocaleString("tr-TR")
+          : "",
+        9.7,
+        4.45,
+        2.35,
+        0.32,
+        {
+          fontSize: 10,
+          color: "AFA39A",
+        },
+      );
+
+      addText(
+        slide,
+        `${index + 1} / ${approvedImages.length}`,
+        9.7,
+        5.76,
+        2.35,
+        0.35,
+        {
+          fontSize: 14,
+          bold: true,
+          color: "FF6A3D",
+        },
+      );
+
+      addFooter(slide, event.event_code);
+    }
+
+    const endSlide = pptx.addSlide();
+    endSlide.background = { color: "0D0B0A" };
+
+    endSlide.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 0,
+      w: 13.333,
+      h: 7.5,
+      fill: { color: "0D0B0A" },
+      line: { color: "0D0B0A" },
+    });
+
+    addText(endSlide, "SnapUp Events", 0.9, 2.45, 11.5, 0.8, {
+      fontSize: 44,
+      bold: true,
+      color: "FFFAF2",
+      align: "center",
+    });
+
+    addText(
+      endSlide,
+      "Capture it. Share it. Cherish it forever.",
+      1.4,
+      3.46,
+      10.5,
+      0.45,
+      {
+        fontSize: 19,
+        bold: true,
+        color: "F7B14C",
+        align: "center",
+      },
+    );
+
+    addText(
+      endSlide,
+      event.event_code ? `Event Code: ${event.event_code}` : "",
+      1.4,
+      4.22,
+      10.5,
+      0.35,
+      {
+        fontSize: 14,
+        bold: true,
+        color: "FF6A3D",
+        align: "center",
+      },
+    );
+
+    const pptxBuffer = await pptx.write({
+      outputType: "nodebuffer",
+    });
+
+    const fileName = `${cleanFileName(
+      event.event_name || "snapup-event",
+    )}-slideshow.pptx`;
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Length", pptxBuffer.length);
+
+    return res.status(200).send(pptxBuffer);
+  } catch (error) {
+    console.error("Slideshow download error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Slideshow could not be generated.",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   createEvent,
   getEventByCode,
@@ -731,4 +1204,5 @@ module.exports = {
   deleteEvent,
   getEventGuests,
   getPublicEventGallery,
+  downloadEventSlideshow,
 };
