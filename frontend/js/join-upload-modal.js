@@ -2,6 +2,7 @@ const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
 let selectedMediaType = "message";
 let selectedEvent = null;
+let selectedFiles = [];
 
 function formatDate(value) {
   if (!value) return "";
@@ -12,6 +13,18 @@ function formatDate(value) {
   }
 
   return new Date(value).toLocaleDateString("tr-TR");
+}
+
+function formatFileSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+
+  const mb = bytes / (1024 * 1024);
+
+  if (mb >= 1) {
+    return `${mb.toFixed(1)} MB`;
+  }
+
+  return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
 function setResult(message, type = "info") {
@@ -78,23 +91,169 @@ function ensureGalleryButton(preview) {
   return button;
 }
 
-function updateMediaFields() {
-  const messageField = document.getElementById("joinMessageField");
-  const fileField = document.getElementById("joinFileField");
+function clearSelectedFiles() {
+  selectedFiles = [];
+
   const fileInput = document.getElementById("joinMediaFile");
-  const messageText = document.getElementById("joinMessageText");
   const filePreview = document.getElementById("joinFilePreview");
 
-  if (!messageField || !fileField || !fileInput || !messageText) return;
-
-  messageField.hidden = false;
-
-  fileInput.value = "";
+  if (fileInput) {
+    fileInput.value = "";
+  }
 
   if (filePreview) {
     filePreview.hidden = true;
     filePreview.innerHTML = "";
   }
+}
+
+function isSameFile(fileA, fileB) {
+  return (
+    fileA.name === fileB.name &&
+    fileA.size === fileB.size &&
+    fileA.lastModified === fileB.lastModified
+  );
+}
+
+function addFilesToSelection(files) {
+  const incomingFiles = Array.from(files || []);
+
+  incomingFiles.forEach((file) => {
+    const alreadyExists = selectedFiles.some((item) => isSameFile(item, file));
+
+    if (!alreadyExists) {
+      selectedFiles.push(file);
+    }
+  });
+}
+
+function removeSelectedFile(index) {
+  selectedFiles.splice(index, 1);
+  renderFilePreview();
+}
+
+function createFileThumbnail(file) {
+  const thumb = document.createElement("div");
+  thumb.className = "join-selected-file-thumb";
+
+  if (file.type.startsWith("image/")) {
+    const image = document.createElement("img");
+    image.src = URL.createObjectURL(file);
+    image.alt = file.name;
+    thumb.appendChild(image);
+    return thumb;
+  }
+
+  if (file.type.startsWith("video/")) {
+    const videoBadge = document.createElement("span");
+    videoBadge.textContent = "▶";
+    thumb.classList.add("video-thumb");
+    thumb.appendChild(videoBadge);
+    return thumb;
+  }
+
+  const fileBadge = document.createElement("span");
+  fileBadge.textContent = "FILE";
+  thumb.appendChild(fileBadge);
+
+  return thumb;
+}
+
+function renderFilePreview() {
+  const filePreview = document.getElementById("joinFilePreview");
+
+  if (!filePreview) return;
+
+  filePreview.innerHTML = "";
+
+  if (selectedFiles.length === 0) {
+    filePreview.hidden = true;
+    return;
+  }
+
+  const previewHeader = document.createElement("div");
+  previewHeader.className = "join-selected-header";
+
+  const titleBox = document.createElement("div");
+
+  const title = document.createElement("strong");
+  title.textContent = "Selected files";
+
+  const subtitle = document.createElement("span");
+  subtitle.textContent =
+    selectedFiles.length === 1
+      ? "1 file is ready to upload."
+      : `${selectedFiles.length} files are ready to upload.`;
+
+  titleBox.appendChild(title);
+  titleBox.appendChild(subtitle);
+
+  const clearButton = document.createElement("button");
+  clearButton.type = "button";
+  clearButton.className = "join-clear-files-button";
+  clearButton.textContent = "Clear all";
+  clearButton.addEventListener("click", clearSelectedFiles);
+
+  previewHeader.appendChild(titleBox);
+  previewHeader.appendChild(clearButton);
+
+  const fileList = document.createElement("div");
+  fileList.className = "join-selected-file-list";
+
+  selectedFiles.forEach((file, index) => {
+    const item = document.createElement("div");
+    item.className = "join-selected-file-card";
+
+    const thumb = createFileThumbnail(file);
+
+    const info = document.createElement("div");
+    info.className = "join-selected-file-info";
+
+    const name = document.createElement("strong");
+    name.textContent = file.name;
+
+    const meta = document.createElement("span");
+    meta.textContent = `${formatFileSize(file.size)} · ${file.type || "file"}`;
+
+    info.appendChild(name);
+    info.appendChild(meta);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "join-remove-file-button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      removeSelectedFile(index);
+    });
+
+    item.appendChild(thumb);
+    item.appendChild(info);
+    item.appendChild(removeButton);
+
+    fileList.appendChild(item);
+  });
+
+  const helper = document.createElement("p");
+  helper.className = "join-file-helper-text";
+  helper.textContent =
+    "You can click Choose Files again to add more files before sending.";
+
+  filePreview.appendChild(previewHeader);
+  filePreview.appendChild(fileList);
+  filePreview.appendChild(helper);
+  filePreview.hidden = false;
+}
+
+function updateMediaFields() {
+  const messageField = document.getElementById("joinMessageField");
+  const fileField = document.getElementById("joinFileField");
+  const fileInput = document.getElementById("joinMediaFile");
+  const messageText = document.getElementById("joinMessageText");
+
+  if (!messageField || !fileField || !fileInput || !messageText) return;
+
+  messageField.hidden = false;
+  clearSelectedFiles();
 
   if (selectedMediaType === "message") {
     fileField.hidden = true;
@@ -258,17 +417,13 @@ async function uploadMedia(eventId, guestId, files, messageText = "") {
 }
 
 function resetFormAfterSuccess() {
-  const fileInput = document.getElementById("joinMediaFile");
   const messageText = document.getElementById("joinMessageText");
-  const filePreview = document.getElementById("joinFilePreview");
 
-  if (fileInput) fileInput.value = "";
-  if (messageText) messageText.value = "";
-
-  if (filePreview) {
-    filePreview.hidden = true;
-    filePreview.innerHTML = "";
+  if (messageText) {
+    messageText.value = "";
   }
+
+  clearSelectedFiles();
 }
 
 function initMediaTypeButtons() {
@@ -289,50 +444,13 @@ function initMediaTypeButtons() {
 
 function initFilePreview() {
   const fileInput = document.getElementById("joinMediaFile");
-  const filePreview = document.getElementById("joinFilePreview");
 
-  if (!fileInput || !filePreview) return;
+  if (!fileInput) return;
 
   fileInput.addEventListener("change", () => {
-    const files = Array.from(fileInput.files || []);
-    const firstFile = files[0];
-
-    filePreview.innerHTML = "";
-
-    if (files.length === 0 || !firstFile) {
-      filePreview.hidden = true;
-      return;
-    }
-
-    const info = document.createElement("p");
-    info.className = "join-file-count";
-
-    if (files.length === 1) {
-      info.textContent = firstFile.name;
-    } else {
-      info.textContent = `${files.length} files selected. Preview shows the first file.`;
-    }
-
-    if (selectedMediaType === "image") {
-      const image = document.createElement("img");
-      image.src = URL.createObjectURL(firstFile);
-      image.alt = "Selected image preview";
-
-      filePreview.appendChild(image);
-      filePreview.appendChild(info);
-      filePreview.hidden = false;
-      return;
-    }
-
-    if (selectedMediaType === "video") {
-      const video = document.createElement("video");
-      video.src = URL.createObjectURL(firstFile);
-      video.controls = true;
-
-      filePreview.appendChild(video);
-      filePreview.appendChild(info);
-      filePreview.hidden = false;
-    }
+    addFilesToSelection(fileInput.files);
+    fileInput.value = "";
+    renderFilePreview();
   });
 }
 
@@ -383,8 +501,6 @@ function initFormSubmit() {
     const guestName = document.getElementById("joinGuestName")?.value.trim();
     const messageText =
       document.getElementById("joinMessageText")?.value.trim() || "";
-    const fileInput = document.getElementById("joinMediaFile");
-    const files = Array.from(fileInput?.files || []);
 
     try {
       if (!eventCode) {
@@ -402,7 +518,7 @@ function initFormSubmit() {
         return;
       }
 
-      if (selectedMediaType !== "message" && files.length === 0) {
+      if (selectedMediaType !== "message" && selectedFiles.length === 0) {
         setResult("Please choose at least one file.", "error");
         return;
       }
@@ -412,7 +528,7 @@ function initFormSubmit() {
       if (selectedMediaType === "message") {
         setResult("Sending message...", "info");
       } else {
-        setResult(`Uploading ${files.length} file(s)...`, "info");
+        setResult(`Uploading ${selectedFiles.length} file(s)...`, "info");
       }
 
       const eventData = selectedEvent || (await findEventByCode(eventCode));
@@ -429,11 +545,12 @@ function initFormSubmit() {
         const uploadResult = await uploadMedia(
           eventData.event_id,
           guest.guest_id,
-          files,
+          selectedFiles,
           messageText,
         );
 
-        const uploadedCount = uploadResult.uploaded_count || files.length;
+        const uploadedCount =
+          uploadResult.uploaded_count || selectedFiles.length;
 
         setResult(`${uploadedCount} file(s) uploaded successfully!`, "success");
       }
