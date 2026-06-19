@@ -89,29 +89,33 @@ function updateMediaFields() {
 
   messageField.hidden = false;
 
+  fileInput.value = "";
+
+  if (filePreview) {
+    filePreview.hidden = true;
+    filePreview.innerHTML = "";
+  }
+
   if (selectedMediaType === "message") {
     fileField.hidden = true;
-    fileInput.value = "";
+
     fileInput.multiple = false;
     fileInput.removeAttribute("multiple");
     fileInput.removeAttribute("accept");
+
     messageText.placeholder = "Write your memory or wish...";
-
-    if (filePreview) {
-      filePreview.hidden = true;
-      filePreview.innerHTML = "";
-    }
-
     return;
   }
 
   fileField.hidden = false;
+
   fileInput.multiple = true;
   fileInput.setAttribute("multiple", "multiple");
+
   messageText.placeholder = "Add a caption for this media...";
 
   if (selectedMediaType === "image") {
-    fileInput.accept = "image/jpeg,image/png,image/webp";
+    fileInput.accept = "image/*";
   }
 
   if (selectedMediaType === "video") {
@@ -218,9 +222,13 @@ async function sendMessage(eventId, guestId, message) {
 }
 
 async function uploadMedia(eventId, guestId, files, messageText = "") {
-  const formData = new FormData();
+  const mediaFiles = Array.from(files || []);
 
-  const mediaFiles = Array.isArray(files) ? files : [files];
+  if (mediaFiles.length === 0) {
+    throw new Error("Please choose at least one file.");
+  }
+
+  const formData = new FormData();
 
   mediaFiles.forEach((file) => {
     formData.append("media", file);
@@ -241,7 +249,9 @@ async function uploadMedia(eventId, guestId, files, messageText = "") {
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(data.message || "Media could not be uploaded.");
+    throw new Error(
+      data.error || data.message || "Media could not be uploaded.",
+    );
   }
 
   return data;
@@ -285,25 +295,27 @@ function initFilePreview() {
 
   fileInput.addEventListener("change", () => {
     const files = Array.from(fileInput.files || []);
-    const file = files[0];
+    const firstFile = files[0];
 
     filePreview.innerHTML = "";
 
-    if (!file) {
+    if (files.length === 0 || !firstFile) {
       filePreview.hidden = true;
       return;
     }
 
     const info = document.createElement("p");
     info.className = "join-file-count";
-    info.textContent =
-      files.length === 1
-        ? file.name
-        : `${files.length} files selected. Preview shows the first file.`;
+
+    if (files.length === 1) {
+      info.textContent = firstFile.name;
+    } else {
+      info.textContent = `${files.length} files selected. Preview shows the first file.`;
+    }
 
     if (selectedMediaType === "image") {
       const image = document.createElement("img");
-      image.src = URL.createObjectURL(file);
+      image.src = URL.createObjectURL(firstFile);
       image.alt = "Selected image preview";
 
       filePreview.appendChild(image);
@@ -314,7 +326,7 @@ function initFilePreview() {
 
     if (selectedMediaType === "video") {
       const video = document.createElement("video");
-      video.src = URL.createObjectURL(file);
+      video.src = URL.createObjectURL(firstFile);
       video.controls = true;
 
       filePreview.appendChild(video);
@@ -371,9 +383,8 @@ function initFormSubmit() {
     const guestName = document.getElementById("joinGuestName")?.value.trim();
     const messageText =
       document.getElementById("joinMessageText")?.value.trim() || "";
-    const files = Array.from(
-      document.getElementById("joinMediaFile")?.files || [],
-    );
+    const fileInput = document.getElementById("joinMediaFile");
+    const files = Array.from(fileInput?.files || []);
 
     try {
       if (!eventCode) {
@@ -397,7 +408,12 @@ function initFormSubmit() {
       }
 
       setLoading(true);
-      setResult("Preparing upload...", "info");
+
+      if (selectedMediaType === "message") {
+        setResult("Sending message...", "info");
+      } else {
+        setResult(`Uploading ${files.length} file(s)...`, "info");
+      }
 
       const eventData = selectedEvent || (await findEventByCode(eventCode));
       selectedEvent = eventData;
