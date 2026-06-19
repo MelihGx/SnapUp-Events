@@ -82,6 +82,7 @@ const eventId = params.get("event_id");
 
 let currentEvent = null;
 let currentSettings = null;
+let currentRenderedMediaList = [];
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -371,6 +372,39 @@ function getMediaStatus(media) {
   return String(media.media_status || media.status || "approved").toLowerCase();
 }
 
+function isImageMedia(media) {
+  const mediaType = getMediaType(media);
+  const mediaUrl = getMediaUrl(media);
+
+  return Boolean(mediaUrl) && mediaType.includes("image");
+}
+
+function shouldShowApproveAllImagesButton(mediaList) {
+  if (!approveAllImagesButton) {
+    return false;
+  }
+
+  if (activeMediaFilter !== "pending") {
+    return false;
+  }
+
+  if (!mediaList || mediaList.length === 0) {
+    return false;
+  }
+
+  return mediaList.some(
+    (media) => getMediaStatus(media) === "pending" && isImageMedia(media),
+  );
+}
+
+function updateApproveAllImagesButtonVisibility(mediaList) {
+  if (!approveAllImagesButton) {
+    return;
+  }
+
+  approveAllImagesButton.hidden = !shouldShowApproveAllImagesButton(mediaList);
+}
+
 function getMediaKind(media) {
   const mediaType = getMediaType(media);
   const mediaUrl = getMediaUrl(media);
@@ -554,6 +588,9 @@ function renderMediaCards() {
 
   const mediaList = getFilteredMediaList();
 
+  currentRenderedMediaList = mediaList || [];
+  updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
+
   if (!mediaList || mediaList.length === 0) {
     mediaGallery.innerHTML = `
       <div class="empty-gallery">
@@ -675,6 +712,9 @@ function renderMediaCards() {
 
 function renderMedia(mediaList) {
   allMediaItems = Array.isArray(mediaList) ? mediaList : [];
+  currentRenderedMediaList = getFilteredMediaList();
+
+  updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
 
   renderMediaFilters();
   renderMediaCards();
@@ -1214,75 +1254,78 @@ if (downloadQrButton) {
       window.open(qrImageUrl, "_blank");
     }
   });
-  if (downloadSlideshowButton) {
-    downloadSlideshowButton.addEventListener("click", async () => {
-      if (!eventId) {
+}
+
+if (downloadSlideshowButton) {
+  downloadSlideshowButton.addEventListener("click", async () => {
+    if (!eventId) {
+      return;
+    }
+
+    try {
+      downloadSlideshowButton.disabled = true;
+      downloadSlideshowButton.textContent = "Preparing...";
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/events/detail/${eventId}/slideshow`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.status === 401) {
+        logout();
         return;
       }
 
-      try {
-        downloadSlideshowButton.disabled = true;
-        downloadSlideshowButton.textContent = "Preparing...";
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/events/detail/${eventId}/slideshow`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+        throw new Error(
+          errorData?.message ||
+            errorData?.error ||
+            "Slideshow could not be downloaded.",
         );
-
-        if (response.status === 401) {
-          logout();
-          return;
-        }
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-
-          throw new Error(
-            errorData?.message ||
-              errorData?.error ||
-              "Slideshow could not be downloaded.",
-          );
-        }
-
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-
-        const contentDisposition =
-          response.headers.get("Content-Disposition") ||
-          response.headers.get("content-disposition");
-
-        let fileName = `snapup-${currentEvent?.event_code || "event"}-slideshow.pdf`;
-
-        if (contentDisposition) {
-          const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-
-          if (fileNameMatch?.[1]) {
-            fileName = fileNameMatch[1];
-          }
-        }
-
-        const downloadLink = document.createElement("a");
-        downloadLink.href = objectUrl;
-        downloadLink.download = fileName;
-
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-
-        URL.revokeObjectURL(objectUrl);
-      } catch (error) {
-        alert(error.message || "Slideshow could not be downloaded.");
-      } finally {
-        downloadSlideshowButton.disabled = false;
-        downloadSlideshowButton.textContent = "Download Slideshow";
       }
-    });
-  }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      const contentDisposition =
+        response.headers.get("Content-Disposition") ||
+        response.headers.get("content-disposition");
+
+      let fileName = `snapup-${
+        currentEvent?.event_code || "event"
+      }-slideshow.pdf`;
+
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+
+        if (fileNameMatch?.[1]) {
+          fileName = fileNameMatch[1];
+        }
+      }
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = objectUrl;
+      downloadLink.download = fileName;
+
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      alert(error.message || "Slideshow could not be downloaded.");
+    } finally {
+      downloadSlideshowButton.disabled = false;
+      downloadSlideshowButton.textContent = "Download Slideshow";
+    }
+  });
 }
 
 if (openSettingsButton) {
@@ -1533,12 +1576,21 @@ if (uploadPhotoBtn) {
 }
 
 async function approveAllImages() {
-  if (!eventId || !token) {
+  if (!eventId || !token || !approveAllImagesButton) {
+    return;
+  }
+
+  const pendingImageCount = currentRenderedMediaList.filter(
+    (media) => getMediaStatus(media) === "pending" && isImageMedia(media),
+  ).length;
+
+  if (pendingImageCount === 0) {
+    approveAllImagesButton.hidden = true;
     return;
   }
 
   const confirmed = confirm(
-    "Are you sure you want to approve all photos for this event?",
+    `Are you sure you want to approve ${pendingImageCount} pending photo(s)?`,
   );
 
   if (!confirmed) {
@@ -1572,18 +1624,19 @@ async function approveAllImages() {
       );
     }
 
-    alert(data.message || "All photos approved successfully.");
+    alert(data.message || "All pending photos approved successfully.");
 
-    window.location.reload();
+    activeMediaFilter = "pending";
+    await loadEventDetail();
   } catch (error) {
     alert(error.message || "Photos could not be approved.");
     console.error("Approve all photos error:", error);
   } finally {
     approveAllImagesButton.disabled = false;
     approveAllImagesButton.textContent = "Approve All Photos";
+    updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
   }
 }
-
 if (approveAllImagesButton) {
   approveAllImagesButton.addEventListener("click", approveAllImages);
 }
