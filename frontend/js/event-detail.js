@@ -42,6 +42,9 @@ const galleryLightboxMeta = document.getElementById("galleryLightboxMeta");
 const copyCodeButton = document.getElementById("copyCodeButton");
 const copyJoinLinkButton = document.getElementById("copyJoinLinkButton");
 const downloadQrButton = document.getElementById("downloadQrButton");
+const approveAllImagesButton = document.getElementById(
+  "approveAllImagesButton",
+);
 const downloadSlideshowButton = document.getElementById(
   "downloadSlideshowButton",
 );
@@ -1527,6 +1530,62 @@ if (uploadPhotoBtn) {
       uploadPhotoBtn.textContent = "Upload Photo";
     }
   });
+}
+
+async function approveAllImages() {
+  if (!eventId || !token) {
+    return;
+  }
+
+  const confirmed = confirm(
+    "Are you sure you want to approve all photos for this event?",
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    approveAllImagesButton.disabled = true;
+    approveAllImagesButton.textContent = "Approving...";
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/media/events/${eventId}/approve-images`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || data.message || "Photos could not be approved.",
+      );
+    }
+
+    alert(data.message || "All photos approved successfully.");
+
+    window.location.reload();
+  } catch (error) {
+    alert(error.message || "Photos could not be approved.");
+    console.error("Approve all photos error:", error);
+  } finally {
+    approveAllImagesButton.disabled = false;
+    approveAllImagesButton.textContent = "Approve All Photos";
+  }
+}
+
+if (approveAllImagesButton) {
+  approveAllImagesButton.addEventListener("click", approveAllImages);
 }
 
 loadEventDetail();

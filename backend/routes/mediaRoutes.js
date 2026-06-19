@@ -661,6 +661,78 @@ router.post("/:mediaId/like", async (req, res) => {
   }
 });
 
+router.put(
+  "/events/:eventId/approve-images",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const userId = req.user.user_id;
+      const { eventId } = req.params;
+
+      if (!eventId) {
+        return res.status(400).json({
+          success: false,
+          message: "eventId is required.",
+        });
+      }
+
+      const { data: event, error: eventError } = await supabase
+        .from("event")
+        .select("event_id, user_id")
+        .eq("event_id", eventId)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (eventError) {
+        return res.status(500).json({
+          success: false,
+          message: "Event ownership could not be checked.",
+          error: eventError.message,
+        });
+      }
+
+      if (!event) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission for this event.",
+        });
+      }
+
+      const imageTypeId = await getMediaTypeId("image");
+
+      const { data, error } = await supabase
+        .from("media")
+        .update({
+          media_status: "approved",
+        })
+        .eq("event_id", eventId)
+        .eq("media_type_id", imageTypeId)
+        .neq("media_status", "approved")
+        .select("media_id");
+
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Photos could not be approved.",
+          error: error.message,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `${data.length} photo(s) approved successfully.`,
+        approved_count: data.length,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        success: false,
+        message: "Approve all photos failed.",
+        error: error.message,
+      });
+    }
+  },
+);
+
 router.put("/:mediaId/status", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
