@@ -20,7 +20,8 @@ const allowedTypes = [
 const upload = multer({
   storage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100 MB
+    fileSize: 100 * 1024 * 1024,
+    files: 20,
   },
   fileFilter: (req, file, cb) => {
     if (!allowedTypes.includes(file.mimetype)) {
@@ -86,7 +87,7 @@ async function getUploadStatusForEvent(eventId) {
 
   const { data: settings, error: settingsError } = await supabase
     .from("event_settings")
-    .select("allow_upload, require_approval")
+    .select("allow_upload, require_approval, max_upload_per_guest")
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -98,7 +99,56 @@ async function getUploadStatusForEvent(eventId) {
     throw createHttpError("Uploads are disabled for this event.", 403);
   }
 
-  return settings?.require_approval ? "pending" : "approved";
+  return {
+    mediaStatus: settings?.require_approval ? "pending" : "approved",
+    maxUploadPerGuest: Number(settings?.max_upload_per_guest) || 20,
+  };
+}
+
+async function checkGuestBelongsToEvent(eventId, guestId) {
+  const { data: guest, error } = await supabase
+    .from("event_guests")
+    .select("guest_id, event_id")
+    .eq("guest_id", guestId)
+    .eq("event_id", eventId)
+    .maybeSingle();
+
+  if (error) {
+    throw createHttpError(error.message, 500);
+  }
+
+  if (!guest) {
+    throw createHttpError("Guest does not belong to this event.", 403);
+  }
+
+  return guest;
+}
+
+async function checkGuestUploadLimit(eventId, guestId, incomingFileCount) {
+  const { maxUploadPerGuest } = await getUploadStatusForEvent(eventId);
+
+  const { count, error } = await supabase
+    .from("media")
+    .select("media_id", {
+      count: "exact",
+      head: true,
+    })
+    .eq("event_id", eventId)
+    .eq("guest_id", guestId);
+
+  if (error) {
+    throw createHttpError(error.message, 500);
+  }
+
+  const currentUploadCount = count || 0;
+  const nextUploadCount = currentUploadCount + incomingFileCount;
+
+  if (nextUploadCount > maxUploadPerGuest) {
+    throw createHttpError(
+      `Upload limit exceeded. This guest can upload maximum ${maxUploadPerGuest} item(s).`,
+      400,
+    );
+  }
 }
 
 function uploadToCloudinary(fileBuffer, eventId, resourceType) {
@@ -226,10 +276,10 @@ router.post("/upload", upload.any(), async (req, res) => {
   try {
     const { event_id, guest_id, message } = req.body;
 
-    const file =
-      req.files?.find((item) =>
+    const files =
+      req.files?.filter((item) =>
         ["media", "photo", "video"].includes(item.fieldname),
-      ) || null;
+      ) || [];
 
     if (!event_id) {
       return res.status(400).json({
@@ -245,67 +295,87 @@ router.post("/upload", upload.any(), async (req, res) => {
       });
     }
 
-    if (!file) {
+    if (files.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Media file is required.",
+        message: "At least one media file is required.",
       });
     }
 
-    const mediaKind = getMediaKindFromMime(file.mimetype);
+    await checkGuestBelongsToEvent(event_id, guest_id);
+    await checkGuestUploadLimit(event_id, guest_id, files.length);
 
-    if (!mediaKind) {
-      return res.status(400).json({
-        success: false,
-        message: "Unsupported media type.",
-      });
-    }
-
-    const mediaStatus = await getUploadStatusForEvent(event_id);
-    const resourceType = mediaKind === "video" ? "video" : "image";
-
-    const cloudinaryResult = await uploadToCloudinary(
-      file.buffer,
-      event_id,
-      resourceType,
-    );
-
-    const mediaTypeId = await getMediaTypeId(mediaKind);
+    const { mediaStatus } = await getUploadStatusForEvent(event_id);
 
     const cleanMessage =
       message && message.trim() !== "" ? message.trim() : null;
 
-    const { data, error } = await supabase
-      .from("media")
-      .insert({
+    const uploadedItems = [];
+
+    for (const file of files) {
+      const mediaKind = getMediaKindFromMime(file.mimetype);
+
+      if (!mediaKind) {
+        return res.status(400).json({
+          success: false,
+          message: "Unsupported media type.",
+        });
+      }
+
+      const resourceType = mediaKind === "video" ? "video" : "image";
+
+      const cloudinaryResult = await uploadToCloudinary(
+        file.buffer,
+        event_id,
+        resourceType,
+      );
+
+      const mediaTypeId = await getMediaTypeId(mediaKind);
+
+      uploadedItems.push({
         event_id,
         guest_id,
         media_type_id: mediaTypeId,
         media_url: cloudinaryResult.secure_url,
         message: cleanMessage,
         media_status: mediaStatus,
-      })
-      .select()
-      .single();
+        cloudinary: {
+          url: cloudinaryResult.secure_url,
+          public_id: cloudinaryResult.public_id,
+          resource_type: cloudinaryResult.resource_type,
+        },
+      });
+    }
+
+    const mediaRows = uploadedItems.map((item) => ({
+      event_id: item.event_id,
+      guest_id: item.guest_id,
+      media_type_id: item.media_type_id,
+      media_url: item.media_url,
+      message: item.message,
+      media_status: item.media_status,
+    }));
+
+    const { data, error } = await supabase
+      .from("media")
+      .insert(mediaRows)
+      .select();
 
     if (error) {
       return res.status(500).json({
         success: false,
-        message: `${mediaKind} uploaded to Cloudinary but Supabase insert failed.`,
-        cloudinary_url: cloudinaryResult.secure_url,
+        message: "Files uploaded to Cloudinary but Supabase insert failed.",
+        uploaded_cloudinary: uploadedItems.map((item) => item.cloudinary),
         error: error.message,
       });
     }
 
     return res.status(201).json({
       success: true,
-      message: `${mediaKind} uploaded successfully.`,
+      message: `${data.length} media file uploaded successfully.`,
+      uploaded_count: data.length,
       media: data,
-      cloudinary: {
-        url: cloudinaryResult.secure_url,
-        public_id: cloudinaryResult.public_id,
-        resource_type: cloudinaryResult.resource_type,
-      },
+      cloudinary: uploadedItems.map((item) => item.cloudinary),
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({
@@ -341,7 +411,10 @@ router.post("/message", async (req, res) => {
       });
     }
 
-    const mediaStatus = await getUploadStatusForEvent(event_id);
+    await checkGuestBelongsToEvent(event_id, guest_id);
+    await checkGuestUploadLimit(event_id, guest_id, 1);
+
+    const { mediaStatus } = await getUploadStatusForEvent(event_id);
     const mediaTypeId = await getMediaTypeId("message");
 
     const { data, error } = await supabase

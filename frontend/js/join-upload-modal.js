@@ -92,6 +92,8 @@ function updateMediaFields() {
   if (selectedMediaType === "message") {
     fileField.hidden = true;
     fileInput.value = "";
+    fileInput.multiple = false;
+    fileInput.removeAttribute("multiple");
     fileInput.removeAttribute("accept");
     messageText.placeholder = "Write your memory or wish...";
 
@@ -104,6 +106,8 @@ function updateMediaFields() {
   }
 
   fileField.hidden = false;
+  fileInput.multiple = true;
+  fileInput.setAttribute("multiple", "multiple");
   messageText.placeholder = "Add a caption for this media...";
 
   if (selectedMediaType === "image") {
@@ -213,15 +217,20 @@ async function sendMessage(eventId, guestId, message) {
   return data;
 }
 
-async function uploadMedia(eventId, guestId, file, message = "") {
+async function uploadMedia(eventId, guestId, files, messageText = "") {
   const formData = new FormData();
 
-  formData.append("media", file);
+  const mediaFiles = Array.isArray(files) ? files : [files];
+
+  mediaFiles.forEach((file) => {
+    formData.append("media", file);
+  });
+
   formData.append("event_id", eventId);
   formData.append("guest_id", guestId);
 
-  if (message && message.trim() !== "") {
-    formData.append("message", message.trim());
+  if (messageText && messageText.trim() !== "") {
+    formData.append("message", messageText.trim());
   }
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
@@ -232,9 +241,7 @@ async function uploadMedia(eventId, guestId, file, message = "") {
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(
-      data.error || data.message || "Media could not be uploaded.",
-    );
+    throw new Error(data.message || "Media could not be uploaded.");
   }
 
   return data;
@@ -277,7 +284,8 @@ function initFilePreview() {
   if (!fileInput || !filePreview) return;
 
   fileInput.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
+    const files = Array.from(fileInput.files || []);
+    const file = files[0];
 
     filePreview.innerHTML = "";
 
@@ -286,11 +294,20 @@ function initFilePreview() {
       return;
     }
 
+    const info = document.createElement("p");
+    info.className = "join-file-count";
+    info.textContent =
+      files.length === 1
+        ? file.name
+        : `${files.length} files selected. Preview shows the first file.`;
+
     if (selectedMediaType === "image") {
       const image = document.createElement("img");
       image.src = URL.createObjectURL(file);
       image.alt = "Selected image preview";
+
       filePreview.appendChild(image);
+      filePreview.appendChild(info);
       filePreview.hidden = false;
       return;
     }
@@ -299,7 +316,9 @@ function initFilePreview() {
       const video = document.createElement("video");
       video.src = URL.createObjectURL(file);
       video.controls = true;
+
       filePreview.appendChild(video);
+      filePreview.appendChild(info);
       filePreview.hidden = false;
     }
   });
@@ -350,10 +369,11 @@ function initFormSubmit() {
 
     const eventCode = document.getElementById("joinEventCode")?.value.trim();
     const guestName = document.getElementById("joinGuestName")?.value.trim();
-    const messageText = document
-      .getElementById("joinMessageText")
-      ?.value.trim();
-    const file = document.getElementById("joinMediaFile")?.files?.[0];
+    const messageText =
+      document.getElementById("joinMessageText")?.value.trim() || "";
+    const files = Array.from(
+      document.getElementById("joinMediaFile")?.files || [],
+    );
 
     try {
       if (!eventCode) {
@@ -371,8 +391,8 @@ function initFormSubmit() {
         return;
       }
 
-      if (selectedMediaType !== "message" && !file) {
-        setResult("Please choose a file.", "error");
+      if (selectedMediaType !== "message" && files.length === 0) {
+        setResult("Please choose at least one file.", "error");
         return;
       }
 
@@ -387,16 +407,21 @@ function initFormSubmit() {
 
       if (selectedMediaType === "message") {
         await sendMessage(eventData.event_id, guest.guest_id, messageText);
+
+        setResult("Message sent successfully!", "success");
       } else {
-        await uploadMedia(
+        const uploadResult = await uploadMedia(
           eventData.event_id,
           guest.guest_id,
-          file,
+          files,
           messageText,
         );
+
+        const uploadedCount = uploadResult.uploaded_count || files.length;
+
+        setResult(`${uploadedCount} file(s) uploaded successfully!`, "success");
       }
 
-      setResult("Memory sent successfully!", "success");
       resetFormAfterSuccess();
     } catch (error) {
       console.error("Join upload error:", error);
