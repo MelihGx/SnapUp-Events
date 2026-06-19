@@ -828,9 +828,38 @@ async function getEventGuests(req, res) {
       });
     }
 
-    const guestsWithStats = (guests || []).map((guest) => {
-      const guestMedia = (media || []).filter(
-        (item) => item.guest_id === guest.guest_id,
+    const guestNameMap = new Map();
+
+    (guests || []).forEach((guest) => {
+      const normalizedName = String(guest.guest_name || "")
+        .trim()
+        .toLowerCase();
+
+      if (!normalizedName) {
+        return;
+      }
+
+      if (!guestNameMap.has(normalizedName)) {
+        guestNameMap.set(normalizedName, {
+          ...guest,
+          duplicate_guest_ids: [guest.guest_id],
+          total_uploads: 0,
+          pending_uploads: 0,
+          approved_uploads: 0,
+          rejected_uploads: 0,
+        });
+
+        return;
+      }
+
+      const existingGuest = guestNameMap.get(normalizedName);
+
+      existingGuest.duplicate_guest_ids.push(guest.guest_id);
+    });
+
+    const groupedGuests = Array.from(guestNameMap.values()).map((guest) => {
+      const guestMedia = (media || []).filter((item) =>
+        guest.duplicate_guest_ids.includes(item.guest_id),
       );
 
       return {
@@ -848,9 +877,16 @@ async function getEventGuests(req, res) {
       };
     });
 
+    groupedGuests.sort((a, b) =>
+      String(a.guest_name || "").localeCompare(
+        String(b.guest_name || ""),
+        "tr",
+      ),
+    );
+
     return res.status(200).json({
       success: true,
-      guests: guestsWithStats,
+      guests: groupedGuests,
     });
   } catch (error) {
     return res.status(500).json({

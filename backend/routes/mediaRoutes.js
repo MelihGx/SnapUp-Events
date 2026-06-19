@@ -241,11 +241,35 @@ router.post("/guests", async (req, res) => {
       });
     }
 
+    const cleanGuestName = guest_name.trim();
+
+    const { data: existingGuests, error: existingGuestError } = await supabase
+      .from("event_guests")
+      .select("*")
+      .eq("event_id", event_id)
+      .ilike("guest_name", cleanGuestName);
+
+    if (existingGuestError) {
+      return res.status(500).json({
+        success: false,
+        message: "Guest could not be checked.",
+        error: existingGuestError.message,
+      });
+    }
+
+    if (existingGuests && existingGuests.length > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Guest already exists.",
+        guest: existingGuests[0],
+      });
+    }
+
     const { data, error } = await supabase
       .from("event_guests")
       .insert({
         event_id,
-        guest_name: guest_name.trim(),
+        guest_name: cleanGuestName,
       })
       .select()
       .single();
