@@ -108,14 +108,6 @@
 
               <button
                 type="button"
-                id="approveAllImagesButton"
-                class="approve-all-images-button"
-              >
-                Approve All Photos
-              </button>
-
-              <button
-                type="button"
                 id="openSettingsButton"
                 class="settings-action-button"
               >
@@ -253,12 +245,23 @@
 
         <section class="detail-section-grid gallery-only-section">
           <article class="detail-card gallery-admin-card">
-            <div class="section-head">
-              <span>Gallery</span>
-              <h2>Uploaded memories</h2>
-              <p class="gallery-helper-text">
-                Filter, approve, reject or delete uploaded memories.
-              </p>
+            <div class="media-admin-toolbar">
+              <div class="section-head">
+                <span>Gallery</span>
+                <h2>Uploaded memories</h2>
+                <p class="gallery-helper-text">
+                  Filter, approve, reject or delete uploaded memories.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="approveAllImagesButton"
+                class="approve-all-images-button"
+                hidden
+              >
+                Approve All Photos
+              </button>
             </div>
 
             <div class="gallery-grid" id="mediaGallery"></div>
