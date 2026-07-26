@@ -6156,3 +6156,61 @@ body {
     padding-bottom: 62px;
   }
 }
+
+/* =========================================================
+   HERO PROOF BADGES — MULTILINGUAL LAYOUT SAFETY
+   Reserves space above the film strip and lets longer labels
+   wrap inside their own badge without being cropped.
+   ========================================================= */
+.hero-grid {
+  padding-bottom: 142px;
+}
+
+.hero-copy {
+  padding-bottom: 0;
+}
+
+.hero .mini-proof {
+  align-items: flex-start;
+  row-gap: 10px;
+  max-width: 100%;
+}
+
+.hero .mini-proof span {
+  width: auto;
+  max-width: 100%;
+  min-height: 40px;
+  height: auto;
+  padding: 9px 13px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.hero .mini-proof svg {
+  flex: 0 0 21px;
+}
+
+@media (max-width: 1100px) {
+  .hero-grid {
+    padding-bottom: 136px;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding-bottom: 0;
+  }
+
+  .hero-grid {
+    padding-bottom: 122px;
+  }
+
+  .hero .mini-proof {
+    align-items: flex-start;
+  }
+
+  .hero .mini-proof span {
+    width: fit-content;
+    max-width: 100%;
+  }
+}

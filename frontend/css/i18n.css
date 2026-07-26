@@ -82,6 +82,11 @@
   box-shadow: 0 22px 60px rgba(8, 4, 22, 0.42);
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
+  max-height: min(430px, calc(100vh - 86px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.7) transparent;
 }
 
 .snapup-language__menu[hidden] {
@@ -235,6 +240,7 @@ html[lang="ar"] .hero-title__line {
 
   .snapup-language__menu {
     width: 164px;
+    max-height: min(390px, calc(100vh - 72px));
   }
 }
 

@@ -2,7 +2,10 @@
   "use strict";
 
   const STORAGE_KEY = "snapup_language";
-  const SUPPORTED = ["en", "tr", "ar"];
+  const SUPPORTED = [
+    "en", "tr", "ar", "de", "fr", "es", "it", "nl",
+    "bg", "ro", "el", "sr", "hr", "bs", "sq", "mk"
+  ];
   const saved = localStorage.getItem(STORAGE_KEY);
   const language = SUPPORTED.includes(saved) ? saved : "en";
 
@@ -620,6 +623,777 @@
 
   Object.assign(phrases, policyParagraphs, policyDetails);
 
+  // European-language interface pack. Long-form legal copy intentionally
+  // remains in English until it receives country-specific legal review.
+  const europeanPhrases = {
+    "Home": ["Startseite", "Accueil", "Inicio", "Home", "Home"],
+    "Home Page": ["Startseite", "Page d’accueil", "Página de inicio", "Pagina iniziale", "Startpagina"],
+    "Back Home": ["Zur Startseite", "Retour à l’accueil", "Volver al inicio", "Torna alla home", "Terug naar home"],
+    "Back to home": ["Zurück zur Startseite", "Retour à l’accueil", "Volver al inicio", "Torna alla home", "Terug naar home"],
+    "How It Works": ["So funktioniert’s", "Comment ça marche", "Cómo funciona", "Come funziona", "Hoe het werkt"],
+    "How it works": ["So funktioniert’s", "Comment ça marche", "Cómo funciona", "Come funziona", "Hoe het werkt"],
+    "Features": ["Funktionen", "Fonctionnalités", "Funciones", "Funzionalità", "Functies"],
+    "Pricing": ["Preise", "Tarifs", "Precios", "Prezzi", "Prijzen"],
+    "Login": ["Anmelden", "Connexion", "Iniciar sesión", "Accedi", "Inloggen"],
+    "Logout": ["Abmelden", "Déconnexion", "Cerrar sesión", "Esci", "Uitloggen"],
+    "Register": ["Registrieren", "S’inscrire", "Registrarse", "Registrati", "Registreren"],
+    "Create account": ["Konto erstellen", "Créer un compte", "Crear una cuenta", "Crea un account", "Account aanmaken"],
+    "Create Account": ["Konto erstellen", "Créer un compte", "Crear una cuenta", "Crea un account", "Account aanmaken"],
+    "Create Event": ["Event erstellen", "Créer un événement", "Crear evento", "Crea evento", "Evenement maken"],
+    "Create New Event": ["Neues Event erstellen", "Créer un nouvel événement", "Crear un nuevo evento", "Crea un nuovo evento", "Nieuw evenement maken"],
+    "Create Your Event": ["Erstelle dein Event", "Créez votre événement", "Crea tu evento", "Crea il tuo evento", "Maak je evenement"],
+    "Join Event": ["Event beitreten", "Rejoindre l’événement", "Unirse al evento", "Partecipa all’evento", "Deelnemen aan evenement"],
+    "Join with Code": ["Mit Code beitreten", "Rejoindre avec un code", "Unirse con código", "Partecipa con il codice", "Deelnemen met code"],
+    "Join with code": ["Mit Code beitreten", "Rejoindre avec un code", "Unirse con código", "Partecipa con il codice", "Deelnemen met code"],
+    "My Account": ["Mein Konto", "Mon compte", "Mi cuenta", "Il mio account", "Mijn account"],
+    "My Events": ["Meine Events", "Mes événements", "Mis eventos", "I miei eventi", "Mijn evenementen"],
+    "Account Details": ["Kontodaten", "Détails du compte", "Detalles de la cuenta", "Dettagli account", "Accountgegevens"],
+    "Dashboard": ["Dashboard", "Tableau de bord", "Panel", "Dashboard", "Dashboard"],
+    "Profile": ["Profil", "Profil", "Perfil", "Profilo", "Profiel"],
+    "Account details": ["Kontodaten", "Détails du compte", "Detalles de la cuenta", "Dettagli account", "Accountgegevens"],
+    "Account summary": ["Kontoübersicht", "Résumé du compte", "Resumen de la cuenta", "Riepilogo account", "Accountoverzicht"],
+    "Account status": ["Kontostatus", "Statut du compte", "Estado de la cuenta", "Stato account", "Accountstatus"],
+    "Active": ["Aktiv", "Actif", "Activo", "Attivo", "Actief"],
+    "Created at": ["Erstellt am", "Créé le", "Creado el", "Creato il", "Aangemaakt op"],
+    "Created events": ["Erstellte Events", "Événements créés", "Eventos creados", "Eventi creati", "Aangemaakte evenementen"],
+    "Total events": ["Events insgesamt", "Total des événements", "Eventos totales", "Eventi totali", "Totaal evenementen"],
+    "Loading events...": ["Events werden geladen...", "Chargement des événements...", "Cargando eventos...", "Caricamento eventi...", "Evenementen laden..."],
+    "Full name": ["Vollständiger Name", "Nom complet", "Nombre completo", "Nome completo", "Volledige naam"],
+    "Email address": ["E-Mail-Adresse", "Adresse e-mail", "Correo electrónico", "Indirizzo e-mail", "E-mailadres"],
+    "Phone number": ["Telefonnummer", "Numéro de téléphone", "Número de teléfono", "Numero di telefono", "Telefoonnummer"],
+    "optional": ["optional", "facultatif", "opcional", "facoltativo", "optioneel"],
+    "Save changes": ["Änderungen speichern", "Enregistrer", "Guardar cambios", "Salva modifiche", "Wijzigingen opslaan"],
+    "Password": ["Passwort", "Mot de passe", "Contraseña", "Password", "Wachtwoord"],
+    "Show": ["Anzeigen", "Afficher", "Mostrar", "Mostra", "Tonen"],
+    "Hide": ["Ausblenden", "Masquer", "Ocultar", "Nascondi", "Verbergen"],
+    "Change password": ["Passwort ändern", "Modifier le mot de passe", "Cambiar contraseña", "Cambia password", "Wachtwoord wijzigen"],
+    "Current password": ["Aktuelles Passwort", "Mot de passe actuel", "Contraseña actual", "Password attuale", "Huidig wachtwoord"],
+    "New password": ["Neues Passwort", "Nouveau mot de passe", "Nueva contraseña", "Nuova password", "Nieuw wachtwoord"],
+    "Confirm new password": ["Neues Passwort bestätigen", "Confirmer le nouveau mot de passe", "Confirmar nueva contraseña", "Conferma nuova password", "Nieuw wachtwoord bevestigen"],
+    "Confirm password": ["Passwort bestätigen", "Confirmer le mot de passe", "Confirmar contraseña", "Conferma password", "Wachtwoord bevestigen"],
+    "User": ["Benutzer", "Utilisateur", "Usuario", "Utente", "Gebruiker"],
+    "Step 1": ["Schritt 1", "Étape 1", "Paso 1", "Passaggio 1", "Stap 1"],
+    "Step 2": ["Schritt 2", "Étape 2", "Paso 2", "Passaggio 2", "Stap 2"],
+    "Step 3": ["Schritt 3", "Étape 3", "Paso 3", "Passaggio 3", "Stap 3"],
+    "Event details": ["Eventdetails", "Détails de l’événement", "Detalles del evento", "Dettagli evento", "Evenementdetails"],
+    "Event settings": ["Eventeinstellungen", "Paramètres de l’événement", "Ajustes del evento", "Impostazioni evento", "Evenementinstellingen"],
+    "Event Settings": ["Eventeinstellungen", "Paramètres de l’événement", "Ajustes del evento", "Impostazioni evento", "Evenementinstellingen"],
+    "Event name": ["Eventname", "Nom de l’événement", "Nombre del evento", "Nome evento", "Evenementnaam"],
+    "Event title": ["Eventtitel", "Titre de l’événement", "Título del evento", "Titolo evento", "Evenementtitel"],
+    "Event description": ["Eventbeschreibung", "Description de l’événement", "Descripción del evento", "Descrizione evento", "Evenementbeschrijving"],
+    "Location": ["Ort", "Lieu", "Ubicación", "Luogo", "Locatie"],
+    "Event date": ["Eventdatum", "Date de l’événement", "Fecha del evento", "Data evento", "Evenementdatum"],
+    "Date": ["Datum", "Date", "Fecha", "Data", "Datum"],
+    "Start time": ["Startzeit", "Heure de début", "Hora de inicio", "Ora di inizio", "Starttijd"],
+    "Finish time": ["Endzeit", "Heure de fin", "Hora de finalización", "Ora di fine", "Eindtijd"],
+    "Time": ["Uhrzeit", "Heure", "Hora", "Ora", "Tijd"],
+    "Description": ["Beschreibung", "Description", "Descripción", "Descrizione", "Beschrijving"],
+    "Choose package": ["Paket wählen", "Choisir une formule", "Elegir paquete", "Scegli pacchetto", "Pakket kiezen"],
+    "Allow Upload": ["Uploads erlauben", "Autoriser les envois", "Permitir subidas", "Consenti caricamenti", "Uploads toestaan"],
+    "Guests can upload photos and videos.": ["Gäste können Fotos und Videos hochladen.", "Les invités peuvent envoyer des photos et des vidéos.", "Los invitados pueden subir fotos y vídeos.", "Gli ospiti possono caricare foto e video.", "Gasten kunnen foto’s en video’s uploaden."],
+    "Allow Comments": ["Kommentare erlauben", "Autoriser les commentaires", "Permitir comentarios", "Consenti commenti", "Reacties toestaan"],
+    "Allow Likes": ["Likes erlauben", "Autoriser les mentions J’aime", "Permitir Me gusta", "Consenti Mi piace", "Likes toestaan"],
+    "Require Approval": ["Freigabe erforderlich", "Exiger une approbation", "Requerir aprobación", "Richiedi approvazione", "Goedkeuring vereisen"],
+    "Uploads wait for your approval.": ["Uploads warten auf deine Freigabe.", "Les envois attendent votre approbation.", "Las subidas esperan tu aprobación.", "I caricamenti attendono la tua approvazione.", "Uploads wachten op jouw goedkeuring."],
+    "Only Registered Users": ["Nur registrierte Benutzer", "Utilisateurs inscrits uniquement", "Solo usuarios registrados", "Solo utenti registrati", "Alleen geregistreerde gebruikers"],
+    "Allow Public Gallery": ["Öffentliche Galerie erlauben", "Autoriser la galerie publique", "Permitir galería pública", "Consenti galleria pubblica", "Openbare galerij toestaan"],
+    "Starter": ["Starter", "Débutant", "Inicial", "Starter", "Starter"],
+    "Standard": ["Standard", "Standard", "Estándar", "Standard", "Standaard"],
+    "Premium": ["Premium", "Premium", "Premium", "Premium", "Premium"],
+    "Recommended": ["Empfohlen", "Recommandé", "Recomendado", "Consigliato", "Aanbevolen"],
+    "Small events": ["Kleine Events", "Petits événements", "Eventos pequeños", "Piccoli eventi", "Kleine evenementen"],
+    "Most events": ["Die meisten Events", "La plupart des événements", "La mayoría de eventos", "La maggior parte degli eventi", "De meeste evenementen"],
+    "Large events": ["Große Events", "Grands événements", "Eventos grandes", "Grandi eventi", "Grote evenementen"],
+    "Unlimited guests": ["Unbegrenzte Gästezahl", "Invités illimités", "Invitados ilimitados", "Ospiti illimitati", "Onbeperkt aantal gasten"],
+    "Photo uploads": ["Foto-Uploads", "Envoi de photos", "Subida de fotos", "Caricamento foto", "Foto-uploads"],
+    "Message uploads": ["Nachrichten-Uploads", "Envoi de messages", "Envío de mensajes", "Caricamento messaggi", "Berichtuploads"],
+    "Photo and video uploads": ["Foto- und Video-Uploads", "Envoi de photos et vidéos", "Subida de fotos y vídeos", "Caricamento di foto e video", "Foto- en video-uploads"],
+    "Approval mode": ["Freigabemodus", "Mode d’approbation", "Modo de aprobación", "Modalità approvazione", "Goedkeuringsmodus"],
+    "Likes and comments": ["Likes und Kommentare", "Mentions J’aime et commentaires", "Me gusta y comentarios", "Mi piace e commenti", "Likes en reacties"],
+    "Advanced moderation": ["Erweiterte Moderation", "Modération avancée", "Moderación avanzada", "Moderazione avanzata", "Geavanceerde moderatie"],
+    "Package price": ["Paketpreis", "Prix de la formule", "Precio del paquete", "Prezzo pacchetto", "Pakketprijs"],
+    "Free": ["Kostenlos", "Gratuit", "Gratis", "Gratis", "Gratis"],
+    "Generate Event Code": ["Eventcode erstellen", "Générer le code de l’événement", "Generar código del evento", "Genera codice evento", "Evenementcode genereren"],
+    "Download QR": ["QR-Code herunterladen", "Télécharger le QR", "Descargar QR", "Scarica QR", "QR downloaden"],
+    "Share QR": ["QR-Code teilen", "Partager le QR", "Compartir QR", "Condividi QR", "QR delen"],
+    "View My Events": ["Meine Events anzeigen", "Voir mes événements", "Ver mis eventos", "Visualizza i miei eventi", "Mijn evenementen bekijken"],
+    "Continue": ["Weiter", "Continuer", "Continuar", "Continua", "Doorgaan"],
+    "Loading event detail...": ["Eventdetails werden geladen...", "Chargement de l’événement...", "Cargando detalles del evento...", "Caricamento dettagli evento...", "Evenementdetails laden..."],
+    "Event could not be loaded.": ["Das Event konnte nicht geladen werden.", "Impossible de charger l’événement.", "No se pudo cargar el evento.", "Impossibile caricare l’evento.", "Het evenement kon niet worden geladen."],
+    "Please try again later.": ["Bitte versuche es später erneut.", "Veuillez réessayer plus tard.", "Inténtalo de nuevo más tarde.", "Riprova più tardi.", "Probeer het later opnieuw."],
+    "Event Code": ["Eventcode", "Code de l’événement", "Código del evento", "Codice evento", "Evenementcode"],
+    "Copy Code": ["Code kopieren", "Copier le code", "Copiar código", "Copia codice", "Code kopiëren"],
+    "Copy Join Link": ["Teilnahmelink kopieren", "Copier le lien d’accès", "Copiar enlace de acceso", "Copia link di accesso", "Deelnamelink kopiëren"],
+    "Download Slideshow": ["Diashow herunterladen", "Télécharger le diaporama", "Descargar presentación", "Scarica presentazione", "Diavoorstelling downloaden"],
+    "Created": ["Erstellt", "Créé", "Creado", "Creato", "Aangemaakt"],
+    "Status": ["Status", "Statut", "Estado", "Stato", "Status"],
+    "Privacy": ["Datenschutz", "Confidentialité", "Privacidad", "Privacy", "Privacy"],
+    "Quick Upload": ["Schnell-Upload", "Envoi rapide", "Subida rápida", "Caricamento rapido", "Snel uploaden"],
+    "Share your moment": ["Teile deinen Moment", "Partagez votre moment", "Comparte tu momento", "Condividi il tuo momento", "Deel je moment"],
+    "Your name": ["Dein Name", "Votre nom", "Tu nombre", "Il tuo nome", "Je naam"],
+    "Your Name": ["Dein Name", "Votre nom", "Tu nombre", "Il tuo nome", "Je naam"],
+    "Choose photo": ["Foto auswählen", "Choisir une photo", "Elegir foto", "Scegli foto", "Foto kiezen"],
+    "Upload Photo": ["Foto hochladen", "Envoyer la photo", "Subir foto", "Carica foto", "Foto uploaden"],
+    "Event permissions": ["Eventberechtigungen", "Autorisations de l’événement", "Permisos del evento", "Permessi evento", "Evenementrechten"],
+    "Guests": ["Gäste", "Invités", "Invitados", "Ospiti", "Gasten"],
+    "Event guests": ["Eventgäste", "Invités de l’événement", "Invitados del evento", "Ospiti dell’evento", "Evenementgasten"],
+    "Search guest": ["Gast suchen", "Rechercher un invité", "Buscar invitado", "Cerca ospite", "Gast zoeken"],
+    "Gallery": ["Galerie", "Galerie", "Galería", "Galleria", "Galerij"],
+    "Uploaded memories": ["Hochgeladene Erinnerungen", "Souvenirs envoyés", "Recuerdos subidos", "Ricordi caricati", "Geüploade herinneringen"],
+    "Approve All Photos": ["Alle Fotos freigeben", "Approuver toutes les photos", "Aprobar todas las fotos", "Approva tutte le foto", "Alle foto’s goedkeuren"],
+    "Save Settings": ["Einstellungen speichern", "Enregistrer les paramètres", "Guardar ajustes", "Salva impostazioni", "Instellingen opslaan"],
+    "Delete Event": ["Event löschen", "Supprimer l’événement", "Eliminar evento", "Elimina evento", "Evenement verwijderen"],
+    "View Gallery": ["Galerie ansehen", "Voir la galerie", "Ver galería", "Vedi galleria", "Galerij bekijken"],
+    "Participants": ["Teilnehmer", "Participants", "Participantes", "Partecipanti", "Deelnemers"],
+    "Photos": ["Fotos", "Photos", "Fotos", "Foto", "Foto’s"],
+    "Approved memories": ["Freigegebene Erinnerungen", "Souvenirs approuvés", "Recuerdos aprobados", "Ricordi approvati", "Goedgekeurde herinneringen"],
+    "Every guest.": ["Jeder Gast.", "Chaque invité.", "Cada invitado.", "Ogni ospite.", "Elke gast."],
+    "Every moment.": ["Jeder Moment.", "Chaque instant.", "Cada momento.", "Ogni momento.", "Elk moment."],
+    "One shared album.": ["Ein gemeinsames Album.", "Un album partagé.", "Un álbum compartido.", "Un album condiviso.", "Eén gedeeld album."],
+    "No App Needed": ["Keine App nötig", "Aucune application nécessaire", "Sin aplicación", "Nessuna app necessaria", "Geen app nodig"],
+    "Live Uploads": ["Live-Uploads", "Envois en direct", "Subidas en directo", "Caricamenti live", "Live-uploads"],
+    "All Memories in One Place": ["Alle Erinnerungen an einem Ort", "Tous les souvenirs au même endroit", "Todos los recuerdos en un lugar", "Tutti i ricordi in un unico posto", "Alle herinneringen op één plek"],
+    "Upload your memory": ["Lade deine Erinnerung hoch", "Ajoutez votre souvenir", "Sube tu recuerdo", "Carica il tuo ricordo", "Upload je herinnering"],
+    "Photo": ["Foto", "Photo", "Foto", "Foto", "Foto"],
+    "Video": ["Video", "Vidéo", "Vídeo", "Video", "Video"],
+    "Message": ["Nachricht", "Message", "Mensaje", "Messaggio", "Bericht"],
+    "Create the event": ["Event erstellen", "Créer l’événement", "Crear el evento", "Crea l’evento", "Evenement maken"],
+    "Share the QR code": ["QR-Code teilen", "Partager le QR code", "Compartir el código QR", "Condividi il codice QR", "QR-code delen"],
+    "Guests add memories": ["Gäste fügen Erinnerungen hinzu", "Les invités ajoutent leurs souvenirs", "Los invitados añaden recuerdos", "Gli ospiti aggiungono ricordi", "Gasten voegen herinneringen toe"],
+    "Enjoy the gallery": ["Galerie genießen", "Profitez de la galerie", "Disfruta de la galería", "Goditi la galleria", "Geniet van de galerij"],
+    "Create event": ["Event erstellen", "Créer l’événement", "Crear evento", "Crea evento", "Evenement maken"],
+    "Event ready": ["Event bereit", "Événement prêt", "Evento listo", "Evento pronto", "Evenement klaar"],
+    "Copy code": ["Code kopieren", "Copier le code", "Copiar código", "Copia codice", "Code kopiëren"],
+    "Add a memory": ["Erinnerung hinzufügen", "Ajouter un souvenir", "Añadir un recuerdo", "Aggiungi un ricordo", "Herinnering toevoegen"],
+    "Send": ["Senden", "Envoyer", "Enviar", "Invia", "Versturen"],
+    "Uploading...": ["Wird hochgeladen...", "Envoi en cours...", "Subiendo...", "Caricamento...", "Uploaden..."],
+    "Live gallery": ["Live-Galerie", "Galerie en direct", "Galería en directo", "Galleria live", "Livegalerij"],
+    "No app download": ["Kein App-Download", "Aucun téléchargement d’application", "Sin descargar aplicaciones", "Nessun download dell’app", "Geen app-download"],
+    "Works on every phone": ["Funktioniert auf jedem Smartphone", "Fonctionne sur tous les téléphones", "Funciona en cualquier teléfono", "Funziona su ogni telefono", "Werkt op elke telefoon"],
+    "Private event access": ["Privater Eventzugang", "Accès privé à l’événement", "Acceso privado al evento", "Accesso privato all’evento", "Privétoegang tot evenement"],
+    "Built for every moment": ["Für jeden Moment gemacht", "Conçu pour chaque instant", "Hecho para cada momento", "Creato per ogni momento", "Gemaakt voor elk moment"],
+    "Live Gallery Wall": ["Live-Galeriewand", "Mur de galerie en direct", "Muro de galería en directo", "Parete galleria live", "Live galerijwand"],
+    "Photo, Video & Message Uploads": ["Foto-, Video- und Nachrichten-Uploads", "Envoi de photos, vidéos et messages", "Subida de fotos, vídeos y mensajes", "Caricamento di foto, video e messaggi", "Foto-, video- en berichtuploads"],
+    "Private Event Access": ["Privater Eventzugang", "Accès privé à l’événement", "Acceso privado al evento", "Accesso privato all’evento", "Privétoegang tot evenement"],
+    "Download & Share": ["Herunterladen & teilen", "Télécharger et partager", "Descargar y compartir", "Scarica e condividi", "Downloaden en delen"],
+    "Pricing & packages": ["Preise & Pakete", "Tarifs et formules", "Precios y paquetes", "Prezzi e pacchetti", "Prijzen en pakketten"],
+    "Choose Starter": ["Starter wählen", "Choisir Débutant", "Elegir Inicial", "Scegli Starter", "Kies Starter"],
+    "Choose Standard": ["Standard wählen", "Choisir Standard", "Elegir Estándar", "Scegli Standard", "Kies Standaard"],
+    "Choose Premium": ["Premium wählen", "Choisir Premium", "Elegir Premium", "Scegli Premium", "Kies Premium"],
+    "Explore": ["Entdecken", "Explorer", "Explorar", "Esplora", "Ontdekken"],
+    "Account": ["Konto", "Compte", "Cuenta", "Account", "Account"],
+    "Contact": ["Kontakt", "Contact", "Contacto", "Contatti", "Contact"],
+    "Privacy Policy": ["Datenschutzerklärung", "Politique de confidentialité", "Política de privacidad", "Informativa sulla privacy", "Privacybeleid"],
+    "Terms of Use": ["Nutzungsbedingungen", "Conditions d’utilisation", "Términos de uso", "Termini di utilizzo", "Gebruiksvoorwaarden"],
+    "JOIN EVENT": ["EVENT BEITRETEN", "REJOINDRE L’ÉVÉNEMENT", "UNIRSE AL EVENTO", "PARTECIPA ALL’EVENTO", "DEELNEMEN AAN EVENEMENT"],
+    "Choose Media": ["Medientyp wählen", "Choisir le média", "Elegir contenido", "Scegli contenuto", "Media kiezen"],
+    "Text": ["Text", "Texte", "Texto", "Testo", "Tekst"],
+    "Image": ["Bild", "Image", "Imagen", "Immagine", "Afbeelding"],
+    "Select File(s)": ["Datei(en) auswählen", "Sélectionner des fichiers", "Seleccionar archivos", "Seleziona file", "Bestand(en) kiezen"],
+    "Send to Event": ["An Event senden", "Envoyer à l’événement", "Enviar al evento", "Invia all’evento", "Naar evenement sturen"],
+    "WELCOME BACK": ["WILLKOMMEN ZURÜCK", "BON RETOUR", "BIENVENIDO DE NUEVO", "BENTORNATO", "WELKOM TERUG"],
+    "Welcome back.": ["Willkommen zurück.", "Bon retour.", "Bienvenido de nuevo.", "Bentornato.", "Welkom terug."],
+    "Don't have an account?": ["Noch kein Konto?", "Vous n’avez pas de compte ?", "¿No tienes una cuenta?", "Non hai un account?", "Nog geen account?"],
+    "Already have an account?": ["Du hast bereits ein Konto?", "Vous avez déjà un compte ?", "¿Ya tienes una cuenta?", "Hai già un account?", "Heb je al een account?"],
+    "PRIVATE EVENT GALLERY": ["PRIVATE EVENTGALERIE", "GALERIE PRIVÉE", "GALERÍA PRIVADA", "GALLERIA PRIVATA", "PRIVÉ-EVENEMENTGALERIJ"],
+    "Start your SnapUp journey.": ["Starte deine SnapUp-Reise.", "Commencez votre aventure SnapUp.", "Comienza tu experiencia SnapUp.", "Inizia il tuo viaggio con SnapUp.", "Begin je SnapUp-reis."],
+    "Summary": ["Zusammenfassung", "Résumé", "Resumen", "Riepilogo", "Samenvatting"],
+    "Your rights": ["Deine Rechte", "Vos droits", "Tus derechos", "I tuoi diritti", "Je rechten"],
+    "Legal & privacy": ["Recht & Datenschutz", "Juridique et confidentialité", "Legal y privacidad", "Aspetti legali e privacy", "Juridisch en privacy"],
+    "Effective date": ["Gültig ab", "Date d’entrée en vigueur", "Fecha de entrada en vigor", "Data di entrata in vigore", "Ingangsdatum"],
+    "Last updated": ["Zuletzt aktualisiert", "Dernière mise à jour", "Última actualización", "Ultimo aggiornamento", "Laatst bijgewerkt"],
+    "Version": ["Version", "Version", "Versión", "Versione", "Versie"],
+    "On this page": ["Auf dieser Seite", "Sur cette page", "En esta página", "In questa pagina", "Op deze pagina"],
+    "Plain-language summary": ["Kurzfassung in einfacher Sprache", "Résumé en langage clair", "Resumen en lenguaje claro", "Riepilogo in linguaggio semplice", "Samenvatting in gewone taal"],
+    "Scope and roles": ["Geltungsbereich und Rollen", "Champ d’application et rôles", "Alcance y funciones", "Ambito e ruoli", "Reikwijdte en rollen"],
+    "Data we collect": ["Erhobene Daten", "Données collectées", "Datos que recopilamos", "Dati raccolti", "Gegevens die we verzamelen"],
+    "How we collect data": ["Wie wir Daten erheben", "Comment nous collectons les données", "Cómo recopilamos datos", "Come raccogliamo i dati", "Hoe we gegevens verzamelen"],
+    "Purposes and legal bases": ["Zwecke und Rechtsgrundlagen", "Finalités et bases juridiques", "Finalidades y bases legales", "Finalità e basi giuridiche", "Doeleinden en rechtsgronden"],
+    "Event content and privacy": ["Eventinhalte und Datenschutz", "Contenu de l’événement et confidentialité", "Contenido del evento y privacidad", "Contenuti dell’evento e privacy", "Evenementinhoud en privacy"],
+    "Sharing and service providers": ["Weitergabe und Dienstleister", "Partage et prestataires", "Intercambio y proveedores", "Condivisione e fornitori", "Delen en dienstverleners"],
+    "International transfers": ["Internationale Übermittlungen", "Transferts internationaux", "Transferencias internacionales", "Trasferimenti internazionali", "Internationale doorgiften"],
+    "Data retention": ["Datenspeicherung", "Conservation des données", "Conservación de datos", "Conservazione dei dati", "Gegevensbewaring"],
+    "Security": ["Sicherheit", "Sécurité", "Seguridad", "Sicurezza", "Beveiliging"],
+    "Cookies and local storage": ["Cookies und lokaler Speicher", "Cookies et stockage local", "Cookies y almacenamiento local", "Cookie e archiviazione locale", "Cookies en lokale opslag"],
+    "Children": ["Kinder", "Enfants", "Menores", "Minori", "Kinderen"],
+    "Changes to this policy": ["Änderungen dieser Richtlinie", "Modifications de cette politique", "Cambios en esta política", "Modifiche a questa informativa", "Wijzigingen in dit beleid"],
+    "Contact and requests": ["Kontakt und Anfragen", "Contact et demandes", "Contacto y solicitudes", "Contatti e richieste", "Contact en verzoeken"],
+    "Contact us or submit a request": ["Kontaktiere uns oder stelle eine Anfrage", "Nous contacter ou envoyer une demande", "Contáctanos o envía una solicitud", "Contattaci o invia una richiesta", "Neem contact op of dien een verzoek in"],
+    "Controller": ["Verantwortlicher", "Responsable du traitement", "Responsable", "Titolare del trattamento", "Verwerkingsverantwoordelijke"],
+    "Address:": ["Adresse:", "Adresse :", "Dirección:", "Indirizzo:", "Adres:"],
+    "Privacy email": ["Datenschutz-E-Mail", "E-mail de confidentialité", "Correo de privacidad", "E-mail privacy", "Privacy-e-mail"],
+    "Copied!": ["Kopiert!", "Copié !", "¡Copiado!", "Copiato!", "Gekopieerd!"],
+    "Uploaded!": ["Hochgeladen!", "Envoyé !", "¡Subido!", "Caricato!", "Geüpload!"],
+    "Processing...": ["Wird verarbeitet...", "Traitement en cours...", "Procesando...", "Elaborazione...", "Verwerken..."],
+    "Creating your event...": ["Dein Event wird erstellt...", "Création de votre événement...", "Creando tu evento...", "Creazione dell’evento...", "Je evenement wordt gemaakt..."],
+    "Try Again": ["Erneut versuchen", "Réessayer", "Intentar de nuevo", "Riprova", "Opnieuw proberen"],
+    "Email address is required.": ["E-Mail-Adresse ist erforderlich.", "L’adresse e-mail est requise.", "El correo electrónico es obligatorio.", "L’indirizzo e-mail è obbligatorio.", "E-mailadres is verplicht."],
+    "Password is required.": ["Passwort ist erforderlich.", "Le mot de passe est requis.", "La contraseña es obligatoria.", "La password è obbligatoria.", "Wachtwoord is verplicht."],
+    "Logging in...": ["Anmeldung läuft...", "Connexion en cours...", "Iniciando sesión...", "Accesso in corso...", "Inloggen..."],
+    "Full name is required.": ["Vollständiger Name ist erforderlich.", "Le nom complet est requis.", "El nombre completo es obligatorio.", "Il nome completo è obbligatorio.", "Volledige naam is verplicht."],
+    "Password must be at least 6 characters.": ["Das Passwort muss mindestens 6 Zeichen lang sein.", "Le mot de passe doit contenir au moins 6 caractères.", "La contraseña debe tener al menos 6 caracteres.", "La password deve contenere almeno 6 caratteri.", "Het wachtwoord moet minimaal 6 tekens bevatten."],
+    "Passwords do not match.": ["Die Passwörter stimmen nicht überein.", "Les mots de passe ne correspondent pas.", "Las contraseñas no coinciden.", "Le password non corrispondono.", "De wachtwoorden komen niet overeen."],
+    "Creating account...": ["Konto wird erstellt...", "Création du compte...", "Creando cuenta...", "Creazione account...", "Account aanmaken..."],
+    "Sending...": ["Wird gesendet...", "Envoi...", "Enviando...", "Invio...", "Versturen..."],
+    "Clear all": ["Alle löschen", "Tout effacer", "Borrar todo", "Cancella tutto", "Alles wissen"],
+    "Remove": ["Entfernen", "Retirer", "Eliminar", "Rimuovi", "Verwijderen"],
+    "Event could not be found.": ["Event wurde nicht gefunden.", "Événement introuvable.", "No se encontró el evento.", "Evento non trovato.", "Evenement niet gevonden."],
+    "Please choose at least one file.": ["Bitte wähle mindestens eine Datei aus.", "Veuillez sélectionner au moins un fichier.", "Selecciona al menos un archivo.", "Seleziona almeno un file.", "Kies minimaal één bestand."],
+    "Checking event code...": ["Eventcode wird geprüft...", "Vérification du code...", "Comprobando código...", "Verifica del codice...", "Evenementcode controleren..."],
+    "Event found. You can send your memory.": ["Event gefunden. Du kannst deine Erinnerung senden.", "Événement trouvé. Vous pouvez envoyer votre souvenir.", "Evento encontrado. Puedes enviar tu recuerdo.", "Evento trovato. Puoi inviare il tuo ricordo.", "Evenement gevonden. Je kunt je herinnering versturen."],
+    "Please enter event code.": ["Bitte Eventcode eingeben.", "Veuillez saisir le code de l’événement.", "Introduce el código del evento.", "Inserisci il codice evento.", "Voer de evenementcode in."],
+    "Please enter your name.": ["Bitte gib deinen Namen ein.", "Veuillez saisir votre nom.", "Introduce tu nombre.", "Inserisci il tuo nome.", "Voer je naam in."],
+    "Please write a message.": ["Bitte schreibe eine Nachricht.", "Veuillez écrire un message.", "Escribe un mensaje.", "Scrivi un messaggio.", "Schrijf een bericht."],
+    "Sending message...": ["Nachricht wird gesendet...", "Envoi du message...", "Enviando mensaje...", "Invio messaggio...", "Bericht versturen..."],
+    "Message sent successfully!": ["Nachricht erfolgreich gesendet!", "Message envoyé !", "¡Mensaje enviado!", "Messaggio inviato!", "Bericht verzonden!"],
+    "Upload failed.": ["Upload fehlgeschlagen.", "Échec de l’envoi.", "Error al subir.", "Caricamento non riuscito.", "Upload mislukt."],
+    "Private": ["Privat", "Privé", "Privado", "Privato", "Privé"],
+    "Public": ["Öffentlich", "Public", "Público", "Pubblico", "Openbaar"],
+    "Preparing...": ["Wird vorbereitet...", "Préparation...", "Preparando...", "Preparazione...", "Voorbereiden..."],
+    "Saving...": ["Wird gespeichert...", "Enregistrement...", "Guardando...", "Salvataggio...", "Opslaan..."],
+    "Settings updated successfully.": ["Einstellungen erfolgreich aktualisiert.", "Paramètres mis à jour.", "Ajustes actualizados.", "Impostazioni aggiornate.", "Instellingen bijgewerkt."],
+    "Deleting...": ["Wird gelöscht...", "Suppression...", "Eliminando...", "Eliminazione...", "Verwijderen..."],
+    "Approving...": ["Wird freigegeben...", "Approbation...", "Aprobando...", "Approvazione...", "Goedkeuren..."],
+    "Backend connection error.": ["Backend-Verbindungsfehler.", "Erreur de connexion au serveur.", "Error de conexión con el servidor.", "Errore di connessione al server.", "Verbindingsfout met de server."],
+    "Account updated successfully.": ["Konto erfolgreich aktualisiert.", "Compte mis à jour.", "Cuenta actualizada.", "Account aggiornato.", "Account bijgewerkt."],
+    "Changing...": ["Wird geändert...", "Modification...", "Cambiando...", "Modifica...", "Wijzigen..."],
+    "Password changed successfully.": ["Passwort erfolgreich geändert.", "Mot de passe modifié.", "Contraseña cambiada.", "Password modificata.", "Wachtwoord gewijzigd."]
+  };
+
+  const europeanCodes = ["de", "fr", "es", "it", "nl"];
+  Object.entries(europeanPhrases).forEach(([key, translations]) => {
+    if (!phrases[key]) phrases[key] = {};
+    europeanCodes.forEach((code, index) => {
+      phrases[key][code] = translations[index];
+    });
+  });
+
+  // Bulgarian, Romanian, Greek, Serbian (Latin), Croatian, Bosnian, Albanian
+  // and Macedonian. Long-form legal policy copy intentionally stays in English
+  // until it receives country-specific legal review.
+  const balkanPhrases = {
+    "Home": ["Начало", "Acasă", "Αρχική", "Početna", "Početna", "Početna", "Kreu", "Почетна"],
+    "Home Page": ["Начална страница", "Pagina principală", "Αρχική σελίδα", "Početna stranica", "Početna stranica", "Početna stranica", "Faqja kryesore", "Почетна страница"],
+    "Back Home": ["Към началото", "Înapoi acasă", "Πίσω στην αρχική", "Nazad na početnu", "Natrag na početnu", "Nazad na početnu", "Kthehu në krye", "Назад на почетна"],
+    "Back to home": ["Назад към началото", "Înapoi la pagina principală", "Πίσω στην αρχική", "Nazad na početnu", "Natrag na početnu", "Nazad na početnu", "Kthehu në faqen kryesore", "Назад на почетна"],
+    "How It Works": ["Как работи", "Cum funcționează", "Πώς λειτουργεί", "Kako funkcioniše", "Kako funkcionira", "Kako funkcioniše", "Si funksionon", "Како функционира"],
+    "How it works": ["Как работи", "Cum funcționează", "Πώς λειτουργεί", "Kako funkcioniše", "Kako funkcionira", "Kako funkcioniše", "Si funksionon", "Како функционира"],
+    "Features": ["Функции", "Funcționalități", "Δυνατότητες", "Funkcije", "Značajke", "Funkcije", "Veçoritë", "Функции"],
+    "Pricing": ["Цени", "Prețuri", "Τιμές", "Cene", "Cijene", "Cijene", "Çmimet", "Цени"],
+    "Login": ["Вход", "Autentificare", "Σύνδεση", "Prijava", "Prijava", "Prijava", "Hyr", "Најава"],
+    "Logout": ["Изход", "Deconectare", "Αποσύνδεση", "Odjava", "Odjava", "Odjava", "Dil", "Одјава"],
+    "Register": ["Регистрация", "Înregistrare", "Εγγραφή", "Registracija", "Registracija", "Registracija", "Regjistrohu", "Регистрација"],
+    "Create account": ["Създай профил", "Creează un cont", "Δημιουργία λογαριασμού", "Kreiraj nalog", "Izradi račun", "Kreiraj račun", "Krijo llogari", "Создај сметка"],
+    "Create Account": ["Създай профил", "Creează cont", "Δημιουργία λογαριασμού", "Kreiraj nalog", "Izradi račun", "Kreiraj račun", "Krijo llogari", "Создај сметка"],
+    "Create Event": ["Създай събитие", "Creează eveniment", "Δημιουργία εκδήλωσης", "Kreiraj događaj", "Izradi događaj", "Kreiraj događaj", "Krijo event", "Создај настан"],
+    "Create New Event": ["Създай ново събитие", "Creează un eveniment nou", "Δημιουργία νέας εκδήλωσης", "Kreiraj novi događaj", "Izradi novi događaj", "Kreiraj novi događaj", "Krijo event të ri", "Создај нов настан"],
+    "Create Your Event": ["Създай своето събитие", "Creează-ți evenimentul", "Δημιούργησε την εκδήλωσή σου", "Kreiraj svoj događaj", "Izradi svoj događaj", "Kreiraj svoj događaj", "Krijo eventin tënd", "Создај го твојот настан"],
+    "Join Event": ["Присъедини се", "Alătură-te evenimentului", "Συμμετοχή στην εκδήλωση", "Pridruži se događaju", "Pridruži se događaju", "Pridruži se događaju", "Bashkohu me eventin", "Приклучи се на настан"],
+    "Join with Code": ["Влез с код", "Intră cu un cod", "Συμμετοχή με κωδικό", "Pridruži se kodom", "Pridruži se kodom", "Pridruži se kodom", "Hyr me kod", "Приклучи се со код"],
+    "Join with code": ["Влез с код", "Intră cu un cod", "Συμμετοχή με κωδικό", "Pridruži se kodom", "Pridruži se kodom", "Pridruži se kodom", "Hyr me kod", "Приклучи се со код"],
+    "My Account": ["Моят профил", "Contul meu", "Ο λογαριασμός μου", "Moj nalog", "Moj račun", "Moj račun", "Llogaria ime", "Мојата сметка"],
+    "My Events": ["Моите събития", "Evenimentele mele", "Οι εκδηλώσεις μου", "Moji događaji", "Moji događaji", "Moji događaji", "Eventet e mia", "Моите настани"],
+    "Account Details": ["Данни за профила", "Detaliile contului", "Στοιχεία λογαριασμού", "Podaci naloga", "Podaci računa", "Podaci računa", "Detajet e llogarisë", "Детали за сметката"],
+    "Dashboard": ["Табло", "Panou de control", "Πίνακας ελέγχου", "Kontrolna tabla", "Nadzorna ploča", "Kontrolna ploča", "Paneli", "Контролна табла"],
+    "Full name": ["Име и фамилия", "Nume complet", "Ονοματεπώνυμο", "Ime i prezime", "Ime i prezime", "Ime i prezime", "Emri i plotë", "Име и презиме"],
+    "Email address": ["Имейл адрес", "Adresă de e-mail", "Διεύθυνση email", "Email adresa", "Adresa e-pošte", "Email adresa", "Adresa e emailit", "Адреса на е-пошта"],
+    "Phone number": ["Телефонен номер", "Număr de telefon", "Αριθμός τηλεφώνου", "Broj telefona", "Broj telefona", "Broj telefona", "Numri i telefonit", "Телефонски број"],
+    "Password": ["Парола", "Parolă", "Κωδικός πρόσβασης", "Lozinka", "Lozinka", "Lozinka", "Fjalëkalimi", "Лозинка"],
+    "Show": ["Покажи", "Arată", "Εμφάνιση", "Prikaži", "Prikaži", "Prikaži", "Shfaq", "Прикажи"],
+    "Hide": ["Скрий", "Ascunde", "Απόκρυψη", "Sakrij", "Sakrij", "Sakrij", "Fshih", "Сокриј"],
+    "Save changes": ["Запази промените", "Salvează modificările", "Αποθήκευση αλλαγών", "Sačuvaj izmene", "Spremi promjene", "Sačuvaj promjene", "Ruaj ndryshimet", "Зачувај ги промените"],
+    "Current password": ["Текуща парола", "Parola actuală", "Τρέχων κωδικός", "Trenutna lozinka", "Trenutačna lozinka", "Trenutna lozinka", "Fjalëkalimi aktual", "Тековна лозинка"],
+    "New password": ["Нова парола", "Parolă nouă", "Νέος κωδικός", "Nova lozinka", "Nova lozinka", "Nova lozinka", "Fjalëkalim i ri", "Нова лозинка"],
+    "Confirm password": ["Потвърди паролата", "Confirmă parola", "Επιβεβαίωση κωδικού", "Potvrdi lozinku", "Potvrdi lozinku", "Potvrdi lozinku", "Konfirmo fjalëkalimin", "Потврди ја лозинката"],
+    "Event details": ["Детайли за събитието", "Detaliile evenimentului", "Στοιχεία εκδήλωσης", "Detalji događaja", "Detalji događaja", "Detalji događaja", "Detajet e eventit", "Детали за настанот"],
+    "Event settings": ["Настройки на събитието", "Setările evenimentului", "Ρυθμίσεις εκδήλωσης", "Podešavanja događaja", "Postavke događaja", "Postavke događaja", "Cilësimet e eventit", "Поставки за настанот"],
+    "Event Settings": ["Настройки на събитието", "Setările evenimentului", "Ρυθμίσεις εκδήλωσης", "Podešavanja događaja", "Postavke događaja", "Postavke događaja", "Cilësimet e eventit", "Поставки за настанот"],
+    "Event name": ["Име на събитието", "Numele evenimentului", "Όνομα εκδήλωσης", "Naziv događaja", "Naziv događaja", "Naziv događaja", "Emri i eventit", "Име на настанот"],
+    "Event description": ["Описание на събитието", "Descrierea evenimentului", "Περιγραφή εκδήλωσης", "Opis događaja", "Opis događaja", "Opis događaja", "Përshkrimi i eventit", "Опис на настанот"],
+    "Location": ["Място", "Locație", "Τοποθεσία", "Lokacija", "Lokacija", "Lokacija", "Vendndodhja", "Локација"],
+    "Event date": ["Дата на събитието", "Data evenimentului", "Ημερομηνία εκδήλωσης", "Datum događaja", "Datum događaja", "Datum događaja", "Data e eventit", "Датум на настанот"],
+    "Date": ["Дата", "Dată", "Ημερομηνία", "Datum", "Datum", "Datum", "Data", "Датум"],
+    "Time": ["Час", "Oră", "Ώρα", "Vreme", "Vrijeme", "Vrijeme", "Ora", "Време"],
+    "Description": ["Описание", "Descriere", "Περιγραφή", "Opis", "Opis", "Opis", "Përshkrimi", "Опис"],
+    "Choose package": ["Избери пакет", "Alege pachetul", "Επιλογή πακέτου", "Izaberi paket", "Odaberi paket", "Izaberi paket", "Zgjidh paketën", "Избери пакет"],
+    "Allow Upload": ["Разреши качването", "Permite încărcările", "Να επιτρέπονται μεταφορτώσεις", "Dozvoli otpremanje", "Dopusti prijenos", "Dozvoli otpremanje", "Lejo ngarkimet", "Дозволи прикачување"],
+    "Allow Comments": ["Разреши коментари", "Permite comentariile", "Να επιτρέπονται σχόλια", "Dozvoli komentare", "Dopusti komentare", "Dozvoli komentare", "Lejo komentet", "Дозволи коментари"],
+    "Allow Likes": ["Разреши харесвания", "Permite aprecierile", "Να επιτρέπονται likes", "Dozvoli sviđanja", "Dopusti oznake sviđanja", "Dozvoli sviđanja", "Lejo pëlqimet", "Дозволи допаѓања"],
+    "Require Approval": ["Изисквай одобрение", "Necesită aprobare", "Απαίτηση έγκρισης", "Zahtevaj odobrenje", "Zahtijevaj odobrenje", "Zahtijevaj odobrenje", "Kërko miratim", "Побарај одобрување"],
+    "Starter": ["Начален", "Începător", "Βασικό", "Početni", "Početni", "Početni", "Fillestar", "Почетен"],
+    "Standard": ["Стандартен", "Standard", "Κανονικό", "Standardni", "Standardni", "Standardni", "Standard", "Стандарден"],
+    "Premium": ["Премиум", "Premium", "Premium", "Premium", "Premium", "Premium", "Premium", "Премиум"],
+    "Recommended": ["Препоръчан", "Recomandat", "Προτεινόμενο", "Preporučeno", "Preporučeno", "Preporučeno", "Rekomanduar", "Препорачано"],
+    "Free": ["Безплатно", "Gratuit", "Δωρεάν", "Besplatno", "Besplatno", "Besplatno", "Falas", "Бесплатно"],
+    "Generate Event Code": ["Генерирай код", "Generează codul evenimentului", "Δημιουργία κωδικού εκδήλωσης", "Generiši kod događaja", "Generiraj kod događaja", "Generiši kod događaja", "Gjenero kodin e eventit", "Генерирај код за настан"],
+    "Event Code": ["Код на събитието", "Codul evenimentului", "Κωδικός εκδήλωσης", "Kod događaja", "Kod događaja", "Kod događaja", "Kodi i eventit", "Код на настанот"],
+    "Copy Code": ["Копирай кода", "Copiază codul", "Αντιγραφή κωδικού", "Kopiraj kod", "Kopiraj kod", "Kopiraj kod", "Kopjo kodin", "Копирај го кодот"],
+    "Download QR": ["Изтегли QR", "Descarcă QR", "Λήψη QR", "Preuzmi QR", "Preuzmi QR", "Preuzmi QR", "Shkarko QR", "Преземи QR"],
+    "Gallery": ["Галерия", "Galerie", "Συλλογή", "Galerija", "Galerija", "Galerija", "Galeria", "Галерија"],
+    "Guests": ["Гости", "Invitați", "Καλεσμένοι", "Gosti", "Gosti", "Gosti", "Të ftuarit", "Гости"],
+    "Photos": ["Снимки", "Fotografii", "Φωτογραφίες", "Fotografije", "Fotografije", "Fotografije", "Fotot", "Фотографии"],
+    "Photo": ["Снимка", "Fotografie", "Φωτογραφία", "Fotografija", "Fotografija", "Fotografija", "Foto", "Фотографија"],
+    "Video": ["Видео", "Videoclip", "Βίντεο", "Video", "Video", "Video", "Video", "Видео"],
+    "Message": ["Съобщение", "Mesaj", "Μήνυμα", "Poruka", "Poruka", "Poruka", "Mesazh", "Порака"],
+    "Upload Photo": ["Качи снимка", "Încarcă fotografia", "Μεταφόρτωση φωτογραφίας", "Otpremi fotografiju", "Prenesi fotografiju", "Otpremi fotografiju", "Ngarko foton", "Прикачи фотографија"],
+    "Upload your memory": ["Качи своя спомен", "Încarcă-ți amintirea", "Ανέβασε την ανάμνησή σου", "Otpremi svoju uspomenu", "Prenesi svoju uspomenu", "Otpremi svoju uspomenu", "Ngarko kujtimin tënd", "Прикачи го твојот спомен"],
+    "Share your moment": ["Сподели своя миг", "Împărtășește momentul", "Μοιράσου τη στιγμή σου", "Podeli svoj trenutak", "Podijeli svoj trenutak", "Podijeli svoj trenutak", "Ndaj momentin tënd", "Сподели го твојот момент"],
+    "Your name": ["Твоето име", "Numele tău", "Το όνομά σου", "Tvoje ime", "Tvoje ime", "Tvoje ime", "Emri yt", "Твоето име"],
+    "Choose photo": ["Избери снимка", "Alege fotografia", "Επιλογή φωτογραφίας", "Izaberi fotografiju", "Odaberi fotografiju", "Izaberi fotografiju", "Zgjidh foton", "Избери фотографија"],
+    "Search guest": ["Търси гост", "Caută invitat", "Αναζήτηση καλεσμένου", "Pretraži goste", "Pretraži goste", "Pretraži goste", "Kërko të ftuarin", "Пребарај гостин"],
+    "Approve All Photos": ["Одобри всички снимки", "Aprobă toate fotografiile", "Έγκριση όλων των φωτογραφιών", "Odobri sve fotografije", "Odobri sve fotografije", "Odobri sve fotografije", "Mirato të gjitha fotot", "Одобри ги сите фотографии"],
+    "Save Settings": ["Запази настройките", "Salvează setările", "Αποθήκευση ρυθμίσεων", "Sačuvaj podešavanja", "Spremi postavke", "Sačuvaj postavke", "Ruaj cilësimet", "Зачувај ги поставките"],
+    "Delete Event": ["Изтрий събитието", "Șterge evenimentul", "Διαγραφή εκδήλωσης", "Obriši događaj", "Izbriši događaj", "Obriši događaj", "Fshi eventin", "Избриши го настанот"],
+    "Every guest.": ["Всеки гост.", "Fiecare invitat.", "Κάθε καλεσμένος.", "Svaki gost.", "Svaki gost.", "Svaki gost.", "Çdo i ftuar.", "Секој гостин."],
+    "Every moment.": ["Всеки миг.", "Fiecare moment.", "Κάθε στιγμή.", "Svaki trenutak.", "Svaki trenutak.", "Svaki trenutak.", "Çdo moment.", "Секој момент."],
+    "One shared album.": ["Един общ албум.", "Un singur album comun.", "Ένα κοινό άλμπουμ.", "Jedan zajednički album.", "Jedan zajednički album.", "Jedan zajednički album.", "Një album i përbashkët.", "Еден заеднички албум."],
+    "No App Needed": ["Без приложение", "Fără aplicație", "Χωρίς εφαρμογή", "Bez aplikacije", "Bez aplikacije", "Bez aplikacije", "Pa aplikacion", "Без апликација"],
+    "Live Uploads": ["Качване на живо", "Încărcări în timp real", "Ζωντανές μεταφορτώσεις", "Otpremanje uživo", "Prijenos uživo", "Otpremanje uživo", "Ngarkime në kohë reale", "Прикачување во живо"],
+    "All Memories in One Place": ["Всички спомени на едно място", "Toate amintirile într-un singur loc", "Όλες οι αναμνήσεις σε ένα μέρος", "Sve uspomene na jednom mestu", "Sve uspomene na jednom mjestu", "Sve uspomene na jednom mjestu", "Të gjitha kujtimet në një vend", "Сите спомени на едно место"],
+    "Privacy Policy": ["Политика за поверителност", "Politica de confidențialitate", "Πολιτική απορρήτου", "Politika privatnosti", "Pravila privatnosti", "Politika privatnosti", "Politika e privatësisë", "Политика за приватност"],
+    "Terms of Use": ["Условия за ползване", "Termeni de utilizare", "Όροι χρήσης", "Uslovi korišćenja", "Uvjeti korištenja", "Uslovi korištenja", "Kushtet e përdorimit", "Услови за користење"],
+    "Copied!": ["Копирано!", "Copiat!", "Αντιγράφηκε!", "Kopirano!", "Kopirano!", "Kopirano!", "U kopjua!", "Копирано!"],
+    "Uploaded!": ["Качено!", "Încărcat!", "Μεταφορτώθηκε!", "Otpremljeno!", "Preneseno!", "Otpremljeno!", "U ngarkua!", "Прикачено!"],
+    "Processing...": ["Обработва се...", "Se procesează...", "Επεξεργασία...", "Obrada...", "Obrada...", "Obrada...", "Duke përpunuar...", "Се обработува..."],
+    "Loading events...": ["Събитията се зареждат...", "Se încarcă evenimentele...", "Φόρτωση εκδηλώσεων...", "Učitavanje događaja...", "Učitavanje događaja...", "Učitavanje događaja...", "Duke ngarkuar eventet...", "Се вчитуваат настаните..."],
+    "Loading event detail...": ["Детайлите се зареждат...", "Se încarcă detaliile...", "Φόρτωση στοιχείων...", "Učitavanje detalja...", "Učitavanje detalja...", "Učitavanje detalja...", "Duke ngarkuar detajet...", "Се вчитуваат деталите..."],
+    "Please try again later.": ["Опитайте отново по-късно.", "Încercați din nou mai târziu.", "Δοκιμάστε ξανά αργότερα.", "Pokušajte ponovo kasnije.", "Pokušajte ponovno kasnije.", "Pokušajte ponovo kasnije.", "Provoni përsëri më vonë.", "Обидете се повторно подоцна."],
+    "Try Again": ["Опитай отново", "Încearcă din nou", "Δοκιμή ξανά", "Pokušaj ponovo", "Pokušaj ponovno", "Pokušaj ponovo", "Provo përsëri", "Обиди се повторно"],
+    "Email address is required.": ["Имейл адресът е задължителен.", "Adresa de e-mail este obligatorie.", "Απαιτείται διεύθυνση email.", "Email adresa je obavezna.", "Adresa e-pošte je obavezna.", "Email adresa je obavezna.", "Adresa e emailit është e detyrueshme.", "Потребна е адреса на е-пошта."],
+    "Password is required.": ["Паролата е задължителна.", "Parola este obligatorie.", "Απαιτείται κωδικός.", "Lozinka je obavezna.", "Lozinka je obavezna.", "Lozinka je obavezna.", "Fjalëkalimi është i detyrueshëm.", "Потребна е лозинка."],
+    "Passwords do not match.": ["Паролите не съвпадат.", "Parolele nu coincid.", "Οι κωδικοί δεν ταιριάζουν.", "Lozinke se ne podudaraju.", "Lozinke se ne podudaraju.", "Lozinke se ne podudaraju.", "Fjalëkalimet nuk përputhen.", "Лозинките не се совпаѓаат."],
+    "Don't have an account?": ["Нямаш профил?", "Nu ai cont?", "Δεν έχεις λογαριασμό;", "Nemaš nalog?", "Nemaš račun?", "Nemaš račun?", "Nuk ke llogari?", "Немаш сметка?"],
+    "Already have an account?": ["Вече имаш профил?", "Ai deja un cont?", "Έχεις ήδη λογαριασμό;", "Već imaš nalog?", "Već imaš račun?", "Već imaš račun?", "Ke tashmë një llogari?", "Веќе имаш сметка?"],
+    "Creating account...": ["Профилът се създава...", "Se creează contul...", "Δημιουργία λογαριασμού...", "Kreiranje naloga...", "Izrada računa...", "Kreiranje računa...", "Duke krijuar llogarinë...", "Се создава сметката..."],
+    "Creating your event...": ["Събитието се създава...", "Se creează evenimentul...", "Δημιουργία εκδήλωσης...", "Kreiranje događaja...", "Izrada događaja...", "Kreiranje događaja...", "Duke krijuar eventin...", "Се создава настанот..."],
+    "Saving...": ["Запазване...", "Se salvează...", "Αποθήκευση...", "Čuvanje...", "Spremanje...", "Čuvanje...", "Duke ruajtur...", "Се зачувува..."],
+    "Deleting...": ["Изтриване...", "Se șterge...", "Διαγραφή...", "Brisanje...", "Brisanje...", "Brisanje...", "Duke fshirë...", "Се брише..."],
+    "Backend connection error.": ["Грешка при връзка със сървъра.", "Eroare de conexiune la server.", "Σφάλμα σύνδεσης με τον διακομιστή.", "Greška veze sa serverom.", "Pogreška veze s poslužiteljem.", "Greška veze sa serverom.", "Gabim në lidhjen me serverin.", "Грешка при поврзување со серверот."]
+  };
+
+  const balkanCodes = ["bg", "ro", "el", "sr", "hr", "bs", "sq", "mk"];
+  Object.entries(balkanPhrases).forEach(([key, translations]) => {
+    if (!phrases[key]) phrases[key] = {};
+    balkanCodes.forEach((code, index) => {
+      phrases[key][code] = translations[index];
+    });
+  });
+
+  // Complete the landing-page sections that were added after the first
+  // European/Balkan language packs. Without these entries the translator
+  // correctly fell back to English, which produced mixed-language cards.
+  const landingSectionPhrases = {
+    "Everything your guests need to capture the night.": [
+      "Alles, was deine Gäste brauchen, um den Abend festzuhalten.",
+      "Tout ce dont vos invités ont besoin pour immortaliser la soirée.",
+      "Todo lo que tus invitados necesitan para capturar la noche.",
+      "Tutto ciò che serve ai tuoi ospiti per immortalare la serata.",
+      "Alles wat je gasten nodig hebben om de avond vast te leggen.",
+      "Всичко необходимо на гостите ти, за да запечатат вечерта.",
+      "Tot ce le trebuie invitaților pentru a surprinde seara.",
+      "Όλα όσα χρειάζονται οι καλεσμένοι σου για να αποτυπώσουν τη βραδιά.",
+      "Sve što je gostima potrebno da zabeleže veče.",
+      "Sve što gostima treba da zabilježe večer.",
+      "Sve što je gostima potrebno da zabilježe večer.",
+      "Gjithçka që u duhet të ftuarve për të ruajtur mbrëmjen.",
+      "Сè што им треба на гостите за да ја овековечат вечерта."
+    ],
+    "SnapUp turns every phone into a shared event camera. Guests scan, upload, and the live gallery updates like a real-time memory wall.": [
+      "SnapUp macht jedes Smartphone zur gemeinsamen Eventkamera. Gäste scannen, laden hoch und die Live-Galerie aktualisiert sich in Echtzeit.",
+      "SnapUp transforme chaque téléphone en appareil photo partagé. Les invités scannent, envoient leurs contenus et la galerie s’actualise en direct.",
+      "SnapUp convierte cada teléfono en una cámara compartida. Los invitados escanean, suben contenido y la galería se actualiza en tiempo real.",
+      "SnapUp trasforma ogni telefono in una fotocamera condivisa. Gli ospiti scansionano, caricano e la galleria si aggiorna in tempo reale.",
+      "SnapUp maakt van elke telefoon een gedeelde evenementcamera. Gasten scannen en uploaden, terwijl de livegalerij direct wordt bijgewerkt.",
+      "SnapUp превръща всеки телефон в обща камера за събитието. Гостите сканират и качват, а галерията се обновява на живо.",
+      "SnapUp transformă fiecare telefon într-o cameră comună. Invitații scanează și încarcă, iar galeria se actualizează în timp real.",
+      "Το SnapUp μετατρέπει κάθε τηλέφωνο σε κοινή κάμερα εκδήλωσης. Οι καλεσμένοι σαρώνουν και ανεβάζουν, ενώ η συλλογή ενημερώνεται ζωντανά.",
+      "SnapUp pretvara svaki telefon u zajedničku kameru događaja. Gosti skeniraju i otpremaju, a galerija se ažurira uživo.",
+      "SnapUp pretvara svaki telefon u zajedničku kameru događaja. Gosti skeniraju i prenose, a galerija se ažurira uživo.",
+      "SnapUp pretvara svaki telefon u zajedničku kameru događaja. Gosti skeniraju i otpremaju, a galerija se ažurira uživo.",
+      "SnapUp e kthen çdo telefon në kamerë të përbashkët. Të ftuarit skanojnë e ngarkojnë, ndërsa galeria përditësohet drejtpërdrejt.",
+      "SnapUp го претвора секој телефон во заедничка камера. Гостите скенираат и прикачуваат, а галеријата се ажурира во живо."
+    ],
+    "LIVE CAPTURE MODE": [
+      "LIVE-AUFNAHMEMODUS", "MODE CAPTURE EN DIRECT",
+      "MODO DE CAPTURA EN DIRECTO", "MODALITÀ ACQUISIZIONE LIVE",
+      "LIVE OPNAMEMODUS", "РЕЖИМ НА ЖИВО", "MOD CAPTURĂ LIVE",
+      "ΛΕΙΤΟΥΡΓΙΑ ΖΩΝΤΑΝΗΣ ΛΗΨΗΣ", "REŽIM SNIMANJA UŽIVO",
+      "NAČIN SNIMANJA UŽIVO", "REŽIM SNIMANJA UŽIVO",
+      "MODALITETI LIVE", "РЕЖИМ НА СНИМАЊЕ ВО ЖИВО"
+    ],
+    "guests live": [
+      "Gäste live", "invités en direct", "invitados en directo",
+      "ospiti live", "gasten live", "гости на живо", "invitați live",
+      "καλεσμένοι ζωντανά", "gostiju uživo", "gostiju uživo",
+      "gostiju uživo", "të ftuar live", "гости во живо"
+    ],
+    "quality ready": [
+      "hohe Qualität", "haute qualité", "alta calidad", "alta qualità",
+      "hoge kwaliteit", "високо качество", "calitate înaltă", "υψηλή ποιότητα",
+      "visok kvalitet", "visoka kvaliteta", "visok kvalitet",
+      "cilësi e lartë", "висок квалитет"
+    ],
+    "upload flow": [
+      "Upload-Ablauf", "flux d’envoi", "flujo de subida", "flusso di caricamento",
+      "uploadproces", "процес на качване", "flux de încărcare", "ροή μεταφόρτωσης",
+      "tok otpremanja", "tijek prijenosa", "tok otpremanja",
+      "rrjedha e ngarkimit", "тек на прикачување"
+    ],
+    "One QR code. A whole event through everyone’s lens.": [
+      "Ein QR-Code. Das ganze Event durch die Augen aller.",
+      "Un QR code. Tout l’événement à travers le regard de chacun.",
+      "Un código QR. Todo el evento desde la mirada de todos.",
+      "Un solo codice QR. L’intero evento attraverso gli occhi di tutti.",
+      "Eén QR-code. Het hele evenement door ieders lens.",
+      "Един QR код. Цялото събитие през погледа на всички.",
+      "Un cod QR. Întregul eveniment prin obiectivul tuturor.",
+      "Ένας κωδικός QR. Όλη η εκδήλωση μέσα από τον φακό όλων.",
+      "Jedan QR kod. Ceo događaj kroz objektiv svih gostiju.",
+      "Jedan QR kod. Cijeli događaj kroz objektiv svih gostiju.",
+      "Jedan QR kod. Cijeli događaj kroz objektiv svih gostiju.",
+      "Një kod QR. I gjithë eventi përmes syve të të gjithëve.",
+      "Еден QR-код. Целиот настан низ објективот на сите."
+    ],
+    "Photos, videos, and messages arrive instantly in one organized gallery — ready for screens, downloads, and sharing.": [
+      "Fotos, Videos und Nachrichten landen sofort in einer übersichtlichen Galerie — bereit zum Anzeigen, Herunterladen und Teilen.",
+      "Photos, vidéos et messages arrivent instantanément dans une galerie organisée — prête à être affichée, téléchargée et partagée.",
+      "Fotos, vídeos y mensajes llegan al instante a una galería organizada, lista para mostrar, descargar y compartir.",
+      "Foto, video e messaggi arrivano subito in un’unica galleria ordinata, pronta per schermi, download e condivisione.",
+      "Foto’s, video’s en berichten verschijnen direct in één overzichtelijke galerij, klaar om te tonen, downloaden en delen.",
+      "Снимките, видеата и съобщенията пристигат веднага в една подредена галерия — готова за показване, изтегляне и споделяне.",
+      "Fotografiile, videoclipurile și mesajele ajung instant într-o singură galerie organizată, gata de afișat, descărcat și distribuit.",
+      "Φωτογραφίες, βίντεο και μηνύματα εμφανίζονται αμέσως σε μία οργανωμένη συλλογή, έτοιμη για προβολή, λήψη και κοινοποίηση.",
+      "Fotografije, video-snimci i poruke odmah stižu u jednu uređenu galeriju, spremnu za prikaz, preuzimanje i deljenje.",
+      "Fotografije, videozapisi i poruke odmah stižu u jednu uređenu galeriju, spremnu za prikaz, preuzimanje i dijeljenje.",
+      "Fotografije, videozapisi i poruke odmah stižu u jednu uređenu galeriju, spremnu za prikaz, preuzimanje i dijeljenje.",
+      "Fotot, videot dhe mesazhet mbërrijnë menjëherë në një galeri të organizuar, gati për shfaqje, shkarkim dhe ndarje.",
+      "Фотографиите, видеата и пораките веднаш пристигнуваат во една уредна галерија, подготвена за прикажување, преземање и споделување."
+    ],
+    "Show uploaded memories instantly on a venue screen or shared gallery.": [
+      "Zeige hochgeladene Erinnerungen sofort auf einem Bildschirm oder in der gemeinsamen Galerie.",
+      "Affichez instantanément les souvenirs envoyés sur un écran ou dans la galerie partagée.",
+      "Muestra al instante los recuerdos subidos en una pantalla o galería compartida.",
+      "Mostra subito i ricordi caricati su uno schermo o nella galleria condivisa.",
+      "Toon geüploade herinneringen direct op een scherm of in de gedeelde galerij.",
+      "Показвай качените спомени веднага на екран или в общата галерия.",
+      "Afișează instant amintirile încărcate pe un ecran sau în galeria comună.",
+      "Πρόβαλε αμέσως τις αναμνήσεις σε οθόνη ή στην κοινόχρηστη συλλογή.",
+      "Prikaži otpremljene uspomene odmah na ekranu ili u zajedničkoj galeriji.",
+      "Prikaži prenesene uspomene odmah na zaslonu ili u zajedničkoj galeriji.",
+      "Prikaži otpremljene uspomene odmah na ekranu ili u zajedničkoj galeriji.",
+      "Shfaq menjëherë kujtimet e ngarkuara në ekran ose në galerinë e përbashkët.",
+      "Прикажи ги прикачените спомени веднаш на екран или во заедничката галерија."
+    ],
+    "Guests join from any phone browser with only a QR code or event code.": [
+      "Gäste treten über jeden Smartphone-Browser nur mit QR- oder Eventcode bei.",
+      "Les invités rejoignent l’événement depuis n’importe quel téléphone avec un QR code ou un code d’événement.",
+      "Los invitados acceden desde cualquier teléfono con un código QR o de evento.",
+      "Gli ospiti partecipano da qualsiasi browser mobile con un codice QR o il codice evento.",
+      "Gasten doen via elke telefoonbrowser mee met alleen een QR- of evenementcode.",
+      "Гостите се включват от всеки телефон само с QR код или код на събитието.",
+      "Invitații participă din orice browser mobil doar cu un cod QR sau codul evenimentului.",
+      "Οι καλεσμένοι συμμετέχουν από οποιοδήποτε τηλέφωνο μόνο με QR ή κωδικό εκδήλωσης.",
+      "Gosti se pridružuju iz bilo kog mobilnog pregledača samo pomoću QR koda ili koda događaja.",
+      "Gosti se pridružuju iz bilo kojeg mobilnog preglednika samo s QR kodom ili kodom događaja.",
+      "Gosti se pridružuju iz bilo kojeg mobilnog preglednika samo pomoću QR koda ili koda događaja.",
+      "Të ftuarit bashkohen nga çdo shfletues telefoni vetëm me kod QR ose kod eventi.",
+      "Гостите се приклучуваат од кој било телефон само со QR-код или код на настанот."
+    ],
+    "Collect every kind of memory in the same event timeline.": [
+      "Sammle jede Art von Erinnerung in derselben Event-Chronik.",
+      "Rassemblez tous les types de souvenirs dans la même chronologie.",
+      "Reúne todo tipo de recuerdos en la misma línea de tiempo.",
+      "Raccogli ogni tipo di ricordo nella stessa sequenza dell’evento.",
+      "Verzamel elk soort herinnering in dezelfde tijdlijn.",
+      "Събирай всякакви спомени в една обща хронология.",
+      "Adună toate tipurile de amintiri în aceeași cronologie.",
+      "Συγκέντρωσε κάθε είδους ανάμνηση στο ίδιο χρονολόγιο.",
+      "Sakupi sve vrste uspomena u istoj vremenskoj liniji događaja.",
+      "Prikupi sve vrste uspomena u istoj vremenskoj crti događaja.",
+      "Sakupi sve vrste uspomena u istoj vremenskoj liniji događaja.",
+      "Mblidh çdo lloj kujtimi në të njëjtën kronologji eventi.",
+      "Собери ги сите видови спомени во истата временска линија."
+    ],
+    "Only invited guests with the code can upload and view memories.": [
+      "Nur eingeladene Gäste mit dem Code können Erinnerungen hochladen und ansehen.",
+      "Seuls les invités disposant du code peuvent envoyer et voir les souvenirs.",
+      "Solo los invitados con el código pueden subir y ver recuerdos.",
+      "Solo gli ospiti invitati con il codice possono caricare e vedere i ricordi.",
+      "Alleen genodigde gasten met de code kunnen herinneringen uploaden en bekijken.",
+      "Само поканени гости с кода могат да качват и разглеждат спомени.",
+      "Doar invitații care au codul pot încărca și vedea amintirile.",
+      "Μόνο οι προσκεκλημένοι με τον κωδικό μπορούν να ανεβάζουν και να βλέπουν αναμνήσεις.",
+      "Samo pozvani gosti sa kodom mogu da otpremaju i pregledaju uspomene.",
+      "Samo pozvani gosti s kodom mogu prenositi i pregledavati uspomene.",
+      "Samo pozvani gosti s kodom mogu otpremati i pregledati uspomene.",
+      "Vetëm të ftuarit me kod mund të ngarkojnë dhe të shohin kujtimet.",
+      "Само поканетите гости со кодот можат да прикачуваат и гледаат спомени."
+    ],
+    "Export your event memories or keep the gallery link alive.": [
+      "Exportiere deine Eventerinnerungen oder halte den Galerielink aktiv.",
+      "Exportez les souvenirs de votre événement ou conservez le lien de la galerie.",
+      "Exporta los recuerdos del evento o mantén activo el enlace de la galería.",
+      "Esporta i ricordi dell’evento o mantieni attivo il link della galleria.",
+      "Exporteer je herinneringen of houd de galerijlink actief.",
+      "Експортирай спомените или запази връзката към галерията активна.",
+      "Exportă amintirile evenimentului sau păstrează activ linkul galeriei.",
+      "Εξήγαγε τις αναμνήσεις ή διατήρησε ενεργό τον σύνδεσμο της συλλογής.",
+      "Izvezi uspomene sa događaja ili zadrži aktivnu vezu galerije.",
+      "Izvezi uspomene s događaja ili zadrži poveznicu galerije aktivnom.",
+      "Izvezi uspomene s događaja ili zadrži aktivan link galerije.",
+      "Eksporto kujtimet e eventit ose mbaje aktiv lidhjen e galerisë.",
+      "Извези ги спомените или задржи ја активна врската до галеријата."
+    ],
+    "Choose the right package for your event.": [
+      "Wähle das passende Paket für dein Event.",
+      "Choisissez la formule adaptée à votre événement.",
+      "Elige el paquete adecuado para tu evento.",
+      "Scegli il pacchetto giusto per il tuo evento.",
+      "Kies het juiste pakket voor je evenement.",
+      "Избери подходящия пакет за своето събитие.",
+      "Alege pachetul potrivit pentru evenimentul tău.",
+      "Επίλεξε το κατάλληλο πακέτο για την εκδήλωσή σου.",
+      "Izaberi pravi paket za svoj događaj.",
+      "Odaberi pravi paket za svoj događaj.",
+      "Izaberi pravi paket za svoj događaj.",
+      "Zgjidh paketën e duhur për eventin tënd.",
+      "Избери го вистинскиот пакет за твојот настан."
+    ],
+    "Start small, scale when your guest count grows. Each package keeps the same simple SnapUp flow: create event, share code, collect memories.": [
+      "Starte klein und erweitere bei mehr Gästen. Jedes Paket behält den einfachen SnapUp-Ablauf bei: Event erstellen, Code teilen, Erinnerungen sammeln.",
+      "Commencez simplement et évoluez avec le nombre d’invités. Chaque formule conserve le même parcours : créer, partager le code, recueillir les souvenirs.",
+      "Empieza con poco y amplía cuando crezcan tus invitados. Todos los paquetes mantienen el mismo flujo: crear, compartir el código y reunir recuerdos.",
+      "Inizia in piccolo e passa al livello successivo quando aumentano gli ospiti. Ogni pacchetto mantiene lo stesso flusso: crea, condividi il codice, raccogli i ricordi.",
+      "Begin klein en schaal op wanneer het aantal gasten groeit. Elk pakket volgt dezelfde eenvoudige stappen: maken, code delen, herinneringen verzamelen.",
+      "Започни с малко и разшири при повече гости. Всеки пакет следва същия лесен процес: създай, сподели кода, събери спомените.",
+      "Începe simplu și extinde când cresc invitații. Fiecare pachet păstrează același flux: creează, distribuie codul, adună amintirile.",
+      "Ξεκίνα απλά και αναβάθμισε όταν αυξηθούν οι καλεσμένοι. Κάθε πακέτο ακολουθεί την ίδια ροή: δημιουργία, κοινοποίηση κωδικού, συλλογή αναμνήσεων.",
+      "Počni od manjeg paketa i proširi ga kada broj gostiju poraste. Tok ostaje isti: napravi događaj, podeli kod, prikupi uspomene.",
+      "Počni s manjim paketom i proširi ga kada broj gostiju poraste. Tijek ostaje isti: izradi događaj, podijeli kod, prikupi uspomene.",
+      "Počni s manjim paketom i proširi ga kada broj gostiju poraste. Tok ostaje isti: napravi događaj, podijeli kod, prikupi uspomene.",
+      "Fillo me paketin e vogël dhe zgjeroje kur shtohen të ftuarit. Hapat mbeten të njëjtë: krijo, ndaj kodin, mblidh kujtimet.",
+      "Започни со помал пакет и прошири го кога ќе се зголеми бројот на гости. Текот останува ист: креирај, сподели код, собери спомени."
+    ],
+    "For test events, small birthdays, and private gatherings.": [
+      "Für Testevents, kleine Geburtstage und private Feiern.",
+      "Pour les événements tests, petits anniversaires et réunions privées.",
+      "Para eventos de prueba, cumpleaños pequeños y reuniones privadas.",
+      "Per eventi di prova, piccoli compleanni e incontri privati.",
+      "Voor testevenementen, kleine verjaardagen en privébijeenkomsten.",
+      "За тестови събития, малки рождени дни и частни събирания.",
+      "Pentru evenimente de test, aniversări mici și întâlniri private.",
+      "Για δοκιμαστικές εκδηλώσεις, μικρά γενέθλια και ιδιωτικές συγκεντρώσεις.",
+      "Za probne događaje, manje rođendane i privatna okupljanja.",
+      "Za probne događaje, manje rođendane i privatna okupljanja.",
+      "Za probne događaje, manje rođendane i privatna okupljanja.",
+      "Për evente provë, ditëlindje të vogla dhe takime private.",
+      "За пробни настани, мали родендени и приватни собири."
+    ],
+    "Best for graduations, birthdays, engagement parties, and medium-size events.": [
+      "Ideal für Abschlussfeiern, Geburtstage, Verlobungen und mittelgroße Events.",
+      "Idéal pour les remises de diplôme, anniversaires, fiançailles et événements de taille moyenne.",
+      "Ideal para graduaciones, cumpleaños, compromisos y eventos medianos.",
+      "Ideale per lauree, compleanni, fidanzamenti ed eventi di medie dimensioni.",
+      "Ideaal voor diploma-uitreikingen, verjaardagen, verlovingen en middelgrote evenementen.",
+      "Идеален за дипломирания, рождени дни, годежи и средни събития.",
+      "Ideal pentru absolviri, aniversări, logodne și evenimente medii.",
+      "Ιδανικό για αποφοιτήσεις, γενέθλια, αρραβώνες και μεσαίες εκδηλώσεις.",
+      "Idealno za mature, rođendane, veridbe i događaje srednje veličine.",
+      "Idealno za diplome, rođendane, zaruke i događaje srednje veličine.",
+      "Idealno za mature, rođendane, zaruke i događaje srednje veličine.",
+      "Ideale për diplomime, ditëlindje, fejesa dhe evente mesatare.",
+      "Идеален за матури, родендени, свршувачки и настани со средна големина."
+    ],
+    "For weddings, corporate events, crowded celebrations, and long galleries.": [
+      "Für Hochzeiten, Firmenevents, große Feiern und umfangreiche Galerien.",
+      "Pour les mariages, événements d’entreprise, grandes célébrations et longues galeries.",
+      "Para bodas, eventos corporativos, celebraciones multitudinarias y galerías extensas.",
+      "Per matrimoni, eventi aziendali, grandi feste e gallerie ricche di contenuti.",
+      "Voor bruiloften, bedrijfsevenementen, grote feesten en uitgebreide galerijen.",
+      "За сватби, фирмени събития, големи празненства и богати галерии.",
+      "Pentru nunți, evenimente corporate, petreceri mari și galerii extinse.",
+      "Για γάμους, εταιρικές εκδηλώσεις, μεγάλες γιορτές και εκτενείς συλλογές.",
+      "Za venčanja, poslovne događaje, velike proslave i obimne galerije.",
+      "Za vjenčanja, poslovne događaje, velike proslave i opsežne galerije.",
+      "Za vjenčanja, poslovne događaje, velike proslave i velike galerije.",
+      "Për dasma, evente biznesi, festa të mëdha dhe galeri të pasura.",
+      "За свадби, деловни настани, големи прослави и богати галерии."
+    ],
+    "Bring every photo, video, and message from your event together in one shared gallery.": [
+      "Bringe alle Fotos, Videos und Nachrichten deines Events in einer gemeinsamen Galerie zusammen.",
+      "Réunissez toutes les photos, vidéos et messages de votre événement dans une galerie partagée.",
+      "Reúne todas las fotos, vídeos y mensajes de tu evento en una galería compartida.",
+      "Riunisci tutte le foto, i video e i messaggi del tuo evento in un’unica galleria condivisa.",
+      "Breng alle foto’s, video’s en berichten van je evenement samen in één gedeelde galerij.",
+      "Събери всички снимки, видеа и съобщения от събитието в една обща галерия.",
+      "Adună toate fotografiile, videoclipurile și mesajele evenimentului într-o singură galerie comună.",
+      "Συγκέντρωσε όλες τις φωτογραφίες, τα βίντεο και τα μηνύματα της εκδήλωσης σε μία κοινόχρηστη συλλογή.",
+      "Sakupi sve fotografije, video-snimke i poruke sa događaja u jednu zajedničku galeriju.",
+      "Okupi sve fotografije, videozapise i poruke s događaja u jednoj zajedničkoj galeriji.",
+      "Sakupi sve fotografije, videozapise i poruke s događaja u jednu zajedničku galeriju.",
+      "Mblidh të gjitha fotot, videot dhe mesazhet e eventit në një galeri të përbashkët.",
+      "Собери ги сите фотографии, видеа и пораки од настанот во една заедничка галерија."
+    ],
+    "Questions or feedback? We would love to hear from you.": [
+      "Fragen oder Feedback? Wir freuen uns, von dir zu hören.",
+      "Une question ou une remarque ? Nous serons ravis de vous lire.",
+      "¿Tienes preguntas o comentarios? Nos encantará escucharte.",
+      "Domande o suggerimenti? Saremo felici di ascoltarti.",
+      "Vragen of feedback? We horen graag van je.",
+      "Въпроси или обратна връзка? Ще се радваме да те чуем.",
+      "Întrebări sau sugestii? Ne-ar plăcea să te auzim.",
+      "Ερωτήσεις ή σχόλια; Θα χαρούμε να σε ακούσουμε.",
+      "Pitanja ili utisci? Biće nam drago da nam se javiš.",
+      "Pitanja ili povratne informacije? Rado ćemo te saslušati.",
+      "Pitanja ili povratne informacije? Rado ćemo te saslušati.",
+      "Pyetje ose sugjerime? Do të na pëlqente të të dëgjonim.",
+      "Прашања или повратни информации? Со задоволство ќе те слушнеме."
+    ],
+    "© 2026 SnapUp Events. All rights reserved.": [
+      "© 2026 SnapUp Events. Alle Rechte vorbehalten.",
+      "© 2026 SnapUp Events. Tous droits réservés.",
+      "© 2026 SnapUp Events. Todos los derechos reservados.",
+      "© 2026 SnapUp Events. Tutti i diritti riservati.",
+      "© 2026 SnapUp Events. Alle rechten voorbehouden.",
+      "© 2026 SnapUp Events. Всички права запазени.",
+      "© 2026 SnapUp Events. Toate drepturile rezervate.",
+      "© 2026 SnapUp Events. Με επιφύλαξη παντός δικαιώματος.",
+      "© 2026 SnapUp Events. Sva prava zadržana.",
+      "© 2026 SnapUp Events. Sva prava pridržana.",
+      "© 2026 SnapUp Events. Sva prava zadržana.",
+      "© 2026 SnapUp Events. Të gjitha të drejtat të rezervuara.",
+      "© 2026 SnapUp Events. Сите права се задржани."
+    ],
+    "/ event": [
+      "/ Event", "/ événement", "/ evento", "/ evento", "/ evenement",
+      "/ събитие", "/ eveniment", "/ εκδήλωση", "/ događaj",
+      "/ događaj", "/ događaj", "/ event", "/ настан"
+    ],
+    "Up to 50 guests": [
+      "Bis zu 50 Gäste", "Jusqu’à 50 invités", "Hasta 50 invitados",
+      "Fino a 50 ospiti", "Tot 50 gasten", "До 50 гости",
+      "Până la 50 de invitați", "Έως 50 καλεσμένοι", "Do 50 gostiju",
+      "Do 50 gostiju", "Do 50 gostiju", "Deri në 50 të ftuar", "До 50 гости"
+    ],
+    "Up to 150 guests": [
+      "Bis zu 150 Gäste", "Jusqu’à 150 invités", "Hasta 150 invitados",
+      "Fino a 150 ospiti", "Tot 150 gasten", "До 150 гости",
+      "Până la 150 de invitați", "Έως 150 καλεσμένοι", "Do 150 gostiju",
+      "Do 150 gostiju", "Do 150 gostiju", "Deri në 150 të ftuar", "До 150 гости"
+    ],
+    "500 MB event storage": [
+      "500 MB Eventspeicher", "500 Mo de stockage", "500 MB de almacenamiento",
+      "500 MB di spazio evento", "500 MB evenementopslag", "500 MB място",
+      "500 MB spațiu de stocare", "500 MB αποθήκευση", "500 MB prostora",
+      "500 MB prostora", "500 MB prostora", "500 MB hapësirë", "500 MB простор"
+    ],
+    "2 GB event storage": [
+      "2 GB Eventspeicher", "2 Go de stockage", "2 GB de almacenamiento",
+      "2 GB di spazio evento", "2 GB evenementopslag", "2 GB място",
+      "2 GB spațiu de stocare", "2 GB αποθήκευση", "2 GB prostora",
+      "2 GB prostora", "2 GB prostora", "2 GB hapësirë", "2 GB простор"
+    ],
+    "10 GB event storage": [
+      "10 GB Eventspeicher", "10 Go de stockage", "10 GB de almacenamiento",
+      "10 GB di spazio evento", "10 GB evenementopslag", "10 GB място",
+      "10 GB spațiu de stocare", "10 GB αποθήκευση", "10 GB prostora",
+      "10 GB prostora", "10 GB prostora", "10 GB hapësirë", "10 GB простор"
+    ],
+    "Photo and message uploads": [
+      "Foto- und Nachrichten-Uploads", "Envoi de photos et messages",
+      "Subida de fotos y mensajes", "Caricamento di foto e messaggi",
+      "Foto- en berichtuploads", "Качване на снимки и съобщения",
+      "Încărcări de fotografii și mesaje", "Μεταφόρτωση φωτογραφιών και μηνυμάτων",
+      "Otpremanje fotografija i poruka", "Prijenos fotografija i poruka",
+      "Otpremanje fotografija i poruka", "Ngarkim fotosh dhe mesazhesh",
+      "Прикачување фотографии и пораки"
+    ],
+    "Photo, video, and message uploads": [
+      "Foto-, Video- und Nachrichten-Uploads", "Envoi de photos, vidéos et messages",
+      "Subida de fotos, vídeos y mensajes", "Caricamento di foto, video e messaggi",
+      "Foto-, video- en berichtuploads", "Качване на снимки, видео и съобщения",
+      "Încărcări de fotografii, videoclipuri și mesaje",
+      "Μεταφόρτωση φωτογραφιών, βίντεο και μηνυμάτων",
+      "Otpremanje fotografija, videa i poruka", "Prijenos fotografija, videa i poruka",
+      "Otpremanje fotografija, videa i poruka", "Ngarkim fotosh, videosh dhe mesazhesh",
+      "Прикачување фотографии, видеа и пораки"
+    ],
+    "Basic QR and event code": [
+      "Einfacher QR- und Eventcode", "QR code et code d’événement de base",
+      "QR y código de evento básicos", "QR e codice evento di base",
+      "Basis QR- en evenementcode", "Основен QR код и код на събитието",
+      "Cod QR și cod de eveniment de bază", "Βασικός QR και κωδικός εκδήλωσης",
+      "Osnovni QR i kod događaja", "Osnovni QR i kod događaja",
+      "Osnovni QR i kod događaja", "Kod bazë QR dhe kodi i eventit",
+      "Основен QR-код и код на настанот"
+    ],
+    "Guest upload limits": [
+      "Upload-Limits pro Gast", "Limites d’envoi par invité",
+      "Límites de subida por invitado", "Limiti di caricamento per ospite",
+      "Uploadlimieten per gast", "Ограничения за качване на гост",
+      "Limite de încărcare per invitat", "Όρια μεταφόρτωσης ανά καλεσμένο",
+      "Ograničenja otpremanja po gostu", "Ograničenja prijenosa po gostu",
+      "Ograničenja otpremanja po gostu", "Kufizime ngarkimi për të ftuar",
+      "Ограничувања за прикачување по гостин"
+    ],
+    "Approval mode for uploads": [
+      "Freigabemodus für Uploads", "Approbation des envois",
+      "Modo de aprobación de subidas", "Modalità di approvazione dei caricamenti",
+      "Goedkeuringsmodus voor uploads", "Одобрение преди публикуване",
+      "Mod de aprobare a încărcărilor", "Έγκριση μεταφορτώσεων",
+      "Režim odobravanja otpremanja", "Način odobravanja prijenosa",
+      "Režim odobravanja otpremanja", "Miratim i ngarkimeve",
+      "Режим на одобрување прикачувања"
+    ],
+    "Gallery view and likes": [
+      "Galerieansicht und Likes", "Vue galerie et mentions J’aime",
+      "Vista de galería y Me gusta", "Vista galleria e Mi piace",
+      "Galerijweergave en likes", "Изглед на галерия и харесвания",
+      "Vizualizare galerie și aprecieri", "Προβολή συλλογής και likes",
+      "Prikaz galerije i sviđanja", "Prikaz galerije i oznake sviđanja",
+      "Prikaz galerije i sviđanja", "Pamja e galerisë dhe pëlqimet",
+      "Приказ на галерија и допаѓања"
+    ],
+    "High-volume video uploads": [
+      "Große Video-Uploads", "Envoi de nombreux fichiers vidéo",
+      "Subidas de vídeo de gran volumen", "Caricamenti video ad alto volume",
+      "Grootschalige video-uploads", "Масово качване на видео",
+      "Încărcări video de volum mare", "Μεταφορτώσεις βίντεο μεγάλου όγκου",
+      "Otpremanje velikog broja videa", "Prijenos velikog broja videozapisa",
+      "Otpremanje velikog broja videa", "Ngarkime videosh me volum të lartë",
+      "Прикачување голем број видеа"
+    ],
+    "Advanced moderation settings": [
+      "Erweiterte Moderationseinstellungen", "Paramètres de modération avancés",
+      "Ajustes de moderación avanzada", "Impostazioni di moderazione avanzate",
+      "Geavanceerde moderatie-instellingen", "Разширени настройки за модериране",
+      "Setări avansate de moderare", "Προηγμένες ρυθμίσεις εποπτείας",
+      "Napredna podešavanja moderacije", "Napredne postavke moderiranja",
+      "Napredne postavke moderacije", "Cilësime të avancuara moderimi",
+      "Напредни поставки за модерирање"
+    ],
+    "Best for live gallery screens": [
+      "Ideal für Live-Galeriebildschirme", "Idéal pour les écrans de galerie en direct",
+      "Ideal para pantallas de galería en directo", "Ideale per gli schermi della galleria live",
+      "Ideaal voor livegalerijschermen", "Идеален за екрани с галерия на живо",
+      "Ideal pentru ecrane cu galerie live", "Ιδανικό για οθόνες ζωντανής συλλογής",
+      "Idealno za ekrane galerije uživo", "Idealno za zaslone galerije uživo",
+      "Idealno za ekrane galerije uživo", "Ideale për ekranet e galerisë live",
+      "Идеален за екрани со галерија во живо"
+    ]
+  };
+
+  const landingCodes = [
+    "de", "fr", "es", "it", "nl", "bg", "ro",
+    "el", "sr", "hr", "bs", "sq", "mk"
+  ];
+  Object.entries(landingSectionPhrases).forEach(([key, translations]) => {
+    if (!phrases[key]) phrases[key] = {};
+    landingCodes.forEach((code, index) => {
+      phrases[key][code] = translations[index];
+    });
+  });
+
   const attributeNames = ["placeholder", "aria-label", "title", "alt", "content"];
   const skipParents = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE"]);
 
@@ -634,21 +1408,104 @@
     if (item?.[lang]) return item[lang];
 
     const guestCount = key.match(/^(\d+) guests$/i);
-    if (guestCount) return lang === "tr" ? `${guestCount[1]} misafir` : `${guestCount[1]} ضيف`;
+    if (guestCount) {
+      const labels = { tr: "misafir", ar: "ضيف", de: "Gäste", fr: "invités", es: "invitados", it: "ospiti", nl: "gasten", bg: "гости", ro: "invitați", el: "καλεσμένοι", sr: "gostiju", hr: "gostiju", bs: "gostiju", sq: "të ftuar", mk: "гости" };
+      return `${guestCount[1]} ${labels[lang] || "guests"}`;
+    }
     const photoCount = key.match(/^(\d+) photos?$/i);
-    if (photoCount) return lang === "tr" ? `${photoCount[1]} fotoğraf` : `${photoCount[1]} صورة`;
+    if (photoCount) {
+      const labels = { tr: "fotoğraf", ar: "صورة", de: "Fotos", fr: "photos", es: "fotos", it: "foto", nl: "foto’s", bg: "снимки", ro: "fotografii", el: "φωτογραφίες", sr: "fotografija", hr: "fotografija", bs: "fotografija", sq: "foto", mk: "фотографии" };
+      return `${photoCount[1]} ${labels[lang] || "photos"}`;
+    }
     const memoryCount = key.match(/^(\d+) memories?$/i);
-    if (memoryCount) return lang === "tr" ? `${memoryCount[1]} anı` : `${memoryCount[1]} ذكرى`;
+    if (memoryCount) {
+      const labels = { tr: "anı", ar: "ذكرى", de: "Erinnerungen", fr: "souvenirs", es: "recuerdos", it: "ricordi", nl: "herinneringen", bg: "спомена", ro: "amintiri", el: "αναμνήσεις", sr: "uspomena", hr: "uspomena", bs: "uspomena", sq: "kujtim", mk: "спомени" };
+      return `${memoryCount[1]} ${labels[lang] || "memories"}`;
+    }
     const uploadedBy = key.match(/^Uploaded by (.+)$/i);
-    if (uploadedBy) return lang === "tr" ? `${uploadedBy[1]} tarafından yüklendi` : `رفعه ${uploadedBy[1]}`;
+    if (uploadedBy) {
+      const templates = {
+        tr: `${uploadedBy[1]} tarafından yüklendi`,
+        ar: `رفعه ${uploadedBy[1]}`,
+        de: `Hochgeladen von ${uploadedBy[1]}`,
+        fr: `Envoyé par ${uploadedBy[1]}`,
+        es: `Subido por ${uploadedBy[1]}`,
+        it: `Caricato da ${uploadedBy[1]}`,
+        nl: `Geüpload door ${uploadedBy[1]}`,
+        bg: `Качено от ${uploadedBy[1]}`,
+        ro: `Încărcat de ${uploadedBy[1]}`,
+        el: `Μεταφορτώθηκε από ${uploadedBy[1]}`,
+        sr: `Otpremio/la ${uploadedBy[1]}`,
+        hr: `Prenio/la ${uploadedBy[1]}`,
+        bs: `Otpremio/la ${uploadedBy[1]}`,
+        sq: `Ngarkuar nga ${uploadedBy[1]}`,
+        mk: `Прикачено од ${uploadedBy[1]}`
+      };
+      return templates[lang] || key;
+    }
     const uploadingFiles = key.match(/^Uploading (\d+) file\(s\)\.\.\.$/i);
-    if (uploadingFiles) return lang === "tr" ? `${uploadingFiles[1]} dosya yükleniyor...` : `جارٍ رفع ${uploadingFiles[1]} ملف...`;
+    if (uploadingFiles) {
+      const templates = {
+        tr: `${uploadingFiles[1]} dosya yükleniyor...`,
+        ar: `جارٍ رفع ${uploadingFiles[1]} ملف...`,
+        de: `${uploadingFiles[1]} Datei(en) werden hochgeladen...`,
+        fr: `Envoi de ${uploadingFiles[1]} fichier(s)...`,
+        es: `Subiendo ${uploadingFiles[1]} archivo(s)...`,
+        it: `Caricamento di ${uploadingFiles[1]} file...`,
+        nl: `${uploadingFiles[1]} bestand(en) uploaden...`,
+        bg: `Качване на ${uploadingFiles[1]} файл(а)...`,
+        ro: `Se încarcă ${uploadingFiles[1]} fișier(e)...`,
+        el: `Μεταφόρτωση ${uploadingFiles[1]} αρχείων...`,
+        sr: `Otpremanje ${uploadingFiles[1]} datoteka...`,
+        hr: `Prijenos ${uploadingFiles[1]} datoteka...`,
+        bs: `Otpremanje ${uploadingFiles[1]} datoteka...`,
+        sq: `Duke ngarkuar ${uploadingFiles[1]} skedarë...`,
+        mk: `Прикачување ${uploadingFiles[1]} датотеки...`
+      };
+      return templates[lang] || key;
+    }
     const uploadedFiles = key.match(/^(\d+) file\(s\) uploaded successfully!$/i);
-    if (uploadedFiles) return lang === "tr" ? `${uploadedFiles[1]} dosya başarıyla yüklendi!` : `تم رفع ${uploadedFiles[1]} ملف بنجاح!`;
+    if (uploadedFiles) {
+      const templates = {
+        tr: `${uploadedFiles[1]} dosya başarıyla yüklendi!`,
+        ar: `تم رفع ${uploadedFiles[1]} ملف بنجاح!`,
+        de: `${uploadedFiles[1]} Datei(en) erfolgreich hochgeladen!`,
+        fr: `${uploadedFiles[1]} fichier(s) envoyé(s) !`,
+        es: `¡${uploadedFiles[1]} archivo(s) subido(s)!`,
+        it: `${uploadedFiles[1]} file caricati!`,
+        nl: `${uploadedFiles[1]} bestand(en) geüpload!`,
+        bg: `${uploadedFiles[1]} файл(а) са качени успешно!`,
+        ro: `${uploadedFiles[1]} fișier(e) încărcat(e) cu succes!`,
+        el: `${uploadedFiles[1]} αρχεία μεταφορτώθηκαν επιτυχώς!`,
+        sr: `${uploadedFiles[1]} datoteka je uspešno otpremljeno!`,
+        hr: `${uploadedFiles[1]} datoteka uspješno je preneseno!`,
+        bs: `${uploadedFiles[1]} datoteka je uspješno otpremljeno!`,
+        sq: `${uploadedFiles[1]} skedarë u ngarkuan me sukses!`,
+        mk: `${uploadedFiles[1]} датотеки се успешно прикачени!`
+      };
+      return templates[lang] || key;
+    }
     const guestsFound = key.match(/^(\d+) of (\d+) guests found\.$/i);
-    if (guestsFound) return lang === "tr"
-      ? `${guestsFound[2]} misafirden ${guestsFound[1]} tanesi bulundu.`
-      : `تم العثور على ${guestsFound[1]} من أصل ${guestsFound[2]} ضيف.`;
+    if (guestsFound) {
+      const templates = {
+        tr: `${guestsFound[2]} misafirden ${guestsFound[1]} tanesi bulundu.`,
+        ar: `تم العثور على ${guestsFound[1]} من أصل ${guestsFound[2]} ضيف.`,
+        de: `${guestsFound[1]} von ${guestsFound[2]} Gästen gefunden.`,
+        fr: `${guestsFound[1]} invité(s) sur ${guestsFound[2]} trouvé(s).`,
+        es: `${guestsFound[1]} de ${guestsFound[2]} invitados encontrados.`,
+        it: `${guestsFound[1]} ospiti su ${guestsFound[2]} trovati.`,
+        nl: `${guestsFound[1]} van ${guestsFound[2]} gasten gevonden.`,
+        bg: `Намерени са ${guestsFound[1]} от ${guestsFound[2]} гости.`,
+        ro: `S-au găsit ${guestsFound[1]} din ${guestsFound[2]} invitați.`,
+        el: `Βρέθηκαν ${guestsFound[1]} από ${guestsFound[2]} καλεσμένους.`,
+        sr: `Pronađeno ${guestsFound[1]} od ${guestsFound[2]} gostiju.`,
+        hr: `Pronađeno je ${guestsFound[1]} od ${guestsFound[2]} gostiju.`,
+        bs: `Pronađeno je ${guestsFound[1]} od ${guestsFound[2]} gostiju.`,
+        sq: `U gjetën ${guestsFound[1]} nga ${guestsFound[2]} të ftuar.`,
+        mk: `Пронајдени се ${guestsFound[1]} од ${guestsFound[2]} гости.`
+      };
+      return templates[lang] || key;
+    }
 
     return value;
   }
@@ -667,6 +1524,13 @@
 
   function translateElement(element) {
     if (!(element instanceof Element)) return;
+    const explicitKey = element.getAttribute("data-i18n");
+    if (explicitKey) {
+      const translated = translate(explicitKey);
+      if (translated !== explicitKey && element.textContent !== translated) {
+        element.textContent = translated;
+      }
+    }
     attributeNames.forEach((name) => {
       if (!element.hasAttribute(name)) return;
       const value = element.getAttribute(name);
@@ -684,16 +1548,54 @@
     root.querySelectorAll?.("*").forEach(translateElement);
   }
 
+  // JavaScript-generated dialogs do not create DOM nodes, so the mutation
+  // observer cannot translate them. Route them through the same dictionary.
+  const nativeAlert = window.alert.bind(window);
+  const nativeConfirm = window.confirm.bind(window);
+  window.alert = (message) => nativeAlert(translate(message));
+  window.confirm = (message) => nativeConfirm(translate(message));
+
   function addSelector() {
     if (!document.body || document.querySelector(".snapup-language")) return;
     const languageNames = {
       en: { short: "EN", label: "English" },
       tr: { short: "TR", label: "Türkçe" },
-      ar: { short: "AR", label: "العربية" }
+      ar: { short: "AR", label: "العربية" },
+      de: { short: "DE", label: "Deutsch" },
+      fr: { short: "FR", label: "Français" },
+      es: { short: "ES", label: "Español" },
+      it: { short: "IT", label: "Italiano" },
+      nl: { short: "NL", label: "Nederlands" },
+      bg: { short: "BG", label: "Български" },
+      ro: { short: "RO", label: "Română" },
+      el: { short: "EL", label: "Ελληνικά" },
+      sr: { short: "SR", label: "Srpski" },
+      hr: { short: "HR", label: "Hrvatski" },
+      bs: { short: "BS", label: "Bosanski" },
+      sq: { short: "SQ", label: "Shqip" },
+      mk: { short: "MK", label: "Македонски" }
     };
     const wrapper = document.createElement("div");
     wrapper.className = "snapup-language";
-    wrapper.setAttribute("aria-label", language === "tr" ? "Dil seç" : language === "ar" ? "اختر اللغة" : "Choose language");
+    const selectorLabels = {
+      en: "Choose language",
+      tr: "Dil seç",
+      ar: "اختر اللغة",
+      de: "Sprache wählen",
+      fr: "Choisir la langue",
+      es: "Elegir idioma",
+      it: "Scegli la lingua",
+      nl: "Taal kiezen",
+      bg: "Изберете език",
+      ro: "Alege limba",
+      el: "Επιλογή γλώσσας",
+      sr: "Izaberi jezik",
+      hr: "Odaberi jezik",
+      bs: "Izaberi jezik",
+      sq: "Zgjidh gjuhën",
+      mk: "Избери јазик"
+    };
+    wrapper.setAttribute("aria-label", selectorLabels[language]);
     wrapper.innerHTML = `
       <button
         class="snapup-language__trigger"
@@ -771,6 +1673,7 @@
   }
 
   function init() {
+    document.title = translate(document.title);
     translateTree();
     addSelector();
 
@@ -780,6 +1683,16 @@
       queued = true;
       queueMicrotask(() => {
         records.forEach((record) => {
+          if (record.type === "attributes") {
+            translateElement(record.target);
+            return;
+          }
+
+          if (record.type === "characterData") {
+            translateTextNode(record.target);
+            return;
+          }
+
           record.addedNodes.forEach((node) => {
             if (node.nodeType === Node.TEXT_NODE) translateTextNode(node);
             if (node.nodeType === Node.ELEMENT_NODE) translateTree(node);
@@ -788,7 +1701,13 @@
         queued = false;
       });
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: attributeNames,
+      characterData: true,
+      childList: true,
+      subtree: true
+    });
   }
 
   window.SnapUpI18n = {
