@@ -14,12 +14,14 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/main.css?v=footer-16" />
+    <link rel="stylesheet" href="css/main.css?v=mobile-1" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
     <meta name="theme-color" content="#17122B" />
+    <link rel="stylesheet" href="css/i18n.css?v=mobile-1" />
+    <script src="js/i18n.js?v=mobile-1" defer></script>
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -136,7 +138,13 @@
             <div class="eyebrow">
               <span></span> One QR · Every guest · Every memory
             </div>
-            <h1>Every memory,<br /><strong>instantly</strong> shared.</h1>
+            <h1 class="hero-title">
+              <span class="hero-title__line">Every guest.</span>
+              <span class="hero-title__line">Every moment.</span>
+              <strong class="hero-title__line hero-title__highlight"
+                >One shared album.</strong
+              >
+            </h1>
             <p>
               Create your event, share one QR code, and let guests upload
               photos, videos, and messages in real time. No app. No login. Just
@@ -290,7 +298,11 @@
           </header>
 
           <div class="product-flow__shell reveal">
-            <div class="product-flow__steps" role="tablist" aria-label="SnapUp workflow">
+            <div
+              class="product-flow__steps"
+              role="tablist"
+              aria-label="SnapUp workflow"
+            >
               <button
                 class="product-flow__step active"
                 type="button"
@@ -304,7 +316,9 @@
                   <strong>Create the event</strong>
                   <small>Set the name, date, access, and upload rules.</small>
                 </span>
-                <span class="product-flow__step-arrow" aria-hidden="true">→</span>
+                <span class="product-flow__step-arrow" aria-hidden="true"
+                  >→</span
+                >
               </button>
 
               <button
@@ -320,7 +334,9 @@
                   <strong>Share the QR code</strong>
                   <small>Display it, print it, or send the event link.</small>
                 </span>
-                <span class="product-flow__step-arrow" aria-hidden="true">→</span>
+                <span class="product-flow__step-arrow" aria-hidden="true"
+                  >→</span
+                >
               </button>
 
               <button
@@ -334,9 +350,13 @@
                 <span class="product-flow__step-number">03</span>
                 <span class="product-flow__step-copy">
                   <strong>Guests add memories</strong>
-                  <small>Upload photos, videos, and messages—no app needed.</small>
+                  <small
+                    >Upload photos, videos, and messages—no app needed.</small
+                  >
                 </span>
-                <span class="product-flow__step-arrow" aria-hidden="true">→</span>
+                <span class="product-flow__step-arrow" aria-hidden="true"
+                  >→</span
+                >
               </button>
 
               <button
@@ -350,9 +370,13 @@
                 <span class="product-flow__step-number">04</span>
                 <span class="product-flow__step-copy">
                   <strong>Enjoy the gallery</strong>
-                  <small>Approve, display, download, and relive everything.</small>
+                  <small
+                    >Approve, display, download, and relive everything.</small
+                  >
                 </span>
-                <span class="product-flow__step-arrow" aria-hidden="true">→</span>
+                <span class="product-flow__step-arrow" aria-hidden="true"
+                  >→</span
+                >
               </button>
 
               <div class="product-flow__actions">
@@ -383,7 +407,9 @@
                     <div class="flow-screen-heading">
                       <span>Organizer dashboard</span>
                       <h3>Create your event</h3>
-                      <p>Your private event space is ready in under a minute.</p>
+                      <p>
+                        Your private event space is ready in under a minute.
+                      </p>
                     </div>
                     <div class="flow-form">
                       <label>
@@ -416,14 +442,20 @@
                     <div class="flow-screen-heading">
                       <span>Event ready</span>
                       <h3>One code connects everyone.</h3>
-                      <p>Guests can scan the QR code or enter the event code.</p>
+                      <p>
+                        Guests can scan the QR code or enter the event code.
+                      </p>
                     </div>
                     <div class="flow-event-card">
                       <div>
                         <b>Emma &amp; Jake's Wedding</b>
                         <small>May 24, 2026</small>
                       </div>
-                      <div class="qr-code" id="qrCode" aria-label="Decorative QR code"></div>
+                      <div
+                        class="qr-code"
+                        id="qrCode"
+                        aria-label="Decorative QR code"
+                      ></div>
                       <div class="flow-code-box">
                         <span>EVENT CODE</span>
                         <strong id="eventCode">EJ2026</strong>
@@ -456,7 +488,9 @@
                     <div class="upload-options">
                       <button type="button" data-upload="photo">Photo</button>
                       <button type="button" data-upload="video">Video</button>
-                      <button type="button" data-upload="message">Message</button>
+                      <button type="button" data-upload="message">
+                        Message
+                      </button>
                     </div>
                     <div class="message-box" id="messageBox">
                       <textarea
@@ -475,7 +509,9 @@
                         <b id="fileName">memory_photo.jpg</b>
                         <small id="progressStatus">Uploading...</small>
                       </div>
-                      <div class="progress-track"><span id="progressFill"></span></div>
+                      <div class="progress-track">
+                        <span id="progressFill"></span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -494,17 +530,27 @@
                         <h3>Every angle, together.</h3>
                         <p>128 memories collected from 42 guests.</p>
                       </div>
-                      <span class="flow-gallery__status"><i></i> Updating live</span>
+                      <span class="flow-gallery__status"
+                        ><i></i> Updating live</span
+                      >
                     </div>
                     <div class="flow-gallery__grid" aria-hidden="true">
-                      <article class="flow-memory memory-one"><span>Elif</span></article>
-                      <article class="flow-memory memory-two"><span>Melih</span></article>
+                      <article class="flow-memory memory-one">
+                        <span>Elif</span>
+                      </article>
+                      <article class="flow-memory memory-two">
+                        <span>Melih</span>
+                      </article>
                       <article class="flow-memory memory-three">
                         <b>“A night we will never forget.”</b>
                         <span>Ayşe</span>
                       </article>
-                      <article class="flow-memory memory-four"><span>Deniz</span></article>
-                      <article class="flow-memory memory-five"><span>Kerem</span></article>
+                      <article class="flow-memory memory-four">
+                        <span>Deniz</span>
+                      </article>
+                      <article class="flow-memory memory-five">
+                        <span>Kerem</span>
+                      </article>
                     </div>
                   </div>
                 </div>
@@ -735,7 +781,6 @@
           </div>
         </div>
       </section>
-
     </main>
 
     <footer class="site-footer">
@@ -779,9 +824,7 @@
               </svg>
               <i></i>
             </span>
-            <span
-              ><strong>SnapUp</strong><em>Events</em></span
-            >
+            <span><strong>SnapUp</strong><em>Events</em></span>
           </a>
 
           <p>
@@ -814,8 +857,8 @@
       <div class="container site-footer__bottom">
         <p>© 2026 SnapUp Events. All rights reserved.</p>
         <div>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Use</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="terms-of-use.html">Terms of Use</a>
         </div>
       </div>
     </footer>
