@@ -227,25 +227,71 @@ html[lang="ar"] .hero-title__line {
 
 @media (max-width: 760px) {
   .snapup-language {
-    right: 12px;
-    bottom: max(12px, env(safe-area-inset-bottom));
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
   }
 
   .snapup-language__trigger {
-    min-width: 70px;
-    height: 44px;
-    padding: 0 10px;
-    border-radius: 14px;
+    min-width: 0;
+    width: 56px;
+    height: 40px;
+    gap: 5px;
+    padding: 0 8px;
+    border-radius: 13px;
+    background: rgba(24, 15, 49, 0.82);
+    box-shadow:
+      0 10px 26px rgba(13, 7, 31, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
+
+  .snapup-language__globe {
+    width: 16px;
+    height: 16px;
+  }
+
+  .snapup-language__current {
+    min-width: 17px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .snapup-language__chevron {
+    display: none;
   }
 
   .snapup-language__menu {
-    width: 164px;
+    width: 176px;
     max-height: min(390px, calc(100vh - 72px));
+    border-radius: 16px;
   }
 }
 
 @media print {
   .snapup-language {
     display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .snapup-language {
+    top: auto;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .snapup-language__trigger {
+    width: 56px;
+    height: 42px;
+    padding: 0 8px;
+    border-radius: 13px;
+    background: rgba(24, 15, 49, 0.92);
+    box-shadow:
+      0 12px 30px rgba(8, 4, 22, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .snapup-language__menu {
+    bottom: calc(100% + 9px);
+    max-height: min(390px, calc(100dvh - 76px));
   }
 }

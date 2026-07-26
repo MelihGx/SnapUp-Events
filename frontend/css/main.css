@@ -6214,3 +6214,988 @@ body {
     max-width: 100%;
   }
 }
+
+/* =========================================================
+   MOBILE HERO V2
+   Purpose-built first viewport instead of a scaled desktop hero.
+   ========================================================= */
+@media (max-width: 720px) {
+  .container {
+    width: min(calc(100% - 32px), var(--container));
+  }
+
+  .hero {
+    padding-top: 92px;
+  }
+
+  .hero-grid {
+    gap: 18px;
+    padding-bottom: 104px;
+  }
+
+  .hero-copy {
+    padding: 0;
+  }
+
+  .hero .eyebrow {
+    min-height: 28px;
+    padding: 7px 9px;
+    gap: 8px;
+    font-size: clamp(7.5px, 2.35vw, 9px);
+    line-height: 1;
+    letter-spacing: 0.045em;
+    white-space: nowrap;
+  }
+
+  .hero .eyebrow span {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+  }
+
+  .hero h1 {
+    margin: 17px 0 14px;
+    font-size: clamp(32px, 10vw, 42px);
+    line-height: 0.96;
+    letter-spacing: -0.065em;
+  }
+
+  .hero-title__line,
+  .hero-title__line:nth-child(2) {
+    width: fit-content;
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(28px, 8.7vw, 36px);
+  }
+
+  .hero-copy p {
+    max-width: none;
+    font-size: 13.5px;
+    line-height: 1.52;
+  }
+
+  .hero-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 19px 0 15px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 46px;
+    padding-inline: 18px;
+    border-radius: 13px;
+    font-size: 13px;
+  }
+
+  .hero-buttons .btn svg {
+    font-size: 16px;
+  }
+
+  .hero .mini-proof {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 7px;
+    width: 100%;
+  }
+
+  .hero .mini-proof span {
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    padding: 8px 5px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 14px;
+    font-size: clamp(9px, 2.6vw, 11px);
+    line-height: 1.16;
+    text-align: center;
+  }
+
+  .hero .mini-proof svg {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+  }
+
+  .hero-device {
+    min-height: 530px;
+    margin-top: 2px;
+  }
+
+  .hero .phone-frame {
+    width: min(78vw, 272px);
+    min-height: 535px;
+    border-radius: 38px;
+  }
+
+  .hero .phone-screen {
+    min-height: 470px;
+  }
+
+  .hero .floating-card {
+    display: none;
+  }
+
+  .hero .lens-ring {
+    top: 48%;
+    right: -74%;
+    width: 500px;
+    opacity: 0.72;
+  }
+
+  .hero .flash {
+    display: none;
+  }
+
+  .viewfinder .vf-label,
+  .viewfinder .vf-corner {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .container {
+    width: min(calc(100% - 26px), var(--container));
+  }
+
+  .hero h1 {
+    font-size: clamp(30px, 9.8vw, 37px);
+  }
+
+  .hero-copy p {
+    font-size: 13px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 56px;
+    padding-inline: 4px;
+    font-size: 9px;
+  }
+}
+
+/* =========================================================
+   MOBILE FIRST VIEW
+   Keeps the complete primary action area above the fold and
+   starts the product preview only after the opening screen.
+   ========================================================= */
+@media (max-width: 720px) {
+  .site-header {
+    padding-top: max(6px, env(safe-area-inset-top));
+  }
+
+  .nav-shell {
+    width: calc(100% - 14px);
+    min-height: 58px;
+    padding: 5px 6px 5px 8px;
+    border-radius: 16px;
+  }
+
+  .brand {
+    gap: 6px;
+    padding: 4px 5px 4px 3px;
+  }
+
+  .brand-mark {
+    width: 35px;
+    height: 35px;
+  }
+
+  .brand-text {
+    font-size: clamp(15px, 4.6vw, 18px);
+  }
+
+  .burger {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+
+  .mobile-menu {
+    top: calc(max(6px, env(safe-area-inset-top)) + 64px);
+  }
+
+  .hero {
+    min-height: 100svh;
+    padding-top: 74px;
+    padding-bottom: 0;
+  }
+
+  .hero-grid {
+    display: block;
+    padding-bottom: 0;
+  }
+
+  .hero-copy {
+    display: flex;
+    min-height: calc(100svh - 74px);
+    padding: 6px 0 14px;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .hero .eyebrow {
+    align-self: flex-start;
+    min-height: 24px;
+    padding: 6px 8px;
+    font-size: clamp(6.7px, 2vw, 8.2px);
+    letter-spacing: 0.035em;
+  }
+
+  .hero .eyebrow span {
+    width: 7px;
+    height: 7px;
+    flex-basis: 7px;
+  }
+
+  .hero h1 {
+    margin: 13px 0 10px;
+    font-size: clamp(31px, 9.7vw, 39px);
+    line-height: 0.94;
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(26px, 8.15vw, 33px);
+  }
+
+  .hero-copy p {
+    max-width: 33rem;
+    font-size: clamp(11.5px, 3.35vw, 13px);
+    line-height: 1.38;
+  }
+
+  .hero-buttons {
+    gap: 7px;
+    margin: 14px 0 11px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 39px;
+    padding-inline: 14px;
+    border-radius: 11px;
+    font-size: 11.5px;
+  }
+
+  .hero-buttons .btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .hero .mini-proof {
+    gap: 5px;
+    margin-top: auto;
+  }
+
+  .hero .mini-proof span {
+    min-height: 49px;
+    padding: 6px 3px;
+    gap: 4px;
+    border-radius: 12px;
+    font-size: clamp(7.6px, 2.25vw, 9.5px);
+    line-height: 1.1;
+  }
+
+  .hero .mini-proof svg {
+    width: 14px;
+    height: 14px;
+    flex-basis: 14px;
+  }
+
+  .hero-device {
+    min-height: 560px;
+    padding-top: 34px;
+  }
+
+  .hero::after {
+    display: none;
+  }
+
+  .hero .film-strip {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) and (min-height: 650px) {
+  .hero-copy {
+    min-height: calc(100svh - 74px);
+    padding-bottom: 18px;
+  }
+
+  .hero .mini-proof {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .container {
+    width: calc(100% - 24px);
+  }
+
+  .hero h1 {
+    font-size: clamp(29px, 9.45vw, 36px);
+  }
+
+  .hero-copy p {
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 720px) and (max-height: 600px) {
+  .hero h1 {
+    margin-block: 11px 8px;
+    font-size: clamp(29px, 9.2vw, 36px);
+  }
+
+  .hero-copy p {
+    font-size: 11.2px;
+    line-height: 1.32;
+  }
+
+  .hero-buttons {
+    margin-block: 11px 9px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 37px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 46px;
+  }
+}
+
+/* =========================================================
+   MOBILE HERO PROPORTIONS
+   Final responsive scale for a balanced, touch-friendly first view.
+   ========================================================= */
+@media (max-width: 720px) {
+  .container {
+    width: calc(100% - 32px);
+  }
+
+  .site-header {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+
+  .nav-shell {
+    width: calc(100% - 16px);
+    min-height: 60px;
+    padding: 6px 7px 6px 9px;
+    gap: 8px;
+    border-radius: 17px;
+  }
+
+  .brand {
+    gap: 7px;
+    padding: 4px 7px 4px 4px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-text {
+    font-size: clamp(16px, 4.8vw, 19px);
+  }
+
+  .burger {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .hero {
+    min-height: 100svh;
+    padding-top: 82px;
+  }
+
+  .hero-copy {
+    min-height: calc(100svh - 82px);
+    padding: 4px 0 clamp(22px, 4svh, 38px);
+  }
+
+  .hero .eyebrow {
+    min-height: 27px;
+    padding: 7px 9px;
+    gap: 7px;
+    font-size: clamp(7.5px, 2.2vw, 9px);
+    letter-spacing: 0.045em;
+  }
+
+  .hero h1 {
+    margin: clamp(15px, 2.7svh, 22px) 0 13px;
+    font-size: clamp(35px, 10.7vw, 43px);
+    line-height: 0.96;
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(29px, 8.8vw, 36px);
+  }
+
+  .hero-copy p {
+    max-width: 36rem;
+    font-size: clamp(13px, 3.8vw, 15px);
+    line-height: 1.46;
+  }
+
+  .hero-buttons {
+    gap: 9px;
+    margin: clamp(17px, 2.8svh, 24px) 0 clamp(17px, 2.6svh, 22px);
+  }
+
+  .hero-buttons .btn {
+    min-height: 47px;
+    padding-inline: 18px;
+    border-radius: 13px;
+    font-size: clamp(12px, 3.45vw, 13.5px);
+  }
+
+  .hero-buttons .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .hero .mini-proof {
+    gap: 7px;
+    margin-top: 0;
+  }
+
+  .hero .mini-proof span {
+    min-height: 68px;
+    padding: 9px 5px;
+    gap: 6px;
+    border-radius: 14px;
+    font-size: clamp(8.7px, 2.55vw, 10.5px);
+    line-height: 1.16;
+  }
+
+  .hero .mini-proof svg {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+  }
+
+  .hero-device {
+    padding-top: 42px;
+  }
+}
+
+@media (max-width: 380px) {
+  .container {
+    width: calc(100% - 26px);
+  }
+
+  .hero h1 {
+    font-size: clamp(33px, 10.4vw, 39px);
+  }
+
+  .hero-copy p {
+    font-size: 13px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 64px;
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 720px) and (max-height: 600px) {
+  .hero {
+    padding-top: 74px;
+  }
+
+  .hero-copy {
+    min-height: calc(100svh - 74px);
+    padding-bottom: 14px;
+  }
+
+  .hero h1 {
+    margin-block: 11px 8px;
+    font-size: clamp(31px, 9.5vw, 37px);
+  }
+
+  .hero-copy p {
+    font-size: 11.5px;
+    line-height: 1.34;
+  }
+
+  .hero-buttons {
+    margin-block: 11px 10px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 40px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 51px;
+    padding-block: 6px;
+  }
+}
+
+/* =========================================================
+   MOBILE FULL-SCREEN HERO
+   The primary hero copy owns the complete opening viewport.
+   Product previews and following sections begin after scrolling.
+   ========================================================= */
+@media (max-width: 720px) {
+  .hero {
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    padding-top: 74px;
+  }
+
+  .hero-grid {
+    display: block;
+    min-height: calc(100vh - 74px);
+    min-height: calc(100svh - 74px);
+    min-height: calc(100dvh - 74px);
+    padding-bottom: 0;
+  }
+
+  .hero-copy {
+    display: flex;
+    box-sizing: border-box;
+    min-height: calc(100vh - 74px);
+    min-height: calc(100svh - 74px);
+    min-height: calc(100dvh - 74px);
+    padding: 8px 0 calc(70px + env(safe-area-inset-bottom));
+    flex-direction: column;
+  }
+
+  .hero .mini-proof {
+    margin-top: auto;
+  }
+
+  .hero-device {
+    min-height: 560px;
+    padding-top: 42px;
+  }
+}
+
+@media (max-width: 720px) and (max-height: 620px) {
+  .hero-copy {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom));
+  }
+
+  .hero h1 {
+    margin-block: 10px 7px;
+  }
+
+  .hero-buttons {
+    margin-block: 10px 9px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 48px;
+  }
+}
+
+/* =========================================================
+   MOBILE HERO — FINAL VERTICAL COMPOSITION
+   Keeps the opening message visually full while placing both
+   primary actions in the lower, thumb-friendly part of the screen.
+   ========================================================= */
+@media (max-width: 720px) {
+  .hero-copy {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(18px, 1fr) auto auto;
+    align-content: stretch;
+    padding-top: clamp(9px, 1.8dvh, 15px);
+    padding-bottom: calc(54px + env(safe-area-inset-bottom));
+  }
+
+  .hero .eyebrow {
+    width: fit-content;
+  }
+
+  .hero h1 {
+    margin: clamp(14px, 2.2dvh, 19px) 0 clamp(11px, 1.7dvh, 15px);
+    font-size: clamp(39px, 11.8vw, 47px);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(34px, 10.15vw, 41px);
+    line-height: 0.96;
+  }
+
+  .hero-copy p {
+    max-width: none;
+    margin: 0;
+    font-size: clamp(13.5px, 3.85vw, 15.5px);
+    line-height: 1.47;
+  }
+
+  .hero-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 11px;
+    margin: 0 0 14px;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    min-height: 48px;
+    padding-inline: 18px;
+    font-size: clamp(12.5px, 3.55vw, 14px);
+  }
+
+  .hero .mini-proof {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: clamp(37px, 11.4vw, 43px);
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(32px, 9.85vw, 37px);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 650px) {
+  .hero-copy {
+    grid-template-rows: auto auto auto minmax(8px, 1fr) auto auto;
+    padding-top: 6px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+
+  .hero h1 {
+    margin-block: 9px 7px;
+    font-size: clamp(31px, 9.6vw, 38px);
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(27px, 8.25vw, 33px);
+  }
+
+  .hero-copy p {
+    font-size: 11.5px;
+    line-height: 1.34;
+  }
+
+  .hero-buttons {
+    gap: 7px;
+    margin-bottom: 9px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 39px;
+    font-size: 11.5px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 47px;
+  }
+}
+
+/* Keep the mobile hero fully inside the viewport after enlarging its copy. */
+@media (max-width: 720px) {
+  .hero-grid,
+  .hero-copy,
+  .hero-message,
+  .hero-buttons {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .hero h1 {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(43px, 13.2vw, 56px);
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(35px, 10.8vw, 45px);
+  }
+
+  html[lang="ar"] .hero h1 {
+    font-size: clamp(37px, 11.2vw, 47px);
+  }
+
+  .hero-title__line {
+    max-width: 100%;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: clamp(41px, 12.8vw, 49px);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 650px) {
+  .hero h1 {
+    font-size: clamp(34px, 10.2vw, 41px);
+  }
+}
+
+/* =========================================================
+   MOBILE HERO — EXACT FIRST-SCREEN PLACEMENT
+   Message fills the large upper area; each action occupies its
+   own full-width row below it. Desktop remains unchanged.
+   ========================================================= */
+@media (max-width: 720px) {
+  .hero {
+    min-height: 100dvh;
+    padding-top: 76px;
+  }
+
+  .hero-grid,
+  .hero-copy {
+    min-height: calc(100dvh - 76px);
+  }
+
+  .hero-copy {
+    display: grid;
+    grid-template-rows:
+      auto
+      minmax(0, 1fr)
+      auto
+      auto;
+    gap: 0;
+    padding: 5px 0 calc(58px + env(safe-area-inset-bottom));
+  }
+
+  .hero .eyebrow {
+    margin: 0 0 8px;
+  }
+
+  .hero-message {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .hero h1 {
+    margin: 0 0 clamp(14px, 2.2dvh, 20px);
+    font-size: clamp(52px, 16vw, 66px);
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+  }
+
+  .hero-copy p {
+    max-width: none;
+    margin: 0;
+    font-size: clamp(16px, 4.45vw, 18px);
+    line-height: 1.5;
+  }
+
+  .hero-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 14px 0 12px;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    min-height: 50px;
+    padding-inline: 18px;
+    border-radius: 13px;
+    font-size: clamp(12.5px, 3.55vw, 14px);
+  }
+
+  .hero .mini-proof {
+    margin: 0;
+  }
+
+  html:is(
+    [lang="de"],
+    [lang="fr"],
+    [lang="es"],
+    [lang="it"],
+    [lang="nl"],
+    [lang="bg"],
+    [lang="ro"],
+    [lang="el"],
+    [lang="sr"],
+    [lang="hr"],
+    [lang="bs"],
+    [lang="sq"],
+    [lang="mk"]
+  ) .hero h1 {
+    font-size: clamp(41px, 12.4vw, 50px);
+    line-height: 0.95;
+  }
+
+  html[lang="ar"] .hero h1 {
+    font-size: clamp(43px, 12.8vw, 52px);
+  }
+
+  .hero-device {
+    padding-top: 38px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: clamp(47px, 14.5vw, 55px);
+  }
+
+  .hero-copy p {
+    font-size: clamp(14.5px, 4.15vw, 16px);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 650px) {
+  .hero {
+    padding-top: 70px;
+  }
+
+  .hero-grid,
+  .hero-copy {
+    min-height: calc(100dvh - 70px);
+  }
+
+  .hero-copy {
+    padding-top: 3px;
+    padding-bottom: calc(50px + env(safe-area-inset-bottom));
+  }
+
+  .hero .eyebrow {
+    margin-bottom: 5px;
+  }
+
+  .hero h1 {
+    margin-bottom: 8px;
+    font-size: clamp(35px, 10.5vw, 42px);
+  }
+
+  .hero-copy p {
+    font-size: 13px;
+    line-height: 1.38;
+  }
+
+  .hero-buttons {
+    gap: 7px;
+    margin: 8px 0 7px;
+  }
+
+  .hero-buttons .btn {
+    min-height: 39px;
+    font-size: 11.5px;
+  }
+
+  .hero .mini-proof span {
+    min-height: 47px;
+  }
+}
