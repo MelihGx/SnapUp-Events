@@ -31,6 +31,18 @@
     white-space: nowrap;
   }
 
+  .hero-title__highlight {
+    width: 100%;
+    white-space: normal;
+    line-height: 0.94;
+  }
+
+  .hero-highlight__mobile-line {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+  }
+
   .hero-buttons .btn {
     width: 100%;
     max-width: 100%;
@@ -66,6 +78,16 @@
   }
 }
 
+@media (min-width: 721px) {
+  .hero-highlight__mobile-line {
+    display: inline;
+  }
+
+  .hero-highlight__mobile-line + .hero-highlight__mobile-line::before {
+    content: " ";
+  }
+}
+
 @media (max-width: 380px) {
   .hero-grid {
     padding-right: max(14px, env(safe-area-inset-right));
@@ -73,6 +95,6 @@
   }
 
   .hero h1 {
-    font-size: clamp(38px, 11.6vw, 44px);
+    font-size: clamp(37px, 10.7vw, 41px);
   }
 }

@@ -1548,6 +1548,42 @@
     root.querySelectorAll?.("*").forEach(translateElement);
   }
 
+  function splitMobileHeroHighlight() {
+    const highlight = document.querySelector(".hero-title__highlight");
+    if (!highlight) return;
+
+    const lines = {
+      en: ["One shared", "album."],
+      tr: ["Tek", "albüm."],
+      ar: ["ألبوم", "واحد."],
+      de: ["Ein gemeinsames", "Album."],
+      fr: ["Un album", "partagé."],
+      es: ["Un álbum", "compartido."],
+      it: ["Un album", "condiviso."],
+      nl: ["Eén gedeeld", "album."],
+      bg: ["Един общ", "албум."],
+      ro: ["Un singur", "album comun."],
+      el: ["Ένα κοινό", "άλμπουμ."],
+      sr: ["Jedan zajednički", "album."],
+      hr: ["Jedan zajednički", "album."],
+      bs: ["Jedan zajednički", "album."],
+      sq: ["Një album", "i përbashkët."],
+      mk: ["Еден заеднички", "албум."]
+    };
+
+    const [firstLine, secondLine] = lines[language] || lines.en;
+    highlight.replaceChildren(
+      Object.assign(document.createElement("span"), {
+        className: "hero-highlight__mobile-line",
+        textContent: firstLine
+      }),
+      Object.assign(document.createElement("span"), {
+        className: "hero-highlight__mobile-line",
+        textContent: secondLine
+      })
+    );
+  }
+
   // JavaScript-generated dialogs do not create DOM nodes, so the mutation
   // observer cannot translate them. Route them through the same dictionary.
   const nativeAlert = window.alert.bind(window);
@@ -1675,6 +1711,7 @@
   function init() {
     document.title = translate(document.title);
     translateTree();
+    splitMobileHeroHighlight();
     addSelector();
 
     let queued = false;
