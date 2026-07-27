@@ -2,6 +2,40 @@ const token = localStorage.getItem("snapup_token");
 
 const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
+const localeByLanguage = {
+  en: "en-US",
+  tr: "tr-TR",
+  ar: "ar",
+  de: "de-DE",
+  fr: "fr-FR",
+  es: "es-ES",
+  it: "it-IT",
+  nl: "nl-NL",
+  bg: "bg-BG",
+  ro: "ro-RO",
+  el: "el-GR",
+  sr: "sr-RS",
+  hr: "hr-HR",
+  bs: "bs-BA",
+  sq: "sq-AL",
+  mk: "mk-MK",
+};
+
+function t(value, replacements = {}) {
+  const translated = window.SnapUpI18n?.t?.(value) || value;
+
+  return Object.entries(replacements).reduce(
+    (result, [key, replacement]) =>
+      result.replaceAll(`{${key}}`, String(replacement)),
+    translated,
+  );
+}
+
+function getCurrentLocale() {
+  const language = window.SnapUpI18n?.language || "en";
+  return localeByLanguage[language] || "en-US";
+}
+
 const detailLoading = document.getElementById("detailLoading");
 const detailError = document.getElementById("detailError");
 const detailErrorText = document.getElementById("detailErrorText");
@@ -98,7 +132,7 @@ if (!token) {
 }
 
 if (!eventId) {
-  showError("Event ID bulunamadı. Account sayfasından tekrar giriş yap.");
+  showError("Event ID was not found. Return from the Account page.");
 }
 
 function getAuthHeaders() {
@@ -129,11 +163,18 @@ function formatDate(dateValue) {
   }
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-    const [year, month, day] = dateValue.split("-");
-    return `${day}.${month}.${year}`;
+    return new Intl.DateTimeFormat(getCurrentLocale(), {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(`${dateValue}T12:00:00`));
   }
 
-  return new Date(dateValue).toLocaleDateString("tr-TR");
+  return new Intl.DateTimeFormat(getCurrentLocale(), {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(dateValue));
 }
 
 function formatDateTime(dateValue) {
@@ -141,7 +182,7 @@ function formatDateTime(dateValue) {
     return "-";
   }
 
-  return new Date(dateValue).toLocaleString("tr-TR", {
+  return new Date(dateValue).toLocaleString(getCurrentLocale(), {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -197,7 +238,7 @@ function showError(message) {
   detailLoading.hidden = true;
   detailContent.hidden = true;
   detailError.hidden = false;
-  detailErrorText.textContent = message;
+  detailErrorText.textContent = t(message);
 }
 
 function showContent() {
@@ -209,9 +250,9 @@ function showContent() {
 function renderEventInfo(event) {
   currentEvent = event;
 
-  eventTitle.textContent = event.event_name || "Untitled Event";
+  eventTitle.textContent = event.event_name || t("Untitled Event");
   eventDescription.textContent =
-    event.description || "No description added for this event.";
+    event.description || t("No description added for this event.");
 
   eventCode.textContent = event.event_code || "------";
 
@@ -219,8 +260,8 @@ function renderEventInfo(event) {
   eventDate.textContent = formatDate(event.event_date);
   eventTime.textContent = getEventTimeText(event);
   eventCreatedAt.textContent = formatDateTime(event.event_created_at);
-  eventStatus.textContent = event.is_event_active ? "Active" : "Passive";
-  eventPrivacy.textContent = event.is_event_private ? "Private" : "Public";
+  eventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
+  eventPrivacy.textContent = t(event.is_event_private ? "Private" : "Public");
 
   if (event.event_cover_url) {
     eventCover.classList.add("has-image");
@@ -237,15 +278,20 @@ function renderEventInfo(event) {
         class="qr-click-link"
         target="_blank"
         rel="noopener"
-        title="Open guest upload page"
+        title="${escapeHtml(t("Open guest upload page"))}"
       >
-        <img src="${escapeHtml(qrImageUrl)}" alt="Event QR code" />
+        <img
+          src="${escapeHtml(qrImageUrl)}"
+          alt="${escapeHtml(t("Event QR code"))}"
+        />
       </a>
-      <small class="qr-helper-text">Scan or click to join this event</small>
+      <small class="qr-helper-text">${escapeHtml(
+        t("Scan or click to join this event"),
+      )}</small>
     `;
   } else {
     qrBox.innerHTML = `
-      <span>QR code not found.</span>
+      <span>${escapeHtml(t("QR code not found."))}</span>
     `;
   }
 }
@@ -293,8 +339,8 @@ function renderSettings(settings) {
   if (!settings) {
     settingsList.innerHTML = `
       <div class="setting-row">
-        <strong>No settings found</strong>
-        <span class="off">Empty</span>
+        <strong>${escapeHtml(t("No settings found"))}</strong>
+        <span class="off">${escapeHtml(t("Empty"))}</span>
       </div>
     `;
     return;
@@ -340,7 +386,7 @@ function renderSettings(settings) {
       if (item.customValue) {
         return `
           <div class="setting-row">
-            <strong>${escapeHtml(item.label)}</strong>
+            <strong>${escapeHtml(t(item.label))}</strong>
             <span class="on">${escapeHtml(item.customValue)}</span>
           </div>
         `;
@@ -348,9 +394,9 @@ function renderSettings(settings) {
 
       return `
         <div class="setting-row">
-          <strong>${escapeHtml(item.label)}</strong>
+          <strong>${escapeHtml(t(item.label))}</strong>
           <span class="${item.value ? "on" : "off"}">
-            ${item.value ? "On" : "Off"}
+            ${escapeHtml(t(item.value ? "On" : "Off"))}
           </span>
         </div>
       `;
@@ -498,7 +544,7 @@ function renderMediaFilters() {
           class="${activeMediaFilter === filter.key ? "active" : ""}"
           data-media-filter="${filter.key}"
         >
-          ${escapeHtml(filter.label)}
+          ${escapeHtml(t(filter.label))}
           <span>${count}</span>
         </button>
       `;
@@ -516,26 +562,26 @@ function renderMediaFilters() {
 
 function getStatusLabel(status) {
   if (status === "pending") {
-    return "Pending";
+    return t("Pending");
   }
 
   if (status === "rejected") {
-    return "Rejected";
+    return t("Rejected");
   }
 
-  return "Approved";
+  return t("Approved");
 }
 
 function getTypeLabel(type) {
   if (type === "image") {
-    return "Image";
+    return t("Image");
   }
 
   if (type === "video") {
-    return "Video";
+    return t("Video");
   }
 
-  return "Message";
+  return t("Message");
 }
 
 function renderAdminActions(mediaId, status) {
@@ -548,7 +594,7 @@ function renderAdminActions(mediaId, status) {
           data-media-action="approve"
           data-media-id="${escapeHtml(mediaId)}"
         >
-          Approve
+          ${escapeHtml(t("Approve"))}
         </button>
       `
       : "";
@@ -562,7 +608,7 @@ function renderAdminActions(mediaId, status) {
           data-media-action="reject"
           data-media-id="${escapeHtml(mediaId)}"
         >
-          Reject
+          ${escapeHtml(t("Reject"))}
         </button>
       `
       : "";
@@ -577,7 +623,7 @@ function renderAdminActions(mediaId, status) {
         data-media-action="delete"
         data-media-id="${escapeHtml(mediaId)}"
       >
-        Delete
+        ${escapeHtml(t("Delete"))}
       </button>
     </div>
   `;
@@ -595,9 +641,11 @@ function renderMediaCards() {
     mediaGallery.innerHTML = `
       <div class="empty-gallery">
         <div>
-          <h3>No media found.</h3>
+          <h3>${escapeHtml(t("No media found."))}</h3>
           <p>
-            There are no uploaded memories for this filter yet.
+            ${escapeHtml(
+              t("There are no uploaded memories for this filter yet."),
+            )}
           </p>
         </div>
       </div>
@@ -617,7 +665,7 @@ function renderMediaCards() {
         media.guestName ||
         media.user_name ||
         media.userName ||
-        "Unknown Guest";
+        t("Unknown Guest");
 
       const uploadedAt = media.media_created_at
         ? formatDateTime(media.media_created_at)
@@ -625,7 +673,7 @@ function renderMediaCards() {
 
       const uploaderHtml = `
         <div class="media-uploader">
-          <span>Uploaded by</span>
+          <span>${escapeHtml(t("Uploaded by"))}</span>
           <strong>${escapeHtml(guestName)}</strong>
           ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
         </div>
@@ -652,7 +700,7 @@ function renderMediaCards() {
 
             <div class="media-card-body">
               ${uploaderHtml}
-              <p>${escapeHtml(message || "Video memory")}</p>
+              <p>${escapeHtml(message || t("Video memory"))}</p>
               ${renderAdminActions(mediaId, status)}
             </div>
           </article>
@@ -666,7 +714,7 @@ function renderMediaCards() {
           url: mediaUrl,
           guestName,
           uploadedAt,
-          message: message || "Photo memory",
+          message: message || t("Photo memory"),
         });
 
         return `
@@ -677,7 +725,9 @@ function renderMediaCards() {
                 type="button"
                 class="media-lightbox-trigger"
                 data-gallery-index="${galleryIndex}"
-                aria-label="Open photo uploaded by ${escapeHtml(guestName)}"
+                aria-label="${escapeHtml(
+                  t("Open photo uploaded by {name}", { name: guestName }),
+                )}"
               >
                 <img src="${escapeHtml(mediaUrl)}" alt="Uploaded by ${escapeHtml(
                   guestName,
@@ -687,7 +737,7 @@ function renderMediaCards() {
 
             <div class="media-card-body">
               ${uploaderHtml}
-              <p>${escapeHtml(message || "Photo memory")}</p>
+              <p>${escapeHtml(message || t("Photo memory"))}</p>
               ${renderAdminActions(mediaId, status)}
             </div>
           </article>
@@ -699,7 +749,7 @@ function renderMediaCards() {
           <div class="media-card-body">
             ${badgeHtml}
             ${uploaderHtml}
-            <p>${escapeHtml(message || "Text memory")}</p>
+            <p>${escapeHtml(message || t("Text memory"))}</p>
             ${renderAdminActions(mediaId, status)}
           </div>
         </article>
@@ -741,8 +791,12 @@ function showGalleryLightboxItem(index) {
   const item = galleryLightboxItems[activeGalleryIndex];
 
   galleryLightboxImage.src = item.url;
-  galleryLightboxImage.alt = `Uploaded by ${item.guestName}`;
-  galleryLightboxTitle.textContent = `Uploaded by ${item.guestName}`;
+  galleryLightboxImage.alt = t("Uploaded by {name}", {
+    name: item.guestName,
+  });
+  galleryLightboxTitle.textContent = t("Uploaded by {name}", {
+    name: item.guestName,
+  });
 
   const metaParts = [item.message, item.uploadedAt].filter(Boolean);
   galleryLightboxMeta.textContent = metaParts.join(" · ");
@@ -812,9 +866,7 @@ function renderGuestTotalBadge(totalCount) {
     return;
   }
 
-  guestTotalBadge.textContent = `${totalCount} guest${
-    totalCount === 1 ? "" : "s"
-  }`;
+  guestTotalBadge.textContent = t("{count} guests", { count: totalCount });
 }
 
 function renderGuestResultCount(visibleCount, totalCount) {
@@ -823,18 +875,26 @@ function renderGuestResultCount(visibleCount, totalCount) {
   }
 
   if (totalCount === 0) {
-    guestResultCount.textContent = "No guests have joined this event yet.";
+    guestResultCount.textContent = t(
+      "No guests have joined this event yet.",
+    );
     return;
   }
 
   if (guestSearchTerm.trim() !== "") {
-    guestResultCount.textContent = `${visibleCount} of ${totalCount} guests found.`;
+    guestResultCount.textContent = t(
+      "{visible} of {total} guests found.",
+      {
+        visible: visibleCount,
+        total: totalCount,
+      },
+    );
     return;
   }
 
-  guestResultCount.textContent = `${totalCount} guest${
-    totalCount === 1 ? "" : "s"
-  } joined this event.`;
+  guestResultCount.textContent = t("{count} guests joined this event.", {
+    count: totalCount,
+  });
 }
 
 function renderGuests() {
@@ -850,7 +910,7 @@ function renderGuests() {
   if (!allGuests || allGuests.length === 0) {
     guestList.innerHTML = `
       <div class="guest-empty">
-        No guests have joined this event yet.
+        ${escapeHtml(t("No guests have joined this event yet."))}
       </div>
     `;
     return;
@@ -859,7 +919,7 @@ function renderGuests() {
   if (filteredGuests.length === 0) {
     guestList.innerHTML = `
       <div class="guest-empty">
-        No guests matched your search.
+        ${escapeHtml(t("No guests matched your search."))}
       </div>
     `;
     return;
@@ -867,7 +927,7 @@ function renderGuests() {
 
   guestList.innerHTML = filteredGuests
     .map((guest) => {
-      const guestName = guest.guest_name || "Unknown Guest";
+      const guestName = guest.guest_name || t("Unknown Guest");
       const totalUploads = guest.total_uploads || 0;
       const pendingUploads = guest.pending_uploads || 0;
       const approvedUploads = guest.approved_uploads || 0;
@@ -881,13 +941,21 @@ function renderGuests() {
 
           <div class="guest-main">
             <strong>${escapeHtml(guestName)}</strong>
-            <span>${totalUploads} upload${totalUploads === 1 ? "" : "s"}</span>
+            <span>${escapeHtml(
+              t("{count} uploads", { count: totalUploads }),
+            )}</span>
           </div>
 
           <div class="guest-stats">
-            <span class="approved">${approvedUploads} approved</span>
-            <span class="pending">${pendingUploads} pending</span>
-            <span class="rejected">${rejectedUploads} rejected</span>
+            <span class="approved">${escapeHtml(
+              t("{count} approved", { count: approvedUploads }),
+            )}</span>
+            <span class="pending">${escapeHtml(
+              t("{count} pending", { count: pendingUploads }),
+            )}</span>
+            <span class="rejected">${escapeHtml(
+              t("{count} rejected", { count: rejectedUploads }),
+            )}</span>
           </div>
         </article>
       `;
@@ -932,12 +1000,12 @@ async function loadEventGuests() {
 
     if (guestResultCount) {
       guestResultCount.textContent =
-        error.message || "Guests could not be loaded.";
+        t(error.message || "Guests could not be loaded.");
     }
 
     guestList.innerHTML = `
       <div class="guest-empty error">
-        ${escapeHtml(error.message || "Guests could not be loaded.")}
+        ${escapeHtml(t(error.message || "Guests could not be loaded."))}
       </div>
     `;
   }
@@ -1170,7 +1238,7 @@ async function handleMediaAdminAction(action, mediaId) {
   try {
     if (action === "delete") {
       const confirmDelete = confirm(
-        "This uploaded memory will be deleted. Are you sure?",
+        t("This uploaded memory will be deleted. Are you sure?"),
       );
 
       if (!confirmDelete) {
@@ -1194,7 +1262,7 @@ async function handleMediaAdminAction(action, mediaId) {
     }
   } catch (error) {
     console.error("Media admin action error:", error);
-    alert(error.message || "Media action failed.");
+    alert(t(error.message || "Media action failed."));
   }
 }
 
@@ -1205,10 +1273,10 @@ if (copyCodeButton) {
     }
 
     await navigator.clipboard.writeText(currentEvent.event_code);
-    copyCodeButton.textContent = "Copied!";
+    copyCodeButton.textContent = t("Copied!");
 
     setTimeout(() => {
-      copyCodeButton.textContent = "Copy Code";
+      copyCodeButton.textContent = t("Copy Code");
     }, 1300);
   });
 }
@@ -1220,10 +1288,10 @@ if (copyJoinLinkButton) {
     }
 
     await navigator.clipboard.writeText(getJoinUrl(currentEvent));
-    copyJoinLinkButton.textContent = "Copied!";
+    copyJoinLinkButton.textContent = t("Copied!");
 
     setTimeout(() => {
-      copyJoinLinkButton.textContent = "Copy Join Link";
+      copyJoinLinkButton.textContent = t("Copy Join Link");
     }, 1300);
   });
 }
@@ -1264,7 +1332,7 @@ if (downloadSlideshowButton) {
 
     try {
       downloadSlideshowButton.disabled = true;
-      downloadSlideshowButton.textContent = "Preparing...";
+      downloadSlideshowButton.textContent = t("Preparing...");
 
       const response = await fetch(
         `${API_BASE_URL}/api/events/detail/${eventId}/slideshow`,
@@ -1320,10 +1388,10 @@ if (downloadSlideshowButton) {
 
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      alert(error.message || "Slideshow could not be downloaded.");
+      alert(t(error.message || "Slideshow could not be downloaded."));
     } finally {
       downloadSlideshowButton.disabled = false;
-      downloadSlideshowButton.textContent = "Download Slideshow";
+      downloadSlideshowButton.textContent = t("Download Slideshow");
     }
   });
 }
@@ -1350,9 +1418,10 @@ if (settingsForm) {
 
     try {
       settingsSaveButton.disabled = true;
-      settingsSaveButton.textContent = "Saving...";
+      settingsSaveButton.textContent = t("Saving...");
 
       settingsResult.textContent = "";
+      delete settingsResult.dataset.state;
 
       const payload = getSettingsPayload();
       const updatedSettings = await updateEventSettings(payload);
@@ -1363,14 +1432,14 @@ if (settingsForm) {
 
       renderSettings(updatedSettings);
 
-      settingsResult.textContent = "Settings updated successfully.";
-      settingsResult.style.color = "#21c55d";
+      settingsResult.textContent = t("Settings updated successfully.");
+      settingsResult.dataset.state = "success";
     } catch (error) {
-      settingsResult.textContent = error.message;
-      settingsResult.style.color = "#ff4d4d";
+      settingsResult.textContent = t(error.message);
+      settingsResult.dataset.state = "error";
     } finally {
       settingsSaveButton.disabled = false;
-      settingsSaveButton.textContent = "Save Settings";
+      settingsSaveButton.textContent = t("Save Settings");
     }
   });
 }
@@ -1378,7 +1447,7 @@ if (settingsForm) {
 if (deleteEventButton) {
   deleteEventButton.addEventListener("click", async () => {
     const confirmDelete = confirm(
-      "This event will be permanently deleted. Are you sure?",
+      t("This event will be permanently deleted. Are you sure?"),
     );
 
     if (!confirmDelete) {
@@ -1387,7 +1456,7 @@ if (deleteEventButton) {
 
     try {
       deleteEventButton.disabled = true;
-      deleteEventButton.textContent = "Deleting...";
+      deleteEventButton.textContent = t("Deleting...");
 
       if (settingsResult) {
         settingsResult.textContent = "";
@@ -1406,12 +1475,12 @@ if (deleteEventButton) {
             stroke-linejoin="round"
           />
         </svg>
-        Delete Event
+        ${escapeHtml(t("Delete Event"))}
       `;
 
       if (settingsResult) {
-        settingsResult.textContent = error.message;
-        settingsResult.style.color = "#ff4d4d";
+        settingsResult.textContent = t(error.message);
+        settingsResult.dataset.state = "error";
       }
     }
   });
@@ -1492,7 +1561,10 @@ if (photoInput) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
     if (!allowedTypes.includes(file.type)) {
-      setUploadMessage("Only JPG, PNG and WEBP images are allowed.", "error");
+      setUploadMessage(
+        t("Only JPG, PNG and WEBP images are allowed."),
+        "error",
+      );
       photoInput.value = "";
 
       if (photoPreviewBox) {
@@ -1523,23 +1595,23 @@ if (uploadPhotoBtn) {
       const file = photoInput?.files[0];
 
       if (!eventId) {
-        setUploadMessage("Event ID not found in URL.", "error");
+        setUploadMessage(t("Event ID not found in URL."), "error");
         return;
       }
 
       if (!guestName) {
-        setUploadMessage("Please enter your name.", "error");
+        setUploadMessage(t("Please enter your name."), "error");
         return;
       }
 
       if (!file) {
-        setUploadMessage("Please choose a photo first.", "error");
+        setUploadMessage(t("Please choose a photo first."), "error");
         return;
       }
 
       uploadPhotoBtn.disabled = true;
-      uploadPhotoBtn.textContent = "Uploading...";
-      setUploadMessage("Uploading photo, please wait...", "info");
+      uploadPhotoBtn.textContent = t("Uploading...");
+      setUploadMessage(t("Uploading photo, please wait..."), "info");
 
       const guest = await createGuestForUpload(guestName);
 
@@ -1549,7 +1621,7 @@ if (uploadPhotoBtn) {
 
       await uploadPhotoToEvent(guest.guest_id, file);
 
-      setUploadMessage("Photo uploaded successfully!", "success");
+      setUploadMessage(t("Photo uploaded successfully!"), "success");
 
       photoInput.value = "";
 
@@ -1565,12 +1637,12 @@ if (uploadPhotoBtn) {
     } catch (error) {
       console.error("Upload error:", error);
       setUploadMessage(
-        error.message || "Something went wrong while uploading.",
+        t(error.message || "Something went wrong while uploading."),
         "error",
       );
     } finally {
       uploadPhotoBtn.disabled = false;
-      uploadPhotoBtn.textContent = "Upload Photo";
+      uploadPhotoBtn.textContent = t("Upload Photo");
     }
   });
 }
@@ -1590,7 +1662,9 @@ async function approveAllImages() {
   }
 
   const confirmed = confirm(
-    `Are you sure you want to approve ${pendingImageCount} pending photo(s)?`,
+    t("Are you sure you want to approve {count} pending photo(s)?", {
+      count: pendingImageCount,
+    }),
   );
 
   if (!confirmed) {
@@ -1599,7 +1673,7 @@ async function approveAllImages() {
 
   try {
     approveAllImagesButton.disabled = true;
-    approveAllImagesButton.textContent = "Approving...";
+    approveAllImagesButton.textContent = t("Approving...");
 
     const response = await fetch(
       `${API_BASE_URL}/api/media/events/${eventId}/approve-images`,
@@ -1624,16 +1698,18 @@ async function approveAllImages() {
       );
     }
 
-    alert(data.message || "All pending photos approved successfully.");
+    alert(
+      data.message || t("All pending photos approved successfully."),
+    );
 
     activeMediaFilter = "pending";
     await loadEventDetail();
   } catch (error) {
-    alert(error.message || "Photos could not be approved.");
+    alert(t(error.message || "Photos could not be approved."));
     console.error("Approve all photos error:", error);
   } finally {
     approveAllImagesButton.disabled = false;
-    approveAllImagesButton.textContent = "Approve All Photos";
+    approveAllImagesButton.textContent = t("Approve All Photos");
     updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
   }
 }
