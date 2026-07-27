@@ -5898,6 +5898,13 @@
     });
   });
 
+  Object.entries(window.SnapUpPagePhrases || {}).forEach(
+    ([key, translations]) => {
+      if (!phrases[key]) phrases[key] = {};
+      Object.assign(phrases[key], translations);
+    },
+  );
+
   const attributeNames = [
     "placeholder",
     "aria-label",

@@ -1,11 +1,10 @@
-﻿const token = localStorage.getItem("snapup_token");
+const token = localStorage.getItem("snapup_token");
 
 const createEventForm = document.getElementById("createEventPageForm");
 const createEventSubmit = document.getElementById("createEventSubmit");
 const createEventResult = document.getElementById("createEventResult");
 const eventCodePreview = document.getElementById("eventCodePreview");
 const qrPreviewBox = document.getElementById("qrPreviewBox");
-
 const qrActions = document.getElementById("qrActions");
 const downloadQrButton = document.getElementById("downloadQrButton");
 const shareQrButton = document.getElementById("shareQrButton");
@@ -33,18 +32,42 @@ const liveCardExpiry = document.getElementById("liveCardExpiry");
 const paymentSuccessPopup = document.getElementById("paymentSuccessPopup");
 const paymentSuccessClose = document.getElementById("paymentSuccessClose");
 
+const API_URL = "https://snapup-events-api.onrender.com";
+
 let pendingEventPayload = null;
 let currentQrCodeUrl = null;
 let currentEventCode = null;
+let lastFocusedElement = null;
 
 if (!token) {
   sessionStorage.setItem("snapup_after_login", "create-event.html");
   window.location.href = "login.html";
 }
 
+function t(key, replacements = {}) {
+  const translated = window.SnapUpI18n?.t?.(key) || key;
+  return Object.entries(replacements).reduce(
+    (result, [name, value]) =>
+      result.replaceAll(`{${name}}`, String(value ?? "")),
+    translated,
+  );
+}
+
 function showResult(message, type = "error") {
   createEventResult.textContent = message;
-  createEventResult.style.color = type === "success" ? "#21c55d" : "#ff4d4d";
+  createEventResult.classList.remove("is-success", "is-error");
+
+  if (!message) {
+    return;
+  }
+
+  createEventResult.classList.add(
+    type === "success" ? "is-success" : "is-error",
+  );
+}
+
+function setPageScrollLocked(locked) {
+  document.body.style.overflow = locked ? "hidden" : "";
 }
 
 function formatTimeForDatabase(timeValue) {
@@ -52,11 +75,7 @@ function formatTimeForDatabase(timeValue) {
     return null;
   }
 
-  if (timeValue.length === 5) {
-    return `${timeValue}:00`;
-  }
-
-  return timeValue;
+  return timeValue.length === 5 ? `${timeValue}:00` : timeValue;
 }
 
 function validateEventDateFields() {
@@ -65,13 +84,15 @@ function validateEventDateFields() {
   const eventFinishTime = eventFinishTimeInput.value;
 
   if (!eventDate && (eventStartTime || eventFinishTime)) {
-    showResult("Please select an event date before choosing event time.");
+    showResult(
+      t("Please select an event date before choosing event time."),
+    );
     eventDateInput.focus();
     return false;
   }
 
   if (eventStartTime && eventFinishTime && eventFinishTime <= eventStartTime) {
-    showResult("Finish time must be later than start time.");
+    showResult(t("Finish time must be later than start time."));
     eventFinishTimeInput.focus();
     return false;
   }
@@ -86,20 +107,30 @@ function getSelectedPackageInfo() {
 
   const packageMap = {
     starter: {
-      name: "Starter",
+      nameKey: "Starter",
+      priceKey: "Free",
       price: "Free",
+      isFree: true,
     },
     standard: {
-      name: "Standard",
-      price: "â‚º149",
+      nameKey: "Standard",
+      price: "₺149",
+      isFree: false,
     },
     premium: {
-      name: "Premium",
-      price: "â‚º299",
+      nameKey: "Premium",
+      price: "₺299",
+      isFree: false,
     },
   };
 
-  return packageMap[selectedPackage] || packageMap.starter;
+  const selected = packageMap[selectedPackage] || packageMap.starter;
+
+  return {
+    ...selected,
+    name: t(selected.nameKey),
+    displayPrice: selected.priceKey ? t(selected.priceKey) : selected.price,
+  };
 }
 
 function getSelectedPackageValue() {
@@ -135,16 +166,17 @@ function updateLiveCard() {
   const displayNumber = cardNumberValue || "4242 4242 4242 4242";
   const numberParts = displayNumber.split(" ");
 
-  liveCardNumber.innerHTML = `
-    <span>${numberParts[0] || "4242"}</span>
-    <span>${numberParts[1] || "4242"}</span>
-    <span>${numberParts[2] || "4242"}</span>
-    <span>${numberParts[3] || "4242"}</span>
-  `;
+  liveCardNumber.replaceChildren(
+    ...[0, 1, 2, 3].map((index) => {
+      const numberPart = document.createElement("span");
+      numberPart.textContent = numberParts[index] || "4242";
+      return numberPart;
+    }),
+  );
 
   liveCardHolder.textContent = holderValue
-    ? holderValue.toUpperCase()
-    : "SNAPUP USER";
+    ? holderValue.toLocaleUpperCase()
+    : t("SNAPUP USER");
 
   liveCardExpiry.textContent = expiryValue || "12/28";
 }
@@ -154,7 +186,6 @@ function resetPaymentForm() {
   cardNumberInput.value = "";
   cardExpiryInput.value = "";
   cardCvcInput.value = "";
-
   updateLiveCard();
 }
 
@@ -187,34 +218,48 @@ function openPaymentPopup() {
   const packageInfo = getSelectedPackageInfo();
 
   paymentPackageName.textContent = packageInfo.name;
-  paymentPackagePrice.textContent = packageInfo.price;
-
+  paymentPackagePrice.textContent = packageInfo.displayPrice;
   paymentDemoButton.disabled = false;
-  paymentDemoButton.textContent =
-    packageInfo.price === "Free" ? "Continue Demo" : "Pay Demo";
-
-  paymentDemoNote.textContent =
-    "Demo mode only â€” this step is for UI testing.";
+  paymentDemoButton.textContent = packageInfo.isFree
+    ? t("Continue Demo")
+    : t("Pay Demo");
+  paymentDemoNote.textContent = t(
+    "Demo mode only — this step is for UI testing.",
+  );
 
   resetPaymentForm();
-
+  lastFocusedElement = document.activeElement;
   paymentPopup.classList.add("active");
   paymentPopup.setAttribute("aria-hidden", "false");
+  setPageScrollLocked(true);
+  paymentPopupClose.focus();
 }
 
-function closePaymentPopup() {
+function closePaymentPopup({ restoreFocus = true } = {}) {
   paymentPopup.classList.remove("active");
   paymentPopup.setAttribute("aria-hidden", "true");
+
+  if (!paymentSuccessPopup.classList.contains("active")) {
+    setPageScrollLocked(false);
+  }
+
+  if (restoreFocus) {
+    lastFocusedElement?.focus?.();
+  }
 }
 
 function openPaymentSuccessPopup() {
   paymentSuccessPopup.classList.add("active");
   paymentSuccessPopup.setAttribute("aria-hidden", "false");
+  setPageScrollLocked(true);
+  paymentSuccessClose.focus();
 }
 
 function closePaymentSuccessPopup() {
   paymentSuccessPopup.classList.remove("active");
   paymentSuccessPopup.setAttribute("aria-hidden", "true");
+  setPageScrollLocked(false);
+  createEventSubmit.focus();
 }
 
 function renderQrCode(createdEvent) {
@@ -226,20 +271,20 @@ function renderQrCode(createdEvent) {
   currentEventCode = createdEvent.event_code || "event";
 
   if (currentQrCodeUrl) {
-    qrPreviewBox.innerHTML = `
-      <img src="${currentQrCodeUrl}" alt="Event QR code" />
-    `;
+    const qrImage = document.createElement("img");
+    qrImage.src = currentQrCodeUrl;
+    qrImage.alt = t("Event QR code");
+    qrPreviewBox.replaceChildren(qrImage);
 
     if (qrActions) {
       qrActions.hidden = false;
     }
-
     return;
   }
 
-  qrPreviewBox.innerHTML = `
-    <span>QR code could not be generated.</span>
-  `;
+  const errorMessage = document.createElement("span");
+  errorMessage.textContent = t("QR code could not be generated.");
+  qrPreviewBox.replaceChildren(errorMessage);
 
   if (qrActions) {
     qrActions.hidden = true;
@@ -247,22 +292,19 @@ function renderQrCode(createdEvent) {
 }
 
 async function createEventOnBackend() {
-  const response = await fetch(
-    "https://snapup-events-api.onrender.com/api/events",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(pendingEventPayload),
+  const response = await fetch(`${API_URL}/api/events`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  );
+    body: JSON.stringify(pendingEventPayload),
+  });
 
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(data.message || "Event could not be created.");
+    throw new Error(data.message || t("Event could not be created."));
   }
 
   return data.event;
@@ -277,21 +319,19 @@ async function downloadQrCode() {
     const response = await fetch(currentQrCodeUrl);
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
-
     const downloadLink = document.createElement("a");
+
     downloadLink.href = objectUrl;
     downloadLink.download = `snapup-event-${currentEventCode}.png`;
-
     document.body.appendChild(downloadLink);
     downloadLink.click();
     downloadLink.remove();
-
     URL.revokeObjectURL(objectUrl);
   } catch (error) {
     const fallbackLink = document.createElement("a");
     fallbackLink.href = currentQrCodeUrl;
     fallbackLink.target = "_blank";
-
+    fallbackLink.rel = "noopener";
     document.body.appendChild(fallbackLink);
     fallbackLink.click();
     fallbackLink.remove();
@@ -303,32 +343,35 @@ async function shareQrCode() {
     return;
   }
 
-  const shareText = `SnapUp Event Code: ${currentEventCode}`;
+  const shareText = t("SnapUp Event Code: {code}", {
+    code: currentEventCode,
+  });
 
   try {
     const response = await fetch(currentQrCodeUrl);
     const blob = await response.blob();
-
-    const qrFile = new File([blob], `snapup-event-${currentEventCode}.png`, {
-      type: "image/png",
-    });
+    const qrFile = new File(
+      [blob],
+      `snapup-event-${currentEventCode}.png`,
+      { type: "image/png" },
+    );
 
     if (navigator.canShare && navigator.canShare({ files: [qrFile] })) {
       await navigator.share({
-        title: "SnapUp Event QR Code",
+        title: t("Event QR code"),
         text: shareText,
         files: [qrFile],
       });
       return;
     }
   } catch (error) {
-    // GÃ¶rsel paylaÅŸÄ±mÄ± desteklenmezse link paylaÅŸÄ±mÄ±na geÃ§er.
+    // Continue with link sharing when file sharing is unavailable.
   }
 
   try {
     if (navigator.share) {
       await navigator.share({
-        title: "SnapUp Event QR Code",
+        title: t("Event QR code"),
         text: shareText,
         url: currentQrCodeUrl,
       });
@@ -336,9 +379,11 @@ async function shareQrCode() {
     }
 
     await navigator.clipboard.writeText(currentQrCodeUrl);
-    showResult("QR code link copied to clipboard.", "success");
+    showResult(t("QR code link copied to clipboard."), "success");
   } catch (error) {
-    showResult("QR code could not be shared.", "error");
+    if (error?.name !== "AbortError") {
+      showResult(t("QR code could not be shared."));
+    }
   }
 }
 
@@ -348,7 +393,8 @@ createEventForm.addEventListener("submit", (event) => {
   const eventName = document.getElementById("eventName").value.trim();
 
   if (!eventName) {
-    showResult("Event name is required.");
+    showResult(t("Event name is required."));
+    document.getElementById("eventName").focus();
     return;
   }
 
@@ -357,12 +403,11 @@ createEventForm.addEventListener("submit", (event) => {
   }
 
   pendingEventPayload = buildEventPayload();
-
   showResult("");
   openPaymentPopup();
 });
 
-paymentPopupClose.addEventListener("click", closePaymentPopup);
+paymentPopupClose.addEventListener("click", () => closePaymentPopup());
 
 paymentPopup.addEventListener("click", (event) => {
   if (event.target === paymentPopup) {
@@ -370,9 +415,7 @@ paymentPopup.addEventListener("click", (event) => {
   }
 });
 
-cardHolderInput.addEventListener("input", () => {
-  updateLiveCard();
-});
+cardHolderInput.addEventListener("input", updateLiveCard);
 
 cardNumberInput.addEventListener("input", () => {
   cardNumberInput.value = formatCardNumber(cardNumberInput.value);
@@ -391,30 +434,28 @@ cardCvcInput.addEventListener("input", () => {
 paymentDemoButton.addEventListener("click", async () => {
   try {
     paymentDemoButton.disabled = true;
-    paymentDemoButton.textContent = "Processing...";
-    paymentDemoNote.textContent = "Creating your event...";
+    paymentDemoButton.textContent = t("Processing...");
+    paymentDemoNote.textContent = t("Creating your event...");
 
     const createdEvent = await createEventOnBackend();
-
-    paymentDemoButton.textContent = "Payment Completed";
+    paymentDemoButton.textContent = t("Payment Completed");
 
     if (eventCodePreview) {
       eventCodePreview.textContent = createdEvent.event_code || "------";
     }
 
     renderQrCode(createdEvent);
-
-    closePaymentPopup();
-
+    closePaymentPopup({ restoreFocus: false });
     showResult(
-      `Event created successfully. Event code: ${createdEvent.event_code}`,
+      t("Event created successfully. Event code: {code}", {
+        code: createdEvent.event_code,
+      }),
       "success",
     );
-
     openPaymentSuccessPopup();
   } catch (error) {
     paymentDemoButton.disabled = false;
-    paymentDemoButton.textContent = "Try Again";
+    paymentDemoButton.textContent = t("Try Again");
     paymentDemoNote.textContent = error.message;
     showResult(error.message);
   }
@@ -428,12 +469,22 @@ paymentSuccessPopup.addEventListener("click", (event) => {
   }
 });
 
-if (downloadQrButton) {
-  downloadQrButton.addEventListener("click", downloadQrCode);
-}
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") {
+    return;
+  }
 
-if (shareQrButton) {
-  shareQrButton.addEventListener("click", shareQrCode);
-}
+  if (paymentSuccessPopup.classList.contains("active")) {
+    closePaymentSuccessPopup();
+    return;
+  }
+
+  if (paymentPopup.classList.contains("active")) {
+    closePaymentPopup();
+  }
+});
+
+downloadQrButton?.addEventListener("click", downloadQrCode);
+shareQrButton?.addEventListener("click", shareQrCode);
 
 updateLiveCard();

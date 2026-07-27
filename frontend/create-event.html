@@ -5,91 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create Event — SnapUp Events</title>
 
-    <link rel="stylesheet" href="css/create-event-page.css" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
-    <meta name="theme-color" content="#0D0B0A" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
-    <script src="js/i18n.js?v=landing-sections-2" defer></script>
-      <script>
+    <meta name="theme-color" content="#17122b" />
+
+    <script>
       (() => {
-        const saved = localStorage.getItem("snapup_theme");
-        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.dataset.theme = theme;
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_) {}
       })();
     </script>
-    <script>
-      (function(){try{var t=localStorage.getItem("snapup_theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(_){}})();
-    </script>
-    <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
+
+    <link rel="stylesheet" href="css/theme.css?v=create-event-refresh-1" />
+    <link
+      rel="stylesheet"
+      href="css/create-event-page.css?v=create-event-refresh-1"
+    />
+    <link
+      rel="stylesheet"
+      href="css/i18n.css?v=mobile-controls-balanced-1"
+    />
+    <script
+      src="js/create-event-i18n.js?v=create-event-refresh-1"
+      defer
+    ></script>
+    <script src="js/i18n.js?v=create-event-refresh-1" defer></script>
   </head>
 
-  <body>
+  <body class="create-event-page">
     <main class="create-page">
       <header class="create-header">
-        <a href="index.html" class="create-brand">
-          <span class="create-brand-logo" aria-hidden="true">
-            <svg
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-            >
-              <circle cx="24" cy="24" r="20" fill="#0D0B0A" />
-              <circle
-                cx="24"
-                cy="24"
-                r="18.25"
-                stroke="rgba(255,255,255,.16)"
-                stroke-width="1.5"
-              />
-              <g transform="translate(24 24)">
-                <path d="M0 -10.5 L6.8 -3.6 L1.2 -1.1 Z" fill="#ffffff" />
-                <path d="M9.1 -5.2 L9.8 4.4 L3.6 1.2 Z" fill="#F4EEE4" />
-                <path d="M9.1 5.2 L1.2 10.6 L1.3 3.6 Z" fill="#ffffff" />
-                <path d="M0 10.5 L-6.8 3.6 L-1.2 1.1 Z" fill="#FF6A3D" />
-                <path d="M-9.1 5.2 L-9.8 -4.4 L-3.6 -1.2 Z" fill="#F7B14C" />
-                <path d="M-9.1 -5.2 L-1.2 -10.6 L-1.3 -3.6 Z" fill="#ffffff" />
-              </g>
-              <circle
-                cx="24"
-                cy="24"
-                r="4.8"
-                fill="#0D0B0A"
-                stroke="#ffffff"
-                stroke-width="1.8"
-              />
-              <circle cx="24" cy="24" r="1.4" fill="#ffffff" />
-            </svg>
-          </span>
-
+        <a
+          href="index.html"
+          class="create-brand"
+          aria-label="SnapUp Events home"
+        >
+          <img
+            class="create-brand-logo"
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="48"
+            height="48"
+          />
           <strong>SnapUp<span>Events</span></strong>
         </a>
 
-        <div class="create-header-actions">
-          <a href="account.html">My Account</a>
-          <a href="index.html">Home</a>
-        </div>
+        <nav class="create-header-actions" aria-label="Page navigation">
+          <a href="account.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5"></circle>
+              <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"></path>
+            </svg>
+            <span>My Account</span>
+          </a>
+          <a href="index.html">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1Z"></path>
+            </svg>
+            <span>Home</span>
+          </a>
+        </nav>
       </header>
 
-      <section class="create-hero">
-        <span>Create Event</span>
-        <h1>Create a private SnapUp event.</h1>
-        <p>
-          Set your event details, choose a package, configure guest permissions,
-          and generate your private event code.
-        </p>
+      <section class="create-hero" aria-labelledby="createPageTitle">
+        <div class="create-hero__copy">
+          <span class="create-eyebrow"><i></i> Create Event</span>
+          <h1 id="createPageTitle">Create a private SnapUp event.</h1>
+          <p>
+            Set your event details, choose a package, configure guest permissions,
+            and generate your private event code.
+          </p>
+        </div>
+
+        <div class="create-hero__steps" aria-label="Creation steps">
+          <div>
+            <b>01</b>
+            <span>Event details</span>
+          </div>
+          <div>
+            <b>02</b>
+            <span>Event settings</span>
+          </div>
+          <div>
+            <b>03</b>
+            <span>Choose package</span>
+          </div>
+        </div>
       </section>
 
       <section class="create-layout">
-        <form class="create-form-card" id="createEventPageForm">
-          <div class="form-section">
-            <span>Step 1</span>
-            <h2>Event details</h2>
+        <form class="create-form-card" id="createEventPageForm" novalidate>
+          <section class="form-section" aria-labelledby="eventDetailsTitle">
+            <div class="form-section__head">
+              <span>Step 1</span>
+              <h2 id="eventDetailsTitle">Event details</h2>
+            </div>
 
             <label>
-              Event name
+              <span>Event name</span>
               <input
                 type="text"
                 id="eventName"
@@ -99,7 +121,7 @@
             </label>
 
             <label>
-              Location
+              <span>Location</span>
               <input
                 type="text"
                 id="eventLocation"
@@ -110,70 +132,77 @@
 
             <div class="form-row">
               <label>
-                Event date
+                <span>Event date</span>
                 <input type="date" id="eventDate" />
               </label>
 
               <label>
-                Start time
+                <span>Start time</span>
                 <input type="time" id="eventStartTime" step="60" />
               </label>
 
               <label>
-                Finish time
+                <span>Finish time</span>
                 <input type="time" id="eventFinishTime" step="60" />
               </label>
             </div>
 
             <label>
-              Description
+              <span>Description</span>
               <textarea
                 id="eventDescription"
                 rows="4"
                 placeholder="Write a short description for your event..."
               ></textarea>
             </label>
-          </div>
+          </section>
 
-          <div class="form-section">
-            <span>Step 2</span>
-            <h2>Event settings</h2>
+          <section class="form-section" aria-labelledby="eventSettingsTitle">
+            <div class="form-section__head">
+              <span>Step 2</span>
+              <h2 id="eventSettingsTitle">Event settings</h2>
+            </div>
 
             <div class="settings-grid">
               <label class="setting-card">
                 <input type="checkbox" id="allowUpload" checked />
+                <span class="setting-card__control" aria-hidden="true"></span>
                 <strong>Allow Upload</strong>
                 <small>Guests can upload photos and videos.</small>
               </label>
 
               <label class="setting-card">
                 <input type="checkbox" id="allowComments" checked />
+                <span class="setting-card__control" aria-hidden="true"></span>
                 <strong>Allow Comments</strong>
                 <small>Guests can leave comments and memories.</small>
               </label>
 
               <label class="setting-card">
                 <input type="checkbox" id="allowLikes" checked />
+                <span class="setting-card__control" aria-hidden="true"></span>
                 <strong>Allow Likes</strong>
                 <small>Guests can like uploaded memories.</small>
               </label>
 
               <label class="setting-card">
                 <input type="checkbox" id="requireApproval" />
+                <span class="setting-card__control" aria-hidden="true"></span>
                 <strong>Require Approval</strong>
                 <small>Uploads wait for your approval.</small>
               </label>
 
-              <label class="setting-card">
+              <label class="setting-card setting-card--wide">
                 <input type="checkbox" id="onlyUsers" />
+                <span class="setting-card__control" aria-hidden="true"></span>
                 <strong>Only Users</strong>
                 <small>Only registered users can upload.</small>
               </label>
             </div>
 
-            <div class="form-row two">
+            <div class="form-row form-row--two">
               <label>
-                Max storage per guest / MB
+                <span>Max storage per guest / MB</span>
                 <input
                   type="number"
                   id="maxStoragePerGuest"
@@ -184,7 +213,7 @@
               </label>
 
               <label>
-                Max upload per guest
+                <span>Max upload per guest</span>
                 <input
                   type="number"
                   id="maxUploadPerGuest"
@@ -194,11 +223,13 @@
                 />
               </label>
             </div>
-          </div>
+          </section>
 
-          <div class="form-section">
-            <span>Step 3</span>
-            <h2>Choose package</h2>
+          <section class="form-section" aria-labelledby="packageTitle">
+            <div class="form-section__head">
+              <span>Step 3</span>
+              <h2 id="packageTitle">Choose package</h2>
+            </div>
 
             <div class="package-grid">
               <label class="package-card">
@@ -208,6 +239,7 @@
                   value="starter"
                   checked
                 />
+                <span class="package-card__radio" aria-hidden="true"></span>
 
                 <div class="package-card-content">
                   <div class="package-card-head">
@@ -239,7 +271,7 @@
 
               <label class="package-card recommended">
                 <input type="radio" name="eventPackage" value="standard" />
-
+                <span class="package-card__radio" aria-hidden="true"></span>
                 <b>Recommended</b>
 
                 <div class="package-card-content">
@@ -272,6 +304,7 @@
 
               <label class="package-card">
                 <input type="radio" name="eventPackage" value="premium" />
+                <span class="package-card__radio" aria-hidden="true"></span>
 
                 <div class="package-card-content">
                   <div class="package-card-head">
@@ -301,13 +334,21 @@
                 </div>
               </label>
             </div>
-          </div>
+          </section>
 
           <button type="submit" class="create-submit" id="createEventSubmit">
-            Generate Event Code
+            <span>Generate Event Code</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
           </button>
 
-          <div class="create-result" id="createEventResult"></div>
+          <div
+            class="create-result"
+            id="createEventResult"
+            role="status"
+            aria-live="polite"
+          ></div>
         </form>
 
         <aside class="create-side-card">
@@ -320,7 +361,9 @@
             guests.
           </p>
 
-          <div class="code-preview" id="eventCodePreview">------</div>
+          <div class="code-preview" id="eventCodePreview" aria-live="polite">
+            ------
+          </div>
 
           <div class="qr-preview-box" id="qrPreviewBox">
             <span>QR code will appear here.</span>
@@ -328,59 +371,40 @@
 
           <div class="qr-actions" id="qrActions" hidden>
             <button type="button" id="downloadQrButton">
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 3V15M12 15L7 10M12 15L17 10"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M5 19H19"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                />
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12m0 0-5-5m5 5 5-5M5 19h14"></path>
               </svg>
-              Download QR
+              <span>Download QR</span>
             </button>
 
             <button type="button" id="shareQrButton">
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.2546 15.0317 5.50179 15.0914 5.73791L8.7086 9.26209C8.16552 8.49323 7.27132 8 6.25 8C4.59315 8 3.25 9.34315 3.25 11C3.25 12.6569 4.59315 14 6.25 14C7.27132 14 8.16552 13.5068 8.7086 12.7379L15.0914 16.2621C15.0317 16.4982 15 16.7454 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C16.9787 14 16.0845 14.4932 15.5414 15.2621L9.1586 11.7379C9.21828 11.5018 9.25 11.2546 9.25 11C9.25 10.7454 9.21828 10.4982 9.1586 10.2621L15.5414 6.73791C16.0845 7.50677 16.9787 8 18 8Z"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"></path>
               </svg>
-              Share QR
+              <span>Share QR</span>
             </button>
           </div>
 
-          <a href="account.html" class="account-link"> View My Events </a>
+          <a href="account.html" class="account-link">
+            <span>View My Events</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"></path>
+            </svg>
+          </a>
         </aside>
       </section>
     </main>
 
-    <!-- DEMO PAYMENT POPUP -->
     <div class="payment-popup-overlay" id="paymentPopup" aria-hidden="true">
       <div
-        class="payment-popup payment-popup-wide"
+        class="payment-popup"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="paymentPopupTitle"
+        aria-describedby="paymentPopupDescription"
       >
         <button
           type="button"
@@ -393,8 +417,8 @@
 
         <div class="payment-popup-head">
           <span><i></i> DEMO PAYMENT</span>
-          <h2>Complete demo payment</h2>
-          <p>
+          <h2 id="paymentPopupTitle">Complete demo payment</h2>
+          <p id="paymentPopupDescription">
             This is a demo payment screen. No real payment will be processed.
           </p>
         </div>
@@ -421,7 +445,13 @@
 
               <div class="demo-card-chip-row">
                 <span class="demo-card-chip"></span>
-                <span class="demo-card-wave">)))</span>
+                <svg
+                  class="demo-card-wave"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M8.5 8.5a5 5 0 0 1 0 7M12 5a10 10 0 0 1 0 14M5 11a1.5 1.5 0 0 1 0 2"></path>
+                </svg>
               </div>
 
               <div class="demo-card-number" id="liveCardNumber">
@@ -450,7 +480,7 @@
               <span>Payment details</span>
 
               <label>
-                Card holder
+                <span>Card holder</span>
                 <input
                   type="text"
                   id="cardHolderInput"
@@ -460,7 +490,7 @@
               </label>
 
               <label>
-                Card number
+                <span>Card number</span>
                 <input
                   type="text"
                   id="cardNumberInput"
@@ -473,7 +503,7 @@
 
               <div class="demo-card-row">
                 <label>
-                  Expiry
+                  <span>Expiry</span>
                   <input
                     type="text"
                     id="cardExpiryInput"
@@ -485,7 +515,7 @@
                 </label>
 
                 <label>
-                  CVC
+                  <span>CVC</span>
                   <input
                     type="text"
                     id="cardCvcInput"
@@ -510,24 +540,28 @@
       </div>
     </div>
 
-    <!-- PAYMENT SUCCESS POPUP -->
     <div
       class="payment-success-overlay"
       id="paymentSuccessPopup"
       aria-hidden="true"
     >
-      <div class="payment-success-popup">
-        <div class="success-icon">✓</div>
-
-        <h2>Payment successful!</h2>
-
+      <div
+        class="payment-success-popup"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="paymentSuccessTitle"
+      >
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h2 id="paymentSuccessTitle">Payment successful!</h2>
         <p>Your demo payment has been completed. Enjoy your event!</p>
-
         <button type="button" id="paymentSuccessClose">Continue</button>
       </div>
     </div>
 
-    <script type="module" src="js/create-event-page.js"></script>
-      <script src="js/theme.js?v=dark-gallery-colors-1"></script>
+    <script
+      type="module"
+      src="js/create-event-page.js?v=create-event-refresh-1"
+    ></script>
+    <script src="js/theme.js?v=create-event-refresh-1"></script>
   </body>
 </html>
