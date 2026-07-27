@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
     <meta name="theme-color" content="#17122B" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-bottom-language-1" />
+    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
     <script src="js/i18n.js?v=mobile-highlight-lines-1" defer></script>
       <script>
       (() => {
@@ -43,7 +43,7 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="css/theme.css?v=logo-raster-lock-3" />
+    <link rel="stylesheet" href="css/theme.css?v=join-modal-backdrop-light-1" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -154,9 +154,22 @@
                 Create Your Event
               </a>
               <a class="btn btn-glass btn-large" href="#" data-join-upload-open>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  class="qr-code-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: none"
+                >
                   <path
-                    d="M7 11a4 4 0 1 1 3.2-6.4A4.8 4.8 0 0 1 19 7.5V8a3.5 3.5 0 0 1-.7 6.9H8a4 4 0 0 1-1-7.9v4Z"
+                    d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M6.5 6.5h1v1h-1v-1Zm10 0h1v1h-1v-1Zm-10 10h1v1h-1v-1ZM14 14h2v2h-2v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2h-2v-2Zm4-1h2v3h-2v-3Z"
+                    fill="currentColor"
                   />
                 </svg>
                 Join with Code

@@ -5,25 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login — SnapUp Events</title>
 
-    <link rel="stylesheet" href="css/auth.css" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
     <meta name="theme-color" content="#0D0B0A" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-bottom-language-1" />
-    <script src="js/i18n.js?v=landing-sections-2" defer></script>
-      <script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
       (() => {
         const saved = localStorage.getItem("snapup_theme");
-        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        const theme =
+          saved ||
+          (matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <script>
-      (function(){try{var t=localStorage.getItem("snapup_theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(_){}})();
-    </script>
-    <link rel="stylesheet" href="css/theme.css?v=process-panels-unified-1" />
+    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
+    <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
+    <link rel="stylesheet" href="css/auth.css?v=hero-theme-audit-2" />
+    <script src="js/i18n.js?v=landing-sections-2" defer></script>
   </head>
   <body>
     <main class="auth-page">
