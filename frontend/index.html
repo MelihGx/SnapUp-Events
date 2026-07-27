@@ -23,6 +23,27 @@
     <meta name="theme-color" content="#17122B" />
     <link rel="stylesheet" href="css/i18n.css?v=mobile-bottom-language-1" />
     <script src="js/i18n.js?v=mobile-highlight-lines-1" defer></script>
+      <script>
+      (() => {
+        const saved = localStorage.getItem("snapup_theme");
+        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="css/theme.css?v=process-panels-unified-1" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -988,5 +1009,6 @@
       })();
     </script>
     <script type="module" src="js/main.js"></script>
+      <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>

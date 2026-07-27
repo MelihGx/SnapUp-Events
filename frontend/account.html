@@ -13,6 +13,17 @@
     <meta name="theme-color" content="#0D0B0A" />
     <link rel="stylesheet" href="css/i18n.css?v=mobile-bottom-language-1" />
     <script src="js/i18n.js?v=landing-sections-2" defer></script>
+      <script>
+      (() => {
+        const saved = localStorage.getItem("snapup_theme");
+        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <script>
+      (function(){try{var t=localStorage.getItem("snapup_theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(_){}})();
+    </script>
+    <link rel="stylesheet" href="css/theme.css?v=process-panels-unified-1" />
   </head>
   <body>
     <main class="account-page">
@@ -216,5 +227,6 @@
     </main>
 
     <script type="module" src="js/account.js"></script>
+      <script src="js/theme.js?v=dark-gallery-colors-1"></script>
   </body>
 </html>
