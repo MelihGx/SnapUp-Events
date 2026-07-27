@@ -922,6 +922,71 @@ html[data-theme="dark"] .policy-table-wrap th {
   background: rgba(124, 58, 237, 0.14);
 }
 
+html[data-theme="dark"] :is(
+  .policy-toc,
+  .policy-summary-grid > div,
+  .policy-purpose-list > div,
+  .policy-provider-grid article,
+  .policy-table-wrap,
+  .policy-next a
+) {
+  color: var(--theme-text);
+  background: #17141f;
+  border-color: var(--theme-border);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .policy-contact__card {
+  background: var(--theme-border);
+  border-color: var(--theme-border);
+}
+
+html[data-theme="dark"] .policy-contact__card > div {
+  color: var(--theme-text);
+  background: #17141f;
+}
+
+html[data-theme="dark"] :is(
+  .policy-summary-grid > div p,
+  .policy-purpose-list > div p,
+  .policy-provider-grid article p,
+  .policy-contact__card span,
+  .policy-next span,
+  .policy-toc p
+) {
+  color: var(--theme-muted);
+}
+
+html[data-theme="dark"] :is(
+  .policy-summary-grid > div h3,
+  .policy-purpose-list > div h3,
+  .policy-provider-grid article h3,
+  .policy-contact__card strong,
+  .policy-next strong
+) {
+  color: var(--theme-text);
+}
+
+html[data-theme="dark"] .policy-summary-icon {
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.2);
+}
+
+html[data-theme="dark"] .policy-callout {
+  background: rgba(34, 211, 197, 0.09);
+  border-color: rgba(34, 211, 197, 0.25);
+}
+
+html[data-theme="dark"] .policy-callout strong {
+  color: #5eead4;
+}
+
+html[data-theme="dark"] code {
+  color: #d8ccff;
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(167, 139, 250, 0.25);
+}
+
 /* Native controls and focus/selection */
 html[data-theme="dark"] :is(input, textarea, select) {
   caret-color: #f7f3ff;
