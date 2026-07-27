@@ -5,112 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Account — SnapUp Events</title>
 
-    <link rel="stylesheet" href="css/account.css" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
-    <meta name="theme-color" content="#0D0B0A" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
-    <script src="js/i18n.js?v=landing-sections-2" defer></script>
-      <script>
+    <meta name="theme-color" content="#17122b" />
+
+    <script>
       (() => {
-        const saved = localStorage.getItem("snapup_theme");
-        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.dataset.theme = theme;
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_) {}
       })();
     </script>
-    <script>
-      (function(){try{var t=localStorage.getItem("snapup_theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(_){}})();
-    </script>
-    <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
-  </head>
-  <body>
-    <main class="account-page">
-      <aside class="account-sidebar">
-        <a href="index.html" class="sidebar-brand">
-          <span class="sidebar-brand-logo" aria-hidden="true">
-            <svg
-              class="sidebar-logo-svg"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-            >
-              <circle cx="24" cy="24" r="20" fill="#0D0B0A" />
-              <circle
-                cx="24"
-                cy="24"
-                r="18.25"
-                stroke="rgba(255,255,255,.16)"
-                stroke-width="1.5"
-              />
-              <g class="sidebar-shutter-blades" transform="translate(24 24)">
-                <path d="M0 -10.5 L6.8 -3.6 L1.2 -1.1 Z" fill="#ffffff" />
-                <path d="M9.1 -5.2 L9.8 4.4 L3.6 1.2 Z" fill="#F4EEE4" />
-                <path d="M9.1 5.2 L1.2 10.6 L1.3 3.6 Z" fill="#ffffff" />
-                <path d="M0 10.5 L-6.8 3.6 L-1.2 1.1 Z" fill="#FF6A3D" />
-                <path d="M-9.1 5.2 L-9.8 -4.4 L-3.6 -1.2 Z" fill="#F7B14C" />
-                <path d="M-9.1 -5.2 L-1.2 -10.6 L-1.3 -3.6 Z" fill="#ffffff" />
-              </g>
-              <circle
-                cx="24"
-                cy="24"
-                r="4.8"
-                fill="#0D0B0A"
-                stroke="#ffffff"
-                stroke-width="1.8"
-              />
-              <circle cx="24" cy="24" r="1.4" fill="#ffffff" />
-            </svg>
-          </span>
 
+    <link rel="stylesheet" href="css/theme.css?v=account-dashboard-1" />
+    <link rel="stylesheet" href="css/account.css?v=account-dashboard-1" />
+    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
+    <script src="js/i18n.js?v=account-dashboard-1" defer></script>
+  </head>
+
+  <body>
+    <div class="account-page">
+      <aside class="account-sidebar" aria-label="Account menu">
+        <a
+          href="index.html"
+          class="sidebar-brand"
+          aria-label="SnapUp Events home"
+        >
+          <img
+            class="sidebar-brand-logo"
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="48"
+            height="48"
+          />
           <strong>SnapUp<span>Events</span></strong>
         </a>
 
         <div class="sidebar-user">
-          <span id="sidebarUserInitial">S</span>
-          <div>
+          <span class="sidebar-user__avatar" id="sidebarUserInitial">S</span>
+          <div class="sidebar-user__copy">
+            <small>Signed in as</small>
             <strong id="sidebarUserName">User</strong>
-            <small id="sidebarUserMail">user@mail.com</small>
+            <span id="sidebarUserMail">user@mail.com</span>
           </div>
         </div>
 
         <nav class="sidebar-menu" aria-label="Account menu">
           <button type="button" class="sidebar-link active" data-panel="events">
-            My Events
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="15" rx="3"></rect>
+              <path d="M8 3v4M16 3v4M4 10h16"></path>
+            </svg>
+            <span>My Events</span>
           </button>
 
-          <a href="create-event.html" class="sidebar-link"> Create Event </a>
+          <a href="create-event.html" class="sidebar-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span>Create Event</span>
+          </a>
 
           <button type="button" class="sidebar-link" data-panel="details">
-            Account Details
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5"></circle>
+              <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"></path>
+            </svg>
+            <span>Account Details</span>
           </button>
 
-          <a href="index.html" class="sidebar-link"> Home Page </a>
+          <a href="index.html" class="sidebar-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m4 11 8-7 8 7"></path>
+              <path d="M6.5 10v10h11V10M10 20v-6h4v6"></path>
+            </svg>
+            <span>Home Page</span>
+          </a>
         </nav>
 
+        <div class="sidebar-footer">
+          <span class="sidebar-footer__eyebrow">Private dashboard</span>
+          <p>Manage your events and account securely in one place.</p>
+        </div>
+
         <button type="button" class="sidebar-logout" id="accountLogout">
-          Logout
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10"
+            ></path>
+            <path d="M13 8l4 4-4 4M17 12H8"></path>
+          </svg>
+          <span>Logout</span>
         </button>
       </aside>
 
-      <section class="account-content">
+      <main class="account-content">
         <header class="account-topbar">
-          <div>
-            <span>Dashboard</span>
+          <div class="account-topbar__copy">
+            <span class="account-eyebrow">Dashboard</span>
             <h1 id="accountTitle">My Events</h1>
+            <p>Keep every event, code, and account setting within reach.</p>
           </div>
 
           <a href="create-event.html" class="topbar-create-btn">
-            Create New Event
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span>Create New Event</span>
           </a>
         </header>
 
-        <!-- EVENTS PANEL -->
         <section class="account-panel active" id="eventsPanel">
           <div class="panel-head">
             <div>
-              <span>Events</span>
+              <span class="account-eyebrow">Events</span>
               <h2>Created events</h2>
               <p>
                 View the events you created and manage their private event
@@ -119,61 +135,85 @@
             </div>
 
             <div class="event-count-box">
-              <strong id="summaryEvents">0</strong>
-              <span>Total events</span>
+              <span class="event-count-box__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="4" y="5" width="16" height="15" rx="3"></rect>
+                  <path d="M8 3v4M16 3v4M4 10h16"></path>
+                </svg>
+              </span>
+              <div>
+                <strong id="summaryEvents">0</strong>
+                <span>Total events</span>
+              </div>
             </div>
           </div>
 
-          <div id="eventsList" class="events-list">
+          <div id="eventsList" class="events-list" aria-live="polite">
             <p class="account-muted">Loading events...</p>
           </div>
         </section>
 
-        <!-- DETAILS PANEL -->
         <section class="account-panel" id="detailsPanel">
           <div class="panel-head">
             <div>
-              <span>Profile</span>
+              <span class="account-eyebrow">Profile</span>
               <h2>Account details</h2>
               <p>Update your name, email address, and phone number.</p>
             </div>
           </div>
 
           <div class="details-grid">
-            <article class="account-card">
+            <article class="account-card account-card--form">
+              <div class="account-card__head">
+                <span class="account-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3.5"></circle>
+                    <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"></path>
+                  </svg>
+                </span>
+                <div>
+                  <span class="account-eyebrow">Profile</span>
+                  <h3>Personal information</h3>
+                </div>
+              </div>
+
               <form id="accountForm" class="account-form">
                 <label>
-                  Full name
-                  <input type="text" id="accountName" />
+                  <span>Full name</span>
+                  <input type="text" id="accountName" autocomplete="name" />
                 </label>
 
                 <label>
-                  Email address
-                  <input type="email" id="accountMail" />
+                  <span>Email address</span>
+                  <input type="email" id="accountMail" autocomplete="email" />
                 </label>
 
                 <label>
-                  Phone number
-                  <input type="tel" id="accountPhone" />
+                  <span>Phone number</span>
+                  <input type="tel" id="accountPhone" autocomplete="tel" />
                 </label>
 
                 <button type="submit" id="accountSaveButton">
-                  Save changes
+                  <span>Save changes</span>
                 </button>
 
-                <p id="accountResult"></p>
+                <p
+                  id="accountResult"
+                  class="form-result"
+                  aria-live="polite"
+                ></p>
               </form>
 
               <div class="password-section">
                 <div class="password-section-head">
-                  <span>Password</span>
+                  <span class="account-eyebrow">Password</span>
                   <h3>Change password</h3>
                   <p>Update your password using your current password.</p>
                 </div>
 
                 <form id="passwordForm" class="account-form">
                   <label>
-                    Current password
+                    <span>Current password</span>
                     <input
                       type="password"
                       id="currentPassword"
@@ -182,7 +222,7 @@
                   </label>
 
                   <label>
-                    New password
+                    <span>New password</span>
                     <input
                       type="password"
                       id="newPassword"
@@ -191,7 +231,7 @@
                   </label>
 
                   <label>
-                    Confirm new password
+                    <span>Confirm new password</span>
                     <input
                       type="password"
                       id="confirmNewPassword"
@@ -200,33 +240,58 @@
                   </label>
 
                   <button type="submit" id="passwordSaveButton">
-                    Change password
+                    <span>Change password</span>
                   </button>
 
-                  <p id="passwordResult"></p>
+                  <p
+                    id="passwordResult"
+                    class="form-result"
+                    aria-live="polite"
+                  ></p>
                 </form>
               </div>
             </article>
 
-            <article class="account-card account-summary-card">
-              <span>Account summary</span>
+            <aside
+              class="account-card account-summary-card"
+              aria-label="Account summary"
+            >
+              <div class="account-card__head">
+                <span class="account-card__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M12 3.5 19 7v5c0 4.4-2.8 7.2-7 8.5-4.2-1.3-7-4.1-7-8.5V7l7-3.5Z"
+                    ></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                  </svg>
+                </span>
+                <div>
+                  <span class="account-eyebrow">Overview</span>
+                  <h3>Account summary</h3>
+                </div>
+              </div>
 
               <div class="summary-item">
+                <span>Account status</span>
                 <strong id="summaryStatus">Active</strong>
-                <small>Account status</small>
               </div>
 
               <div class="summary-item">
+                <span>Created at</span>
                 <strong id="summaryCreatedAt">-</strong>
-                <small>Created at</small>
               </div>
-            </article>
+
+              <div class="summary-note">
+                <span aria-hidden="true"></span>
+                <p>Your account information is only visible to you.</p>
+              </div>
+            </aside>
           </div>
         </section>
-      </section>
-    </main>
+      </main>
+    </div>
 
-    <script type="module" src="js/account.js"></script>
-      <script src="js/theme.js?v=dark-gallery-colors-1"></script>
+    <script type="module" src="js/account.js?v=account-dashboard-1"></script>
+    <script src="js/theme.js?v=account-dashboard-1"></script>
   </body>
 </html>

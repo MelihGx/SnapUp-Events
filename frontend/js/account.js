@@ -1,4 +1,4 @@
-﻿const token = localStorage.getItem("snapup_token");
+const token = localStorage.getItem("snapup_token");
 
 const sidebarUserInitial = document.getElementById("sidebarUserInitial");
 const sidebarUserName = document.getElementById("sidebarUserName");
@@ -33,6 +33,39 @@ const passwordResult = document.getElementById("passwordResult");
 
 const API_BASE_URL = "https://snapup-events-api.onrender.com";
 
+const localeByLanguage = {
+  en: "en-US",
+  tr: "tr-TR",
+  ar: "ar",
+  de: "de-DE",
+  fr: "fr-FR",
+  es: "es-ES",
+  it: "it-IT",
+  nl: "nl-NL",
+  bg: "bg-BG",
+  ro: "ro-RO",
+  el: "el-GR",
+  sr: "sr-RS",
+  hr: "hr-HR",
+  bs: "bs-BA",
+  sq: "sq-AL",
+  mk: "mk-MK",
+};
+
+function t(value) {
+  return window.SnapUpI18n?.t?.(value) || value;
+}
+
+function setResult(element, message = "", state = "") {
+  element.textContent = message ? t(message) : "";
+
+  if (state) {
+    element.dataset.state = state;
+  } else {
+    delete element.dataset.state;
+  }
+}
+
 if (!token) {
   window.location.href = "login.html";
 }
@@ -49,7 +82,13 @@ function formatDate(dateValue) {
     return "-";
   }
 
-  return new Date(dateValue).toLocaleDateString("tr-TR");
+  const language = window.SnapUpI18n?.language || "en";
+  const locale = localeByLanguage[language] || "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(dateValue));
 }
 
 function logout() {
@@ -66,8 +105,9 @@ function setActivePanel(panelName) {
   eventsPanel.classList.toggle("active", panelName === "events");
   detailsPanel.classList.toggle("active", panelName === "details");
 
-  accountTitle.textContent =
-    panelName === "events" ? "My Events" : "Account Details";
+  accountTitle.textContent = t(
+    panelName === "events" ? "My Events" : "Account Details",
+  );
 }
 
 sidebarButtons.forEach((button) => {
@@ -93,9 +133,11 @@ async function loadProfile() {
     }
 
     if (!response.ok || !data.success) {
-      accountResult.textContent =
-        data.message || "Profile could not be loaded.";
-      accountResult.style.color = "#ff4d4d";
+      setResult(
+        accountResult,
+        data.message || "Profile could not be loaded.",
+        "error",
+      );
       return;
     }
 
@@ -103,7 +145,7 @@ async function loadProfile() {
 
     localStorage.setItem("snapup_user", JSON.stringify(user));
 
-    sidebarUserName.textContent = user.user_name || "User";
+    sidebarUserName.textContent = user.user_name || t("User");
     sidebarUserMail.textContent = user.user_mail || "-";
     sidebarUserInitial.textContent = user.user_name
       ? user.user_name.charAt(0).toUpperCase()
@@ -113,12 +155,11 @@ async function loadProfile() {
     accountMail.value = user.user_mail || "";
     accountPhone.value = user.user_phone || "";
 
-    summaryStatus.textContent = user.is_user_active ? "Active" : "Passive";
+    summaryStatus.textContent = t(user.is_user_active ? "Active" : "Passive");
     summaryCreatedAt.textContent = formatDate(user.user_created_at);
   } catch (error) {
     console.error("Profile error:", error);
-    accountResult.textContent = "Backend connection error.";
-    accountResult.style.color = "#ff4d4d";
+    setResult(accountResult, "Backend connection error.", "error");
   }
 }
 
@@ -127,7 +168,7 @@ function renderNoEventsMessage() {
     <div class="account-empty">
       <h3>No existing events found.</h3>
       <p>
-        Your first memory wall is one click away â€” create your first SnapUp event now.
+        Your first memory wall is one click away — create your first SnapUp event now.
       </p>
       <a href="create-event.html" class="topbar-create-btn">
         Create Your First Event
@@ -137,31 +178,32 @@ function renderNoEventsMessage() {
 }
 
 function renderEvents(events) {
-  summaryEvents.textContent = events.length;
+  const eventItems = Array.isArray(events) ? events : [];
+  summaryEvents.textContent = eventItems.length;
 
-  if (!events || events.length === 0) {
+  if (eventItems.length === 0) {
     renderNoEventsMessage();
     return;
   }
 
-  eventsList.innerHTML = events
+  eventsList.innerHTML = eventItems
     .map((event) => {
       const eventId = encodeURIComponent(event.event_id);
-      const eventName = event.event_name || "Untitled Event";
-      const eventLocation = event.event_location || "No location";
+      const eventName = event.event_name || t("Untitled Event");
+      const eventLocation = event.event_location || t("No location");
       const eventDate = event.event_date
         ? formatDate(event.event_date)
-        : "No date";
+        : t("No date");
       const createdAt = formatDate(event.event_created_at);
       const eventCode = event.event_code || "------";
-      const eventStatus = event.is_event_active ? "Active" : "Passive";
+      const eventStatus = t(event.is_event_active ? "Active" : "Passive");
       const statusClass = event.is_event_active ? "active" : "passive";
 
       return `
         <a 
           href="event-detail.html?event_id=${eventId}" 
           class="event-item event-item-link sweet-event-card"
-          aria-label="Open ${eventName} gallery"
+          aria-label="${t("Open event gallery")}: ${eventName}"
         >
           <div class="sweet-event-cover">
             <div class="sweet-camera-icon">
@@ -324,14 +366,13 @@ accountForm.addEventListener("submit", async (event) => {
   const user_phone = accountPhone.value.trim();
 
   if (!user_name || !user_mail) {
-    accountResult.textContent = "Full name and email are required.";
-    accountResult.style.color = "#ff4d4d";
+    setResult(accountResult, "Full name and email are required.", "error");
     return;
   }
 
   try {
     accountSaveButton.disabled = true;
-    accountSaveButton.textContent = "Saving...";
+    accountSaveButton.textContent = t("Saving...");
 
     const response = await fetch(`${API_BASE_URL}/api/users/me`, {
       method: "PUT",
@@ -351,29 +392,26 @@ accountForm.addEventListener("submit", async (event) => {
     }
 
     if (!response.ok || !data.success) {
-      accountResult.textContent = data.message || "Update failed.";
-      accountResult.style.color = "#ff4d4d";
+      setResult(accountResult, data.message || "Update failed.", "error");
       return;
     }
 
     localStorage.setItem("snapup_user", JSON.stringify(data.user));
 
-    sidebarUserName.textContent = data.user.user_name || "User";
+    sidebarUserName.textContent = data.user.user_name || t("User");
     sidebarUserMail.textContent = data.user.user_mail || "-";
     sidebarUserInitial.textContent = data.user.user_name
       ? data.user.user_name.charAt(0).toUpperCase()
       : "S";
 
-    accountResult.textContent = "Account updated successfully.";
-    accountResult.style.color = "#21c55d";
+    setResult(accountResult, "Account updated successfully.", "success");
   } catch (error) {
     console.error("Update error:", error);
 
-    accountResult.textContent = "Backend connection error.";
-    accountResult.style.color = "#ff4d4d";
+    setResult(accountResult, "Backend connection error.", "error");
   } finally {
     accountSaveButton.disabled = false;
-    accountSaveButton.textContent = "Save changes";
+    accountSaveButton.textContent = t("Save changes");
   }
 });
 
@@ -384,29 +422,30 @@ passwordForm.addEventListener("submit", async (event) => {
   const new_password = newPassword.value.trim();
   const confirm_new_password = confirmNewPassword.value.trim();
 
-  passwordResult.textContent = "";
+  setResult(passwordResult);
 
   if (!current_password || !new_password || !confirm_new_password) {
-    passwordResult.textContent = "All password fields are required.";
-    passwordResult.style.color = "#ff4d4d";
+    setResult(passwordResult, "All password fields are required.", "error");
     return;
   }
 
   if (new_password.length < 6) {
-    passwordResult.textContent = "New password must be at least 6 characters.";
-    passwordResult.style.color = "#ff4d4d";
+    setResult(
+      passwordResult,
+      "New password must be at least 6 characters.",
+      "error",
+    );
     return;
   }
 
   if (new_password !== confirm_new_password) {
-    passwordResult.textContent = "New passwords do not match.";
-    passwordResult.style.color = "#ff4d4d";
+    setResult(passwordResult, "New passwords do not match.", "error");
     return;
   }
 
   try {
     passwordSaveButton.disabled = true;
-    passwordSaveButton.textContent = "Changing...";
+    passwordSaveButton.textContent = t("Changing...");
 
     const response = await fetch(`${API_BASE_URL}/api/users/me/password`, {
       method: "PUT",
@@ -421,9 +460,8 @@ passwordForm.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (response.status === 401) {
-      if (data.message === "Mevcut ÅŸifre hatalÄ±.") {
-        passwordResult.textContent = data.message;
-        passwordResult.style.color = "#ff4d4d";
+      if (data.message === "Mevcut şifre hatalı.") {
+        setResult(passwordResult, "Current password is incorrect.", "error");
         return;
       }
 
@@ -432,13 +470,15 @@ passwordForm.addEventListener("submit", async (event) => {
     }
 
     if (!response.ok || !data.success) {
-      passwordResult.textContent = data.message || "Password update failed.";
-      passwordResult.style.color = "#ff4d4d";
+      setResult(
+        passwordResult,
+        data.message || "Password update failed.",
+        "error",
+      );
       return;
     }
 
-    passwordResult.textContent = "Password changed successfully.";
-    passwordResult.style.color = "#21c55d";
+    setResult(passwordResult, "Password changed successfully.", "success");
 
     currentPassword.value = "";
     newPassword.value = "";
@@ -446,11 +486,10 @@ passwordForm.addEventListener("submit", async (event) => {
   } catch (error) {
     console.error("Password update error:", error);
 
-    passwordResult.textContent = "Backend connection error.";
-    passwordResult.style.color = "#ff4d4d";
+    setResult(passwordResult, "Backend connection error.", "error");
   } finally {
     passwordSaveButton.disabled = false;
-    passwordSaveButton.textContent = "Change password";
+    passwordSaveButton.textContent = t("Change password");
   }
 });
 
