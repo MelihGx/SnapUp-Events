@@ -1,0 +1,297 @@
+.snapup-language {
+  position: fixed;
+  right: 18px;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 10000;
+  direction: ltr !important;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.snapup-language__trigger {
+  min-width: 78px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: #ffffff;
+  background: rgba(30, 20, 61, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  box-shadow:
+    0 14px 36px rgba(13, 7, 31, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.snapup-language__trigger:hover,
+.snapup-language__trigger:focus-visible,
+.snapup-language.is-open .snapup-language__trigger {
+  background: rgba(50, 31, 94, 0.96);
+  border-color: rgba(167, 139, 250, 0.62);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.snapup-language__globe {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #a78bfa;
+  stroke-width: 1.7;
+}
+
+.snapup-language__current {
+  min-width: 19px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.snapup-language__chevron {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.8;
+  transition: transform 180ms ease;
+}
+
+.snapup-language.is-open .snapup-language__chevron {
+  transform: rotate(180deg);
+}
+
+.snapup-language__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: 174px;
+  padding: 7px;
+  background: rgba(24, 15, 49, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 22px 60px rgba(8, 4, 22, 0.42);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  max-height: min(430px, calc(100vh - 86px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.7) transparent;
+}
+
+.snapup-language__menu[hidden] {
+  display: none;
+}
+
+.snapup-language__menu button {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 11px;
+  color: rgba(255, 255, 255, 0.78);
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font: 700 13px/1 Inter, Arial, sans-serif;
+  direction: ltr !important;
+  text-align: left;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.snapup-language__menu button:hover,
+.snapup-language__menu button:focus-visible {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+.snapup-language__menu button[aria-checked="true"] {
+  color: #ffffff;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 58, 237, 0.34),
+    rgba(34, 211, 197, 0.14)
+  );
+}
+
+.snapup-language__menu button[aria-checked="true"]::after {
+  content: "✓";
+  color: #5eead4;
+  font-size: 13px;
+}
+
+.snapup-language__menu button[aria-checked="true"] small {
+  display: none;
+}
+
+.snapup-language__menu button small {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.snapup-language__menu button[lang="ar"] span {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+html[lang="ar"] body,
+html[lang="ar"] button,
+html[lang="ar"] input,
+html[lang="ar"] select,
+html[lang="ar"] textarea {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+/*
+ * Arabic is applied to text only. The document itself stays LTR so navigation,
+ * cards, columns, media, controls and icons keep the original layout.
+ */
+html[lang="ar"] :where(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  li,
+  label,
+  legend,
+  blockquote,
+  figcaption,
+  dt,
+  dd,
+  th,
+  td
+) {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+}
+
+html[lang="ar"] input:not(
+  [type="email"],
+  [type="tel"],
+  [type="password"],
+  [type="number"],
+  [type="date"],
+  [type="time"]
+),
+html[lang="ar"] textarea {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] input[type="email"],
+html[lang="ar"] input[type="tel"],
+html[lang="ar"] input[type="password"],
+html[lang="ar"] input[type="number"],
+html[lang="ar"] input[type="date"],
+html[lang="ar"] input[type="time"],
+html[lang="ar"] input[inputmode="numeric"],
+html[lang="ar"] .event-code,
+html[lang="ar"] code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Keep the hero composition fixed while letting each Arabic line read RTL. */
+html[lang="ar"] .hero-title {
+  direction: ltr;
+  text-align: left;
+}
+
+html[lang="ar"] .hero-title__line {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .snapup-language {
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .snapup-language__trigger {
+    min-width: 0;
+    width: 56px;
+    height: 40px;
+    gap: 5px;
+    padding: 0 8px;
+    border-radius: 13px;
+    background: rgba(24, 15, 49, 0.82);
+    box-shadow:
+      0 10px 26px rgba(13, 7, 31, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
+
+  .snapup-language__globe {
+    width: 16px;
+    height: 16px;
+  }
+
+  .snapup-language__current {
+    min-width: 17px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .snapup-language__chevron {
+    display: none;
+  }
+
+  .snapup-language__menu {
+    width: 176px;
+    max-height: min(390px, calc(100vh - 72px));
+    border-radius: 16px;
+  }
+}
+
+@media print {
+  .snapup-language {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .snapup-language {
+    top: auto;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .snapup-language__trigger {
+    width: 56px;
+    height: 42px;
+    padding: 0 8px;
+    border-radius: 13px;
+    background: rgba(24, 15, 49, 0.92);
+    box-shadow:
+      0 12px 30px rgba(8, 4, 22, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .snapup-language__menu {
+    bottom: calc(100% + 9px);
+    max-height: min(390px, calc(100dvh - 76px));
+  }
+}

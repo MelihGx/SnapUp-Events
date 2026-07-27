@@ -784,6 +784,10 @@ html[data-theme="dark"] :focus-visible {
   outline-color: #a78bfa;
 }
 
+html[data-theme="dark"] img {
+  color-scheme: dark;
+}
+
 /*
  * The landing header and first hero viewport are a fixed brand composition.
  * Keep their original palette in both themes; dark mode begins below the hero.

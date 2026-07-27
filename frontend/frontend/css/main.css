@@ -6987,35 +6987,16 @@ body {
   }
 }
 
-/*
- * Theme-independent brand mark.
- *
- * This deliberately uses a raster CSS background rather than an inline SVG or
- * an <img>. Theme rules can neither inherit a fill color into it nor apply the
- * dark image color-scheme treatment that caused the white circle.
- */
-.brand-logo-fixed {
-  width: 100%;
-  height: 100%;
-  display: block;
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  background: transparent
-    url("../icon/snapup-brand-mark-fixed-v3.png") center / contain no-repeat !important;
-  color-scheme: only light !important;
-  forced-color-adjust: none !important;
+/* External brand asset: theme rules cannot recolor its internal SVG shapes. */
+.brand-logo-svg {
+  background: transparent !important;
   filter: none !important;
   opacity: 1 !important;
   mix-blend-mode: normal !important;
-  isolation: isolate;
 }
 
-html[data-theme="dark"]
-  :is(.brand-mark, .site-footer__brand-mark, .brand-logo-fixed) {
+html[data-theme="dark"] :is(.brand-mark, .site-footer__brand-mark, img.brand-logo-svg) {
   background-color: transparent !important;
-  color-scheme: only light !important;
-  forced-color-adjust: none !important;
   filter: none !important;
 }
 
