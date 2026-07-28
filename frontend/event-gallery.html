@@ -5,43 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Gallery — SnapUp Events</title>
 
-    <link rel="stylesheet" href="css/event-gallery.css" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
-    <meta name="theme-color" content="#0D0B0A" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
-    <script src="js/i18n.js?v=landing-sections-2" defer></script>
-      <script>
+    <meta name="theme-color" content="#17122b" />
+
+    <script>
       (() => {
-        const saved = localStorage.getItem("snapup_theme");
-        const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.dataset.theme = theme;
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_) {}
       })();
     </script>
-    <script>
-      (function(){try{var t=localStorage.getItem("snapup_theme");document.documentElement.dataset.theme=t==="light"||t==="dark"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(_){}})();
-    </script>
-    <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
+
+    <link rel="stylesheet" href="css/theme.css?v=gallery-mobile-instagram-4" />
+    <link
+      rel="stylesheet"
+      href="css/event-gallery.css?v=gallery-mobile-instagram-4"
+    />
+    <link
+      rel="stylesheet"
+      href="css/i18n.css?v=mobile-controls-balanced-1"
+    />
+    <script
+      src="js/event-gallery-i18n.js?v=event-gallery-refresh-1"
+      defer
+    ></script>
+    <script src="js/i18n.js?v=event-gallery-refresh-1" defer></script>
   </head>
 
-  <body>
+  <body class="event-gallery-shell">
     <main class="public-gallery-page">
       <header class="gallery-header">
-        <a href="index.html" class="gallery-brand">
+        <a
+          href="index.html"
+          class="gallery-brand"
+          aria-label="SnapUp Events home"
+        >
+          <img
+            class="gallery-brand-logo"
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="48"
+            height="48"
+          />
           <strong>SnapUp<span>Events</span></strong>
         </a>
 
-        <a href="index.html" class="gallery-back-link">Back Home</a>
+        <nav class="gallery-header-actions" aria-label="Page navigation">
+          <a href="index.html" class="gallery-back-link">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1Z"
+              ></path>
+            </svg>
+            <span>Back Home</span>
+          </a>
+        </nav>
       </header>
 
-      <section class="gallery-loading" id="galleryLoading">
-        <div class="loader"></div>
+      <section
+        class="gallery-loading"
+        id="galleryLoading"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <div class="loader" aria-hidden="true"></div>
         <p>Loading approved gallery...</p>
       </section>
 
-      <section class="gallery-error" id="galleryError" hidden>
+      <section
+        class="gallery-error"
+        id="galleryError"
+        aria-live="assertive"
+        hidden
+      >
+        <div class="gallery-state-icon" aria-hidden="true">!</div>
         <h1>Gallery could not be loaded.</h1>
         <p id="galleryErrorText">Please check the event code.</p>
         <a href="index.html">Back Home</a>
@@ -49,28 +95,40 @@
 
       <section class="gallery-content" id="galleryContent" hidden>
         <section class="gallery-hero" id="galleryHero">
-          <div>
-            <span class="gallery-kicker">Approved Event Gallery</span>
+          <div class="gallery-hero-copy">
+            <span class="gallery-kicker">
+              <i aria-hidden="true"></i>
+              Approved Event Gallery
+            </span>
             <h1 id="galleryEventTitle">Event name</h1>
-            <p id="galleryEventMeta">Location · Date · Code</p>
-            <p id="galleryEventDescription"></p>
+            <p class="gallery-event-meta" id="galleryEventMeta">
+              Location · Date · Code
+            </p>
+            <p
+              class="gallery-event-description"
+              id="galleryEventDescription"
+            ></p>
           </div>
         </section>
 
         <section class="participants-panel">
           <div class="section-head">
-            <span>Participants</span>
+            <span class="section-kicker">Participants</span>
             <h2 id="guestCountTitle">Event guests</h2>
+            <p>Everyone who has joined this shared event album.</p>
           </div>
 
           <div class="participant-list" id="participantList"></div>
         </section>
 
         <section class="approved-gallery-panel">
-          <div class="section-head">
-            <span>Photos</span>
-            <h2>Approved memories</h2>
-            <p>Only photos approved by the event admin are shown here.</p>
+          <div class="gallery-panel-head">
+            <div class="section-head">
+              <span class="section-kicker">Photos</span>
+              <h2>Approved memories</h2>
+              <p>Only photos approved by the event admin are shown here.</p>
+            </div>
+            <span class="gallery-count-badge" id="photoCountBadge">0 photos</span>
           </div>
 
           <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
@@ -78,13 +136,21 @@
       </section>
     </main>
 
-    <div class="public-lightbox" id="publicLightbox" aria-hidden="true">
+    <div
+      class="public-lightbox"
+      id="publicLightbox"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Gallery preview"
+    >
       <div class="public-lightbox-backdrop" id="publicLightboxBackdrop"></div>
 
       <button
         type="button"
         class="public-lightbox-close"
         id="publicLightboxClose"
+        aria-label="Close gallery preview"
       >
         ×
       </button>
@@ -93,6 +159,7 @@
         type="button"
         class="public-lightbox-arrow public-lightbox-prev"
         id="publicLightboxPrev"
+        aria-label="Previous photo"
       >
         ‹
       </button>
@@ -109,12 +176,16 @@
         type="button"
         class="public-lightbox-arrow public-lightbox-next"
         id="publicLightboxNext"
+        aria-label="Next photo"
       >
         ›
       </button>
     </div>
 
-    <script type="module" src="js/event-gallery.js"></script>
-      <script src="js/theme.js?v=dark-gallery-colors-1"></script>
+    <script
+      type="module"
+      src="js/event-gallery.js?v=gallery-mobile-instagram-4"
+    ></script>
+    <script src="js/theme.js?v=gallery-mobile-instagram-4"></script>
   </body>
 </html>

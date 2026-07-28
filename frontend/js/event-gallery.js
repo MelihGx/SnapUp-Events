@@ -13,6 +13,7 @@ const galleryEventDescription = document.getElementById(
 );
 const guestCountTitle = document.getElementById("guestCountTitle");
 const participantList = document.getElementById("participantList");
+const photoCountBadge = document.getElementById("photoCountBadge");
 const approvedGalleryGrid = document.getElementById("approvedGalleryGrid");
 
 const publicLightbox = document.getElementById("publicLightbox");
@@ -29,11 +30,46 @@ const publicLightboxMeta = document.getElementById("publicLightboxMeta");
 const params = new URLSearchParams(window.location.search);
 const eventCode = params.get("code");
 
+const localeByLanguage = {
+  en: "en-US",
+  tr: "tr-TR",
+  ar: "ar",
+  de: "de-DE",
+  fr: "fr-FR",
+  es: "es-ES",
+  it: "it-IT",
+  nl: "nl-NL",
+  bg: "bg-BG",
+  ro: "ro-RO",
+  el: "el-GR",
+  sr: "sr-RS",
+  hr: "hr-HR",
+  bs: "bs-BA",
+  sq: "sq-AL",
+  mk: "mk-MK",
+};
+
 let approvedPhotos = [];
 let activePhotoIndex = 0;
+let lightboxReturnTarget = null;
+let touchStartX = null;
 let gallerySettings = {
   allow_likes: true,
 };
+
+function getLanguage() {
+  return window.SnapUpI18n?.language || "en";
+}
+
+function t(value, replacements = {}) {
+  const translated = window.SnapUpI18n?.t(value) || value;
+
+  return Object.entries(replacements).reduce(
+    (result, [key, replacement]) =>
+      result.replaceAll(`{${key}}`, String(replacement)),
+    translated,
+  );
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -64,38 +100,60 @@ function getLikeKey() {
 function formatDate(value) {
   if (!value) return "";
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [year, month, day] = value.split("-");
-    return `${day}.${month}.${year}`;
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? `${value}T12:00:00`
+    : value;
+  const date = new Date(normalizedValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
   }
 
-  return new Date(value).toLocaleDateString("tr-TR");
+  return new Intl.DateTimeFormat(
+    localeByLanguage[getLanguage()] || "en-US",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    },
+  ).format(date);
 }
 
 function formatDateTime(value) {
   if (!value) return "";
 
-  return new Date(value).toLocaleString("tr-TR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    localeByLanguage[getLanguage()] || "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  ).format(date);
 }
 
 function showError(message) {
   galleryLoading.hidden = true;
+  galleryLoading.setAttribute("aria-busy", "false");
   galleryContent.hidden = true;
   galleryError.hidden = false;
-  galleryErrorText.textContent = message;
+  galleryErrorText.textContent = t(message);
 }
 
 function showContent() {
   galleryLoading.hidden = true;
+  galleryLoading.setAttribute("aria-busy", "false");
   galleryError.hidden = true;
   galleryContent.hidden = false;
 }
 
 function renderEvent(event) {
-  galleryEventTitle.textContent = event.event_name || "Untitled Event";
+  galleryEventTitle.textContent = event.event_name || t("Untitled Event");
 
   const metaParts = [
     event.event_location || "",
@@ -105,33 +163,42 @@ function renderEvent(event) {
 
   galleryEventMeta.textContent = metaParts.join(" · ");
   galleryEventDescription.textContent =
-    event.description || "Approved memories from this event.";
+    event.description || t("Approved memories from this event.");
 
   if (event.event_cover_url) {
     galleryHero.classList.add("has-image");
-    galleryHero.style.backgroundImage = `url("${event.event_cover_url}")`;
+    galleryHero.style.backgroundImage = `url(${JSON.stringify(
+      event.event_cover_url,
+    )})`;
+  } else {
+    galleryHero.classList.remove("has-image");
+    galleryHero.style.removeProperty("background-image");
   }
 }
 
 function renderGuests(guests) {
   const list = guests || [];
-  guestCountTitle.textContent = `Event guests (${list.length})`;
+  guestCountTitle.textContent = `${t("Event guests")} (${list.length})`;
 
   if (list.length === 0) {
     participantList.innerHTML = `
-      <div class="empty-box">No guests have joined this event yet.</div>
+      <div class="empty-box">${escapeHtml(
+        t("No guests have joined this event yet."),
+      )}</div>
     `;
     return;
   }
 
   participantList.innerHTML = list
     .map((guest) => {
-      const guestName = guest.guest_name || "Unknown Guest";
-      const firstLetter = guestName.charAt(0).toUpperCase();
+      const guestName = guest.guest_name || t("Unknown Guest");
+      const firstLetter = guestName.trim().charAt(0).toLocaleUpperCase(
+        localeByLanguage[getLanguage()] || "en-US",
+      );
 
       return `
         <span class="participant-chip">
-          <i>${escapeHtml(firstLetter)}</i>
+          <i aria-hidden="true">${escapeHtml(firstLetter || "?")}</i>
           ${escapeHtml(guestName)}
         </span>
       `;
@@ -146,6 +213,7 @@ function getLikeButtonHtml(item) {
 
   const likesCount = Number(item.likes_count || 0);
   const userLiked = Boolean(item.user_liked);
+  const label = userLiked ? t("Unlike this photo") : t("Like this photo");
 
   return `
     <button
@@ -153,9 +221,9 @@ function getLikeButtonHtml(item) {
       class="public-like-button ${userLiked ? "liked" : ""}"
       data-like-media-id="${escapeHtml(item.media_id)}"
       aria-pressed="${userLiked ? "true" : "false"}"
-      aria-label="${userLiked ? "Unlike this photo" : "Like this photo"}"
+      aria-label="${escapeHtml(label)}"
     >
-      <span>${userLiked ? "♥" : "♡"}</span>
+      <span aria-hidden="true">${userLiked ? "♥" : "♡"}</span>
       <strong>${likesCount}</strong>
     </button>
   `;
@@ -163,11 +231,20 @@ function getLikeButtonHtml(item) {
 
 function renderApprovedPhotos(media) {
   approvedPhotos = media || [];
+  photoCountBadge.textContent = t(
+    approvedPhotos.length === 1
+      ? `${approvedPhotos.length} photo`
+      : `${approvedPhotos.length} photos`,
+  );
 
   if (approvedPhotos.length === 0) {
     approvedGalleryGrid.innerHTML = `
       <div class="empty-box">
-        No approved photos yet. Photos will appear here after admin approval.
+        ${escapeHtml(
+          t(
+            "No approved photos yet. Photos will appear here after admin approval.",
+          ),
+        )}
       </div>
     `;
     return;
@@ -175,34 +252,86 @@ function renderApprovedPhotos(media) {
 
   approvedGalleryGrid.innerHTML = approvedPhotos
     .map((item, index) => {
-      const guestName = item.guest_name || "Unknown Guest";
-      const message = item.message || "Approved photo";
+      const guestName = item.guest_name || t("Unknown Guest");
+      const message = item.message || t("Approved photo");
       const uploadedAt = item.media_created_at
         ? formatDateTime(item.media_created_at)
         : "";
+      const uploadedBy = t("Uploaded by {name}", { name: guestName });
+      const openLabel = t("Open approved photo uploaded by {name}", {
+        name: guestName,
+      });
+      const guestInitial =
+        guestName
+          .trim()
+          .charAt(0)
+          .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
 
       return `
         <article class="approved-card">
+          <header class="approved-card-head">
+            <span class="approved-card-avatar" aria-hidden="true">
+              ${escapeHtml(guestInitial)}
+            </span>
+            <span class="approved-card-identity">
+              <strong>${escapeHtml(guestName)}</strong>
+              ${
+                uploadedAt
+                  ? `<time datetime="${escapeHtml(
+                      item.media_created_at,
+                    )}">${escapeHtml(uploadedAt)}</time>`
+                  : ""
+              }
+            </span>
+          </header>
+
           <button
             type="button"
+            class="approved-media-button"
             data-photo-index="${index}"
-            aria-label="Open approved photo uploaded by ${escapeHtml(
-              guestName,
-            )}"
+            aria-label="${escapeHtml(openLabel)}"
           >
-            <img src="${escapeHtml(item.media_url)}" alt="Uploaded by ${escapeHtml(
-              guestName,
-            )}" />
+            <img
+              src="${escapeHtml(item.media_url)}"
+              alt="${escapeHtml(uploadedBy)}"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="approved-media-overlay" aria-hidden="true">
+              <span class="approved-overlay-author">
+                <i>${escapeHtml(guestInitial)}</i>
+                <span>
+                  <strong>${escapeHtml(guestName)}</strong>
+                  ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
+                </span>
+              </span>
+              <span class="approved-overlay-open">
+                <svg viewBox="0 0 24 24">
+                  <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+                </svg>
+              </span>
+            </span>
           </button>
 
           <div class="approved-card-body">
-            <strong>Uploaded by ${escapeHtml(guestName)}</strong>
-            <p>${escapeHtml(message)}</p>
-            ${uploadedAt ? `<p>${escapeHtml(uploadedAt)}</p>` : ""}
-
             <div class="approved-card-actions">
               ${getLikeButtonHtml(item)}
+              <button
+                type="button"
+                class="public-expand-button"
+                data-photo-index="${index}"
+                aria-label="${escapeHtml(openLabel)}"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+                </svg>
+              </button>
             </div>
+
+            <p class="approved-card-caption">
+              <strong>${escapeHtml(guestName)}</strong>
+              <span>${escapeHtml(message)}</span>
+            </p>
           </div>
         </article>
       `;
@@ -222,14 +351,15 @@ function showLightboxItem(index) {
   }
 
   const item = approvedPhotos[activePhotoIndex];
-  const guestName = item.guest_name || "Unknown Guest";
+  const guestName = item.guest_name || t("Unknown Guest");
   const uploadedAt = item.media_created_at
     ? formatDateTime(item.media_created_at)
     : "";
+  const uploadedBy = t("Uploaded by {name}", { name: guestName });
 
   publicLightboxImage.src = item.media_url;
-  publicLightboxImage.alt = `Uploaded by ${guestName}`;
-  publicLightboxTitle.textContent = `Uploaded by ${guestName}`;
+  publicLightboxImage.alt = uploadedBy;
+  publicLightboxTitle.textContent = uploadedBy;
 
   const likeText = gallerySettings.allow_likes
     ? `♥ ${Number(item.likes_count || 0)}`
@@ -243,12 +373,14 @@ function showLightboxItem(index) {
   publicLightboxNext.hidden = !hasMultiplePhotos;
 }
 
-function openLightbox(index) {
+function openLightbox(index, trigger) {
+  lightboxReturnTarget = trigger || document.activeElement;
   showLightboxItem(index);
 
   publicLightbox.classList.add("active");
   publicLightbox.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+  publicLightboxClose.focus();
 }
 
 function closeLightbox() {
@@ -256,11 +388,16 @@ function closeLightbox() {
   publicLightbox.setAttribute("aria-hidden", "true");
   publicLightboxImage.src = "";
   document.body.style.overflow = "";
+
+  if (lightboxReturnTarget instanceof HTMLElement) {
+    lightboxReturnTarget.focus();
+  }
 }
 
 function updateLikeButtons(mediaId, liked, likesCount) {
+  const escapedId = CSS.escape(String(mediaId));
   const buttons = document.querySelectorAll(
-    `[data-like-media-id="${CSS.escape(mediaId)}"]`,
+    `[data-like-media-id="${escapedId}"]`,
   );
 
   buttons.forEach((button) => {
@@ -268,7 +405,7 @@ function updateLikeButtons(mediaId, liked, likesCount) {
     button.setAttribute("aria-pressed", liked ? "true" : "false");
     button.setAttribute(
       "aria-label",
-      liked ? "Unlike this photo" : "Like this photo",
+      liked ? t("Unlike this photo") : t("Like this photo"),
     );
 
     const icon = button.querySelector("span");
@@ -311,7 +448,7 @@ async function handleLikeClick(button) {
     }
 
     approvedPhotos = approvedPhotos.map((item) => {
-      if (item.media_id !== mediaId) {
+      if (String(item.media_id) !== String(mediaId)) {
         return item;
       }
 
@@ -326,13 +463,13 @@ async function handleLikeClick(button) {
 
     if (
       publicLightbox.classList.contains("active") &&
-      approvedPhotos[activePhotoIndex]?.media_id === mediaId
+      String(approvedPhotos[activePhotoIndex]?.media_id) === String(mediaId)
     ) {
       showLightboxItem(activePhotoIndex);
     }
   } catch (error) {
     console.error("Like error:", error);
-    alert(error.message || "Like action failed.");
+    alert(t(error.message || "Like action failed."));
   } finally {
     button.disabled = false;
   }
@@ -363,7 +500,7 @@ async function loadGallery() {
       allow_likes: data.settings?.allow_likes !== false,
     };
 
-    renderEvent(data.event);
+    renderEvent(data.event || {});
     renderGuests(data.guests || []);
     renderApprovedPhotos(data.media || []);
     showContent();
@@ -389,7 +526,7 @@ approvedGalleryGrid.addEventListener("click", async (event) => {
     return;
   }
 
-  openLightbox(Number(button.dataset.photoIndex));
+  openLightbox(Number(button.dataset.photoIndex), button);
 });
 
 publicLightboxClose.addEventListener("click", closeLightbox);
@@ -402,6 +539,31 @@ publicLightboxPrev.addEventListener("click", () => {
 publicLightboxNext.addEventListener("click", () => {
   showLightboxItem(activePhotoIndex + 1);
 });
+
+publicLightbox.addEventListener(
+  "touchstart",
+  (event) => {
+    touchStartX = event.changedTouches[0]?.clientX ?? null;
+  },
+  { passive: true },
+);
+
+publicLightbox.addEventListener(
+  "touchend",
+  (event) => {
+    if (touchStartX === null || approvedPhotos.length < 2) return;
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+    const distance = touchEndX - touchStartX;
+    touchStartX = null;
+
+    if (Math.abs(distance) < 50) return;
+    showLightboxItem(
+      distance > 0 ? activePhotoIndex - 1 : activePhotoIndex + 1,
+    );
+  },
+  { passive: true },
+);
 
 window.addEventListener("keydown", (event) => {
   if (!publicLightbox.classList.contains("active")) {

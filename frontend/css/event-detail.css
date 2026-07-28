@@ -474,23 +474,77 @@ body.event-detail-shell [hidden] {
 }
 
 .event-code-box {
+  position: relative;
+  width: 100%;
   margin-bottom: 16px;
   padding: 17px 12px;
   overflow-wrap: anywhere;
   color: #ffffff;
   background: var(--detail-gradient);
+  border: 0;
   border-radius: 19px;
   box-shadow: 0 14px 28px rgba(124, 58, 237, 0.22);
+  cursor: copy;
   text-align: center;
   font-size: clamp(26px, 4vw, 34px);
   font-weight: 950;
   letter-spacing: 0.13em;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+body.event-detail-shell button.event-code-box {
+  font-family: inherit;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 4px;
+}
+
+.event-code-box:hover {
+  filter: saturate(1.08) brightness(1.04);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(124, 58, 237, 0.28);
+}
+
+.event-code-box:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.event-code-box::after {
+  position: absolute;
+  right: 50%;
+  bottom: 5px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.92);
+  content: attr(data-copy-feedback);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translate(50%, 4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  white-space: nowrap;
+}
+
+.event-code-box.is-copied::after {
+  opacity: 1;
+  transform: translate(50%, 0);
 }
 
 .qr-box {
   min-height: 224px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 14px;
   padding: 15px;
@@ -509,7 +563,11 @@ body.event-detail-shell [hidden] {
 }
 
 .qr-click-link {
-  display: block;
+  width: min(188px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline: auto;
   border-radius: 17px;
   transition:
     transform 180ms ease,
@@ -522,17 +580,21 @@ body.event-detail-shell [hidden] {
 }
 
 .qr-box img {
-  width: min(188px, 100%);
+  width: 100%;
   height: auto;
   display: block;
+  margin-inline: auto;
   border-radius: 15px;
 }
 
 .qr-helper-text {
+  width: 100%;
   display: block;
+  margin-inline: auto;
   color: #70667f;
   font-size: 11px;
   font-weight: 750;
+  text-align: center;
 }
 
 .detail-actions {

@@ -25,10 +25,10 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="css/theme.css?v=event-detail-refresh-1" />
+    <link rel="stylesheet" href="css/theme.css?v=event-detail-qr-fix-1" />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-detail-refresh-1"
+      href="css/event-detail.css?v=event-detail-qr-fix-1"
     />
     <link
       rel="stylesheet"
@@ -113,7 +113,15 @@
           <aside class="detail-side-card">
             <span class="side-label">Event Code</span>
 
-            <div class="event-code-box" id="eventCode">------</div>
+            <button
+              type="button"
+              class="event-code-box"
+              id="eventCode"
+              title="Copy Code"
+              aria-label="Copy Code"
+            >
+              ------
+            </button>
 
             <div class="qr-box" id="qrBox">
               <span>QR code will appear here.</span>
@@ -452,7 +460,10 @@
       </div>
     </div>
 
-    <script type="module" src="js/event-detail.js?v=event-detail-refresh-1"></script>
-    <script src="js/theme.js?v=event-detail-refresh-1"></script>
+    <script
+      type="module"
+      src="js/event-detail.js?v=event-detail-qr-fix-1"
+    ></script>
+    <script src="js/theme.js?v=event-detail-qr-fix-1"></script>
   </body>
 </html>

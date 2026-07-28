@@ -234,6 +234,56 @@ function getQrImageUrl(event) {
   )}`;
 }
 
+async function copyTextToClipboard(value) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const temporaryInput = document.createElement("textarea");
+  temporaryInput.value = value;
+  temporaryInput.setAttribute("readonly", "");
+  temporaryInput.style.position = "fixed";
+  temporaryInput.style.opacity = "0";
+  temporaryInput.style.pointerEvents = "none";
+
+  document.body.appendChild(temporaryInput);
+  temporaryInput.select();
+  temporaryInput.setSelectionRange(0, temporaryInput.value.length);
+
+  const copied = document.execCommand("copy");
+  temporaryInput.remove();
+
+  if (!copied) {
+    throw new Error("Copy failed.");
+  }
+}
+
+function showEventCodeCopiedFeedback() {
+  if (!eventCode) {
+    return;
+  }
+
+  eventCode.dataset.copyFeedback = t("Copied!");
+  eventCode.classList.remove("is-copied");
+  void eventCode.offsetWidth;
+  eventCode.classList.add("is-copied");
+
+  window.clearTimeout(showEventCodeCopiedFeedback.timeoutId);
+  showEventCodeCopiedFeedback.timeoutId = window.setTimeout(() => {
+    eventCode.classList.remove("is-copied");
+  }, 1300);
+}
+
+async function copyCurrentEventCode() {
+  if (!currentEvent?.event_code) {
+    return;
+  }
+
+  await copyTextToClipboard(currentEvent.event_code);
+  showEventCodeCopiedFeedback();
+}
+
 function showError(message) {
   detailLoading.hidden = true;
   detailContent.hidden = true;
@@ -255,6 +305,8 @@ function renderEventInfo(event) {
     event.description || t("No description added for this event.");
 
   eventCode.textContent = event.event_code || "------";
+  eventCode.title = t("Copy Code");
+  eventCode.setAttribute("aria-label", t("Copy Code"));
 
   eventLocation.textContent = event.event_location || "-";
   eventDate.textContent = formatDate(event.event_date);
@@ -1266,18 +1318,28 @@ async function handleMediaAdminAction(action, mediaId) {
   }
 }
 
+if (eventCode) {
+  eventCode.addEventListener("click", async () => {
+    try {
+      await copyCurrentEventCode();
+    } catch (error) {
+      console.error("Event code copy error:", error);
+    }
+  });
+}
+
 if (copyCodeButton) {
   copyCodeButton.addEventListener("click", async () => {
-    if (!currentEvent?.event_code) {
-      return;
+    try {
+      await copyCurrentEventCode();
+      copyCodeButton.textContent = t("Copied!");
+
+      setTimeout(() => {
+        copyCodeButton.textContent = t("Copy Code");
+      }, 1300);
+    } catch (error) {
+      console.error("Event code copy error:", error);
     }
-
-    await navigator.clipboard.writeText(currentEvent.event_code);
-    copyCodeButton.textContent = t("Copied!");
-
-    setTimeout(() => {
-      copyCodeButton.textContent = t("Copy Code");
-    }, 1300);
   });
 }
 
@@ -1287,7 +1349,7 @@ if (copyJoinLinkButton) {
       return;
     }
 
-    await navigator.clipboard.writeText(getJoinUrl(currentEvent));
+    await copyTextToClipboard(getJoinUrl(currentEvent));
     copyJoinLinkButton.textContent = t("Copied!");
 
     setTimeout(() => {
