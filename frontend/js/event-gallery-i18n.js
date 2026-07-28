@@ -623,4 +623,56 @@
       ]),
     ),
   };
+
+  const memoryBookPhrases = {
+    "SnapUp Memory Book": { tr: "SnapUp Anı Albümü" },
+    "Keep the whole story": { tr: "Tüm hikâyeyi sakla" },
+    "Approved photos will be collected in one downloadable PDF.": {
+      tr: "Onaylı fotoğraflar indirilebilir tek bir PDF’te toplanacak.",
+    },
+    "Prepare Memory Book": { tr: "Anı Albümünü Hazırla" },
+    "Close memory book": { tr: "Anı albümünü kapat" },
+    "Your event, one keepsake": { tr: "Etkinliğin, tek bir hatıra" },
+    "Create your Memory Book": { tr: "Anı Albümünü oluştur" },
+    "Only approved photos are included. Guest names, messages and event details are arranged automatically.":
+      {
+        tr: "Yalnızca onaylı fotoğraflar eklenir. Misafir adları, mesajlar ve etkinlik bilgileri otomatik olarak düzenlenir.",
+      },
+    "Memory book summary": { tr: "Anı albümü özeti" },
+    "Approved photos": { tr: "Onaylı fotoğraf" },
+    "Estimated pages": { tr: "Tahmini sayfa" },
+    "Download format": { tr: "İndirme biçimi" },
+    Cancel: { tr: "Vazgeç" },
+    "Download Memory Book": { tr: "Anı Albümünü İndir" },
+    "The Memory Book will be available after a photo is approved.": {
+      tr: "Bir fotoğraf onaylandıktan sonra Anı Albümü hazırlanabilir.",
+    },
+    "{count} approved photos are ready for your downloadable album.": {
+      tr: "{count} onaylı fotoğraf indirilebilir albümün için hazır.",
+    },
+    "Creating your book...": { tr: "Albümün oluşturuluyor..." },
+    "Arranging approved photos, guest messages and event details...": {
+      tr: "Onaylı fotoğraflar, misafir mesajları ve etkinlik bilgileri düzenleniyor...",
+    },
+    "The Memory Book could not be created.": {
+      tr: "Anı Albümü oluşturulamadı.",
+    },
+    "The server did not return a PDF file.": {
+      tr: "Sunucu bir PDF dosyası döndürmedi.",
+    },
+    "The generated PDF file is empty.": {
+      tr: "Oluşturulan PDF dosyası boş.",
+    },
+    "Your Memory Book is ready. The download has started.": {
+      tr: "Anı Albümün hazır. İndirme başladı.",
+    },
+    Downloaded: { tr: "İndirildi" },
+  };
+
+  Object.entries(memoryBookPhrases).forEach(([key, translations]) => {
+    window.SnapUpPagePhrases[key] = {
+      ...(window.SnapUpPagePhrases[key] || {}),
+      ...translations,
+    };
+  });
 })();

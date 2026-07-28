@@ -9,7 +9,17 @@ const mediaRoutes = require("./routes/mediaRoutes");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    exposedHeaders: [
+      "Content-Disposition",
+      "X-SnapUp-PDF-Engine",
+      "X-SnapUp-PDF-Design",
+      "X-Memory-Book-Photos",
+      "X-Memory-Book-Skipped",
+    ],
+  }),
+);
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
@@ -29,6 +39,7 @@ app.get("/api/health", (req, res) => {
     success: true,
     message: "Backend bağlantısı başarılı",
     project: "SnapUp Events",
+    pdf_engine: "memory-book-v3",
   });
 });
 

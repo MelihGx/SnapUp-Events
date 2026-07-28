@@ -1,3 +1,5 @@
+import { API_URL } from "./config.js?v=runtime-api-2";
+
 const token = localStorage.getItem("snapup_token");
 
 const sidebarUserInitial = document.getElementById("sidebarUserInitial");
@@ -31,7 +33,7 @@ const confirmNewPassword = document.getElementById("confirmNewPassword");
 const passwordSaveButton = document.getElementById("passwordSaveButton");
 const passwordResult = document.getElementById("passwordResult");
 
-const API_BASE_URL = "https://snapup-events-api.onrender.com";
+const API_BASE_URL = API_URL;
 
 const localeByLanguage = {
   en: "en-US",

@@ -25,10 +25,10 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="css/theme.css?v=event-detail-qr-fix-1" />
+    <link rel="stylesheet" href="css/theme.css?v=memory-book-detail-3" />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-detail-qr-fix-1"
+      href="css/event-detail.css?v=memory-book-detail-3"
     />
     <link
       rel="stylesheet"
@@ -136,10 +136,20 @@
 
               <button
                 type="button"
-                id="downloadSlideshowButton"
-                class="slideshow-download-button"
+                id="memoryBookOpen"
+                class="memory-book-open"
+                disabled
               >
-                Download Slideshow
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4.5 5.5A2.5 2.5 0 0 1 7 3h12.5v16H7a2.5 2.5 0 0 0-2.5 2Z"
+                  ></path>
+                  <path d="M4.5 5.5V21M8 7h8M8 11h6"></path>
+                </svg>
+                <span>
+                  <strong>Prepare Memory Book</strong>
+                  <small id="memoryBookButtonMeta">Waiting for approved photos</small>
+                </span>
               </button>
 
               <button
@@ -313,6 +323,94 @@
     </main>
 
     <div
+      class="memory-book-modal"
+      id="memoryBookModal"
+      aria-hidden="true"
+    >
+      <div
+        class="memory-book-modal-backdrop"
+        id="memoryBookModalBackdrop"
+      ></div>
+
+      <section
+        class="memory-book-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="memoryBookDialogTitle"
+        aria-describedby="memoryBookDialogDescription"
+      >
+        <button
+          type="button"
+          class="memory-book-close"
+          id="memoryBookClose"
+          aria-label="Close memory book"
+        >
+          ×
+        </button>
+
+        <div class="memory-book-preview" aria-hidden="true">
+          <div class="memory-book-preview-cover" id="memoryBookPreviewCover">
+            <span>SNAPUP MEMORY BOOK</span>
+            <strong id="memoryBookPreviewTitle">Event name</strong>
+            <small id="memoryBookPreviewMeta">Event details</small>
+          </div>
+          <i></i>
+          <i></i>
+        </div>
+
+        <div class="memory-book-dialog-copy">
+          <span class="memory-book-dialog-kicker">Your event, one keepsake</span>
+          <h2 id="memoryBookDialogTitle">Create your Memory Book</h2>
+          <p id="memoryBookDialogDescription">
+            Only approved photos are included. Guest names, messages and event
+            details are arranged automatically.
+          </p>
+
+          <div class="memory-book-stats" aria-label="Memory book summary">
+            <span>
+              <strong id="memoryBookPhotoCount">0</strong>
+              <small>Approved photos</small>
+            </span>
+            <span>
+              <strong id="memoryBookPageCount">0</strong>
+              <small>Estimated pages</small>
+            </span>
+            <span>
+              <strong>PDF</strong>
+              <small>Download format</small>
+            </span>
+          </div>
+
+          <p
+            class="memory-book-status"
+            id="memoryBookStatus"
+            aria-live="polite"
+          ></p>
+
+          <div class="memory-book-dialog-actions">
+            <button
+              type="button"
+              class="memory-book-cancel"
+              id="memoryBookCancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="memory-book-download"
+              id="memoryBookDownload"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"></path>
+              </svg>
+              <span>Download Memory Book</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div
       class="gallery-lightbox"
       id="galleryLightbox"
       role="dialog"
@@ -460,10 +558,12 @@
       </div>
     </div>
 
+    <script src="js/vendor/pdfmake.min.js?v=browser-memory-book-2"></script>
+    <script src="js/vendor/vfs_fonts.js?v=browser-memory-book-2"></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-detail-qr-fix-1"
+      src="js/event-detail.js?v=browser-memory-book-2"
     ></script>
-    <script src="js/theme.js?v=event-detail-qr-fix-1"></script>
+    <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-import { API_URL } from "./config.js";
+import { API_URL } from "./config.js?v=runtime-api-2";
 
 export async function testBackendConnection() {
   try {

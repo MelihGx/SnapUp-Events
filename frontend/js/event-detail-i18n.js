@@ -820,4 +820,64 @@
       ]),
     ),
   };
+
+  const memoryBookPhrases = {
+    "Prepare Memory Book": { tr: "Anı Albümünü Hazırla" },
+    "Waiting for approved photos": {
+      tr: "Onaylı fotoğraflar bekleniyor",
+    },
+    "Prepare Memory Book with {count} approved photos": {
+      tr: "{count} onaylı fotoğrafla Anı Albümünü hazırla",
+    },
+    "Memory Book is waiting for approved photos": {
+      tr: "Anı Albümü onaylı fotoğrafları bekliyor",
+    },
+    "{count} approved photos ready": {
+      tr: "{count} onaylı fotoğraf hazır",
+    },
+    "Close memory book": { tr: "Anı albümünü kapat" },
+    "Your event, one keepsake": { tr: "Etkinliğin, tek bir hatıra" },
+    "Create your Memory Book": { tr: "Anı Albümünü oluştur" },
+    "Only approved photos are included. Guest names, messages and event details are arranged automatically.":
+      {
+        tr: "Yalnızca onaylı fotoğraflar eklenir. Misafir adları, mesajlar ve etkinlik bilgileri otomatik olarak düzenlenir.",
+      },
+    "Memory book summary": { tr: "Anı albümü özeti" },
+    "Approved photos": { tr: "Onaylı fotoğraf" },
+    "Estimated pages": { tr: "Tahmini sayfa" },
+    "Download format": { tr: "İndirme biçimi" },
+    Cancel: { tr: "Vazgeç" },
+    "Download Memory Book": { tr: "Anı Albümünü İndir" },
+    "Creating your book...": { tr: "Albümün oluşturuluyor..." },
+    "Arranging approved photos, guest messages and event details...": {
+      tr: "Onaylı fotoğraflar, misafir mesajları ve etkinlik bilgileri düzenleniyor...",
+    },
+    "The Memory Book could not be created.": {
+      tr: "Anı Albümü oluşturulamadı.",
+    },
+    "The server did not return a PDF file.": {
+      tr: "Sunucu bir PDF dosyası döndürmedi.",
+    },
+    "The generated PDF file is empty.": {
+      tr: "Oluşturulan PDF dosyası boş.",
+    },
+    "The Memory Book route is not available.": {
+      tr: "Anı Albümü bağlantısı kullanılamıyor.",
+    },
+    "Your session has expired. Please log in again.": {
+      tr: "Oturumun sona erdi. Lütfen yeniden giriş yap.",
+    },
+    "Your Memory Book is ready. The download has started.": {
+      tr: "Anı Albümün hazır. İndirme başladı.",
+    },
+    Downloaded: { tr: "İndirildi" },
+    "Try Again": { tr: "Tekrar Dene" },
+  };
+
+  Object.entries(memoryBookPhrases).forEach(([key, translations]) => {
+    window.SnapUpPagePhrases[key] = {
+      ...(window.SnapUpPagePhrases[key] || {}),
+      ...translations,
+    };
+  });
 })();

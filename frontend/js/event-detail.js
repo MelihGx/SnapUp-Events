@@ -1,6 +1,8 @@
-const token = localStorage.getItem("snapup_token");
+import { API_URL } from "./config.js?v=runtime-api-2";
+import { createMemoryBookPdf } from "./memory-book-pdf.js?v=browser-memory-book-2";
 
-const API_BASE_URL = "https://snapup-events-api.onrender.com";
+const token = localStorage.getItem("snapup_token");
+const API_BASE_URL = API_URL;
 
 const localeByLanguage = {
   en: "en-US",
@@ -76,11 +78,27 @@ const galleryLightboxMeta = document.getElementById("galleryLightboxMeta");
 const copyCodeButton = document.getElementById("copyCodeButton");
 const copyJoinLinkButton = document.getElementById("copyJoinLinkButton");
 const downloadQrButton = document.getElementById("downloadQrButton");
+const memoryBookOpen = document.getElementById("memoryBookOpen");
+const memoryBookButtonMeta = document.getElementById("memoryBookButtonMeta");
+const memoryBookModal = document.getElementById("memoryBookModal");
+const memoryBookModalBackdrop = document.getElementById(
+  "memoryBookModalBackdrop",
+);
+const memoryBookClose = document.getElementById("memoryBookClose");
+const memoryBookCancel = document.getElementById("memoryBookCancel");
+const memoryBookDownload = document.getElementById("memoryBookDownload");
+const memoryBookStatus = document.getElementById("memoryBookStatus");
+const memoryBookPhotoCount = document.getElementById("memoryBookPhotoCount");
+const memoryBookPageCount = document.getElementById("memoryBookPageCount");
+const memoryBookPreviewCover = document.getElementById(
+  "memoryBookPreviewCover",
+);
+const memoryBookPreviewTitle = document.getElementById(
+  "memoryBookPreviewTitle",
+);
+const memoryBookPreviewMeta = document.getElementById("memoryBookPreviewMeta");
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
-);
-const downloadSlideshowButton = document.getElementById(
-  "downloadSlideshowButton",
 );
 
 const openSettingsButton = document.getElementById("openSettingsButton");
@@ -117,6 +135,9 @@ const eventId = params.get("event_id");
 let currentEvent = null;
 let currentSettings = null;
 let currentRenderedMediaList = [];
+let approvedMemoryBookPhotos = [];
+let memoryBookReturnTarget = null;
+let memoryBookScrollY = 0;
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -345,6 +366,43 @@ function renderEventInfo(event) {
     qrBox.innerHTML = `
       <span>${escapeHtml(t("QR code not found."))}</span>
     `;
+  }
+
+  updateMemoryBookPreview();
+}
+
+function updateMemoryBookPreview() {
+  if (!currentEvent) {
+    return;
+  }
+
+  const metaParts = [
+    currentEvent.event_location || "",
+    formatDate(currentEvent.event_date),
+    currentEvent.event_code || "",
+  ].filter(Boolean);
+
+  if (memoryBookPreviewTitle) {
+    memoryBookPreviewTitle.textContent =
+      currentEvent.event_name || t("Untitled Event");
+  }
+
+  if (memoryBookPreviewMeta) {
+    memoryBookPreviewMeta.textContent = metaParts.join(" · ");
+  }
+
+  const previewImageUrl =
+    currentEvent.event_cover_url ||
+    getMediaUrl(approvedMemoryBookPhotos[0] || {});
+
+  if (memoryBookPreviewCover && previewImageUrl) {
+    memoryBookPreviewCover.style.backgroundImage = `linear-gradient(
+      180deg,
+      rgba(12, 7, 25, 0.16),
+      rgba(12, 7, 25, 0.92)
+    ), url(${JSON.stringify(previewImageUrl)})`;
+  } else if (memoryBookPreviewCover) {
+    memoryBookPreviewCover.style.removeProperty("background-image");
   }
 }
 
@@ -816,10 +874,160 @@ function renderMedia(mediaList) {
   allMediaItems = Array.isArray(mediaList) ? mediaList : [];
   currentRenderedMediaList = getFilteredMediaList();
 
+  updateMemoryBookAvailability();
   updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
 
   renderMediaFilters();
   renderMediaCards();
+}
+
+function updateMemoryBookAvailability() {
+  approvedMemoryBookPhotos = allMediaItems.filter(
+    (media) => getMediaStatus(media) === "approved" && isImageMedia(media),
+  );
+
+  const approvedCount = approvedMemoryBookPhotos.length;
+
+  if (memoryBookOpen) {
+    memoryBookOpen.disabled = approvedCount === 0;
+    memoryBookOpen.setAttribute(
+      "aria-label",
+      approvedCount
+        ? t("Prepare Memory Book with {count} approved photos", {
+            count: approvedCount,
+          })
+        : t("Memory Book is waiting for approved photos"),
+    );
+  }
+
+  if (memoryBookButtonMeta) {
+    memoryBookButtonMeta.textContent = approvedCount
+      ? t("{count} approved photos ready", { count: approvedCount })
+      : t("Waiting for approved photos");
+  }
+
+  if (memoryBookPhotoCount) {
+    memoryBookPhotoCount.textContent = String(approvedCount);
+  }
+
+  if (memoryBookPageCount) {
+    memoryBookPageCount.textContent = String(
+      approvedCount ? approvedCount + 2 : 0,
+    );
+  }
+
+  updateMemoryBookPreview();
+}
+
+function openMemoryBook() {
+  if (!approvedMemoryBookPhotos.length || !memoryBookModal) {
+    return;
+  }
+
+  memoryBookReturnTarget = document.activeElement;
+  memoryBookScrollY = window.scrollY;
+  memoryBookStatus.textContent = "";
+  memoryBookStatus.className = "memory-book-status";
+  memoryBookDownload.disabled = false;
+  memoryBookCancel.disabled = false;
+  memoryBookClose.disabled = false;
+  memoryBookDownload.querySelector("span").textContent = t(
+    "Download Memory Book",
+  );
+
+  updateMemoryBookPreview();
+  memoryBookModal.classList.add("active");
+  memoryBookModal.setAttribute("aria-hidden", "false");
+  document.body.style.top = `-${memoryBookScrollY}px`;
+  document.body.classList.add("memory-book-open");
+  memoryBookClose.focus();
+}
+
+function closeMemoryBook() {
+  if (!memoryBookModal || memoryBookDownload.disabled) {
+    return;
+  }
+
+  memoryBookModal.classList.remove("active");
+  memoryBookModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("memory-book-open");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, memoryBookScrollY);
+
+  if (memoryBookReturnTarget instanceof HTMLElement) {
+    memoryBookReturnTarget.focus();
+  }
+}
+
+async function downloadMemoryBook() {
+  if (
+    !eventId ||
+    !approvedMemoryBookPhotos.length ||
+    memoryBookDownload.disabled
+  ) {
+    return;
+  }
+
+  const buttonText = memoryBookDownload.querySelector("span");
+
+  try {
+    memoryBookDownload.disabled = true;
+    memoryBookCancel.disabled = true;
+    memoryBookClose.disabled = true;
+    buttonText.textContent = t("Creating your book...");
+    memoryBookStatus.className = "memory-book-status active";
+    memoryBookStatus.textContent = t(
+      "Arranging approved photos, guest messages and event details...",
+    );
+
+    const result = await createMemoryBookPdf({
+      event: currentEvent,
+      mediaItems: approvedMemoryBookPhotos,
+      locale: getCurrentLocale(),
+      onProgress: ({ completed, total }) => {
+        memoryBookStatus.textContent = t(
+          "Preparing photo {completed} of {total}...",
+          { completed, total },
+        );
+      },
+    });
+
+    const objectUrl = URL.createObjectURL(result.blob);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = objectUrl;
+    downloadLink.download = result.fileName;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
+    memoryBookStatus.className = "memory-book-status active success";
+    memoryBookStatus.textContent = result.skippedCount
+      ? t(
+          "Your Memory Book is ready. {count} unreadable photo(s) were skipped.",
+          { count: result.skippedCount },
+        )
+      : t("Your Memory Book is ready. The download has started.");
+    buttonText.textContent = t("Downloaded");
+
+    window.setTimeout(() => {
+      memoryBookDownload.disabled = false;
+      memoryBookCancel.disabled = false;
+      memoryBookClose.disabled = false;
+      closeMemoryBook();
+    }, 1200);
+  } catch (error) {
+    console.error("Memory Book download error:", error);
+    memoryBookStatus.className = "memory-book-status active error";
+    memoryBookStatus.textContent = t(
+      error.message || "The Memory Book could not be created.",
+    );
+    memoryBookDownload.disabled = false;
+    memoryBookCancel.disabled = false;
+    memoryBookClose.disabled = false;
+    buttonText.textContent = t("Try Again");
+  }
 }
 
 function showGalleryLightboxItem(index) {
@@ -1386,77 +1594,11 @@ if (downloadQrButton) {
   });
 }
 
-if (downloadSlideshowButton) {
-  downloadSlideshowButton.addEventListener("click", async () => {
-    if (!eventId) {
-      return;
-    }
-
-    try {
-      downloadSlideshowButton.disabled = true;
-      downloadSlideshowButton.textContent = t("Preparing...");
-
-      const response = await fetch(
-        `${API_BASE_URL}/api/events/detail/${eventId}/slideshow`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (response.status === 401) {
-        logout();
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-
-        throw new Error(
-          errorData?.message ||
-            errorData?.error ||
-            "Slideshow could not be downloaded.",
-        );
-      }
-
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-
-      const contentDisposition =
-        response.headers.get("Content-Disposition") ||
-        response.headers.get("content-disposition");
-
-      let fileName = `snapup-${
-        currentEvent?.event_code || "event"
-      }-slideshow.pdf`;
-
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-
-        if (fileNameMatch?.[1]) {
-          fileName = fileNameMatch[1];
-        }
-      }
-
-      const downloadLink = document.createElement("a");
-      downloadLink.href = objectUrl;
-      downloadLink.download = fileName;
-
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      downloadLink.remove();
-
-      URL.revokeObjectURL(objectUrl);
-    } catch (error) {
-      alert(t(error.message || "Slideshow could not be downloaded."));
-    } finally {
-      downloadSlideshowButton.disabled = false;
-      downloadSlideshowButton.textContent = t("Download Slideshow");
-    }
-  });
-}
+memoryBookOpen?.addEventListener("click", openMemoryBook);
+memoryBookClose?.addEventListener("click", closeMemoryBook);
+memoryBookCancel?.addEventListener("click", closeMemoryBook);
+memoryBookModalBackdrop?.addEventListener("click", closeMemoryBook);
+memoryBookDownload?.addEventListener("click", downloadMemoryBook);
 
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);
@@ -1591,6 +1733,14 @@ if (galleryLightboxNext) {
 }
 
 window.addEventListener("keydown", (event) => {
+  if (memoryBookModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeMemoryBook();
+    }
+
+    return;
+  }
+
   if (!galleryLightbox?.classList.contains("active")) {
     return;
   }

@@ -11,7 +11,8 @@ const {
   deleteEvent,
   getEventGuests,
   getPublicEventGallery,
-  downloadEventSlideshow,
+  downloadEventMemoryBookV3,
+  downloadPublicMemoryBook,
 } = require("../controllers/eventController");
 
 router.post("/", authMiddleware, createEvent);
@@ -20,14 +21,16 @@ router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
 
 router.get(
-  "/detail/:eventId/slideshow",
+  "/detail/:eventId/memory-book-v3",
   authMiddleware,
-  downloadEventSlideshow,
+  downloadEventMemoryBookV3,
 );
 
 router.put("/detail/:eventId/settings", authMiddleware, updateEventSettings);
 
 router.delete("/detail/:eventId", authMiddleware, deleteEvent);
+
+router.get("/:eventCode/memory-book", downloadPublicMemoryBook);
 
 router.get("/:eventCode/gallery", getPublicEventGallery);
 

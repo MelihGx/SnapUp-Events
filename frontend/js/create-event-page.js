@@ -1,3 +1,5 @@
+import { API_URL } from "./config.js?v=runtime-api-2";
+
 const token = localStorage.getItem("snapup_token");
 
 const createEventForm = document.getElementById("createEventPageForm");
@@ -31,8 +33,6 @@ const liveCardExpiry = document.getElementById("liveCardExpiry");
 
 const paymentSuccessPopup = document.getElementById("paymentSuccessPopup");
 const paymentSuccessClose = document.getElementById("paymentSuccessClose");
-
-const API_URL = "https://snapup-events-api.onrender.com";
 
 let pendingEventPayload = null;
 let currentQrCodeUrl = null;

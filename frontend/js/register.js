@@ -1,4 +1,6 @@
-﻿const registerForm = document.getElementById("registerForm");
+﻿import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+
+const registerForm = document.getElementById("registerForm");
 
 const userNameInput = document.getElementById("userName");
 const userMailInput = document.getElementById("userMail");
@@ -16,7 +18,7 @@ const registerSubmit = document.getElementById("registerSubmit");
 const registerResult = document.getElementById("registerResult");
 const togglePassword = document.getElementById("togglePassword");
 
-const API_URL = "https://snapup-events-api.onrender.com/api/auth/register";
+const API_URL = `${API_BASE_URL}/api/auth/register`;
 
 function clearErrors() {
   userNameError.textContent = "";

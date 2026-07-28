@@ -1,4 +1,6 @@
-const API_BASE_URL = "https://snapup-events-api.onrender.com";
+import { API_URL } from "./config.js?v=runtime-api-2";
+
+const API_BASE_URL = API_URL;
 
 let selectedMediaType = "message";
 let selectedEvent = null;

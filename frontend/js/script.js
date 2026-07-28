@@ -321,7 +321,13 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 /* BACKEND CONNECTION TEST */
 (async function testBackendConnection() {
-  const API_URL = "https://snapup-events-api.onrender.com";
+  const API_URL =
+    window.location.protocol === "file:" ||
+    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(
+      window.location.hostname,
+    )
+      ? "http://localhost:3000"
+      : "https://snapup-events-api.onrender.com";
 
   try {
     const response = await fetch(`${API_URL}/api/health`);
@@ -339,7 +345,13 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const input = document.querySelector("#eventNameInput");
   const result = document.querySelector("#eventCreateResult");
 
-  const API_URL = "https://snapup-events-api.onrender.com";
+  const API_URL =
+    window.location.protocol === "file:" ||
+    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(
+      window.location.hostname,
+    )
+      ? "http://localhost:3000"
+      : "https://snapup-events-api.onrender.com";
 
   if (!form || !input || !result) return;
 
