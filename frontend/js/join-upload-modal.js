@@ -5,6 +5,111 @@ const API_BASE_URL = API_URL;
 let selectedMediaType = "message";
 let selectedEvent = null;
 let selectedFiles = [];
+let successPopupHideTimer = null;
+
+const successButtonLabels = {
+  en: "Continue",
+  tr: "Devam Et",
+  ar: "متابعة",
+  de: "Weiter",
+  fr: "Continuer",
+  es: "Continuar",
+  it: "Continua",
+  nl: "Doorgaan",
+  bg: "Продължи",
+  ro: "Continuă",
+  el: "Συνέχεια",
+  sr: "Nastavi",
+  hr: "Nastavi",
+  bs: "Nastavi",
+  sq: "Vazhdo",
+  mk: "Продолжи",
+};
+
+const messageSuccessTitleLabels = {
+  en: "Sent!",
+  tr: "Gönderildi!",
+  ar: "تم الإرسال!",
+  de: "Gesendet!",
+  fr: "Envoyé !",
+  es: "¡Enviado!",
+  it: "Inviato!",
+  nl: "Verzonden!",
+  bg: "Изпратено!",
+  ro: "Trimis!",
+  el: "Στάλθηκε!",
+  sr: "Poslato!",
+  hr: "Poslano!",
+  bs: "Poslano!",
+  sq: "U dërgua!",
+  mk: "Испратено!",
+};
+
+function translate(message) {
+  return window.SnapUpI18n?.t?.(message) || message;
+}
+
+function isSuccessPopupOpen() {
+  return document
+    .getElementById("joinUploadSuccess")
+    ?.classList.contains("active");
+}
+
+function openUploadSuccessPopup(mediaType, uploadedCount = 1) {
+  const popup = document.getElementById("joinUploadSuccess");
+  const title = document.getElementById("joinUploadSuccessTitle");
+  const message = document.getElementById("joinUploadSuccessMessage");
+  const button = document.getElementById("joinUploadSuccessButton");
+  const uploadPanel = document.querySelector(".join-upload-panel");
+
+  if (!popup || !title || !message || !button) return;
+
+  window.clearTimeout(successPopupHideTimer);
+
+  const language = window.SnapUpI18n?.language || "en";
+  const safeCount = Number(uploadedCount) || 1;
+  const isMessage = mediaType === "message";
+
+  title.textContent = isMessage
+    ? messageSuccessTitleLabels[language] || messageSuccessTitleLabels.en
+    : translate("Uploaded!");
+  message.textContent = isMessage
+    ? translate("Message sent successfully!")
+    : translate(`${safeCount} file(s) uploaded successfully!`);
+  button.textContent =
+    successButtonLabels[language] || successButtonLabels.en;
+
+  popup.hidden = false;
+  popup.setAttribute("aria-hidden", "false");
+  document.body.classList.add("join-upload-success-open");
+  uploadPanel?.setAttribute("inert", "");
+
+  requestAnimationFrame(() => {
+    popup.classList.add("active");
+    button.focus();
+  });
+}
+
+function closeUploadSuccessPopup() {
+  const popup = document.getElementById("joinUploadSuccess");
+  const uploadPanel = document.querySelector(".join-upload-panel");
+
+  if (!popup) return;
+
+  if (popup.contains(document.activeElement)) {
+    document.activeElement.blur?.();
+  }
+
+  popup.classList.remove("active");
+  popup.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("join-upload-success-open");
+  uploadPanel?.removeAttribute("inert");
+
+  window.clearTimeout(successPopupHideTimer);
+  successPopupHideTimer = window.setTimeout(() => {
+    popup.hidden = true;
+  }, 220);
+}
 
 function formatDate(value) {
   if (!value) return "";
@@ -42,12 +147,21 @@ function setLoading(isLoading) {
   if (!button) return;
 
   button.disabled = isLoading;
-  button.textContent = isLoading ? "Sending..." : "Send to Event";
+  button.classList.toggle("is-loading", isLoading);
+  button.setAttribute("aria-busy", String(isLoading));
+  button.textContent = translate(
+    isLoading ? "Sending..." : "Send to Event",
+  );
 }
 
 function openModal() {
   const modal = document.getElementById("joinUploadModal");
   if (!modal) return;
+
+  closeUploadSuccessPopup();
+  selectedEvent = null;
+  renderEventPreview(null);
+  setResult("");
 
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
@@ -62,9 +176,15 @@ function closeModal() {
   const modal = document.getElementById("joinUploadModal");
   if (!modal) return;
 
+  closeUploadSuccessPopup();
   modal.classList.remove("active");
   modal.setAttribute("aria-hidden", "true");
   document.body.classList.remove("join-upload-open");
+}
+
+function finishUploadSuccessFlow() {
+  closeUploadSuccessPopup();
+  closeModal();
 }
 
 function getEventGalleryUrl(event) {
@@ -288,8 +408,22 @@ function renderEventPreview(event) {
   const preview = document.getElementById("joinEventPreview");
   const name = document.getElementById("joinEventName");
   const meta = document.getElementById("joinEventMeta");
+  const cover = document.getElementById("joinEventCover");
+  const coverImage = document.getElementById("joinEventCoverImage");
+  const coverPlaceholder = document.getElementById(
+    "joinEventCoverPlaceholder",
+  );
 
-  if (!preview || !name || !meta) return;
+  if (
+    !preview ||
+    !name ||
+    !meta ||
+    !cover ||
+    !coverImage ||
+    !coverPlaceholder
+  ) {
+    return;
+  }
 
   const galleryButton = ensureGalleryButton(preview);
 
@@ -297,12 +431,38 @@ function renderEventPreview(event) {
     preview.hidden = true;
     name.textContent = "";
     meta.textContent = "";
+    cover.classList.remove("has-image");
+    coverImage.hidden = true;
+    coverImage.removeAttribute("src");
+    coverImage.alt = "";
+    coverPlaceholder.hidden = false;
     galleryButton.hidden = true;
     galleryButton.removeAttribute("href");
     return;
   }
 
   name.textContent = event.event_name || "Untitled Event";
+
+  if (event.event_cover_url) {
+    coverImage.onload = () => {
+      cover.classList.add("has-image");
+      coverImage.hidden = false;
+      coverPlaceholder.hidden = true;
+    };
+    coverImage.onerror = () => {
+      cover.classList.remove("has-image");
+      coverImage.hidden = true;
+      coverPlaceholder.hidden = false;
+    };
+    coverImage.alt = event.event_name || "Event";
+    coverImage.src = event.event_cover_url;
+  } else {
+    cover.classList.remove("has-image");
+    coverImage.hidden = true;
+    coverImage.removeAttribute("src");
+    coverImage.alt = "";
+    coverPlaceholder.hidden = false;
+  }
 
   const parts = [
     event.event_location || "",
@@ -503,6 +663,7 @@ function initFormSubmit() {
     const guestName = document.getElementById("joinGuestName")?.value.trim();
     const messageText =
       document.getElementById("joinMessageText")?.value.trim() || "";
+    const submissionMediaType = selectedMediaType;
 
     try {
       if (!eventCode) {
@@ -515,19 +676,19 @@ function initFormSubmit() {
         return;
       }
 
-      if (selectedMediaType === "message" && !messageText) {
+      if (submissionMediaType === "message" && !messageText) {
         setResult("Please write a message.", "error");
         return;
       }
 
-      if (selectedMediaType !== "message" && selectedFiles.length === 0) {
+      if (submissionMediaType !== "message" && selectedFiles.length === 0) {
         setResult("Please choose at least one file.", "error");
         return;
       }
 
       setLoading(true);
 
-      if (selectedMediaType === "message") {
+      if (submissionMediaType === "message") {
         setResult("Sending message...", "info");
       } else {
         setResult(`Uploading ${selectedFiles.length} file(s)...`, "info");
@@ -539,10 +700,13 @@ function initFormSubmit() {
 
       const guest = await createGuest(eventData.event_id, guestName);
 
-      if (selectedMediaType === "message") {
+      if (submissionMediaType === "message") {
         await sendMessage(eventData.event_id, guest.guest_id, messageText);
 
         setResult("Message sent successfully!", "success");
+        resetFormAfterSuccess();
+        openUploadSuccessPopup(submissionMediaType);
+        return;
       } else {
         const uploadResult = await uploadMedia(
           eventData.event_id,
@@ -555,9 +719,10 @@ function initFormSubmit() {
           uploadResult.uploaded_count || selectedFiles.length;
 
         setResult(`${uploadedCount} file(s) uploaded successfully!`, "success");
+        resetFormAfterSuccess();
+        openUploadSuccessPopup(submissionMediaType, uploadedCount);
+        return;
       }
-
-      resetFormAfterSuccess();
     } catch (error) {
       console.error("Join upload error:", error);
       setResult(error.message || "Upload failed.", "error");
@@ -584,8 +749,19 @@ function initOpenClose() {
 
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
+      if (isSuccessPopupOpen()) {
+        finishUploadSuccessFlow();
+        return;
+      }
+
       closeModal();
     }
+  });
+}
+
+function initUploadSuccessPopup() {
+  document.querySelectorAll("[data-upload-success-finish]").forEach((item) => {
+    item.addEventListener("click", finishUploadSuccessFlow);
   });
 }
 
@@ -595,6 +771,7 @@ export function initJoinUploadModal() {
   initFilePreview();
   initEventCodeLookup();
   initFormSubmit();
+  initUploadSuccessPopup();
   updateMediaFields();
 
   const params = new URLSearchParams(window.location.search);

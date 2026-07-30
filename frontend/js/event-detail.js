@@ -1,5 +1,6 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { createMemoryBookPdf } from "./memory-book-pdf.js?v=browser-memory-book-2";
+import { setInvitationStudioEvent } from "./invitation-studio.js?v=invitation-studio-7";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -44,6 +45,62 @@ const detailErrorText = document.getElementById("detailErrorText");
 const detailContent = document.getElementById("detailContent");
 
 const eventCover = document.getElementById("eventCover");
+const eventCoverChangeButton = document.getElementById(
+  "eventCoverChangeButton",
+);
+const eventCoverChangeLabel = document.getElementById(
+  "eventCoverChangeLabel",
+);
+const eventCoverChangeInput = document.getElementById(
+  "eventCoverChangeInput",
+);
+const eventCoverRemoveButton = document.getElementById(
+  "eventCoverRemoveButton",
+);
+const eventCoverRemoveModal = document.getElementById(
+  "eventCoverRemoveModal",
+);
+const eventCoverRemoveClose = document.getElementById(
+  "eventCoverRemoveClose",
+);
+const eventCoverRemoveCancel = document.getElementById(
+  "eventCoverRemoveCancel",
+);
+const eventCoverRemoveConfirm = document.getElementById(
+  "eventCoverRemoveConfirm",
+);
+const eventCoverRemoveEventName = document.getElementById(
+  "eventCoverRemoveEventName",
+);
+const eventCoverRemoveStatus = document.getElementById(
+  "eventCoverRemoveStatus",
+);
+const eventCoverEditor = document.getElementById("eventCoverEditor");
+const eventCoverEditorClose = document.getElementById(
+  "eventCoverEditorClose",
+);
+const eventCoverEditorCancel = document.getElementById(
+  "eventCoverEditorCancel",
+);
+const eventCoverEditorStage = document.getElementById(
+  "eventCoverEditorStage",
+);
+const eventCoverEditorImage = document.getElementById(
+  "eventCoverEditorImage",
+);
+const eventCoverEditorZoom = document.getElementById(
+  "eventCoverEditorZoom",
+);
+const eventCoverEditorReset = document.getElementById(
+  "eventCoverEditorReset",
+);
+const eventCoverEditorSave = document.getElementById(
+  "eventCoverEditorSave",
+);
+const eventCoverEditorStatus = document.getElementById(
+  "eventCoverEditorStatus",
+);
+const eventCoverToast = document.getElementById("eventCoverToast");
 const eventTitle = document.getElementById("eventTitle");
 const eventDescription = document.getElementById("eventDescription");
 const eventCode = document.getElementById("eventCode");
@@ -100,6 +157,10 @@ const memoryBookPreviewMeta = document.getElementById("memoryBookPreviewMeta");
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
+const mobileDetailNav = document.querySelector(".mobile-detail-nav");
+const mobileDetailNavLinks = Array.from(
+  mobileDetailNav?.querySelectorAll('a[href^="#"]') || [],
+);
 
 const openSettingsButton = document.getElementById("openSettingsButton");
 const settingsModal = document.getElementById("settingsModal");
@@ -138,6 +199,15 @@ let currentRenderedMediaList = [];
 let approvedMemoryBookPhotos = [];
 let memoryBookReturnTarget = null;
 let memoryBookScrollY = 0;
+let eventCoverEditorSourceFile = null;
+let eventCoverEditorObjectUrl = null;
+let eventCoverEditorImageWidth = 0;
+let eventCoverEditorImageHeight = 0;
+let eventCoverEditorLoadToken = 0;
+let eventCoverEditorLastFocusedElement = null;
+let eventCoverEditorDrag = null;
+let eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
+let eventCoverRemoveLastFocusedElement = null;
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -147,6 +217,11 @@ let activeMediaFilter = "all";
 
 let allGuests = [];
 let guestSearchTerm = "";
+
+const EVENT_COVER_MAX_SIZE = 8 * 1024 * 1024;
+const EVENT_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const EVENT_COVER_OUTPUT_WIDTH = 1296;
+const EVENT_COVER_OUTPUT_HEIGHT = 1032;
 
 if (!token) {
   window.location.href = "login.html";
@@ -176,6 +251,63 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function setActiveMobileSection(sectionId) {
+  mobileDetailNavLinks.forEach((link) => {
+    const isActive = link.getAttribute("href") === `#${sectionId}`;
+
+    if (isActive) {
+      link.setAttribute("aria-current", "true");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function setupMobileSectionNavigation() {
+  if (!mobileDetailNav || !mobileDetailNavLinks.length) {
+    return;
+  }
+
+  mobileDetailNavLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const sectionId = link.getAttribute("href")?.slice(1);
+
+      if (sectionId) {
+        setActiveMobileSection(sectionId);
+      }
+    });
+  });
+
+  if (!("IntersectionObserver" in window)) {
+    return;
+  }
+
+  const observedSections = mobileDetailNavLinks
+    .map((link) => {
+      const sectionId = link.getAttribute("href")?.slice(1);
+      return sectionId ? document.getElementById(sectionId) : null;
+    })
+    .filter(Boolean);
+
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const visibleSection = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0];
+
+      if (visibleSection?.target?.id) {
+        setActiveMobileSection(visibleSection.target.id);
+      }
+    },
+    {
+      rootMargin: "-18% 0px -57% 0px",
+      threshold: [0, 0.15, 0.35],
+    },
+  );
+
+  observedSections.forEach((section) => sectionObserver.observe(section));
 }
 
 function formatDate(dateValue) {
@@ -318,6 +450,383 @@ function showContent() {
   detailContent.hidden = false;
 }
 
+function setEventCoverBackground(coverUrl) {
+  const hasCover = Boolean(coverUrl);
+
+  eventCover.classList.toggle("has-image", hasCover);
+
+  if (hasCover) {
+    eventCover.style.backgroundImage = `url(${JSON.stringify(coverUrl)})`;
+  } else {
+    eventCover.style.removeProperty("background-image");
+  }
+
+  if (eventCoverChangeLabel) {
+    eventCoverChangeLabel.textContent = t(
+      hasCover ? "Change Photo" : "Add Photo",
+    );
+  }
+
+  if (eventCoverRemoveButton) {
+    eventCoverRemoveButton.hidden = !hasCover;
+  }
+}
+
+function setEventCoverRemoveStatus(message = "") {
+  if (eventCoverRemoveStatus) {
+    eventCoverRemoveStatus.textContent = message;
+  }
+}
+
+function openEventCoverRemoveDialog() {
+  if (!currentEvent?.event_cover_url || !eventCoverRemoveModal) {
+    return;
+  }
+
+  eventCoverRemoveLastFocusedElement = document.activeElement;
+  setEventCoverRemoveStatus("");
+
+  if (eventCoverRemoveEventName) {
+    eventCoverRemoveEventName.textContent =
+      currentEvent.event_name || t("Untitled Event");
+  }
+
+  eventCoverRemoveModal.classList.add("active");
+  eventCoverRemoveModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("event-cover-remove-open");
+  eventCoverRemoveCancel?.focus();
+}
+
+function closeEventCoverRemoveDialog({ restoreFocus = true } = {}) {
+  eventCoverRemoveModal?.classList.remove("active");
+  eventCoverRemoveModal?.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-cover-remove-open");
+  setEventCoverRemoveStatus("");
+
+  if (restoreFocus && eventCoverRemoveLastFocusedElement?.focus) {
+    eventCoverRemoveLastFocusedElement.focus();
+  }
+}
+
+function showEventCoverToast(message, type = "success") {
+  if (!eventCoverToast) {
+    return;
+  }
+
+  eventCoverToast.textContent = message;
+  eventCoverToast.classList.toggle("is-error", type === "error");
+  eventCoverToast.hidden = false;
+
+  window.clearTimeout(showEventCoverToast.timeoutId);
+  showEventCoverToast.timeoutId = window.setTimeout(() => {
+    eventCoverToast.hidden = true;
+  }, 3200);
+}
+
+function setEventCoverEditorStatus(message = "") {
+  if (eventCoverEditorStatus) {
+    eventCoverEditorStatus.textContent = message;
+  }
+}
+
+function clampEventCoverValue(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function releaseEventCoverEditorObjectUrl() {
+  if (eventCoverEditorObjectUrl) {
+    URL.revokeObjectURL(eventCoverEditorObjectUrl);
+    eventCoverEditorObjectUrl = null;
+  }
+}
+
+function getEventCoverEditorMetrics() {
+  if (
+    !eventCoverEditorStage ||
+    !eventCoverEditorImageWidth ||
+    !eventCoverEditorImageHeight
+  ) {
+    return null;
+  }
+
+  const stageWidth = eventCoverEditorStage.clientWidth;
+  const stageHeight = eventCoverEditorStage.clientHeight;
+
+  if (!stageWidth || !stageHeight) {
+    return null;
+  }
+
+  const baseScale = Math.max(
+    stageWidth / eventCoverEditorImageWidth,
+    stageHeight / eventCoverEditorImageHeight,
+  );
+  const scale = baseScale * eventCoverEditorCrop.zoom;
+  const width = eventCoverEditorImageWidth * scale;
+  const height = eventCoverEditorImageHeight * scale;
+  const unclampedLeft =
+    stageWidth / 2 - eventCoverEditorCrop.focalX * width;
+  const unclampedTop =
+    stageHeight / 2 - eventCoverEditorCrop.focalY * height;
+  const left = clampEventCoverValue(
+    unclampedLeft,
+    stageWidth - width,
+    0,
+  );
+  const top = clampEventCoverValue(
+    unclampedTop,
+    stageHeight - height,
+    0,
+  );
+
+  eventCoverEditorCrop.focalX = clampEventCoverValue(
+    (stageWidth / 2 - left) / width,
+    0,
+    1,
+  );
+  eventCoverEditorCrop.focalY = clampEventCoverValue(
+    (stageHeight / 2 - top) / height,
+    0,
+    1,
+  );
+
+  return {
+    stageWidth,
+    stageHeight,
+    scale,
+    width,
+    height,
+    left,
+    top,
+  };
+}
+
+function renderEventCoverEditor() {
+  const metrics = getEventCoverEditorMetrics();
+
+  if (!metrics || !eventCoverEditorImage) {
+    return;
+  }
+
+  eventCoverEditorImage.style.width = `${metrics.width}px`;
+  eventCoverEditorImage.style.height = `${metrics.height}px`;
+  eventCoverEditorImage.style.left = `${metrics.left}px`;
+  eventCoverEditorImage.style.top = `${metrics.top}px`;
+}
+
+function closeEventCoverEditor({ restoreFocus = true } = {}) {
+  eventCoverEditorLoadToken += 1;
+  eventCoverEditorDrag = null;
+  eventCoverEditorStage?.classList.remove("is-dragging");
+  eventCoverEditor?.classList.remove("active");
+  eventCoverEditor?.setAttribute("aria-hidden", "true");
+  eventCoverEditorImage?.removeAttribute("src");
+  document.body.classList.remove("event-cover-editor-open");
+  releaseEventCoverEditorObjectUrl();
+  eventCoverEditorSourceFile = null;
+  eventCoverEditorImageWidth = 0;
+  eventCoverEditorImageHeight = 0;
+  setEventCoverEditorStatus("");
+
+  if (eventCoverChangeInput) {
+    eventCoverChangeInput.value = "";
+  }
+
+  if (restoreFocus && eventCoverEditorLastFocusedElement?.focus) {
+    eventCoverEditorLastFocusedElement.focus();
+  }
+}
+
+function openEventCoverEditor(file) {
+  if (
+    !file ||
+    !eventCoverEditor ||
+    !eventCoverEditorImage ||
+    !eventCoverEditorStage ||
+    !eventCoverEditorZoom ||
+    !eventCoverEditorSave
+  ) {
+    return;
+  }
+
+  releaseEventCoverEditorObjectUrl();
+  eventCoverEditorSourceFile = file;
+  eventCoverEditorImageWidth = 0;
+  eventCoverEditorImageHeight = 0;
+  eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
+  eventCoverEditorZoom.value = "1";
+  eventCoverEditorLastFocusedElement =
+    document.activeElement === eventCoverChangeInput
+      ? eventCoverChangeButton
+      : document.activeElement;
+  eventCoverEditorSave.disabled = true;
+  eventCoverEditorImage.style.opacity = "0";
+  setEventCoverEditorStatus("");
+
+  eventCoverEditor.classList.add("active");
+  eventCoverEditor.setAttribute("aria-hidden", "false");
+  document.body.classList.add("event-cover-editor-open");
+
+  const currentLoadToken = ++eventCoverEditorLoadToken;
+  eventCoverEditorObjectUrl = URL.createObjectURL(file);
+
+  eventCoverEditorImage.onload = () => {
+    if (currentLoadToken !== eventCoverEditorLoadToken) {
+      return;
+    }
+
+    eventCoverEditorImageWidth = eventCoverEditorImage.naturalWidth;
+    eventCoverEditorImageHeight = eventCoverEditorImage.naturalHeight;
+
+    if (!eventCoverEditorImageWidth || !eventCoverEditorImageHeight) {
+      closeEventCoverEditor();
+      showEventCoverToast(
+        t("Photo could not be prepared. Please choose another image."),
+        "error",
+      );
+      return;
+    }
+
+    eventCoverEditorImage.style.opacity = "1";
+    eventCoverEditorSave.disabled = false;
+    requestAnimationFrame(() => {
+      renderEventCoverEditor();
+      eventCoverEditorStage.focus();
+    });
+  };
+
+  eventCoverEditorImage.onerror = () => {
+    if (currentLoadToken !== eventCoverEditorLoadToken) {
+      return;
+    }
+
+    closeEventCoverEditor();
+    showEventCoverToast(
+      t("Photo could not be prepared. Please choose another image."),
+      "error",
+    );
+  };
+
+  eventCoverEditorImage.src = eventCoverEditorObjectUrl;
+}
+
+function createCroppedEventCover() {
+  const metrics = getEventCoverEditorMetrics();
+
+  if (!metrics || !eventCoverEditorSourceFile || !eventCoverEditorImage) {
+    return Promise.reject(new Error("Crop image is not ready."));
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = EVENT_COVER_OUTPUT_WIDTH;
+  canvas.height = EVENT_COVER_OUTPUT_HEIGHT;
+
+  const context = canvas.getContext("2d", { alpha: false });
+
+  if (!context) {
+    return Promise.reject(new Error("Canvas is not supported."));
+  }
+
+  const sourceX = -metrics.left / metrics.scale;
+  const sourceY = -metrics.top / metrics.scale;
+  const sourceWidth = metrics.stageWidth / metrics.scale;
+  const sourceHeight = metrics.stageHeight / metrics.scale;
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(
+    eventCoverEditorImage,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Cropped image could not be created."));
+          return;
+        }
+
+        const sourceName =
+          eventCoverEditorSourceFile.name.replace(/\.[^.]+$/, "") ||
+          "event-photo";
+        resolve(
+          new File([blob], `${sourceName}-cover.jpg`, {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          }),
+        );
+      },
+      "image/jpeg",
+      0.92,
+    );
+  });
+}
+
+async function uploadChangedEventCover(file) {
+  const formData = new FormData();
+  formData.append("event_cover", file);
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/events/detail/${eventId}/cover`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    },
+  );
+  const data = await response.json();
+
+  if (response.status === 401) {
+    logout();
+    return null;
+  }
+
+  if (!response.ok || !data.success || !data.event?.event_cover_url) {
+    const error = new Error("Event photo could not be updated.");
+    error.serverMessage = data.error || data.message || "";
+    throw error;
+  }
+
+  return data.event;
+}
+
+async function removeCurrentEventCover() {
+  const response = await fetch(
+    `${API_BASE_URL}/api/events/detail/${eventId}/cover`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    logout();
+    return null;
+  }
+
+  if (!response.ok || !data.success || !data.event) {
+    const error = new Error("Event photo could not be removed.");
+    error.serverMessage = data.error || data.message || "";
+    throw error;
+  }
+
+  return data.event;
+}
+
 function renderEventInfo(event) {
   currentEvent = event;
 
@@ -336,10 +845,7 @@ function renderEventInfo(event) {
   eventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
   eventPrivacy.textContent = t(event.is_event_private ? "Private" : "Public");
 
-  if (event.event_cover_url) {
-    eventCover.classList.add("has-image");
-    eventCover.style.backgroundImage = `url("${event.event_cover_url}")`;
-  }
+  setEventCoverBackground(event.event_cover_url);
 
   const joinUrl = getJoinUrl(event);
   const qrImageUrl = getQrImageUrl(event);
@@ -368,6 +874,7 @@ function renderEventInfo(event) {
     `;
   }
 
+  setInvitationStudioEvent(event, joinUrl);
   updateMemoryBookPreview();
 }
 
@@ -1732,7 +2239,295 @@ if (galleryLightboxNext) {
   });
 }
 
+eventCoverChangeButton?.addEventListener("click", () => {
+  eventCoverChangeInput?.click();
+});
+
+eventCoverRemoveButton?.addEventListener("click", () => {
+  openEventCoverRemoveDialog();
+});
+
+eventCoverRemoveClose?.addEventListener("click", () => {
+  closeEventCoverRemoveDialog();
+});
+
+eventCoverRemoveCancel?.addEventListener("click", () => {
+  closeEventCoverRemoveDialog();
+});
+
+eventCoverRemoveModal?.addEventListener("click", (event) => {
+  if (event.target === eventCoverRemoveModal) {
+    closeEventCoverRemoveDialog();
+  }
+});
+
+eventCoverRemoveConfirm?.addEventListener("click", async () => {
+  try {
+    eventCoverRemoveConfirm.disabled = true;
+    eventCoverRemoveCancel.disabled = true;
+    eventCoverRemoveConfirm.textContent = t("Removing photo...");
+    setEventCoverRemoveStatus(t("Removing photo..."));
+
+    const updatedEvent = await removeCurrentEventCover();
+
+    if (!updatedEvent) {
+      return;
+    }
+
+    currentEvent = { ...currentEvent, ...updatedEvent };
+    setEventCoverBackground(null);
+    setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
+    updateMemoryBookPreview();
+    closeEventCoverRemoveDialog({ restoreFocus: false });
+    showEventCoverToast(t("Event photo removed successfully."));
+    eventCoverChangeButton?.focus();
+  } catch (error) {
+    console.error(
+      "Event cover remove error:",
+      error.serverMessage || error.message,
+    );
+    setEventCoverRemoveStatus(
+      t(error.message || "Event photo could not be removed."),
+    );
+  } finally {
+    eventCoverRemoveConfirm.disabled = false;
+    eventCoverRemoveCancel.disabled = false;
+    eventCoverRemoveConfirm.textContent = t("Remove Photo");
+  }
+});
+
+eventCoverChangeInput?.addEventListener("change", () => {
+  const file = eventCoverChangeInput.files?.[0] || null;
+
+  if (!file) {
+    return;
+  }
+
+  if (!EVENT_COVER_TYPES.includes(file.type)) {
+    eventCoverChangeInput.value = "";
+    showEventCoverToast(
+      t("Only JPG, PNG or WEBP images are allowed."),
+      "error",
+    );
+    return;
+  }
+
+  if (file.size > EVENT_COVER_MAX_SIZE) {
+    eventCoverChangeInput.value = "";
+    showEventCoverToast(
+      t("Event photo must be 8 MB or smaller."),
+      "error",
+    );
+    return;
+  }
+
+  openEventCoverEditor(file);
+});
+
+eventCoverEditorClose?.addEventListener("click", () => {
+  closeEventCoverEditor();
+});
+
+eventCoverEditorCancel?.addEventListener("click", () => {
+  closeEventCoverEditor();
+});
+
+eventCoverEditor?.addEventListener("click", (event) => {
+  if (event.target === eventCoverEditor) {
+    closeEventCoverEditor();
+  }
+});
+
+eventCoverEditorZoom?.addEventListener("input", () => {
+  eventCoverEditorCrop.zoom = clampEventCoverValue(
+    Number(eventCoverEditorZoom.value) || 1,
+    1,
+    3,
+  );
+  renderEventCoverEditor();
+});
+
+eventCoverEditorReset?.addEventListener("click", () => {
+  eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
+  eventCoverEditorZoom.value = "1";
+  renderEventCoverEditor();
+});
+
+eventCoverEditorStage?.addEventListener("pointerdown", (event) => {
+  const metrics = getEventCoverEditorMetrics();
+
+  if (!metrics || eventCoverEditorSave?.disabled) {
+    return;
+  }
+
+  event.preventDefault();
+  eventCoverEditorDrag = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    left: metrics.left,
+    top: metrics.top,
+  };
+  eventCoverEditorStage.setPointerCapture(event.pointerId);
+  eventCoverEditorStage.classList.add("is-dragging");
+});
+
+eventCoverEditorStage?.addEventListener("pointermove", (event) => {
+  if (
+    !eventCoverEditorDrag ||
+    eventCoverEditorDrag.pointerId !== event.pointerId
+  ) {
+    return;
+  }
+
+  const metrics = getEventCoverEditorMetrics();
+
+  if (!metrics) {
+    return;
+  }
+
+  const left = clampEventCoverValue(
+    eventCoverEditorDrag.left +
+      event.clientX -
+      eventCoverEditorDrag.startX,
+    metrics.stageWidth - metrics.width,
+    0,
+  );
+  const top = clampEventCoverValue(
+    eventCoverEditorDrag.top +
+      event.clientY -
+      eventCoverEditorDrag.startY,
+    metrics.stageHeight - metrics.height,
+    0,
+  );
+
+  eventCoverEditorCrop.focalX = clampEventCoverValue(
+    (metrics.stageWidth / 2 - left) / metrics.width,
+    0,
+    1,
+  );
+  eventCoverEditorCrop.focalY = clampEventCoverValue(
+    (metrics.stageHeight / 2 - top) / metrics.height,
+    0,
+    1,
+  );
+  renderEventCoverEditor();
+});
+
+function finishEventCoverEditorDrag(event) {
+  if (
+    !eventCoverEditorDrag ||
+    eventCoverEditorDrag.pointerId !== event.pointerId
+  ) {
+    return;
+  }
+
+  if (eventCoverEditorStage.hasPointerCapture(event.pointerId)) {
+    eventCoverEditorStage.releasePointerCapture(event.pointerId);
+  }
+
+  eventCoverEditorDrag = null;
+  eventCoverEditorStage.classList.remove("is-dragging");
+}
+
+eventCoverEditorStage?.addEventListener(
+  "pointerup",
+  finishEventCoverEditorDrag,
+);
+eventCoverEditorStage?.addEventListener(
+  "pointercancel",
+  finishEventCoverEditorDrag,
+);
+
+eventCoverEditorStage?.addEventListener("keydown", (event) => {
+  const directionByKey = {
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+  };
+  const direction = directionByKey[event.key];
+
+  if (!direction || eventCoverEditorSave?.disabled) {
+    return;
+  }
+
+  event.preventDefault();
+  const step = event.shiftKey ? 0.05 : 0.015;
+  eventCoverEditorCrop.focalX = clampEventCoverValue(
+    eventCoverEditorCrop.focalX + direction[0] * step,
+    0,
+    1,
+  );
+  eventCoverEditorCrop.focalY = clampEventCoverValue(
+    eventCoverEditorCrop.focalY + direction[1] * step,
+    0,
+    1,
+  );
+  renderEventCoverEditor();
+});
+
+eventCoverEditorSave?.addEventListener("click", async () => {
+  try {
+    eventCoverEditorSave.disabled = true;
+    eventCoverEditorSave.textContent = t("Saving photo...");
+    setEventCoverEditorStatus(t("Saving photo..."));
+
+    const croppedFile = await createCroppedEventCover();
+    const updatedEvent = await uploadChangedEventCover(croppedFile);
+
+    if (!updatedEvent) {
+      return;
+    }
+
+    currentEvent = { ...currentEvent, ...updatedEvent };
+    setEventCoverBackground(currentEvent.event_cover_url);
+    setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
+    updateMemoryBookPreview();
+    closeEventCoverEditor({ restoreFocus: false });
+    showEventCoverToast(t("Event photo updated successfully."));
+    eventCoverChangeButton?.focus();
+  } catch (error) {
+    console.error(
+      "Event cover update error:",
+      error.serverMessage || error.message,
+    );
+    setEventCoverEditorStatus(
+      t(error.message || "Event photo could not be updated."),
+    );
+  } finally {
+    eventCoverEditorSave.disabled = false;
+    eventCoverEditorSave.textContent = t("Save Photo");
+  }
+});
+
+if ("ResizeObserver" in window && eventCoverEditorStage) {
+  new ResizeObserver(() => {
+    if (eventCoverEditor?.classList.contains("active")) {
+      renderEventCoverEditor();
+    }
+  }).observe(eventCoverEditorStage);
+} else {
+  window.addEventListener("resize", renderEventCoverEditor);
+}
+
 window.addEventListener("keydown", (event) => {
+  if (eventCoverRemoveModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventCoverRemoveDialog();
+    }
+
+    return;
+  }
+
+  if (eventCoverEditor?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventCoverEditor();
+    }
+
+    return;
+  }
+
   if (memoryBookModal?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeMemoryBook();
@@ -1757,6 +2552,8 @@ window.addEventListener("keydown", (event) => {
     showGalleryLightboxItem(activeGalleryIndex + 1);
   }
 });
+
+window.addEventListener("beforeunload", releaseEventCoverEditorObjectUrl);
 
 if (photoInput) {
   photoInput.addEventListener("change", () => {
@@ -1929,4 +2726,5 @@ if (approveAllImagesButton) {
   approveAllImagesButton.addEventListener("click", approveAllImages);
 }
 
+setupMobileSectionNavigation();
 loadEventDetail();

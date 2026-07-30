@@ -1,0 +1,1694 @@
+.detail-actions .invitation-studio-open {
+  grid-column: 1 / -1;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  overflow: hidden;
+  color: #ffffff;
+  text-align: left;
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(45, 212, 191, 0.44),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #ec4899, #7c3aed 56%, #4f46e5);
+  border-color: transparent;
+  box-shadow: 0 17px 34px rgba(124, 58, 237, 0.24);
+}
+
+.detail-actions .invitation-studio-open:hover:not(:disabled) {
+  color: #ffffff;
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(45, 212, 191, 0.54),
+      transparent 37%
+    ),
+    linear-gradient(135deg, #f052a2, #8648f2 56%, #5951ee);
+  border-color: transparent;
+  box-shadow: 0 21px 40px rgba(124, 58, 237, 0.3);
+}
+
+.invitation-studio-open svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.invitation-studio-open > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.invitation-studio-open strong {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.invitation-studio-open small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-actions .invitation-studio-open:disabled {
+  color: var(--detail-text-faint);
+  background: var(--detail-surface-raised);
+  border-color: var(--detail-line);
+  box-shadow: none;
+}
+
+.invitation-studio-open:disabled small {
+  color: var(--detail-text-faint);
+}
+
+body.invitation-studio-opened {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+body.invitation-studio-opened :where(.theme-toggle, .snapup-language) {
+  visibility: hidden;
+}
+
+.invitation-studio-modal {
+  position: fixed;
+  z-index: 190;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.invitation-studio-modal.active {
+  display: flex;
+}
+
+.invitation-studio-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 5, 16, 0.78);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+}
+
+.invitation-studio-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(1380px, 100%);
+  height: min(900px, calc(100vh - 36px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  color: var(--detail-text);
+  background: var(--detail-surface-solid);
+  border: 1px solid var(--detail-line);
+  border-radius: 30px;
+  box-shadow: 0 42px 130px rgba(5, 2, 12, 0.48);
+}
+
+.invitation-studio-header {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 390px);
+  gap: 24px;
+  align-items: center;
+  padding: 22px 72px 22px 26px;
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      color-mix(in srgb, var(--detail-pink) 15%, transparent),
+      transparent 32%
+    ),
+    var(--detail-surface);
+  border-bottom: 1px solid var(--detail-line);
+}
+
+.invitation-studio-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--detail-purple);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.invitation-studio-header h2 {
+  margin: 0;
+  color: var(--detail-text);
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.invitation-studio-header p {
+  margin: 8px 0 0;
+  color: var(--detail-text-soft);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.invitation-studio-header-tools {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.invitation-studio-preferences {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-right: 2px;
+  direction: ltr;
+}
+
+.invitation-language-control,
+.invitation-theme-toggle {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.invitation-language-control {
+  min-width: 146px;
+}
+
+.invitation-language-control > span {
+  flex: 0 0 auto;
+}
+
+.invitation-language-control svg,
+.invitation-theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.invitation-language-control svg {
+  color: var(--detail-purple);
+}
+
+.invitation-language-control select {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 0 16px 0 2px;
+  color: var(--detail-text);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.invitation-language-control select option {
+  color: var(--detail-text);
+  background: var(--detail-surface-solid);
+}
+
+.invitation-theme-toggle {
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.invitation-theme-toggle:hover,
+.invitation-language-control:focus-within {
+  color: var(--detail-purple);
+  border-color: color-mix(
+    in srgb,
+    var(--detail-purple) 46%,
+    var(--detail-line)
+  );
+}
+
+.invitation-theme-toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px
+    color-mix(in srgb, var(--detail-purple) 13%, transparent);
+}
+
+.invitation-theme-toggle__sun,
+html[data-theme="dark"] .invitation-theme-toggle__moon {
+  display: none;
+}
+
+html[data-theme="dark"] .invitation-theme-toggle__sun {
+  display: block;
+}
+
+.invitation-studio-library > label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--detail-text-faint);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.invitation-studio-library > label strong {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--detail-purple) 20%, transparent);
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.invitation-studio-library.limit-reached > label strong {
+  color: var(--detail-danger);
+  background: color-mix(in srgb, var(--detail-danger) 9%, transparent);
+  border-color: color-mix(in srgb, var(--detail-danger) 24%, transparent);
+}
+
+.invitation-studio-library > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+}
+
+.invitation-studio-library select,
+.invitation-studio-library button {
+  min-width: 0;
+  min-height: 42px;
+  color: var(--detail-text);
+  background: var(--detail-field);
+  border: 1px solid var(--detail-line);
+  border-radius: 13px;
+  outline: 0;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.invitation-studio-library select {
+  padding: 9px 34px 9px 11px;
+}
+
+.invitation-studio-library button {
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+.invitation-studio-library .invitation-delete-button {
+  color: var(--detail-danger);
+  background: color-mix(
+    in srgb,
+    var(--detail-danger) 9%,
+    var(--detail-field)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--detail-danger) 34%,
+    var(--detail-line)
+  );
+}
+
+.invitation-studio-library .invitation-delete-button:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--detail-danger);
+  border-color: var(--detail-danger);
+}
+
+.invitation-studio-library button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.invitation-studio-library :where(select, button):focus-visible {
+  border-color: var(--detail-purple);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.invitation-studio-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0 0 3px;
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.invitation-delete-confirm {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    visibility 0.2s,
+    opacity 0.2s ease;
+}
+
+.invitation-delete-confirm.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.invitation-delete-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(12, 8, 22, 0.68);
+  border: 0;
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+  cursor: default;
+}
+
+.invitation-delete-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(450px, 100%);
+  padding: 34px;
+  overflow: hidden;
+  color: var(--detail-text);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--detail-danger) 13%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      color-mix(in srgb, var(--detail-purple) 10%, transparent),
+      transparent 42%
+    ),
+    #fffafd;
+  border: 1px solid color-mix(in srgb, var(--detail-danger) 19%, var(--detail-line));
+  border-radius: 28px;
+  box-shadow:
+    0 36px 100px rgba(6, 3, 13, 0.52),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  transform: translateY(14px) scale(0.97);
+  transition: transform 0.24s ease;
+}
+
+.invitation-delete-confirm.active .invitation-delete-confirm-dialog {
+  transform: translateY(0) scale(1);
+}
+
+.invitation-delete-confirm-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  color: #ffffff;
+  background:
+    linear-gradient(145deg, #fb7185, #dc2626);
+  border: 6px solid color-mix(in srgb, var(--detail-danger) 10%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 16px 32px rgba(220, 38, 38, 0.24);
+}
+
+.invitation-delete-confirm-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.invitation-delete-confirm-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--detail-danger);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.invitation-delete-confirm-dialog h3 {
+  margin: 0;
+  color: var(--detail-text);
+  font-size: clamp(25px, 5vw, 34px);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.invitation-delete-confirm-dialog > p {
+  margin: 13px 0 0;
+  color: var(--detail-text-soft);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.58;
+}
+
+.invitation-delete-confirm-dialog > p strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: var(--detail-text);
+  font-size: 14px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitation-delete-confirm-warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin-top: 20px;
+  padding: 13px 14px;
+  color: color-mix(in srgb, var(--detail-danger) 78%, var(--detail-text));
+  background: color-mix(in srgb, var(--detail-danger) 7%, var(--detail-field));
+  border: 1px solid color-mix(in srgb, var(--detail-danger) 18%, var(--detail-line));
+  border-radius: 16px;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.48;
+}
+
+.invitation-delete-confirm-warning svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.invitation-delete-confirm-actions {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.invitation-delete-confirm-actions button {
+  min-height: 48px;
+  padding: 11px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.invitation-delete-confirm-cancel {
+  color: var(--detail-text);
+  background: var(--detail-field);
+  border: 1px solid var(--detail-line-strong);
+}
+
+.invitation-delete-confirm-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border: 0;
+  box-shadow: 0 13px 25px rgba(220, 38, 38, 0.22);
+}
+
+.invitation-delete-confirm-submit svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.invitation-delete-confirm-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.invitation-delete-confirm-actions button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--detail-danger) 18%, transparent);
+}
+
+.invitation-studio-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(430px, 500px) minmax(0, 1fr);
+}
+
+.invitation-studio-controls {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 22px;
+  background: var(--detail-surface);
+  border-right: 1px solid var(--detail-line);
+  scrollbar-color: var(--detail-line-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.invitation-control-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 22px;
+  border: 0;
+}
+
+.invitation-control-section + .invitation-control-section {
+  padding-top: 22px;
+  border-top: 1px solid var(--detail-line);
+}
+
+.invitation-control-section:last-child {
+  padding-bottom: 4px;
+}
+
+.invitation-control-section legend {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+  padding: 0;
+  color: var(--detail-text);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+}
+
+.invitation-control-section legend span {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: var(--detail-gradient);
+  border-radius: 8px;
+  font-size: 8px;
+  letter-spacing: 0;
+}
+
+.invitation-format-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.invitation-format-grid label {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.invitation-format-grid input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.invitation-format-grid label > span {
+  min-height: 70px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 10px;
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 14px;
+  transition:
+    border-color 170ms ease,
+    background 170ms ease,
+    transform 170ms ease;
+}
+
+.invitation-format-grid label:hover > span {
+  transform: translateY(-1px);
+}
+
+.invitation-format-grid input:checked + span {
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 9%, transparent);
+  border-color: color-mix(in srgb, var(--detail-purple) 45%, transparent);
+}
+
+.invitation-format-grid input:focus-visible + span {
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.invitation-format-grid strong,
+.invitation-format-grid small {
+  display: block;
+}
+
+.invitation-format-grid strong {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.invitation-format-grid small {
+  color: var(--detail-text-faint);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.invitation-category-filter {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+  padding: 1px 1px 6px;
+  scrollbar-width: thin;
+}
+
+.invitation-category-filter button {
+  min-height: 34px;
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.invitation-category-filter button.active {
+  color: #ffffff;
+  background: var(--detail-gradient);
+  border-color: transparent;
+}
+
+.invitation-category-filter button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.invitation-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.invitation-template-grid button {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  padding: 9px;
+  color: var(--detail-text-soft);
+  text-align: left;
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.invitation-template-grid button.active {
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 8%, transparent);
+  border-color: color-mix(in srgb, var(--detail-purple) 45%, transparent);
+}
+
+.template-swatch {
+  position: relative;
+  height: 88px;
+  display: block;
+  overflow: hidden;
+  border-radius: 9px;
+}
+
+.template-swatch::after {
+  content: "";
+  position: absolute;
+  inset: 8px 12px auto;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  box-shadow:
+    0 10px 0 rgba(255, 255, 255, 0.46),
+    0 20px 0 rgba(255, 255, 255, 0.24);
+}
+
+.template-swatch.birthday-confetti {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    url("../assets/invitations/birthday-confetti.webp") center 20% / cover;
+}
+
+.template-swatch.birthday-colorburst {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+    url("../assets/invitations/birthday-sunlit-ribbon.webp") center 23% / cover;
+}
+
+.template-swatch.birthday-celebration {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)),
+    url("../assets/invitations/celebration-gouache.webp") center 25% / cover;
+}
+
+.template-swatch.house-after-dark {
+  background:
+    linear-gradient(rgba(33, 8, 50, 0.05), rgba(33, 8, 50, 0.05)),
+    url("../assets/invitations/house-party-after-dark.webp") center 22% / cover;
+}
+
+.template-swatch.house-polaroid {
+  background:
+    linear-gradient(rgba(21, 3, 26, 0.02), rgba(21, 3, 26, 0.02)),
+    url("../assets/invitations/house-velvet-frequency.webp") center 28% / cover;
+}
+
+.template-swatch.wedding-botanical {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)),
+    url("../assets/invitations/wedding-botanical.webp") center 19% / cover;
+}
+
+.template-swatch.wedding-watercolor {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)),
+    url("../assets/invitations/watercolor-elegant.webp") center 27% / cover;
+}
+
+.template-swatch.wedding-editorial {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)),
+    url("../assets/invitations/botanical-editorial.webp") center 31% / cover;
+}
+
+.template-swatch.graduation-midnight {
+  background:
+    linear-gradient(rgba(9, 24, 61, 0.04), rgba(9, 24, 61, 0.04)),
+    url("../assets/invitations/graduation-nocturne-lines.webp") center 19% / cover;
+}
+
+.template-swatch.graduation-gold {
+  background:
+    linear-gradient(rgba(9, 24, 61, 0.04), rgba(9, 24, 61, 0.04)),
+    url("../assets/invitations/graduation-midnight.webp") center 22% / cover;
+}
+
+.template-swatch.travel-postcard {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)),
+    url("../assets/invitations/travel-postcard.webp") center 19% / cover;
+}
+
+.template-swatch.travel-route {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+    url("../assets/invitations/travel-atlas-keepsake.webp") center 21% / cover;
+}
+
+.template-swatch:is(
+    .wedding-watercolor,
+    .wedding-editorial,
+    .wedding-botanical
+  )::after {
+  background: #63465b;
+  box-shadow:
+    0 10px 0 rgba(99, 70, 91, 0.5),
+    0 20px 0 rgba(99, 70, 91, 0.26);
+}
+
+.invitation-template-grid button.template-hidden {
+  display: none;
+}
+
+.invitation-template-grid button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.invitation-template-grid strong,
+.invitation-template-grid small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitation-template-grid strong {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.invitation-template-grid small {
+  color: var(--detail-text-faint);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.invitation-color-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.invitation-color-grid > label,
+.invitation-field-grid > label {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  color: var(--detail-text-soft);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.invitation-color-grid label > span {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  background: var(--detail-field);
+  border: 1px solid var(--detail-line);
+  border-radius: 13px;
+}
+
+.invitation-color-grid input[type="color"] {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.invitation-color-grid output {
+  overflow: hidden;
+  color: var(--detail-text);
+  font-size: 9px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+}
+
+.invitation-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.invitation-field-grid .full {
+  grid-column: 1 / -1;
+}
+
+.invitation-field-grid :where(input, textarea) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  color: var(--detail-text);
+  background: var(--detail-field);
+  border: 1px solid var(--detail-line);
+  border-radius: 12px;
+  outline: 0;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.invitation-field-grid textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.invitation-field-grid :where(input, textarea):focus {
+  border-color: var(--detail-purple);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.invitation-photo-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  align-items: center;
+  margin-top: 13px;
+  padding: 13px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--detail-purple) 8%, transparent),
+      transparent 62%
+    ),
+    var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 15px;
+}
+
+.invitation-photo-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.invitation-photo-copy strong {
+  color: var(--detail-text);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.invitation-photo-copy small,
+.invitation-photo-field > span {
+  color: var(--detail-text-faint);
+  font-size: 8px;
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.invitation-frame-picker {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: color-mix(
+    in srgb,
+    var(--detail-surface-raised) 86%,
+    transparent
+  );
+  border: 1px solid var(--detail-line);
+  border-radius: 14px;
+}
+
+.invitation-frame-picker > span {
+  color: var(--detail-text-soft);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.invitation-frame-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.invitation-frame-options label {
+  position: relative;
+  min-width: 0;
+  min-height: 60px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: 7px 4px;
+  color: var(--detail-text-faint);
+  background: var(--detail-surface);
+  border: 1px solid var(--detail-line);
+  border-radius: 11px;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.invitation-frame-options input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.invitation-frame-options label:has(input:checked) {
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 9%, transparent);
+  border-color: color-mix(in srgb, var(--detail-purple) 52%, transparent);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--detail-purple) 8%, transparent);
+}
+
+.invitation-frame-options label:has(input:focus-visible) {
+  outline: 3px solid
+    color-mix(in srgb, var(--detail-purple) 18%, transparent);
+  outline-offset: 2px;
+}
+
+.frame-icon {
+  position: relative;
+  width: 31px;
+  height: 23px;
+  display: block;
+  background: linear-gradient(135deg, #91b7c7, #e7b496);
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+
+.frame-icon.arch {
+  border-radius: 16px 16px 4px 4px;
+}
+
+.frame-icon.polaroid {
+  height: 25px;
+  border: 4px solid #fffdf8;
+  border-bottom-width: 8px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px currentColor;
+  transform: rotate(-3deg);
+}
+
+.frame-icon.oval {
+  border-radius: 50%;
+}
+
+.frame-icon.film {
+  width: 34px;
+  height: 24px;
+  border: 5px solid #20242d;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 0 #fff,
+    inset 0 -2px 0 #fff;
+}
+
+.frame-icon.stamp {
+  border-style: dashed;
+  border-radius: 1px;
+}
+
+.invitation-photo-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.invitation-photo-actions button {
+  min-height: 36px;
+  padding: 8px 11px;
+  color: #ffffff;
+  background: var(--detail-gradient);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.invitation-photo-actions button.secondary {
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-solid);
+  border: 1px solid var(--detail-line);
+}
+
+.invitation-photo-actions button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+
+.invitation-photo-field > span {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  padding-top: 8px;
+  border-top: 1px solid var(--detail-line);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitation-photo-adjustments {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding-top: 11px;
+  border-top: 1px solid var(--detail-line);
+}
+
+.invitation-photo-adjustments label {
+  display: grid;
+  gap: 7px;
+}
+
+.invitation-photo-adjustments label > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--detail-text-soft);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.invitation-photo-adjustments output {
+  min-width: 42px;
+  color: var(--detail-purple);
+  font-size: 9px;
+  font-weight: 950;
+  text-align: right;
+}
+
+.invitation-photo-adjustments input[type="range"] {
+  width: 100%;
+  height: 5px;
+  margin: 0;
+  accent-color: var(--detail-purple);
+  cursor: ew-resize;
+}
+
+.invitation-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.invitation-toggle-grid > label {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 11px;
+  color: var(--detail-text);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 13px;
+  cursor: pointer;
+}
+
+.invitation-toggle-grid input {
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+  accent-color: var(--detail-purple);
+}
+
+.invitation-toggle-grid span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.invitation-toggle-grid strong {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.invitation-toggle-grid small {
+  color: var(--detail-text-faint);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.invitation-preview-workspace {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 13px;
+  padding: 20px;
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--detail-purple) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--detail-purple) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    var(--detail-surface-raised);
+  background-size: 24px 24px;
+}
+
+.invitation-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.invitation-preview-head > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.invitation-preview-head span {
+  color: var(--detail-text-faint);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.invitation-preview-head strong {
+  overflow: hidden;
+  color: var(--detail-text);
+  font-size: 11px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invitation-preview-head .invitation-auto-badge {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  color: var(--detail-teal);
+  background: color-mix(in srgb, var(--detail-teal) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--detail-teal) 22%, transparent);
+  border-radius: 999px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.invitation-canvas-stage {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.invitation-canvas-shell {
+  width: min(
+    100%,
+    calc((100vh - 270px) * var(--invitation-ratio, 0.8))
+  );
+  max-height: 100%;
+  aspect-ratio: var(--invitation-ratio, 0.8);
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 28px 80px rgba(26, 14, 46, 0.25);
+}
+
+.invitation-canvas-shell canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.invitation-studio-status {
+  min-height: 17px;
+  margin: 0;
+  color: var(--detail-text-soft);
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.invitation-studio-status.success {
+  color: var(--detail-teal);
+}
+
+.invitation-studio-status.error {
+  color: var(--detail-danger);
+}
+
+.invitation-studio-actions {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr 1fr;
+  gap: 9px;
+}
+
+.invitation-studio-actions button {
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.invitation-save-button {
+  color: var(--detail-text);
+  background: var(--detail-surface-solid);
+  border: 1px solid var(--detail-line-strong);
+}
+
+.invitation-download-button {
+  color: #ffffff;
+  background: var(--detail-gradient);
+  border: 0;
+  box-shadow: 0 14px 27px rgba(124, 58, 237, 0.22);
+}
+
+.invitation-download-button.secondary {
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 9%, var(--detail-surface));
+  border: 1px solid color-mix(in srgb, var(--detail-purple) 25%, transparent);
+  box-shadow: none;
+}
+
+.invitation-studio-actions button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+html[data-theme="dark"] body.event-detail-shell
+  :where(
+    .invitation-studio-dialog,
+    .invitation-studio-header,
+    .invitation-studio-controls,
+    .invitation-preview-workspace
+  ) {
+  color: var(--detail-text);
+  border-color: var(--detail-line);
+}
+
+html[data-theme="dark"] body.event-detail-shell
+  .invitation-delete-confirm-dialog {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--detail-danger) 16%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      color-mix(in srgb, var(--detail-purple) 14%, transparent),
+      transparent 42%
+    ),
+    #1d1729;
+}
+
+@media (max-width: 1020px) {
+  .invitation-studio-dialog {
+    height: calc(100vh - 24px);
+  }
+
+  .invitation-studio-workspace {
+    grid-template-columns: minmax(330px, 390px) minmax(0, 1fr);
+  }
+
+  .invitation-studio-controls {
+    padding: 18px;
+  }
+
+  .invitation-format-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invitation-template-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invitation-format-grid label > span {
+    min-height: 54px;
+  }
+
+  .invitation-template-grid button {
+    grid-template-columns: 66px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .template-swatch {
+    height: 40px;
+  }
+}
+
+@media (max-width: 760px) {
+  .detail-actions .invitation-studio-open {
+    grid-column: auto;
+  }
+
+  .invitation-studio-modal {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .invitation-studio-dialog {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .invitation-studio-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 17px 60px 15px 16px;
+  }
+
+  .invitation-studio-header p {
+    display: none;
+  }
+
+  .invitation-studio-header-tools {
+    gap: 9px;
+  }
+
+  .invitation-studio-preferences {
+    justify-content: flex-start;
+    padding-right: 0;
+  }
+
+  .invitation-studio-library {
+    padding-right: 0;
+  }
+
+  .invitation-studio-library > div {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .invitation-studio-library button {
+    padding-inline: 11px;
+  }
+
+  .invitation-studio-close {
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .invitation-studio-workspace {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .invitation-studio-controls {
+    overflow: visible;
+    padding: 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--detail-line);
+  }
+
+  .invitation-format-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .invitation-template-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invitation-template-grid button {
+    display: grid;
+  }
+
+  .template-swatch {
+    height: 56px;
+  }
+
+  .invitation-preview-workspace {
+    min-height: 720px;
+    padding: 16px;
+  }
+
+  .invitation-canvas-stage {
+    min-height: 510px;
+    padding: 6px;
+  }
+
+  .invitation-canvas-shell {
+    width: min(100%, calc(500px * var(--invitation-ratio, 0.8)));
+  }
+
+  .invitation-studio-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: 0 -16px -16px;
+    padding: 10px 16px 16px;
+    background: color-mix(
+      in srgb,
+      var(--detail-surface-solid) 94%,
+      transparent
+    );
+    border-top: 1px solid var(--detail-line);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
+
+@media (max-width: 520px) {
+  .invitation-studio-header h2 {
+    font-size: 25px;
+  }
+
+  .invitation-language-control {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .invitation-theme-toggle {
+    flex: 0 0 auto;
+  }
+
+  .invitation-theme-toggle span {
+    display: none;
+  }
+
+  .invitation-studio-library > label {
+    margin-bottom: 5px;
+  }
+
+  .invitation-studio-library > div {
+    gap: 6px;
+  }
+
+  .invitation-studio-library button {
+    min-height: 40px;
+    padding-inline: 9px;
+  }
+
+  .invitation-format-grid {
+    gap: 6px;
+  }
+
+  .invitation-format-grid label > span {
+    min-height: 64px;
+    padding: 8px;
+  }
+
+  .invitation-format-grid small {
+    white-space: normal;
+  }
+
+  .invitation-template-grid {
+    gap: 6px;
+  }
+
+  .invitation-template-grid button {
+    padding: 6px;
+  }
+
+  .invitation-template-grid small {
+    display: none;
+  }
+
+  .invitation-field-grid,
+  .invitation-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invitation-photo-field {
+    grid-template-columns: 1fr;
+  }
+
+  .invitation-frame-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .invitation-photo-actions {
+    justify-content: stretch;
+  }
+
+  .invitation-photo-actions button {
+    flex: 1 1 auto;
+  }
+
+  .invitation-photo-field > span {
+    grid-column: auto;
+  }
+
+  .invitation-field-grid .full {
+    grid-column: auto;
+  }
+
+  .invitation-preview-head .invitation-auto-badge {
+    display: none;
+  }
+
+  .invitation-studio-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .invitation-save-button {
+    grid-column: 1 / -1;
+  }
+
+  .invitation-delete-confirm {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .invitation-delete-confirm-dialog {
+    width: 100%;
+    padding: 25px 20px 20px;
+    border-radius: 24px;
+  }
+
+  .invitation-delete-confirm-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 16px;
+    border-radius: 18px;
+  }
+
+  .invitation-delete-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .invitation-delete-confirm-submit {
+    grid-row: 1;
+  }
+}

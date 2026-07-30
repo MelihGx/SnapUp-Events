@@ -443,6 +443,18 @@ html[data-theme="dark"] .join-event-preview span {
   color: #afa6bd;
 }
 
+html[data-theme="dark"] .join-event-cover {
+  color: #c4b5fd;
+  background:
+    radial-gradient(
+      circle at 22% 18%,
+      rgba(236, 72, 153, 0.18),
+      transparent 42%
+    ),
+    #241d31;
+  border-color: rgba(196, 181, 253, 0.18);
+}
+
 html[data-theme="dark"] .join-event-gallery-link {
   color: #ffffff;
   background: #312546;
@@ -505,6 +517,55 @@ html[data-theme="dark"] .join-upload-result.success {
 
 html[data-theme="dark"] .join-upload-result.error {
   color: #ff8d8d;
+}
+
+html[data-theme="dark"] .join-upload-success__backdrop {
+  background: rgba(5, 3, 10, 0.72);
+  backdrop-filter: blur(18px) saturate(110%);
+  -webkit-backdrop-filter: blur(18px) saturate(110%);
+}
+
+html[data-theme="dark"] .join-upload-success__card {
+  color: var(--theme-text);
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(124, 58, 237, 0.25),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 92% 10%,
+      rgba(34, 211, 197, 0.11),
+      transparent 30%
+    ),
+    #1b1624;
+  border-color: rgba(196, 181, 253, 0.2);
+  box-shadow:
+    0 38px 110px rgba(3, 2, 8, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+html[data-theme="dark"] .join-upload-success__card h2 {
+  color: #f8f5ff;
+}
+
+html[data-theme="dark"] .join-upload-success__card p {
+  color: #b8afc5;
+}
+
+html[data-theme="dark"] .join-upload-success__brand {
+  color: #c4b5fd;
+}
+
+html[data-theme="dark"] .join-upload-success__button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #a33cc6);
+  box-shadow: 0 16px 34px rgba(7, 4, 14, 0.4);
+}
+
+html[data-theme="dark"] .join-upload-success__button:hover,
+html[data-theme="dark"] .join-upload-success__button:focus-visible {
+  background: linear-gradient(135deg, #8b5cf6, #c43b9a);
 }
 
 html[data-theme="dark"] :is(

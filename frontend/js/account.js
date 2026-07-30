@@ -58,6 +58,15 @@ function t(value) {
   return window.SnapUpI18n?.t?.(value) || value;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function setResult(element, message = "", state = "") {
   element.textContent = message ? t(message) : "";
 
@@ -200,6 +209,18 @@ function renderEvents(events) {
       const eventCode = event.event_code || "------";
       const eventStatus = t(event.is_event_active ? "Active" : "Passive");
       const statusClass = event.is_event_active ? "active" : "passive";
+      const eventCoverUrl = event.event_cover_url || "";
+      const eventCoverImage = eventCoverUrl
+        ? `
+          <img
+            class="sweet-event-cover-image"
+            src="${escapeHtml(eventCoverUrl)}"
+            alt="${escapeHtml(eventName)}"
+            loading="lazy"
+            decoding="async"
+          />
+        `
+        : "";
 
       return `
         <a 
@@ -207,7 +228,9 @@ function renderEvents(events) {
           class="event-item event-item-link sweet-event-card"
           aria-label="${t("Open event gallery")}: ${eventName}"
         >
-          <div class="sweet-event-cover">
+          <div class="sweet-event-cover${eventCoverUrl ? " has-image" : ""}">
+            ${eventCoverImage}
+
             <div class="sweet-camera-icon">
               <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
                 <path
@@ -329,6 +352,21 @@ function renderEvents(events) {
       `;
     })
     .join("");
+
+  eventsList
+    .querySelectorAll(".sweet-event-cover-image")
+    .forEach((coverImage) => {
+      coverImage.addEventListener(
+        "error",
+        () => {
+          coverImage
+            .closest(".sweet-event-cover")
+            ?.classList.remove("has-image");
+          coverImage.remove();
+        },
+        { once: true },
+      );
+    });
 }
 
 async function loadEvents() {

@@ -25,17 +25,25 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="css/theme.css?v=memory-book-detail-3" />
+    <link rel="stylesheet" href="css/theme.css?v=mobile-gallery-first-1" />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=memory-book-detail-3"
+      href="css/event-detail.css?v=event-cover-remove-1"
+    />
+    <link
+      rel="stylesheet"
+      href="css/invitation-studio.css?v=invitation-studio-8"
     />
     <link
       rel="stylesheet"
       href="css/i18n.css?v=mobile-controls-balanced-1"
     />
     <script
-      src="js/event-detail-i18n.js?v=event-detail-refresh-1"
+      src="js/event-detail-i18n.js?v=event-cover-remove-1"
+      defer
+    ></script>
+    <script
+      src="js/invitation-studio-i18n.js?v=invitation-studio-8"
       defer
     ></script>
     <script src="js/i18n.js?v=event-detail-refresh-1" defer></script>
@@ -103,6 +111,44 @@
       <section class="detail-content" id="detailContent" hidden>
         <section class="detail-hero">
           <div class="detail-cover" id="eventCover">
+            <div class="event-cover-actions">
+              <button
+                type="button"
+                class="event-cover-change-button"
+                id="eventCoverChangeButton"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 8.5A2.5 2.5 0 0 1 6.5 6h2l1.3-2h4.4l1.3 2h2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"
+                  ></path>
+                  <circle cx="12" cy="12.5" r="3.2"></circle>
+                  <path d="m16.8 5.2 2-2m0 0 2 2m-2-2v5"></path>
+                </svg>
+                <span id="eventCoverChangeLabel">Change Photo</span>
+              </button>
+
+              <button
+                type="button"
+                class="event-cover-remove-button"
+                id="eventCoverRemoveButton"
+                hidden
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16"></path>
+                  <path d="M9 7V4h6v3"></path>
+                  <path d="m7 7 1 13h8l1-13"></path>
+                </svg>
+                <span>Remove Photo</span>
+              </button>
+            </div>
+
+            <input
+              type="file"
+              id="eventCoverChangeInput"
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+            />
+
             <div class="detail-cover-overlay">
               <span class="rec-chip"><i></i> EVENT DETAIL</span>
               <h1 id="eventTitle">Event title</h1>
@@ -110,7 +156,7 @@
             </div>
           </div>
 
-          <aside class="detail-side-card">
+          <aside class="detail-side-card" id="eventShareSection">
             <span class="side-label">Event Code</span>
 
             <button
@@ -133,6 +179,23 @@
                 Copy Join Link
               </button>
               <button type="button" id="downloadQrButton">Download QR</button>
+
+              <button
+                type="button"
+                id="invitationStudioOpen"
+                class="invitation-studio-open"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="3"></rect>
+                  <path d="m4.5 7 7.5 6 7.5-6"></path>
+                  <path d="M17.5 3.5v4M15.5 5.5h4"></path>
+                </svg>
+                <span>
+                  <strong>Create Invitation</strong>
+                  <small>Mini card, story or printable PDF</small>
+                </span>
+              </button>
 
               <button
                 type="button"
@@ -176,7 +239,41 @@
           </aside>
         </section>
 
-        <section class="detail-info-grid">
+        <nav
+          class="mobile-detail-nav"
+          aria-label="Event sections"
+        >
+          <a href="#eventGallerySection" aria-current="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3.5" y="4" width="17" height="16" rx="3"></rect>
+              <circle cx="9" cy="9" r="1.6"></circle>
+              <path d="m5.5 17 4.2-4 3.1 2.8 2.4-2.2 3.3 3.4"></path>
+            </svg>
+            <span>Gallery</span>
+          </a>
+
+          <a href="#eventGuestsSection">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="9" cy="8" r="3"></circle>
+              <circle cx="17" cy="10" r="2.3"></circle>
+              <path d="M3.8 19c.5-3.5 2.3-5.3 5.2-5.3s4.7 1.8 5.2 5.3"></path>
+              <path d="M14 15.1c.8-.7 1.8-1 3-1 2.2 0 3.5 1.4 3.9 4"></path>
+            </svg>
+            <span>Guests</span>
+          </a>
+
+          <a href="#eventShareSection">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+              <path d="M15 14h2v2h-2zM18 18h2v2h-2zM14 18h1"></path>
+            </svg>
+            <span>Event Code</span>
+          </a>
+        </nav>
+
+        <section class="detail-info-grid" id="eventInfoSection">
           <div class="info-card">
             <span>Location</span>
             <strong id="eventLocation">-</strong>
@@ -208,7 +305,7 @@
           </div>
         </section>
 
-        <section class="admin-workspace-grid">
+        <section class="admin-workspace-grid" id="eventManageSection">
           <section class="upload-panel">
             <div class="upload-panel-header">
               <span class="upload-kicker">Quick Upload</span>
@@ -256,7 +353,10 @@
           </article>
         </section>
 
-        <section class="detail-card guests-panel">
+        <section
+          class="detail-card guests-panel"
+          id="eventGuestsSection"
+        >
           <div class="guests-panel-head">
             <div class="section-head">
               <span>Guests</span>
@@ -293,7 +393,10 @@
           </div>
         </section>
 
-        <section class="detail-section-grid gallery-only-section">
+        <section
+          class="detail-section-grid gallery-only-section"
+          id="eventGallerySection"
+        >
           <article class="detail-card gallery-admin-card">
             <div class="gallery-admin-head">
               <div class="section-head">
@@ -321,6 +424,926 @@
         </section>
       </section>
     </main>
+
+    <div
+      class="invitation-studio-modal"
+      id="invitationStudioModal"
+      aria-hidden="true"
+    >
+      <div
+        class="invitation-studio-backdrop"
+        id="invitationStudioBackdrop"
+      ></div>
+
+      <section
+        class="invitation-studio-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="invitationStudioTitle"
+        aria-describedby="invitationStudioDescription"
+      >
+        <header class="invitation-studio-header">
+          <div>
+            <span class="invitation-studio-kicker">SnapUp Invitation Studio</span>
+            <h2 id="invitationStudioTitle">Create your invitation</h2>
+            <p id="invitationStudioDescription">
+              Choose a format, personalise the design and download it instantly.
+            </p>
+          </div>
+
+          <div class="invitation-studio-header-tools">
+            <div
+              class="invitation-studio-preferences"
+              aria-label="Invitation preferences"
+            >
+              <label
+                class="invitation-language-control"
+                for="invitationLanguageSelect"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <path
+                    d="M3 12h18M12 3c2.3 2.45 3.5 5.45 3.5 9s-1.2 6.55-3.5 9c-2.3-2.45-3.5-5.45-3.5-9S9.7 5.45 12 3Z"
+                  ></path>
+                </svg>
+                <span>Language</span>
+                <select
+                  id="invitationLanguageSelect"
+                  aria-label="Choose language"
+                >
+                  <option value="en">English</option>
+                  <option value="tr">Türkçe</option>
+                  <option value="ar">العربية</option>
+                  <option value="de">Deutsch</option>
+                  <option value="fr">Français</option>
+                  <option value="es">Español</option>
+                  <option value="it">Italiano</option>
+                  <option value="nl">Nederlands</option>
+                  <option value="bg">Български</option>
+                  <option value="ro">Română</option>
+                  <option value="el">Ελληνικά</option>
+                  <option value="sr">Srpski</option>
+                  <option value="hr">Hrvatski</option>
+                  <option value="bs">Bosanski</option>
+                  <option value="sq">Shqip</option>
+                  <option value="mk">Македонски</option>
+                </select>
+              </label>
+
+              <button
+                type="button"
+                class="invitation-theme-toggle"
+                id="invitationThemeToggle"
+                aria-label="Switch to dark mode"
+                aria-pressed="false"
+                title="Dark mode"
+              >
+                <svg
+                  class="invitation-theme-toggle__moon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"
+                  ></path>
+                </svg>
+                <svg
+                  class="invitation-theme-toggle__sun"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="3.8"></circle>
+                  <path
+                    d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"
+                  ></path>
+                </svg>
+                <span id="invitationThemeLabel">Dark mode</span>
+              </button>
+            </div>
+
+            <div class="invitation-studio-library">
+              <label for="invitationSavedSelect">
+                <span>Saved drafts</span>
+                <strong id="invitationSavedCount">0 / 3</strong>
+              </label>
+              <div>
+                <select id="invitationSavedSelect">
+                  <option value="">New invitation</option>
+                </select>
+                <button
+                  type="button"
+                  class="invitation-delete-button"
+                  id="invitationDeleteButton"
+                  aria-label="Delete selected invitation"
+                  hidden
+                >
+                  Delete
+                </button>
+                <button type="button" id="invitationNewButton">New</button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="invitation-studio-close"
+            id="invitationStudioClose"
+            aria-label="Close Invitation Studio"
+          >
+            ×
+          </button>
+        </header>
+
+        <div class="invitation-studio-workspace">
+          <form
+            class="invitation-studio-controls"
+            id="invitationStudioForm"
+            autocomplete="off"
+          >
+            <fieldset class="invitation-control-section">
+              <legend>
+                <span>01</span>
+                Output format
+              </legend>
+
+              <div class="invitation-format-grid">
+                <label>
+                  <input
+                    type="radio"
+                    name="invitationFormat"
+                    value="mini_card"
+                    checked
+                  />
+                  <span>
+                    <strong>Mini Card</strong>
+                    <small>1080 × 1350 · Social</small>
+                  </span>
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="invitationFormat"
+                    value="story"
+                  />
+                  <span>
+                    <strong>Story</strong>
+                    <small>1080 × 1920 · Vertical</small>
+                  </span>
+                </label>
+
+                <label>
+                  <input type="radio" name="invitationFormat" value="pdf" />
+                  <span>
+                    <strong>Print PDF</strong>
+                    <small>A5 · High resolution</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="invitation-control-section">
+              <legend>
+                <span>02</span>
+                Design
+              </legend>
+
+              <div
+                class="invitation-category-filter"
+                aria-label="Invitation concept"
+              >
+                <button
+                  type="button"
+                  class="active"
+                  data-invitation-category-filter="all"
+                  aria-pressed="true"
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  data-invitation-category-filter="birthday"
+                  aria-pressed="false"
+                >
+                  Birthday
+                </button>
+                <button
+                  type="button"
+                  data-invitation-category-filter="house"
+                  aria-pressed="false"
+                >
+                  House Party
+                </button>
+                <button
+                  type="button"
+                  data-invitation-category-filter="wedding"
+                  aria-pressed="false"
+                >
+                  Wedding
+                </button>
+                <button
+                  type="button"
+                  data-invitation-category-filter="graduation"
+                  aria-pressed="false"
+                >
+                  Graduation
+                </button>
+                <button
+                  type="button"
+                  data-invitation-category-filter="travel"
+                  aria-pressed="false"
+                >
+                  Travel
+                </button>
+              </div>
+
+              <div class="invitation-template-grid">
+                <button
+                  type="button"
+                  class="active"
+                  data-invitation-template="birthday-confetti"
+                  data-invitation-category="birthday"
+                  aria-pressed="true"
+                >
+                  <i class="template-swatch birthday-confetti"></i>
+                  <span>
+                    <strong>Confetti Cream</strong>
+                    <small>Warm & playful</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="birthday-colorburst"
+                  data-invitation-category="birthday"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch birthday-colorburst"></i>
+                  <span>
+                    <strong>Sunlit Ribbon</strong>
+                    <small>Premium paper art</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="birthday-celebration"
+                  data-invitation-category="birthday"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch birthday-celebration"></i>
+                  <span>
+                    <strong>Celebration</strong>
+                    <small>Colorful & joyful</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="house-after-dark"
+                  data-invitation-category="house"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch house-after-dark"></i>
+                  <span>
+                    <strong>After Dark</strong>
+                    <small>Premium night</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="house-polaroid"
+                  data-invitation-category="house"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch house-polaroid"></i>
+                  <span>
+                    <strong>Velvet Frequency</strong>
+                    <small>Modern late-night</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="wedding-botanical"
+                  data-invitation-category="wedding"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch wedding-botanical"></i>
+                  <span>
+                    <strong>Botanical Vows</strong>
+                    <small>Soft & natural</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="wedding-watercolor"
+                  data-invitation-category="wedding"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch wedding-watercolor"></i>
+                  <span>
+                    <strong>Watercolor Romance</strong>
+                    <small>Romantic & timeless</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="wedding-editorial"
+                  data-invitation-category="wedding"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch wedding-editorial"></i>
+                  <span>
+                    <strong>Editorial Garden</strong>
+                    <small>Clean & elegant</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="graduation-midnight"
+                  data-invitation-category="graduation"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch graduation-midnight"></i>
+                  <span>
+                    <strong>Nocturne Lines</strong>
+                    <small>Art-deco prestige</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="graduation-gold"
+                  data-invitation-category="graduation"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch graduation-gold"></i>
+                  <span>
+                    <strong>Golden Future</strong>
+                    <small>Classic & bright</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="travel-postcard"
+                  data-invitation-category="travel"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch travel-postcard"></i>
+                  <span>
+                    <strong>Travel Postcard</strong>
+                    <small>Artful & scenic</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-invitation-template="travel-route"
+                  data-invitation-category="travel"
+                  aria-pressed="false"
+                >
+                  <i class="template-swatch travel-route"></i>
+                  <span>
+                    <strong>Atlas Keepsake</strong>
+                    <small>Travel journal</small>
+                  </span>
+                </button>
+              </div>
+
+              <div class="invitation-color-grid">
+                <label>
+                  Primary
+                  <span>
+                    <input
+                      type="color"
+                      id="invitationPrimaryColor"
+                      value="#30493B"
+                    />
+                    <output id="invitationPrimaryColorValue">#30493B</output>
+                  </span>
+                </label>
+
+                <label>
+                  Accent
+                  <span>
+                    <input
+                      type="color"
+                      id="invitationSecondaryColor"
+                      value="#B88A4A"
+                    />
+                    <output id="invitationSecondaryColorValue">#B88A4A</output>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="invitation-control-section">
+              <legend>
+                <span>03</span>
+                Invitation content
+              </legend>
+
+              <div class="invitation-field-grid">
+                <label class="full">
+                  Draft name
+                  <input
+                    type="text"
+                    id="invitationName"
+                    maxlength="100"
+                    placeholder="My invitation"
+                  />
+                </label>
+
+                <label class="full">
+                  Title
+                  <input
+                    type="text"
+                    id="invitationTitle"
+                    maxlength="150"
+                    placeholder="You are invited"
+                  />
+                </label>
+
+                <label class="full">
+                  Message
+                  <textarea
+                    id="invitationMessage"
+                    maxlength="600"
+                    rows="3"
+                    placeholder="We would love to celebrate this special day with you."
+                  ></textarea>
+                </label>
+
+                <label>
+                  Dress code
+                  <input
+                    type="text"
+                    id="invitationDressCode"
+                    maxlength="100"
+                    placeholder="Smart casual"
+                  />
+                </label>
+
+                <label>
+                  Contact
+                  <input
+                    type="tel"
+                    id="invitationContactPhone"
+                    maxlength="20"
+                    placeholder="+90 5..."
+                  />
+                </label>
+
+                <label class="full">
+                  RSVP deadline
+                  <input type="date" id="invitationRsvpDeadline" />
+                </label>
+              </div>
+
+              <div class="invitation-photo-field">
+                <div class="invitation-photo-copy">
+                  <strong>Invitation photo</strong>
+                  <small>
+                    Upload a separate photo or keep using the event cover.
+                  </small>
+                </div>
+
+                <div
+                  class="invitation-frame-picker"
+                  role="radiogroup"
+                  aria-label="Photo frame"
+                >
+                  <span>Photo frame</span>
+                  <div class="invitation-frame-options">
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="rounded"
+                        checked
+                      />
+                      <i class="frame-icon rounded" aria-hidden="true"></i>
+                      <span>Rounded</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="arch"
+                      />
+                      <i class="frame-icon arch" aria-hidden="true"></i>
+                      <span>Arch</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="polaroid"
+                      />
+                      <i class="frame-icon polaroid" aria-hidden="true"></i>
+                      <span>Polaroid</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="oval"
+                      />
+                      <i class="frame-icon oval" aria-hidden="true"></i>
+                      <span>Oval</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="film"
+                      />
+                      <i class="frame-icon film" aria-hidden="true"></i>
+                      <span>Film</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="invitationPhotoFrame"
+                        value="stamp"
+                      />
+                      <i class="frame-icon stamp" aria-hidden="true"></i>
+                      <span>Stamp</span>
+                    </label>
+                  </div>
+                </div>
+
+                <input
+                  type="file"
+                  id="invitationPhotoInput"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                />
+
+                <div class="invitation-photo-actions">
+                  <button type="button" id="invitationPhotoButton">
+                    Choose Photo
+                  </button>
+                  <button
+                    type="button"
+                    id="invitationPhotoRemove"
+                    class="secondary"
+                    hidden
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <span id="invitationPhotoName">
+                  Event cover will be used automatically.
+                </span>
+
+                <div class="invitation-photo-adjustments">
+                  <label>
+                    <span>
+                      Photo zoom
+                      <output id="invitationPhotoZoomValue">100%</output>
+                    </span>
+                    <input
+                      type="range"
+                      id="invitationPhotoZoom"
+                      min="100"
+                      max="220"
+                      value="100"
+                      step="1"
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Horizontal position
+                      <output id="invitationPhotoXValue">0</output>
+                    </span>
+                    <input
+                      type="range"
+                      id="invitationPhotoX"
+                      min="-100"
+                      max="100"
+                      value="0"
+                      step="1"
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Vertical position
+                      <output id="invitationPhotoYValue">0</output>
+                    </span>
+                    <input
+                      type="range"
+                      id="invitationPhotoY"
+                      min="-100"
+                      max="100"
+                      value="0"
+                      step="1"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div class="invitation-toggle-grid">
+                <label>
+                  <input type="checkbox" id="invitationShowCover" checked />
+                  <span>
+                    <strong>Show invitation photo</strong>
+                    <small>Custom photo takes priority over event cover</small>
+                  </span>
+                </label>
+
+                <label>
+                  <input type="checkbox" id="invitationShowQr" checked />
+                  <span>
+                    <strong>Show join QR</strong>
+                    <small>Guests enter SnapUp with one scan</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+          </form>
+
+          <section class="invitation-preview-workspace">
+            <div class="invitation-preview-head">
+              <div>
+                <span>Live preview</span>
+                <strong id="invitationPreviewFormat">
+                  Mini Card · 1080 × 1350
+                </strong>
+              </div>
+              <span class="invitation-auto-badge">Auto-filled from event</span>
+            </div>
+
+            <div class="invitation-canvas-stage">
+              <div class="invitation-canvas-shell">
+                <canvas
+                  id="invitationPreviewCanvas"
+                  width="1080"
+                  height="1350"
+                  aria-label="Invitation preview"
+                ></canvas>
+              </div>
+            </div>
+
+            <p
+              class="invitation-studio-status"
+              id="invitationStudioStatus"
+              aria-live="polite"
+            ></p>
+
+            <div class="invitation-studio-actions">
+              <button
+                type="button"
+                class="invitation-save-button"
+                id="invitationSaveButton"
+              >
+                Save Draft
+              </button>
+              <button
+                type="button"
+                class="invitation-download-button secondary"
+                id="invitationDownloadPng"
+              >
+                Download PNG
+              </button>
+              <button
+                type="button"
+                class="invitation-download-button"
+                id="invitationDownloadPdf"
+              >
+                Download PDF
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <div
+        class="invitation-delete-confirm"
+        id="invitationDeleteConfirm"
+        aria-hidden="true"
+      >
+        <button
+          type="button"
+          class="invitation-delete-confirm-backdrop"
+          id="invitationDeleteConfirmBackdrop"
+          aria-label="Cancel"
+          tabindex="-1"
+        ></button>
+
+        <section
+          class="invitation-delete-confirm-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="invitationDeleteConfirmTitle"
+          aria-describedby="invitationDeleteConfirmDescription"
+        >
+          <div class="invitation-delete-confirm-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7h16"></path>
+              <path d="M9 7V4h6v3"></path>
+              <path d="m7 7 1 13h8l1-13"></path>
+              <path d="M10 11v5M14 11v5"></path>
+            </svg>
+          </div>
+
+          <span class="invitation-delete-confirm-kicker">
+            Invitation safety
+          </span>
+          <h3 id="invitationDeleteConfirmTitle">Delete invitation?</h3>
+          <p id="invitationDeleteConfirmDescription">
+            You are about to permanently delete this saved invitation:
+            <strong id="invitationDeleteConfirmName"></strong>
+          </p>
+
+          <div class="invitation-delete-confirm-warning">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3 2.8 20h18.4L12 3Z"></path>
+              <path d="M12 9v5"></path>
+              <circle cx="12" cy="17" r="0.8"></circle>
+            </svg>
+            <span>
+              This action cannot be undone. Downloaded PNG and PDF files on
+              your device will not be affected.
+            </span>
+          </div>
+
+          <div class="invitation-delete-confirm-actions">
+            <button
+              type="button"
+              class="invitation-delete-confirm-cancel"
+              id="invitationDeleteConfirmCancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="invitation-delete-confirm-submit"
+              id="invitationDeleteConfirmSubmit"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16"></path>
+                <path d="M9 7V4h6v3"></path>
+                <path d="m7 7 1 13h8l1-13"></path>
+              </svg>
+              Delete invitation
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div
+      class="event-cover-editor-overlay"
+      id="eventCoverEditor"
+      aria-hidden="true"
+    >
+      <section
+        class="event-cover-editor-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eventCoverEditorTitle"
+        aria-describedby="eventCoverEditorDescription"
+      >
+        <button
+          type="button"
+          class="event-cover-editor-close"
+          id="eventCoverEditorClose"
+          aria-label="Close photo editor"
+        >
+          ×
+        </button>
+
+        <div class="event-cover-editor-head">
+          <span>EVENT PHOTO</span>
+          <h2 id="eventCoverEditorTitle">Position your event photo</h2>
+          <p id="eventCoverEditorDescription">
+            Drag the photo and use zoom to choose what guests will see in the
+            event card.
+          </p>
+        </div>
+
+        <div
+          class="event-cover-editor-stage"
+          id="eventCoverEditorStage"
+          tabindex="0"
+          aria-label="Drag to reposition"
+        >
+          <img id="eventCoverEditorImage" alt="" />
+          <span class="event-cover-editor-grid" aria-hidden="true"></span>
+          <small class="event-cover-editor-hint">Drag to reposition</small>
+        </div>
+
+        <div class="event-cover-editor-controls">
+          <label for="eventCoverEditorZoom">
+            <span>Zoom</span>
+            <input
+              type="range"
+              id="eventCoverEditorZoom"
+              min="1"
+              max="3"
+              step="0.01"
+              value="1"
+            />
+          </label>
+
+          <button type="button" id="eventCoverEditorReset">Reset</button>
+        </div>
+
+        <p
+          class="event-cover-editor-status"
+          id="eventCoverEditorStatus"
+          aria-live="polite"
+        ></p>
+
+        <div class="event-cover-editor-actions">
+          <button
+            type="button"
+            class="event-cover-editor-cancel"
+            id="eventCoverEditorCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="event-cover-editor-save"
+            id="eventCoverEditorSave"
+            disabled
+          >
+            Save Photo
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div
+      class="event-cover-remove-overlay"
+      id="eventCoverRemoveModal"
+      aria-hidden="true"
+    >
+      <section
+        class="event-cover-remove-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eventCoverRemoveTitle"
+        aria-describedby="eventCoverRemoveDescription"
+      >
+        <button
+          type="button"
+          class="event-cover-remove-close"
+          id="eventCoverRemoveClose"
+          aria-label="Close remove photo dialog"
+        >
+          ×
+        </button>
+
+        <span class="event-cover-remove-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7h16"></path>
+            <path d="M9 7V4h6v3"></path>
+            <path d="m7 7 1 13h8l1-13"></path>
+          </svg>
+        </span>
+
+        <span class="event-cover-remove-kicker">EVENT PHOTO</span>
+        <h2 id="eventCoverRemoveTitle">Remove event photo?</h2>
+        <p id="eventCoverRemoveDescription">
+          The event will stay active. Only its current cover photo will be
+          removed.
+        </p>
+        <strong
+          class="event-cover-remove-name"
+          id="eventCoverRemoveEventName"
+        ></strong>
+
+        <p
+          class="event-cover-remove-status"
+          id="eventCoverRemoveStatus"
+          aria-live="polite"
+        ></p>
+
+        <div class="event-cover-remove-actions">
+          <button
+            type="button"
+            class="event-cover-remove-cancel"
+            id="eventCoverRemoveCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="event-cover-remove-confirm"
+            id="eventCoverRemoveConfirm"
+          >
+            Remove Photo
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div
+      class="event-cover-toast"
+      id="eventCoverToast"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
 
     <div
       class="memory-book-modal"
@@ -560,9 +1583,13 @@
 
     <script src="js/vendor/pdfmake.min.js?v=browser-memory-book-2"></script>
     <script src="js/vendor/vfs_fonts.js?v=browser-memory-book-2"></script>
+    <script src="js/vendor/qrcode-generator.js?v=invitation-studio-3"></script>
+    <script
+      src="js/vendor/qrcode-generator-utf8.js?v=invitation-studio-3"
+    ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=browser-memory-book-2"
+      src="js/event-detail.js?v=event-cover-remove-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

@@ -1,4 +1,5 @@
 const supabase = require("../config/supabaseClient");
+const cloudinary = require("../config/cloudinary");
 const {
   MemoryBookPdfError,
   buildEventMemoryBookPdf,
@@ -82,9 +83,82 @@ async function getPacketLevelId(packageName) {
   return data.packet_level_id;
 }
 
+function uploadEventCover(fileBuffer, eventCode) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "snapup-events/event-covers",
+        public_id: `${eventCode.toLowerCase()}-${Date.now()}`,
+        resource_type: "image",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(result);
+      },
+    );
+
+    stream.end(fileBuffer);
+  });
+}
+
+async function deleteEventCover(publicId) {
+  if (!publicId) {
+    return;
+  }
+
+  try {
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: "image",
+      invalidate: true,
+    });
+  } catch (error) {
+    console.error("Event cover cleanup failed:", error.message);
+  }
+}
+
+function getCloudinaryPublicId(mediaUrl) {
+  if (!mediaUrl || !mediaUrl.includes("/upload/")) {
+    return null;
+  }
+
+  try {
+    const url = new URL(mediaUrl);
+    const afterUpload = url.pathname.split("/upload/")[1];
+
+    if (!afterUpload) {
+      return null;
+    }
+
+    const withoutVersion = afterUpload.replace(/^v\d+\//, "");
+    return decodeURIComponent(withoutVersion.replace(/\.[^/.]+$/, ""));
+  } catch (error) {
+    return null;
+  }
+}
+
 const createEvent = async (req, res) => {
+  let uploadedCoverPublicId = null;
+  let createdEventId = null;
+
   try {
     const userId = req.user.user_id;
+    let requestBody = req.body || {};
+
+    if (typeof requestBody.payload === "string") {
+      try {
+        requestBody = JSON.parse(requestBody.payload);
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: "Event bilgileri geçersiz.",
+          code: "INVALID_EVENT_PAYLOAD",
+        });
+      }
+    }
 
     const {
       eventName,
@@ -97,7 +171,7 @@ const createEvent = async (req, res) => {
       eventPackage,
       packageName,
       settings,
-    } = req.body;
+    } = requestBody;
 
     const finalEventName = event_name || eventName;
 
@@ -113,6 +187,16 @@ const createEvent = async (req, res) => {
 
     const eventCode = await generateUniqueEventCode();
     const qrCodeUrl = createQrCodeUrl(eventCode);
+    let eventCoverUrl = null;
+
+    if (req.file) {
+      const uploadedCover = await uploadEventCover(
+        req.file.buffer,
+        eventCode,
+      );
+      uploadedCoverPublicId = uploadedCover.public_id;
+      eventCoverUrl = uploadedCover.secure_url;
+    }
 
     const { data: newEvent, error: eventError } = await supabase
       .from("event")
@@ -127,17 +211,21 @@ const createEvent = async (req, res) => {
           event_finish_time: event_finish_time || null,
           event_code: eventCode,
           qr_code_url: qrCodeUrl,
+          event_cover_url: eventCoverUrl,
           description: description || null,
           is_event_active: true,
           is_event_private: true,
         },
       ])
       .select(
-        "event_id, event_name, event_location, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description",
+        "event_id, event_name, event_location, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .single();
 
     if (eventError) {
+      await deleteEventCover(uploadedCoverPublicId);
+      uploadedCoverPublicId = null;
+
       return res.status(500).json({
         success: false,
         message: "Event oluşturulurken hata oluştu.",
@@ -145,6 +233,7 @@ const createEvent = async (req, res) => {
       });
     }
 
+    createdEventId = newEvent.event_id;
     const eventSettings = settings || {};
 
     const { error: settingsError } = await supabase
@@ -164,6 +253,11 @@ const createEvent = async (req, res) => {
       ]);
 
     if (settingsError) {
+      await supabase.from("event").delete().eq("event_id", newEvent.event_id);
+      await deleteEventCover(uploadedCoverPublicId);
+      uploadedCoverPublicId = null;
+      createdEventId = null;
+
       return res.status(500).json({
         success: false,
         message: "Event ayarları oluşturulurken hata oluştu.",
@@ -177,6 +271,12 @@ const createEvent = async (req, res) => {
       event: newEvent,
     });
   } catch (error) {
+    if (createdEventId) {
+      await supabase.from("event").delete().eq("event_id", createdEventId);
+    }
+
+    await deleteEventCover(uploadedCoverPublicId);
+
     return res.status(500).json({
       success: false,
       message: "Sunucu hatası.",
@@ -329,6 +429,179 @@ const getEventDetail = async (req, res) => {
   }
 };
 
+const updateEventCover = async (req, res) => {
+  let uploadedCoverPublicId = null;
+
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID zorunludur.",
+        code: "EVENT_ID_REQUIRED",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Yeni etkinlik fotoğrafı zorunludur.",
+        code: "EVENT_COVER_REQUIRED",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select("event_id, event_code, event_cover_url, user_id")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event kontrol edilirken hata oluştu.",
+        error: eventError.message,
+      });
+    }
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event bulunamadı veya fotoğrafı değiştirme yetkin yok.",
+        code: "EVENT_NOT_FOUND_OR_FORBIDDEN",
+      });
+    }
+
+    const uploadedCover = await uploadEventCover(
+      req.file.buffer,
+      event.event_code,
+    );
+    uploadedCoverPublicId = uploadedCover.public_id;
+
+    const { data: updatedEvent, error: updateError } = await supabase
+      .from("event")
+      .update({ event_cover_url: uploadedCover.secure_url })
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .select("event_id, event_code, event_cover_url")
+      .single();
+
+    if (updateError || !updatedEvent) {
+      await deleteEventCover(uploadedCoverPublicId);
+      uploadedCoverPublicId = null;
+
+      return res.status(500).json({
+        success: false,
+        message: "Etkinlik fotoğrafı güncellenemedi.",
+        error: updateError?.message || "Güncellenen event alınamadı.",
+      });
+    }
+
+    uploadedCoverPublicId = null;
+    await deleteEventCover(getCloudinaryPublicId(event.event_cover_url));
+
+    return res.status(200).json({
+      success: true,
+      message: "Etkinlik fotoğrafı başarıyla güncellendi.",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    await deleteEventCover(uploadedCoverPublicId);
+
+    return res.status(500).json({
+      success: false,
+      message: "Etkinlik fotoğrafı güncellenemedi.",
+      error: error.message,
+    });
+  }
+};
+
+const removeEventCover = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID zorunludur.",
+        code: "EVENT_ID_REQUIRED",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select("event_id, event_code, event_cover_url, user_id")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event kontrol edilirken hata oluştu.",
+        error: eventError.message,
+      });
+    }
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event bulunamadı veya fotoğrafı kaldırma yetkin yok.",
+        code: "EVENT_NOT_FOUND_OR_FORBIDDEN",
+      });
+    }
+
+    if (!event.event_cover_url) {
+      return res.status(200).json({
+        success: true,
+        message: "Etkinlikte kaldırılacak bir fotoğraf bulunmuyor.",
+        event: {
+          event_id: event.event_id,
+          event_code: event.event_code,
+          event_cover_url: null,
+        },
+      });
+    }
+
+    const previousCoverPublicId = getCloudinaryPublicId(
+      event.event_cover_url,
+    );
+    const { data: updatedEvent, error: updateError } = await supabase
+      .from("event")
+      .update({ event_cover_url: null })
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .select("event_id, event_code, event_cover_url")
+      .single();
+
+    if (updateError || !updatedEvent) {
+      return res.status(500).json({
+        success: false,
+        message: "Etkinlik fotoğrafı kaldırılamadı.",
+        error: updateError?.message || "Güncellenen event alınamadı.",
+      });
+    }
+
+    await deleteEventCover(previousCoverPublicId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Etkinlik fotoğrafı başarıyla kaldırıldı.",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Etkinlik fotoğrafı kaldırılamadı.",
+      error: error.message,
+    });
+  }
+};
+
 const updateEventSettings = async (req, res) => {
   try {
     const userId = req.user.user_id;
@@ -417,7 +690,7 @@ const deleteEvent = async (req, res) => {
 
     const { data: event, error: eventError } = await supabase
       .from("event")
-      .select("event_id, user_id")
+      .select("event_id, user_id, event_cover_url")
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -450,6 +723,8 @@ const deleteEvent = async (req, res) => {
         error: deleteError.message,
       });
     }
+
+    await deleteEventCover(getCloudinaryPublicId(event.event_cover_url));
 
     return res.status(200).json({
       success: true,
@@ -1010,6 +1285,8 @@ module.exports = {
   createEvent,
   getEventByCode,
   getEventDetail,
+  updateEventCover,
+  removeEventCover,
   updateEventSettings,
   deleteEvent,
   getEventGuests,

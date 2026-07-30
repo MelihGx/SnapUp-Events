@@ -25,20 +25,20 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="css/theme.css?v=create-event-refresh-1" />
+    <link rel="stylesheet" href="css/theme.css?v=event-cover-2" />
     <link
       rel="stylesheet"
-      href="css/create-event-page.css?v=create-event-refresh-1"
+      href="css/create-event-page.css?v=event-cover-crop-1"
     />
     <link
       rel="stylesheet"
       href="css/i18n.css?v=mobile-controls-balanced-1"
     />
     <script
-      src="js/create-event-i18n.js?v=create-event-refresh-1"
+      src="js/create-event-i18n.js?v=event-cover-crop-1"
       defer
     ></script>
-    <script src="js/i18n.js?v=create-event-refresh-1" defer></script>
+    <script src="js/i18n.js?v=event-cover-2" defer></script>
   </head>
 
   <body class="create-event-page">
@@ -155,6 +155,61 @@
                 placeholder="Write a short description for your event..."
               ></textarea>
             </label>
+
+            <div class="event-cover-field">
+              <div class="event-cover-field__head">
+                <div>
+                  <strong>Event photo</strong>
+                  <small>
+                    Optionally choose a cover photo. It will appear only after
+                    guests verify the event code or scan its QR code.
+                  </small>
+                </div>
+                <span>Optional</span>
+              </div>
+
+              <label class="event-cover-picker" for="eventCoverInput">
+                <input
+                  class="event-cover-input"
+                  type="file"
+                  id="eventCoverInput"
+                  accept="image/jpeg,image/png,image/webp"
+                />
+
+                <img
+                  class="event-cover-preview"
+                  id="eventCoverPreview"
+                  alt=""
+                  hidden
+                />
+
+                <span
+                  class="event-cover-placeholder"
+                  id="eventCoverPlaceholder"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2l1.3-1.6h4.4L15.5 5h2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"
+                    ></path>
+                    <circle cx="12" cy="12" r="3.2"></circle>
+                  </svg>
+                  <b>Choose photo</b>
+                  <small>JPG, PNG or WEBP · Maximum 8 MB</small>
+                </span>
+              </label>
+
+              <div class="event-cover-actions">
+                <button type="button" id="eventCoverChoose">
+                  Choose photo
+                </button>
+                <button type="button" id="eventCoverAdjust" hidden>
+                  Adjust crop
+                </button>
+                <button type="button" id="eventCoverRemove" hidden>
+                  Remove photo
+                </button>
+              </div>
+            </div>
           </section>
 
           <section class="form-section" aria-labelledby="eventSettingsTitle">
@@ -398,6 +453,82 @@
       </section>
     </main>
 
+    <div
+      class="event-cover-crop-overlay"
+      id="eventCoverCropOverlay"
+      aria-hidden="true"
+    >
+      <div
+        class="event-cover-crop-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eventCoverCropTitle"
+        aria-describedby="eventCoverCropDescription"
+      >
+        <button
+          type="button"
+          class="event-cover-crop-close"
+          id="eventCoverCropClose"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+        <div class="event-cover-crop-head">
+          <span>Event photo</span>
+          <h2 id="eventCoverCropTitle">Position your event photo</h2>
+          <p id="eventCoverCropDescription">
+            Drag the photo and use zoom to choose what guests will see in the
+            event card.
+          </p>
+        </div>
+
+        <div
+          class="event-cover-crop-stage"
+          id="eventCoverCropStage"
+          tabindex="0"
+          aria-label="Drag to reposition"
+        >
+          <img id="eventCoverCropImage" alt="" draggable="false" />
+          <div class="event-cover-crop-grid" aria-hidden="true"></div>
+          <span class="event-cover-crop-hint">Drag to reposition</span>
+        </div>
+
+        <div class="event-cover-crop-controls">
+          <label for="eventCoverCropZoom">
+            <span>Zoom</span>
+            <input
+              type="range"
+              id="eventCoverCropZoom"
+              min="1"
+              max="3"
+              value="1"
+              step="0.01"
+            />
+          </label>
+
+          <button type="button" id="eventCoverCropReset">Reset</button>
+        </div>
+
+        <div class="event-cover-crop-actions">
+          <button
+            type="button"
+            class="event-cover-crop-cancel"
+            id="eventCoverCropCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="event-cover-crop-apply"
+            id="eventCoverCropApply"
+          >
+            Use photo
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="payment-popup-overlay" id="paymentPopup" aria-hidden="true">
       <div
         class="payment-popup"
@@ -560,7 +691,7 @@
 
     <script
       type="module"
-      src="js/create-event-page.js?v=runtime-api-2"
+      src="js/create-event-page.js?v=event-cover-crop-1"
     ></script>
     <script src="js/theme.js?v=create-event-refresh-1"></script>
   </body>

@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/main.css?v=logo-raster-lock-3" />
+    <link rel="stylesheet" href="css/main.css?v=all-media-success-popup-2" />
     <link rel="stylesheet" href="css/mobile-edge-fix.css?v=4" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
@@ -43,7 +43,7 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="css/theme.css?v=join-modal-backdrop-light-1" />
+    <link rel="stylesheet" href="css/theme.css?v=all-media-success-popup-2" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -886,8 +886,22 @@
           </div>
 
           <div class="join-event-preview" id="joinEventPreview" hidden>
-            <strong id="joinEventName">Event name</strong>
-            <span id="joinEventMeta">Event details</span>
+            <div class="join-event-cover" id="joinEventCover">
+              <img id="joinEventCoverImage" alt="" hidden />
+              <span id="joinEventCoverPlaceholder" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2l1.3-1.6h4.4L15.5 5h2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"
+                  ></path>
+                  <circle cx="12" cy="12" r="3.2"></circle>
+                </svg>
+              </span>
+            </div>
+
+            <div class="join-event-preview__details">
+              <strong id="joinEventName">Event name</strong>
+              <span id="joinEventMeta">Event details</span>
+            </div>
           </div>
 
           <div class="join-media-type">
@@ -939,6 +953,45 @@
       </div>
     </div>
 
+    <div
+      class="join-upload-success"
+      id="joinUploadSuccess"
+      aria-hidden="true"
+      hidden
+    >
+      <div
+        class="join-upload-success__backdrop"
+        data-upload-success-finish
+      ></div>
+
+      <section
+        class="join-upload-success__card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="joinUploadSuccessTitle"
+        aria-describedby="joinUploadSuccessMessage"
+      >
+        <div class="join-upload-success__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="m14.5 24.5 6.2 6.2 13.4-14.1"></path>
+          </svg>
+        </div>
+
+        <span class="join-upload-success__brand">SnapUp Events</span>
+        <h2 id="joinUploadSuccessTitle">Uploaded!</h2>
+        <p id="joinUploadSuccessMessage"></p>
+
+        <button
+          type="button"
+          class="join-upload-success__button"
+          id="joinUploadSuccessButton"
+          data-upload-success-finish
+        >
+          Continue
+        </button>
+      </section>
+    </div>
+
     <script>
       (() => {
         const steps = [...document.querySelectorAll("[data-flow-step]")];
@@ -963,7 +1016,7 @@
         });
       })();
     </script>
-    <script type="module" src="js/main.js?v=runtime-api-2"></script>
+    <script type="module" src="js/main.js?v=all-media-success-popup-2"></script>
       <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>
