@@ -1134,6 +1134,38 @@ html[data-theme="dark"] .pricing .btn-glass:hover {
   border-color: rgba(167, 139, 250, 0.4);
 }
 
+/* "Every event" remains a deliberate dark brand band in both themes. */
+html[data-theme="dark"] .event-types {
+  color: #ffffff;
+  background: #121016;
+  background-image: none;
+}
+
+html[data-theme="dark"] .event-types__intro h2,
+html[data-theme="dark"] .event-type-card h3 {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .event-types__summary p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme="dark"] .event-type-card {
+  border-color: rgba(255, 255, 255, 0.11);
+  background: #1d1922;
+  background-image: none;
+}
+
+html[data-theme="dark"] .event-type-card:hover {
+  border-color: color-mix(in srgb, var(--event-accent) 46%, transparent);
+  background: #24202a;
+}
+
+html[data-theme="dark"] .event-types__cta {
+  color: #17122b;
+  background: #fff8ed;
+}
+
 /*
  * Keep the live-gallery preview colorful in dark mode without the bright,
  * disconnected neon blocks used by the light theme.

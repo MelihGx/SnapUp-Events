@@ -3277,6 +3277,339 @@ body.join-upload-open {
 }
 
 /* =========================================================
+   SnapUp Events — Every Event Type
+   ========================================================= */
+
+.event-types {
+  position: relative;
+  padding: 112px 0;
+  overflow: hidden;
+  color: #ffffff;
+  background: #17122b;
+}
+
+.event-types::before,
+.event-types::after {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  content: "";
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.event-types::before {
+  top: -250px;
+  right: -90px;
+  box-shadow:
+    0 0 0 68px rgba(255, 255, 255, 0.018),
+    0 0 0 136px rgba(255, 255, 255, 0.014);
+}
+
+.event-types::after {
+  bottom: -310px;
+  left: -170px;
+  box-shadow:
+    0 0 0 82px rgba(255, 255, 255, 0.016),
+    0 0 0 164px rgba(255, 255, 255, 0.012);
+}
+
+.event-types .container {
+  position: relative;
+  z-index: 1;
+}
+
+.event-types__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.72fr);
+  gap: clamp(46px, 8vw, 112px);
+  align-items: end;
+}
+
+.event-types .section-kicker {
+  color: #75eadc;
+}
+
+.event-types__intro h2 {
+  max-width: 740px;
+  margin: 18px 0 0;
+  color: #ffffff;
+  font-size: clamp(42px, 5.2vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -0.058em;
+}
+
+.event-types__summary {
+  padding-bottom: 4px;
+}
+
+.event-types__summary p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+
+.event-types__cta {
+  width: fit-content;
+  min-height: 52px;
+  margin-top: 27px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: #17122b;
+  background: #fff8ed;
+  font-size: 14px;
+  font-weight: 950;
+  box-shadow: 0 14px 34px rgba(4, 2, 14, 0.25);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.event-types__cta span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.event-types__cta:hover,
+.event-types__cta:focus-visible {
+  color: #17122b;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(4, 2, 14, 0.34);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.event-types__grid {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.event-type-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 238px;
+  overflow: hidden;
+  padding: 27px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  background: #201a29;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    transform 0.24s var(--ease),
+    border-color 0.24s ease;
+}
+
+.event-type-card::before,
+.event-type-card::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.event-type-card::before {
+  background-image: var(--event-art);
+  background-position: center;
+  background-size: cover;
+  opacity: 0.72;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s var(--ease);
+  transform: scale(1.015);
+}
+
+.event-type-card::after {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(23, 18, 31, 0.94) 0%,
+      rgba(23, 18, 31, 0.72) 43%,
+      rgba(23, 18, 31, 0.18) 78%,
+      rgba(23, 18, 31, 0.04) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(18, 14, 25, 0.72) 0%,
+      rgba(18, 14, 25, 0.06) 66%,
+      transparent 100%
+    );
+}
+
+.event-type-card--wedding {
+  --event-art: url("../assets/event-types/weddings-abstract.webp");
+}
+
+.event-type-card--birthday {
+  --event-art: url("../assets/event-types/birthdays-abstract.webp");
+}
+
+.event-type-card--graduation {
+  --event-art: url("../assets/event-types/graduations-abstract.webp");
+}
+
+.event-type-card--corporate {
+  --event-art: url("../assets/event-types/corporate-abstract.webp");
+}
+
+.event-type-card--travel {
+  --event-art: url("../assets/event-types/trips-abstract.webp");
+}
+
+.event-type-card--community {
+  --event-art: url("../assets/event-types/communities-abstract.webp");
+}
+
+.event-type-card:hover {
+  border-color: color-mix(in srgb, var(--event-accent) 46%, transparent);
+  transform: translateY(-6px);
+}
+
+.event-type-card:hover::before {
+  opacity: 0.9;
+  transform: scale(1.055);
+}
+
+.event-type-card__icon {
+  position: relative;
+  z-index: 1;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--event-accent) 38%, transparent);
+  border-radius: 18px;
+  color: var(--event-accent);
+  background: color-mix(in srgb, var(--event-accent) 11%, transparent);
+}
+
+.event-type-card__icon svg {
+  width: 29px;
+  height: 29px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.event-type-card h3 {
+  position: relative;
+  z-index: 1;
+  max-width: 260px;
+  margin: 38px 0 0;
+  color: #ffffff;
+  font-size: clamp(23px, 2.1vw, 30px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.event-type-card__signal {
+  position: absolute;
+  z-index: 1;
+  top: 30px;
+  right: 30px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--event-accent);
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--event-accent) 12%, transparent);
+}
+
+@media (max-width: 1050px) {
+  .event-types__intro {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .event-types__summary {
+    max-width: 720px;
+  }
+
+  .event-types__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .event-types {
+    padding: 82px 0;
+  }
+
+  .event-types::before {
+    right: -280px;
+  }
+
+  .event-types::after {
+    left: -300px;
+  }
+
+  .event-types__intro h2 {
+    font-size: clamp(39px, 12vw, 54px);
+  }
+
+  .event-types__summary p {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .event-types__cta {
+    width: 100%;
+    min-height: 56px;
+    padding-inline: 16px;
+    text-align: center;
+  }
+
+  .event-types__grid {
+    margin-top: 42px;
+    grid-template-columns: 1fr;
+  }
+
+  .event-type-card {
+    min-height: 184px;
+    padding: 23px;
+    border-radius: 24px;
+  }
+
+  .event-type-card__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .event-type-card__icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .event-type-card h3 {
+    max-width: calc(100% - 50px);
+    margin-top: 31px;
+    font-size: 25px;
+  }
+
+  .event-type-card__signal {
+    top: 26px;
+    right: 26px;
+  }
+}
+
+/* =========================================================
    SnapUp Events — Homepage Pricing Section
    ========================================================= */
 
