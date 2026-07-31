@@ -33,6 +33,29 @@ const confirmNewPassword = document.getElementById("confirmNewPassword");
 const passwordSaveButton = document.getElementById("passwordSaveButton");
 const passwordResult = document.getElementById("passwordResult");
 
+
+const deleteAccountOpenButton = document.getElementById(
+  "deleteAccountOpenButton",
+);
+const deleteAccountModal = document.getElementById("deleteAccountModal");
+const deleteAccountCloseButton = document.getElementById(
+  "deleteAccountCloseButton",
+);
+const deleteAccountCancelButton = document.getElementById(
+  "deleteAccountCancelButton",
+);
+const deleteAccountForm = document.getElementById("deleteAccountForm");
+const deleteAccountPassword = document.getElementById(
+  "deleteAccountPassword",
+);
+const deleteAccountConfirmation = document.getElementById(
+  "deleteAccountConfirmation",
+);
+const deleteAccountConfirmButton = document.getElementById(
+  "deleteAccountConfirmButton",
+);
+const deleteAccountResult = document.getElementById("deleteAccountResult");
+
 const API_BASE_URL = API_URL;
 
 const localeByLanguage = {
@@ -79,6 +102,59 @@ function setResult(element, message = "", state = "") {
 
 if (!token) {
   window.location.replace("login.html");
+}
+
+
+
+let deleteAccountRequestPending = false;
+let deleteAccountLastFocusedElement = null;
+
+function setDeleteAccountResult(message = "", state = "") {
+  deleteAccountResult.textContent = message ? t(message) : "";
+
+  if (state) {
+    deleteAccountResult.dataset.state = state;
+  } else {
+    delete deleteAccountResult.dataset.state;
+  }
+}
+
+function updateDeleteAccountButtonState() {
+  const hasPassword = deleteAccountPassword.value.trim().length > 0;
+  const hasConfirmation =
+    deleteAccountConfirmation.value.trim().toUpperCase() === "DELETE";
+
+  deleteAccountConfirmButton.disabled =
+    deleteAccountRequestPending || !hasPassword || !hasConfirmation;
+}
+
+function openDeleteAccountModal() {
+  deleteAccountLastFocusedElement = document.activeElement;
+  deleteAccountForm.reset();
+  setDeleteAccountResult();
+  deleteAccountRequestPending = false;
+  updateDeleteAccountButtonState();
+
+  deleteAccountModal.classList.add("is-open");
+  deleteAccountModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("account-modal-open");
+
+  window.setTimeout(() => deleteAccountPassword.focus(), 60);
+}
+
+function closeDeleteAccountModal() {
+  if (deleteAccountRequestPending) {
+    return;
+  }
+
+  deleteAccountModal.classList.remove("is-open");
+  deleteAccountModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("account-modal-open");
+  deleteAccountForm.reset();
+  setDeleteAccountResult();
+  updateDeleteAccountButtonState();
+
+  deleteAccountLastFocusedElement?.focus?.();
 }
 
 function getAuthHeaders() {
@@ -534,6 +610,118 @@ passwordForm.addEventListener("submit", async (event) => {
   } finally {
     passwordSaveButton.disabled = false;
     passwordSaveButton.textContent = t("Change password");
+  }
+});
+
+
+deleteAccountOpenButton.addEventListener("click", openDeleteAccountModal);
+deleteAccountCloseButton.addEventListener("click", closeDeleteAccountModal);
+deleteAccountCancelButton.addEventListener("click", closeDeleteAccountModal);
+
+deleteAccountModal
+  .querySelector("[data-delete-account-close]")
+  .addEventListener("click", closeDeleteAccountModal);
+
+[deleteAccountPassword, deleteAccountConfirmation].forEach((input) => {
+  input.addEventListener("input", () => {
+    if (input === deleteAccountConfirmation) {
+      input.value = input.value.toUpperCase();
+    }
+
+    setDeleteAccountResult();
+    updateDeleteAccountButtonState();
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && deleteAccountModal.classList.contains("is-open")) {
+    closeDeleteAccountModal();
+  }
+});
+
+deleteAccountForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const current_password = deleteAccountPassword.value;
+  const confirmation = deleteAccountConfirmation.value.trim().toUpperCase();
+
+  setDeleteAccountResult();
+
+  if (!current_password.trim()) {
+    setDeleteAccountResult("Current password is required.", "error");
+    deleteAccountPassword.focus();
+    return;
+  }
+
+  if (confirmation !== "DELETE") {
+    setDeleteAccountResult("Type DELETE to confirm account deletion.", "error");
+    deleteAccountConfirmation.focus();
+    return;
+  }
+
+  try {
+    deleteAccountRequestPending = true;
+    updateDeleteAccountButtonState();
+    deleteAccountCloseButton.disabled = true;
+    deleteAccountCancelButton.disabled = true;
+    deleteAccountConfirmButton.textContent = t("Deleting account...");
+    setDeleteAccountResult(
+      "Deleting your account and connected content...",
+      "loading",
+    );
+
+    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        current_password,
+        confirmation,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      if (response.status === 401 && data.code !== "INVALID_PASSWORD") {
+        logout();
+        return;
+      }
+
+      setDeleteAccountResult(
+        data.code === "INVALID_PASSWORD"
+          ? "Current password is incorrect."
+          : data.message || "Account could not be deleted.",
+        "error",
+      );
+      return;
+    }
+
+    localStorage.removeItem("snapup_token");
+    localStorage.removeItem("snapup_user");
+    sessionStorage.removeItem("snapup_after_login");
+
+    setDeleteAccountResult(
+      "Your account was deleted successfully. Redirecting...",
+      "success",
+    );
+    deleteAccountConfirmButton.textContent = t("Account deleted");
+
+    window.setTimeout(() => {
+      window.location.replace("index.html");
+    }, 1400);
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    setDeleteAccountResult("Backend connection error.", "error");
+  } finally {
+    if (localStorage.getItem("snapup_token")) {
+      deleteAccountRequestPending = false;
+      deleteAccountCloseButton.disabled = false;
+      deleteAccountCancelButton.disabled = false;
+      deleteAccountConfirmButton.textContent = t(
+        "Delete account permanently",
+      );
+      updateDeleteAccountButtonState();
+    }
   }
 });
 
