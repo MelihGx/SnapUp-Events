@@ -381,6 +381,7 @@ const getEventByCode = async (req, res) => {
         "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .eq("event_code", eventCode.toUpperCase())
+      .eq("is_event_active", true)
       .maybeSingle();
 
     if (error) {
@@ -496,7 +497,10 @@ const getEventDetail = async (req, res) => {
     return res.status(200).json({
       success: true,
       event,
-      settings: settings || null,
+      settings: {
+        ...(settings || {}),
+        is_event_active: event.is_event_active !== false,
+      },
       media: media || [],
     });
   } catch (error) {
@@ -785,6 +789,7 @@ const updateEventSettings = async (req, res) => {
       allow_likes,
       require_approval,
       allow_gallery_view,
+      is_event_active,
       max_storage_per_guest,
       max_upload_per_guest,
     } = req.body;
@@ -808,6 +813,22 @@ const updateEventSettings = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Event bulunamadı veya bu evente erişim yetkin yok.",
+      });
+    }
+
+    const nextActiveState = is_event_active !== false;
+
+    const { error: activeStateError } = await supabase
+      .from("event")
+      .update({ is_event_active: nextActiveState })
+      .eq("event_id", eventId)
+      .eq("user_id", userId);
+
+    if (activeStateError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event aktiflik durumu güncellenemedi.",
+        error: activeStateError.message,
       });
     }
 
@@ -843,7 +864,10 @@ const updateEventSettings = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Event ayarları güncellendi.",
-      settings: updatedSettings,
+      settings: {
+        ...updatedSettings,
+        is_event_active: nextActiveState,
+      },
     });
   } catch (error) {
     return res.status(500).json({

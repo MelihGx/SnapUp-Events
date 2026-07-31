@@ -212,6 +212,7 @@ const eventDeleteSuccessButton = document.getElementById(
   "eventDeleteSuccessButton",
 );
 
+const settingEventActive = document.getElementById("settingEventActive");
 const settingAllowUpload = document.getElementById("settingAllowUpload");
 const settingOnlyUsers = document.getElementById("settingOnlyUsers");
 const settingAllowComments = document.getElementById("settingAllowComments");
@@ -1008,6 +1009,7 @@ function fillSettingsForm(settings) {
   }
 
   if (!settings) {
+    settingEventActive.checked = true;
     settingAllowUpload.checked = true;
     settingOnlyUsers.checked = false;
     settingAllowComments.checked = true;
@@ -1019,6 +1021,7 @@ function fillSettingsForm(settings) {
     return;
   }
 
+  settingEventActive.checked = settings.is_event_active !== false;
   settingAllowUpload.checked = Boolean(settings.allow_upload);
   settingOnlyUsers.checked = Boolean(settings.only_users);
   settingAllowComments.checked = Boolean(settings.allow_comments);
@@ -1044,6 +1047,10 @@ function renderSettings(settings) {
   }
 
   const settingItems = [
+    {
+      label: "Event Active",
+      value: settings.is_event_active !== false,
+    },
     {
       label: "Allow Upload",
       value: settings.allow_upload,
@@ -2032,6 +2039,7 @@ function closeSettingsModal() {
 
 function getSettingsPayload() {
   return {
+    is_event_active: settingEventActive.checked,
     allow_upload: settingAllowUpload.checked,
     only_users: settingOnlyUsers.checked,
     allow_comments: settingAllowComments.checked,

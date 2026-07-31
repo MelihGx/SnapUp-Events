@@ -3719,3 +3719,17 @@ html[data-theme="dark"] body.event-detail-shell :is(
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Event active / inactive setting */
+.settings-switch-row-primary {
+  border-color: rgba(255, 90, 54, 0.28);
+  background: rgba(255, 90, 54, 0.07);
+}
+
+.settings-active-help {
+  margin: -6px 0 4px;
+  color: var(--muted, rgba(23, 18, 15, 0.62));
+  font-size: 13px;
+  line-height: 1.5;
+}
