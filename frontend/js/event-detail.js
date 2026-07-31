@@ -227,11 +227,27 @@ const settingMaxStorage = document.getElementById("settingMaxStorage");
 const settingMaxUpload = document.getElementById("settingMaxUpload");
 
 const guestNameInput = document.getElementById("guestName");
+const uploadTypeButtons = Array.from(
+  document.querySelectorAll("[data-upload-type]"),
+);
+const uploadTypePanels = Array.from(
+  document.querySelectorAll("[data-upload-panel]"),
+);
 const photoInput = document.getElementById("photoInput");
-const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
+const videoInput = document.getElementById("videoInput");
+const memoryMessageInput = document.getElementById("memoryMessageInput");
+const memoryMessageCount = document.getElementById("memoryMessageCount");
+const uploadMediaBtn = document.getElementById("uploadMediaBtn");
 const uploadMessage = document.getElementById("uploadMessage");
 const photoPreviewBox = document.getElementById("photoPreviewBox");
-const photoPreview = document.getElementById("photoPreview");
+const photoPreviewList = document.getElementById("photoPreviewList");
+const videoPreviewBox = document.getElementById("videoPreviewBox");
+const videoPreviewList = document.getElementById("videoPreviewList");
+const uploadSuccessPopup = document.getElementById("uploadSuccessPopup");
+const uploadSuccessBackdrop = document.getElementById("uploadSuccessBackdrop");
+const uploadSuccessTitle = document.getElementById("uploadSuccessTitle");
+const uploadSuccessText = document.getElementById("uploadSuccessText");
+const uploadSuccessClose = document.getElementById("uploadSuccessClose");
 
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("event_id");
@@ -262,7 +278,16 @@ let activeMediaFilter = "all";
 
 let allGuests = [];
 let guestSearchTerm = "";
+let activeUploadType = "photo";
+let queuedPhotoFiles = [];
+let queuedVideoFiles = [];
+let photoPreviewObjectUrls = [];
+let videoPreviewObjectUrls = [];
+let uploadSuccessLastFocusedElement = null;
 
+const MEDIA_UPLOAD_MAX_SIZE = 100 * 1024 * 1024;
+const PHOTO_UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const VIDEO_UPLOAD_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 const EVENT_COVER_MAX_SIZE = 8 * 1024 * 1024;
 const EVENT_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const EVENT_COVER_OUTPUT_WIDTH = 1296;
@@ -2104,6 +2129,289 @@ function setUploadMessage(message, type = "info") {
   uploadMessage.className = `upload-message ${type}`;
 }
 
+function openUploadSuccessPopup(title, message) {
+  if (!uploadSuccessPopup) {
+    return;
+  }
+
+  uploadSuccessLastFocusedElement = document.activeElement;
+
+  if (uploadSuccessTitle) {
+    uploadSuccessTitle.textContent = title;
+  }
+
+  if (uploadSuccessText) {
+    uploadSuccessText.textContent = message;
+  }
+
+  uploadSuccessPopup.classList.add("active");
+  uploadSuccessPopup.setAttribute("aria-hidden", "false");
+  document.body.classList.add("upload-success-open");
+  uploadSuccessClose?.focus();
+}
+
+function closeUploadSuccessPopup({ restoreFocus = true } = {}) {
+  if (!uploadSuccessPopup) {
+    return;
+  }
+
+  uploadSuccessPopup.classList.remove("active");
+  uploadSuccessPopup.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("upload-success-open");
+
+  if (restoreFocus && uploadSuccessLastFocusedElement instanceof HTMLElement) {
+    uploadSuccessLastFocusedElement.focus();
+  }
+
+  uploadSuccessLastFocusedElement = null;
+}
+
+function releaseUploadPreviewUrls(type) {
+  const urls = type === "video" ? videoPreviewObjectUrls : photoPreviewObjectUrls;
+
+  urls.forEach((url) => URL.revokeObjectURL(url));
+
+  if (type === "video") {
+    videoPreviewObjectUrls = [];
+  } else {
+    photoPreviewObjectUrls = [];
+  }
+}
+
+function getSelectedUploadFiles(type = activeUploadType) {
+  if (type === "video") {
+    return [...queuedVideoFiles];
+  }
+
+  if (type === "photo") {
+    return [...queuedPhotoFiles];
+  }
+
+  return [];
+}
+
+function getUploadFileKey(file) {
+  return [file.name, file.size, file.type, file.lastModified].join("::");
+}
+
+function appendUploadFiles(type, newFiles) {
+  const currentFiles = type === "video" ? queuedVideoFiles : queuedPhotoFiles;
+  const existingKeys = new Set(currentFiles.map(getUploadFileKey));
+  const uniqueNewFiles = newFiles.filter((file) => {
+    const key = getUploadFileKey(file);
+
+    if (existingKeys.has(key)) {
+      return false;
+    }
+
+    existingKeys.add(key);
+    return true;
+  });
+
+  if (type === "video") {
+    queuedVideoFiles = [...queuedVideoFiles, ...uniqueNewFiles];
+    return queuedVideoFiles;
+  }
+
+  queuedPhotoFiles = [...queuedPhotoFiles, ...uniqueNewFiles];
+  return queuedPhotoFiles;
+}
+
+function formatUploadFileSize(size) {
+  if (!Number.isFinite(size) || size <= 0) {
+    return "0 KB";
+  }
+
+  if (size >= 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  return `${Math.max(1, Math.round(size / 1024))} KB`;
+}
+
+function renderUploadPreviews(type, files) {
+  const isVideo = type === "video";
+  const previewBox = isVideo ? videoPreviewBox : photoPreviewBox;
+  const previewList = isVideo ? videoPreviewList : photoPreviewList;
+
+  releaseUploadPreviewUrls(type);
+
+  if (!previewList || !previewBox) {
+    return;
+  }
+
+  previewList.innerHTML = "";
+
+  if (files.length === 0) {
+    previewBox.classList.add("hidden");
+    return;
+  }
+
+  const objectUrls = [];
+
+  files.forEach((file, index) => {
+    const objectUrl = URL.createObjectURL(file);
+    objectUrls.push(objectUrl);
+
+    const item = document.createElement("article");
+    item.className = "upload-preview-item";
+
+    const mediaWrap = document.createElement("div");
+    mediaWrap.className = "upload-preview-media";
+
+    if (isVideo) {
+      const video = document.createElement("video");
+      video.src = objectUrl;
+      video.controls = true;
+      video.preload = "metadata";
+      video.setAttribute("playsinline", "");
+      mediaWrap.appendChild(video);
+    } else {
+      const image = document.createElement("img");
+      image.src = objectUrl;
+      image.alt = t("Selected photo {count}", { count: index + 1 });
+      mediaWrap.appendChild(image);
+    }
+
+    const details = document.createElement("div");
+    details.className = "upload-preview-details";
+
+    const name = document.createElement("strong");
+    name.textContent = file.name;
+    name.title = file.name;
+
+    const size = document.createElement("span");
+    size.textContent = formatUploadFileSize(file.size);
+
+    details.append(name, size);
+    item.append(mediaWrap, details);
+    previewList.appendChild(item);
+  });
+
+  if (isVideo) {
+    videoPreviewObjectUrls = objectUrls;
+  } else {
+    photoPreviewObjectUrls = objectUrls;
+  }
+
+  previewBox.classList.remove("hidden");
+}
+
+function updateMemoryMessageCount() {
+  if (!memoryMessageCount) {
+    return;
+  }
+
+  const currentLength = memoryMessageInput?.value.length || 0;
+  memoryMessageCount.textContent = `${currentLength} / 1000`;
+}
+
+function getUploadButtonLabel(type = activeUploadType) {
+  const selectedFileCount = getSelectedUploadFiles(type).length;
+
+  if (type === "video") {
+    return selectedFileCount > 1
+      ? t("Upload {count} Videos", { count: selectedFileCount })
+      : t("Upload Video");
+  }
+
+  if (type === "message") {
+    return t("Send Message");
+  }
+
+  return selectedFileCount > 1
+    ? t("Upload {count} Photos", { count: selectedFileCount })
+    : t("Upload Photo");
+}
+
+function setActiveUploadType(type) {
+  if (!["photo", "video", "message"].includes(type)) {
+    return;
+  }
+
+  activeUploadType = type;
+
+  uploadTypeButtons.forEach((button) => {
+    const isActive = button.dataset.uploadType === type;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  uploadTypePanels.forEach((panel) => {
+    const isActive = panel.dataset.uploadPanel === type;
+    panel.hidden = !isActive;
+    panel.classList.toggle("active", isActive);
+  });
+
+  if (uploadMediaBtn) {
+    uploadMediaBtn.textContent = getUploadButtonLabel(type);
+  }
+
+  setUploadMessage("", "info");
+}
+
+function resetUploadInput(type = activeUploadType) {
+  if (type === "photo") {
+    queuedPhotoFiles = [];
+    releaseUploadPreviewUrls("photo");
+
+    if (photoInput) {
+      photoInput.value = "";
+    }
+
+    if (photoPreviewList) {
+      photoPreviewList.innerHTML = "";
+    }
+
+    photoPreviewBox?.classList.add("hidden");
+    return;
+  }
+
+  if (type === "video") {
+    queuedVideoFiles = [];
+    releaseUploadPreviewUrls("video");
+
+    if (videoInput) {
+      videoInput.value = "";
+    }
+
+    if (videoPreviewList) {
+      videoPreviewList.querySelectorAll("video").forEach((video) => {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      });
+      videoPreviewList.innerHTML = "";
+    }
+
+    videoPreviewBox?.classList.add("hidden");
+    return;
+  }
+
+  if (memoryMessageInput) {
+    memoryMessageInput.value = "";
+  }
+
+  updateMemoryMessageCount();
+}
+
+function validateUploadFile(file, allowedTypes, invalidTypeMessage) {
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(invalidTypeMessage);
+  }
+
+  if (file.size > MEDIA_UPLOAD_MAX_SIZE) {
+    throw new Error("The selected file must be 100 MB or smaller.");
+  }
+}
+
+function validateUploadFiles(files, allowedTypes, invalidTypeMessage) {
+  files.forEach((file) => {
+    validateUploadFile(file, allowedTypes, invalidTypeMessage);
+  });
+}
+
 async function createGuestForUpload(guestName) {
   const response = await fetch(`${API_BASE_URL}/api/media/guests`, {
     method: "POST",
@@ -2130,7 +2438,7 @@ async function createGuestForUpload(guestName) {
   return data.guest;
 }
 
-async function uploadPhotoToEvent(guestId, file) {
+async function uploadFileToEvent(guestId, file) {
   const formData = new FormData();
 
   formData.append("media", file);
@@ -2145,7 +2453,66 @@ async function uploadPhotoToEvent(guestId, file) {
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(data.error || data.message || "Photo upload failed.");
+    throw new Error(data.error || data.message || "Media upload failed.");
+  }
+
+  return data.media;
+}
+
+async function uploadFilesToEvent(guestId, files) {
+  const failures = [];
+  let uploaded = 0;
+
+  for (let index = 0; index < files.length; index += 1) {
+    const file = files[index];
+    const current = index + 1;
+
+    if (uploadMediaBtn) {
+      uploadMediaBtn.textContent = t("Uploading {current} / {total}", {
+        current,
+        total: files.length,
+      });
+    }
+
+    setUploadMessage(
+      t("Uploading file {current} of {total}...", {
+        current,
+        total: files.length,
+      }),
+      "info",
+    );
+
+    try {
+      await uploadFileToEvent(guestId, file);
+      uploaded += 1;
+    } catch (error) {
+      failures.push({ file, error });
+    }
+  }
+
+  return { uploaded, failures };
+}
+
+async function sendMessageToEvent(guestId, message) {
+  const response = await fetch(`${API_BASE_URL}/api/media/message`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      event_id: eventId,
+      guest_id: guestId,
+      message,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (response.status === 401) {
+    logout();
+    return null;
+  }
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || data.message || "Message could not be sent.");
   }
 
   return data.media;
@@ -2777,6 +3144,14 @@ if ("ResizeObserver" in window && eventCoverEditorStage) {
 }
 
 window.addEventListener("keydown", (event) => {
+  if (uploadSuccessPopup?.classList.contains("active")) {
+    if (event.key === "Escape" || event.key === "Enter") {
+      closeUploadSuccessPopup();
+    }
+
+    return;
+  }
+
   if (eventDeleteSuccessModal?.classList.contains("active")) {
     if (event.key === "Escape" || event.key === "Enter") {
       returnToAccountAfterDelete();
@@ -2834,55 +3209,128 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-window.addEventListener("beforeunload", releaseEventCoverEditorObjectUrl);
+window.addEventListener("beforeunload", () => {
+  releaseEventCoverEditorObjectUrl();
+  releaseUploadPreviewUrls("photo");
+  releaseUploadPreviewUrls("video");
+});
+
+uploadTypeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setActiveUploadType(button.dataset.uploadType || "photo");
+  });
+
+  button.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) {
+      return;
+    }
+
+    event.preventDefault();
+    const currentIndex = uploadTypeButtons.indexOf(button);
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const nextIndex =
+      (currentIndex + direction + uploadTypeButtons.length) %
+      uploadTypeButtons.length;
+    const nextButton = uploadTypeButtons[nextIndex];
+
+    setActiveUploadType(nextButton.dataset.uploadType || "photo");
+    nextButton.focus();
+  });
+});
 
 if (photoInput) {
   photoInput.addEventListener("change", () => {
-    const file = photoInput.files[0];
+    const newlySelectedFiles = Array.from(photoInput.files || []);
 
-    if (!file) {
-      if (photoPreviewBox) {
-        photoPreviewBox.classList.add("hidden");
-      }
-
+    if (newlySelectedFiles.length === 0) {
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-    if (!allowedTypes.includes(file.type)) {
-      setUploadMessage(
-        t("Only JPG, PNG and WEBP images are allowed."),
-        "error",
+    try {
+      validateUploadFiles(
+        newlySelectedFiles,
+        PHOTO_UPLOAD_TYPES,
+        "Only JPG, PNG and WEBP images are allowed.",
       );
+    } catch (error) {
       photoInput.value = "";
-
-      if (photoPreviewBox) {
-        photoPreviewBox.classList.add("hidden");
-      }
-
+      setUploadMessage(t(error.message), "error");
       return;
     }
 
-    const imageUrl = URL.createObjectURL(file);
+    const files = appendUploadFiles("photo", newlySelectedFiles);
+    photoInput.value = "";
 
-    if (photoPreview) {
-      photoPreview.src = imageUrl;
-    }
-
-    if (photoPreviewBox) {
-      photoPreviewBox.classList.remove("hidden");
-    }
-
-    setUploadMessage("", "info");
+    renderUploadPreviews("photo", files);
+    uploadMediaBtn.textContent = getUploadButtonLabel("photo");
+    setUploadMessage(
+      files.length === 1
+        ? t("1 photo selected. You can add more before uploading.")
+        : t("{count} photos selected. You can add more before uploading.", {
+            count: files.length,
+          }),
+      "info",
+    );
   });
 }
 
-if (uploadPhotoBtn) {
-  uploadPhotoBtn.addEventListener("click", async () => {
+if (videoInput) {
+  videoInput.addEventListener("change", () => {
+    const newlySelectedFiles = Array.from(videoInput.files || []);
+
+    if (newlySelectedFiles.length === 0) {
+      return;
+    }
+
+    try {
+      validateUploadFiles(
+        newlySelectedFiles,
+        VIDEO_UPLOAD_TYPES,
+        "Only MP4, WEBM and MOV videos are allowed.",
+      );
+    } catch (error) {
+      videoInput.value = "";
+      setUploadMessage(t(error.message), "error");
+      return;
+    }
+
+    const files = appendUploadFiles("video", newlySelectedFiles);
+    videoInput.value = "";
+
+    renderUploadPreviews("video", files);
+    uploadMediaBtn.textContent = getUploadButtonLabel("video");
+    setUploadMessage(
+      files.length === 1
+        ? t("1 video selected. You can add more before uploading.")
+        : t("{count} videos selected. You can add more before uploading.", {
+            count: files.length,
+          }),
+      "info",
+    );
+  });
+}
+
+memoryMessageInput?.addEventListener("input", () => {
+  updateMemoryMessageCount();
+  setUploadMessage("", "info");
+});
+
+uploadSuccessClose?.addEventListener("click", () => {
+  closeUploadSuccessPopup();
+});
+
+uploadSuccessBackdrop?.addEventListener("click", () => {
+  closeUploadSuccessPopup();
+});
+
+if (uploadMediaBtn) {
+  uploadMediaBtn.addEventListener("click", async () => {
+    const selectedType = activeUploadType;
+
     try {
       const guestName = guestNameInput?.value.trim();
-      const file = photoInput?.files[0];
+      const selectedFiles = getSelectedUploadFiles(selectedType);
+      const message = memoryMessageInput?.value.trim() || "";
 
       if (!eventId) {
         setUploadMessage(t("Event ID not found in URL."), "error");
@@ -2891,17 +3339,41 @@ if (uploadPhotoBtn) {
 
       if (!guestName) {
         setUploadMessage(t("Please enter your name."), "error");
+        guestNameInput?.focus();
         return;
       }
 
-      if (!file) {
-        setUploadMessage(t("Please choose a photo first."), "error");
+      if (selectedType === "photo" && selectedFiles.length === 0) {
+        setUploadMessage(t("Please choose at least one photo first."), "error");
+        photoInput?.focus();
         return;
       }
 
-      uploadPhotoBtn.disabled = true;
-      uploadPhotoBtn.textContent = t("Uploading...");
-      setUploadMessage(t("Uploading photo, please wait..."), "info");
+      if (selectedType === "video" && selectedFiles.length === 0) {
+        setUploadMessage(t("Please choose at least one video first."), "error");
+        videoInput?.focus();
+        return;
+      }
+
+      if (selectedType === "message" && !message) {
+        setUploadMessage(t("Please write a message first."), "error");
+        memoryMessageInput?.focus();
+        return;
+      }
+
+      uploadMediaBtn.disabled = true;
+      uploadMediaBtn.textContent = t(
+        selectedType === "message" ? "Sending..." : "Uploading...",
+      );
+
+      setUploadMessage(
+        t(
+          selectedType === "message"
+            ? "Sending message, please wait..."
+            : "Preparing selected files...",
+        ),
+        "info",
+      );
 
       const guest = await createGuestForUpload(guestName);
 
@@ -2909,18 +3381,54 @@ if (uploadPhotoBtn) {
         return;
       }
 
-      await uploadPhotoToEvent(guest.guest_id, file);
+      if (selectedType === "message") {
+        await sendMessageToEvent(guest.guest_id, message);
+        setUploadMessage(t("Message sent successfully!"), "success");
+        resetUploadInput("message");
+        openUploadSuccessPopup(
+          t("Message sent"),
+          t("Your message was added to the event successfully."),
+        );
+      } else {
+        const uploadResult = await uploadFilesToEvent(
+          guest.guest_id,
+          selectedFiles,
+        );
 
-      setUploadMessage(t("Photo uploaded successfully!"), "success");
+        if (uploadResult.uploaded === 0) {
+          throw uploadResult.failures[0]?.error || new Error("Media upload failed.");
+        }
 
-      photoInput.value = "";
+        const isPhoto = selectedType === "photo";
+        const allUploaded = uploadResult.failures.length === 0;
+        const successMessage = allUploaded
+          ? isPhoto
+            ? uploadResult.uploaded === 1
+              ? t("Photo uploaded successfully!")
+              : t("{count} photos uploaded successfully!", {
+                  count: uploadResult.uploaded,
+                })
+            : uploadResult.uploaded === 1
+              ? t("Video uploaded successfully!")
+              : t("{count} videos uploaded successfully!", {
+                  count: uploadResult.uploaded,
+                })
+          : t("{uploaded} of {total} files uploaded successfully.", {
+              uploaded: uploadResult.uploaded,
+              total: selectedFiles.length,
+            });
 
-      if (photoPreview) {
-        photoPreview.src = "";
-      }
-
-      if (photoPreviewBox) {
-        photoPreviewBox.classList.add("hidden");
+        setUploadMessage(successMessage, allUploaded ? "success" : "error");
+        resetUploadInput(selectedType);
+        openUploadSuccessPopup(
+          allUploaded ? t("Upload complete") : t("Upload partially completed"),
+          allUploaded
+            ? t("Your selected files were received successfully.")
+            : t("{uploaded} files were uploaded. {failed} files could not be uploaded.", {
+                uploaded: uploadResult.uploaded,
+                failed: uploadResult.failures.length,
+              }),
+        );
       }
 
       await loadEventDetail();
@@ -2931,11 +3439,14 @@ if (uploadPhotoBtn) {
         "error",
       );
     } finally {
-      uploadPhotoBtn.disabled = false;
-      uploadPhotoBtn.textContent = t("Upload Photo");
+      uploadMediaBtn.disabled = false;
+      uploadMediaBtn.textContent = getUploadButtonLabel(selectedType);
     }
   });
 }
+
+setActiveUploadType("photo");
+updateMemoryMessageCount();
 
 async function approveAllImages() {
   if (!eventId || !token || !approveAllImagesButton) {

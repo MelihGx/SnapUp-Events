@@ -14,6 +14,82 @@
       "Quick Upload": "Hızlı Yükleme",
       "Upload a photo to this event album from the dashboard.":
         "Kontrol panelinden bu etkinlik albümüne fotoğraf yükle.",
+      "Upload a photo, video or message to this event album from the dashboard.":
+        "Kontrol panelinden bu etkinlik albümüne fotoğraf, video veya mesaj ekle.",
+      "Memory type": "Anı türü",
+      Photo: "Fotoğraf",
+      "Choose photos": "Fotoğrafları seç",
+      "JPG, PNG or WEBP · Reopen the file picker to add more before uploading":
+        "JPG, PNG veya WEBP · Yüklemeden önce dosya seçiciyi tekrar açarak yeni dosyalar ekleyebilirsin",
+      "Choose videos": "Videoları seç",
+      "MP4, WEBM or MOV · Maximum 100 MB each · Reopen the file picker to add more":
+        "MP4, WEBM veya MOV · Her dosya en fazla 100 MB · Yeni dosyalar eklemek için dosya seçiciyi tekrar açabilirsin",
+      "Close upload confirmation": "Yükleme onayını kapat",
+      Completed: "Tamamlandı",
+      "Upload complete": "Yükleme tamamlandı",
+      "Upload partially completed": "Yükleme kısmen tamamlandı",
+      "Your files were received successfully.":
+        "Dosyaların başarıyla alındı.",
+      "Your selected files were received successfully.":
+        "Seçtiğin dosyalar başarıyla alındı.",
+      Done: "Tamam",
+      "Selected photo {count}": "Seçilen fotoğraf {count}",
+      "Upload {count} Photos": "{count} Fotoğraf Yükle",
+      "Upload {count} Videos": "{count} Video Yükle",
+      "1 photo selected.": "1 fotoğraf seçildi.",
+      "{count} photos selected.": "{count} fotoğraf seçildi.",
+      "1 video selected.": "1 video seçildi.",
+      "{count} videos selected.": "{count} video seçildi.",
+      "1 photo selected. You can add more before uploading.":
+        "1 fotoğraf seçildi. Yüklemeden önce daha fazla ekleyebilirsin.",
+      "{count} photos selected. You can add more before uploading.":
+        "{count} fotoğraf seçildi. Yüklemeden önce daha fazla ekleyebilirsin.",
+      "1 video selected. You can add more before uploading.":
+        "1 video seçildi. Yüklemeden önce daha fazla ekleyebilirsin.",
+      "{count} videos selected. You can add more before uploading.":
+        "{count} video seçildi. Yüklemeden önce daha fazla ekleyebilirsin.",
+      "Please choose at least one photo first.":
+        "Lütfen önce en az bir fotoğraf seçin.",
+      "Please choose at least one video first.":
+        "Lütfen önce en az bir video seçin.",
+      "Preparing selected files...": "Seçilen dosyalar hazırlanıyor...",
+      "Uploading {current} / {total}": "Yükleniyor {current} / {total}",
+      "Uploading file {current} of {total}...":
+        "{total} dosyadan {current}. dosya yükleniyor...",
+      "Message sent": "Mesaj gönderildi",
+      "Your message was added to the event successfully.":
+        "Mesajın etkinliğe başarıyla eklendi.",
+      "{count} photos uploaded successfully!":
+        "{count} fotoğraf başarıyla yüklendi!",
+      "{count} videos uploaded successfully!":
+        "{count} video başarıyla yüklendi!",
+      "{uploaded} of {total} files uploaded successfully.":
+        "{total} dosyadan {uploaded} tanesi başarıyla yüklendi.",
+      "{uploaded} files were uploaded. {failed} files could not be uploaded.":
+        "{uploaded} dosya yüklendi. {failed} dosya yüklenemedi.",
+      "Choose video": "Video seç",
+      "Write message": "Mesaj yaz",
+      "Write a memory, note or wish...": "Bir anı, not veya dilek yaz...",
+      "Maximum 1000 characters": "En fazla 1000 karakter",
+      "MP4, WEBM or MOV · Maximum 100 MB":
+        "MP4, WEBM veya MOV · En fazla 100 MB",
+      "Upload Video": "Video Yükle",
+      "Send Message": "Mesaj Gönder",
+      "Please choose a video first.": "Lütfen önce bir video seçin.",
+      "Please write a message first.": "Lütfen önce bir mesaj yazın.",
+      "Uploading video, please wait...":
+        "Video yükleniyor, lütfen bekleyin...",
+      "Sending message, please wait...":
+        "Mesaj gönderiliyor, lütfen bekleyin...",
+      "Video uploaded successfully!": "Video başarıyla yüklendi!",
+      "Message sent successfully!": "Mesaj başarıyla gönderildi!",
+      "Only MP4, WEBM and MOV videos are allowed.":
+        "Yalnızca MP4, WEBM ve MOV videolarına izin verilir.",
+      "The selected file must be 100 MB or smaller.":
+        "Seçilen dosya 100 MB veya daha küçük olmalıdır.",
+      "Media upload failed.": "Medya yüklenemedi.",
+      "Message could not be sent.": "Mesaj gönderilemedi.",
+      "Sending...": "Gönderiliyor...",
       "Enter your name": "Adını gir",
       "Selected photo preview": "Seçilen fotoğraf önizlemesi",
       "Event permissions": "Etkinlik izinleri",

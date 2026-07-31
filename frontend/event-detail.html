@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=location-map-2"
+      href="css/event-detail.css?v=quick-upload-queue-3"
     />
     <link
       rel="stylesheet"
@@ -47,7 +47,7 @@
       href="css/i18n.css?v=mobile-controls-balanced-1"
     />
     <script
-      src="js/event-detail-i18n.js?v=event-cover-remove-1"
+      src="js/event-detail-i18n.js?v=quick-upload-queue-3"
       defer
     ></script>
     <script
@@ -346,7 +346,10 @@
             <div class="upload-panel-header">
               <span class="upload-kicker">Quick Upload</span>
               <h2>Share your moment</h2>
-              <p>Upload a photo to this event album from the dashboard.</p>
+              <p>
+                Upload a photo, video or message to this event album from the
+                dashboard.
+              </p>
             </div>
 
             <div class="upload-form">
@@ -358,18 +361,132 @@
                 autocomplete="name"
               />
 
-              <label for="photoInput">Choose photo</label>
-              <input
-                type="file"
-                id="photoInput"
-                accept="image/jpeg,image/png,image/webp"
-              />
+              <div
+                class="upload-type-switch"
+                role="tablist"
+                aria-label="Memory type"
+              >
+                <button
+                  type="button"
+                  class="upload-type-button active"
+                  data-upload-type="photo"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="photoUploadPanel"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3.5" y="4" width="17" height="16" rx="3"></rect>
+                    <circle cx="9" cy="9" r="1.6"></circle>
+                    <path d="m5.5 17 4.2-4 3.1 2.8 2.4-2.2 3.3 3.4"></path>
+                  </svg>
+                  <span>Photo</span>
+                </button>
 
-              <div id="photoPreviewBox" class="photo-preview-box hidden">
-                <img id="photoPreview" alt="Selected photo preview" />
+                <button
+                  type="button"
+                  class="upload-type-button"
+                  data-upload-type="video"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="videoUploadPanel"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3.5" y="5" width="13" height="14" rx="3"></rect>
+                    <path d="m16.5 10 4-2.5v9l-4-2.5Z"></path>
+                  </svg>
+                  <span>Video</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="upload-type-button"
+                  data-upload-type="message"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="messageUploadPanel"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 3v-3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"></path>
+                    <path d="M7.5 9h9M7.5 13h6"></path>
+                  </svg>
+                  <span>Message</span>
+                </button>
               </div>
 
-              <button type="button" id="uploadPhotoBtn">Upload Photo</button>
+              <div
+                class="upload-type-panel active"
+                id="photoUploadPanel"
+                data-upload-panel="photo"
+                role="tabpanel"
+              >
+                <label for="photoInput">Choose photos</label>
+                <input
+                  type="file"
+                  id="photoInput"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                />
+                <small class="upload-file-helper">
+                  JPG, PNG or WEBP · Reopen the file picker to add more before uploading
+                </small>
+
+                <div id="photoPreviewBox" class="photo-preview-box hidden">
+                  <div
+                    id="photoPreviewList"
+                    class="upload-preview-grid"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                class="upload-type-panel"
+                id="videoUploadPanel"
+                data-upload-panel="video"
+                role="tabpanel"
+                hidden
+              >
+                <label for="videoInput">Choose videos</label>
+                <input
+                  type="file"
+                  id="videoInput"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  multiple
+                />
+                <small class="upload-file-helper">
+                  MP4, WEBM or MOV · Maximum 100 MB each · Reopen the file picker to add more
+                </small>
+
+                <div id="videoPreviewBox" class="video-preview-box hidden">
+                  <div
+                    id="videoPreviewList"
+                    class="upload-preview-grid upload-preview-grid-video"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                class="upload-type-panel"
+                id="messageUploadPanel"
+                data-upload-panel="message"
+                role="tabpanel"
+                hidden
+              >
+                <label for="memoryMessageInput">Write message</label>
+                <textarea
+                  id="memoryMessageInput"
+                  rows="5"
+                  maxlength="1000"
+                  placeholder="Write a memory, note or wish..."
+                ></textarea>
+                <div class="upload-message-counter" aria-live="polite">
+                  <span>Maximum 1000 characters</span>
+                  <strong id="memoryMessageCount">0 / 1000</strong>
+                </div>
+              </div>
+
+              <button type="button" id="uploadMediaBtn">Upload Photo</button>
 
               <p
                 id="uploadMessage"
@@ -1759,6 +1876,35 @@
       </div>
     </div>
 
+
+    <div
+      class="upload-success-overlay"
+      id="uploadSuccessPopup"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="uploadSuccessTitle"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="upload-success-backdrop"
+        id="uploadSuccessBackdrop"
+        aria-label="Close upload confirmation"
+      ></button>
+
+      <div class="upload-success-dialog" role="document">
+        <div class="upload-success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m6.5 12.5 3.4 3.4 7.8-8.1"></path>
+          </svg>
+        </div>
+        <span>Completed</span>
+        <h2 id="uploadSuccessTitle">Upload complete</h2>
+        <p id="uploadSuccessText">Your files were received successfully.</p>
+        <button type="button" id="uploadSuccessClose">Done</button>
+      </div>
+    </div>
+
     <script src="js/vendor/leaflet.js?v=1.9.4"></script>
     <script src="js/vendor/pdfmake.min.js?v=browser-memory-book-2"></script>
     <script src="js/vendor/vfs_fonts.js?v=browser-memory-book-2"></script>
@@ -1768,7 +1914,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=location-map-2"
+      src="js/event-detail.js?v=quick-upload-queue-3"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>
