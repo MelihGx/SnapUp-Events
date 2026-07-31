@@ -305,7 +305,13 @@ function accentStrips() {
 function createCoverPage(event, coverImageKey, photoCount, locale) {
   const eventName = shorten(event?.event_name || "Untitled Event", 70);
   const eventDate = formatDate(event?.event_date, locale, "A shared moment");
-  const location = shorten(event?.event_location || "", 46);
+  const location = shorten(
+    [event?.event_location, event?.event_address]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean)
+      .join(", "),
+    46,
+  );
   const eventCode = safeText(event?.event_code);
   const meta = [eventDate, location].filter(Boolean).join("  ·  ");
   const photoCard = coverImageKey

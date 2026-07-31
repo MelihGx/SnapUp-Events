@@ -1,6 +1,10 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
-import { createMemoryBookPdf } from "./memory-book-pdf.js?v=browser-memory-book-2";
-import { setInvitationStudioEvent } from "./invitation-studio.js?v=invitation-studio-7";
+import { createMemoryBookPdf } from "./memory-book-pdf.js?v=location-details-1";
+import { setInvitationStudioEvent } from "./invitation-studio.js?v=location-details-1";
+import {
+  buildEventMapUrl,
+  createLocationMapPicker,
+} from "./location-map-picker.js?v=location-map-2";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -107,6 +111,38 @@ const eventCode = document.getElementById("eventCode");
 const qrBox = document.getElementById("qrBox");
 
 const eventLocation = document.getElementById("eventLocation");
+const eventAddress = document.getElementById("eventAddress");
+const eventMapLink = document.getElementById("eventMapLink");
+const eventLocationEditButton = document.getElementById(
+  "eventLocationEditButton",
+);
+const locationEditorModal = document.getElementById("locationEditorModal");
+const locationEditorClose = document.getElementById("locationEditorClose");
+const locationEditorCancel = document.getElementById(
+  "locationEditorCancel",
+);
+const locationEditorForm = document.getElementById("locationEditorForm");
+const locationEditorVenue = document.getElementById("locationEditorVenue");
+const locationEditorAddress = document.getElementById(
+  "locationEditorAddress",
+);
+const locationEditorMap = document.getElementById("locationEditorMap");
+const locationEditorMapStatus = document.getElementById(
+  "locationEditorMapStatus",
+);
+const locationEditorMapClear = document.getElementById(
+  "locationEditorMapClear",
+);
+const locationEditorLatitude = document.getElementById(
+  "locationEditorLatitude",
+);
+const locationEditorLongitude = document.getElementById(
+  "locationEditorLongitude",
+);
+const locationEditorResult = document.getElementById(
+  "locationEditorResult",
+);
+const locationEditorSave = document.getElementById("locationEditorSave");
 const eventDate = document.getElementById("eventDate");
 const eventTime = document.getElementById("eventTime");
 const eventCreatedAt = document.getElementById("eventCreatedAt");
@@ -169,6 +205,12 @@ const settingsForm = document.getElementById("settingsForm");
 const settingsSaveButton = document.getElementById("settingsSaveButton");
 const settingsResult = document.getElementById("settingsResult");
 const deleteEventButton = document.getElementById("deleteEventButton");
+const eventDeleteSuccessModal = document.getElementById(
+  "eventDeleteSuccessModal",
+);
+const eventDeleteSuccessButton = document.getElementById(
+  "eventDeleteSuccessButton",
+);
 
 const settingAllowUpload = document.getElementById("settingAllowUpload");
 const settingOnlyUsers = document.getElementById("settingOnlyUsers");
@@ -208,6 +250,8 @@ let eventCoverEditorLastFocusedElement = null;
 let eventCoverEditorDrag = null;
 let eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
 let eventCoverRemoveLastFocusedElement = null;
+let locationEditorPicker = null;
+let locationEditorLastFocusedElement = null;
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -362,6 +406,22 @@ function getEventTimeText(event) {
   }
 
   return "-";
+}
+
+function getEventLocationParts(event) {
+  return {
+    venue: String(event?.event_location || "").trim(),
+    address: String(event?.event_address || "").trim(),
+  };
+}
+
+function getEventLocationText(event) {
+  const { venue, address } = getEventLocationParts(event);
+  return [venue, address].filter(Boolean).join(", ");
+}
+
+function getEventMapUrl(event) {
+  return buildEventMapUrl(event);
 }
 
 function getJoinUrl(event) {
@@ -838,7 +898,27 @@ function renderEventInfo(event) {
   eventCode.title = t("Copy Code");
   eventCode.setAttribute("aria-label", t("Copy Code"));
 
-  eventLocation.textContent = event.event_location || "-";
+  const { venue, address } = getEventLocationParts(event);
+  const mapUrl = getEventMapUrl(event);
+
+  eventLocation.textContent = venue || address || "-";
+  eventAddress.textContent = venue && address ? address : "";
+  eventAddress.hidden = !(venue && address);
+  eventMapLink.hidden = !mapUrl;
+
+  if (mapUrl) {
+    eventMapLink.href = mapUrl;
+    eventMapLink.title = t("Open event location in Maps");
+    eventMapLink.setAttribute(
+      "aria-label",
+      t("Open event location in Maps"),
+    );
+  } else {
+    eventMapLink.removeAttribute("href");
+    eventMapLink.removeAttribute("title");
+    eventMapLink.removeAttribute("aria-label");
+  }
+
   eventDate.textContent = formatDate(event.event_date);
   eventTime.textContent = getEventTimeText(event);
   eventCreatedAt.textContent = formatDateTime(event.event_created_at);
@@ -884,7 +964,7 @@ function updateMemoryBookPreview() {
   }
 
   const metaParts = [
-    currentEvent.event_location || "",
+    getEventLocationText(currentEvent),
     formatDate(currentEvent.event_date),
     currentEvent.event_code || "",
   ].filter(Boolean);
@@ -1815,6 +1895,117 @@ async function loadEventDetail() {
   }
 }
 
+function getLocationEditorPicker() {
+  if (locationEditorPicker) {
+    return locationEditorPicker;
+  }
+
+  locationEditorPicker = createLocationMapPicker({
+    mapElement: locationEditorMap,
+    latitudeInput: locationEditorLatitude,
+    longitudeInput: locationEditorLongitude,
+    addressInput: locationEditorAddress,
+    clearButton: locationEditorMapClear,
+    statusElement: locationEditorMapStatus,
+    translate: t,
+  });
+
+  return locationEditorPicker;
+}
+
+function setLocationEditorResult(message = "", state = "") {
+  if (!locationEditorResult) {
+    return;
+  }
+
+  locationEditorResult.textContent = message;
+
+  if (state) {
+    locationEditorResult.dataset.state = state;
+  } else {
+    delete locationEditorResult.dataset.state;
+  }
+}
+
+function openLocationEditor() {
+  if (!locationEditorModal || !currentEvent) {
+    return;
+  }
+
+  locationEditorLastFocusedElement = document.activeElement;
+  locationEditorVenue.value = currentEvent.event_location || "";
+  locationEditorAddress.value = currentEvent.event_address || "";
+  setLocationEditorResult();
+
+  locationEditorModal.classList.add("active");
+  locationEditorModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("location-editor-open");
+
+  const picker = getLocationEditorPicker();
+  picker?.resetAddressTracking();
+  picker?.setCoordinates(
+    currentEvent.event_latitude,
+    currentEvent.event_longitude,
+  );
+
+  requestAnimationFrame(() => {
+    picker?.resize();
+    locationEditorClose?.focus();
+  });
+}
+
+function closeLocationEditor({ restoreFocus = true } = {}) {
+  if (!locationEditorModal) {
+    return;
+  }
+
+  locationEditorModal.classList.remove("active");
+  locationEditorModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("location-editor-open");
+  setLocationEditorResult();
+
+  if (restoreFocus) {
+    locationEditorLastFocusedElement?.focus?.();
+  }
+}
+
+async function updateCurrentEventLocation(payload) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/events/detail/${eventId}/location`,
+    {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    },
+  );
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    logout();
+    return null;
+  }
+
+  if (!response.ok || !data.success || !data.event) {
+    const error = new Error("Location could not be updated.");
+    error.serverMessage = data.error || data.message || "";
+    throw error;
+  }
+
+  return data.event;
+}
+
+function openEventDeleteSuccessPopup() {
+  closeSettingsModal();
+  eventDeleteSuccessModal?.classList.add("active");
+  eventDeleteSuccessModal?.setAttribute("aria-hidden", "false");
+  document.body.classList.add("event-delete-success-open");
+  eventDeleteSuccessButton?.focus();
+}
+
+function returnToAccountAfterDelete() {
+  window.location.href = "account.html";
+}
+
 function openSettingsModal() {
   if (!settingsModal) {
     return;
@@ -1893,7 +2084,7 @@ async function deleteCurrentEvent() {
     throw new Error(data.message || "Event could not be deleted.");
   }
 
-  window.location.href = "account.html";
+  return true;
 }
 
 function setUploadMessage(message, type = "info") {
@@ -2107,6 +2298,68 @@ memoryBookCancel?.addEventListener("click", closeMemoryBook);
 memoryBookModalBackdrop?.addEventListener("click", closeMemoryBook);
 memoryBookDownload?.addEventListener("click", downloadMemoryBook);
 
+eventLocationEditButton?.addEventListener("click", openLocationEditor);
+
+locationEditorClose?.addEventListener("click", () => {
+  closeLocationEditor();
+});
+
+locationEditorCancel?.addEventListener("click", () => {
+  closeLocationEditor();
+});
+
+locationEditorModal?.addEventListener("click", (event) => {
+  if (event.target === locationEditorModal) {
+    closeLocationEditor();
+  }
+});
+
+locationEditorForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  try {
+    locationEditorSave.disabled = true;
+    locationEditorSave.textContent = t("Saving...");
+    setLocationEditorResult();
+
+    const updatedLocation = await updateCurrentEventLocation({
+      event_location: locationEditorVenue.value.trim() || null,
+      event_address: locationEditorAddress.value.trim() || null,
+      event_latitude: locationEditorLatitude.value
+        ? Number(locationEditorLatitude.value)
+        : null,
+      event_longitude: locationEditorLongitude.value
+        ? Number(locationEditorLongitude.value)
+        : null,
+    });
+
+    if (!updatedLocation) {
+      return;
+    }
+
+    currentEvent = { ...currentEvent, ...updatedLocation };
+    renderEventInfo(currentEvent);
+    setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
+    updateMemoryBookPreview();
+    closeLocationEditor({ restoreFocus: false });
+    showEventCoverToast(t("Location updated."));
+    eventLocationEditButton?.focus();
+  } catch (error) {
+    setLocationEditorResult(
+      t(error.message || "Location could not be updated."),
+      "error",
+    );
+  } finally {
+    locationEditorSave.disabled = false;
+    locationEditorSave.textContent = t("Save location");
+  }
+});
+
+eventDeleteSuccessButton?.addEventListener(
+  "click",
+  returnToAccountAfterDelete,
+);
+
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);
 }
@@ -2173,7 +2426,11 @@ if (deleteEventButton) {
         settingsResult.textContent = "";
       }
 
-      await deleteCurrentEvent();
+      const wasDeleted = await deleteCurrentEvent();
+
+      if (wasDeleted) {
+        openEventDeleteSuccessPopup();
+      }
     } catch (error) {
       deleteEventButton.disabled = false;
       deleteEventButton.innerHTML = `
@@ -2512,6 +2769,22 @@ if ("ResizeObserver" in window && eventCoverEditorStage) {
 }
 
 window.addEventListener("keydown", (event) => {
+  if (eventDeleteSuccessModal?.classList.contains("active")) {
+    if (event.key === "Escape" || event.key === "Enter") {
+      returnToAccountAfterDelete();
+    }
+
+    return;
+  }
+
+  if (locationEditorModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeLocationEditor();
+    }
+
+    return;
+  }
+
   if (eventCoverRemoveModal?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeEventCoverRemoveDialog();

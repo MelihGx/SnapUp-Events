@@ -766,6 +766,13 @@ function formatEventTime(event) {
   return start || "";
 }
 
+function formatEventLocation(event) {
+  return [event?.event_location, event?.event_address]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
 function formatRsvpDate(value) {
   if (!value) {
     return "";
@@ -1320,7 +1327,8 @@ function drawModernInvitation(context, width, height, values, coverImage) {
   ]
     .filter(Boolean)
     .join(" · ");
-  const locationText = eventData?.event_location || t("Location to be announced");
+  const locationText =
+    formatEventLocation(eventData) || t("Location to be announced");
 
   context.fillStyle = "#FFFFFF";
   context.font = `850 ${20 * unit}px Arial, sans-serif`;
@@ -1490,7 +1498,7 @@ function drawElegantInvitation(context, width, height, values, coverImage) {
   context.font = `400 ${17 * unit}px Georgia, serif`;
   const locationLines = wrapText(
     context,
-    eventData?.event_location || t("Location to be announced"),
+    formatEventLocation(eventData) || t("Location to be announced"),
     width - padding * 2,
   ).slice(0, 2);
   locationLines.forEach((line, index) => {
@@ -1671,7 +1679,7 @@ function drawJoyfulInvitation(context, width, height, values, coverImage) {
   context.font = `700 ${16 * unit}px Arial, sans-serif`;
   drawWrappedText(
     context,
-    eventData?.event_location || t("Location to be announced"),
+    formatEventLocation(eventData) || t("Location to be announced"),
     padding + 36 * unit,
     infoY + 30 * unit,
     width - padding * 2 - 72 * unit,
@@ -2460,7 +2468,7 @@ function drawInvitationCopy(
   context.font = `750 ${19 * unit}px Arial, sans-serif`;
   const locationLines = wrapText(
     context,
-    eventData?.event_location || t("Location to be announced"),
+    formatEventLocation(eventData) || t("Location to be announced"),
     contentWidth,
   ).slice(0, 2);
   locationLines.forEach((line, index) => {

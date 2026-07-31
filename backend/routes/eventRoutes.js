@@ -16,6 +16,7 @@ const {
   getEventDetail,
   updateEventCover,
   removeEventCover,
+  updateEventLocation,
   updateEventSettings,
   deleteEvent,
   getEventGuests,
@@ -111,6 +112,12 @@ router.delete(
   "/detail/:eventId/cover",
   authMiddleware,
   removeEventCover,
+);
+
+router.put(
+  "/detail/:eventId/location",
+  authMiddleware,
+  updateEventLocation,
 );
 
 router.put("/detail/:eventId/settings", authMiddleware, updateEventSettings);

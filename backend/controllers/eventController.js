@@ -6,6 +6,66 @@ const {
   createMemoryBookFileName,
 } = require("../services/eventMemoryBookPdf");
 
+function cleanOptionalText(value, maxLength) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const cleaned = value.trim();
+  return cleaned ? cleaned.slice(0, maxLength) : null;
+}
+
+function normalizeEventCoordinates(latitudeValue, longitudeValue) {
+  const latitudeMissing =
+    latitudeValue === null ||
+    latitudeValue === undefined ||
+    latitudeValue === "";
+  const longitudeMissing =
+    longitudeValue === null ||
+    longitudeValue === undefined ||
+    longitudeValue === "";
+
+  if (latitudeMissing && longitudeMissing) {
+    return {
+      latitude: null,
+      longitude: null,
+      error: null,
+    };
+  }
+
+  if (latitudeMissing || longitudeMissing) {
+    return {
+      latitude: null,
+      longitude: null,
+      error: "Harita konumu için enlem ve boylam birlikte gönderilmelidir.",
+    };
+  }
+
+  const latitude = Number(latitudeValue);
+  const longitude = Number(longitudeValue);
+
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return {
+      latitude: null,
+      longitude: null,
+      error: "Seçilen harita konumu geçersiz.",
+    };
+  }
+
+  return {
+    latitude: Number(latitude.toFixed(7)),
+    longitude: Number(longitude.toFixed(7)),
+    error: null,
+  };
+}
+
 function generateEventCode() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
@@ -164,6 +224,9 @@ const createEvent = async (req, res) => {
       eventName,
       event_name,
       event_location,
+      event_address,
+      event_latitude,
+      event_longitude,
       event_date,
       event_start_time,
       event_finish_time,
@@ -179,6 +242,19 @@ const createEvent = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Event adı zorunludur.",
+      });
+    }
+
+    const coordinates = normalizeEventCoordinates(
+      event_latitude,
+      event_longitude,
+    );
+
+    if (coordinates.error) {
+      return res.status(400).json({
+        success: false,
+        message: coordinates.error,
+        code: "INVALID_EVENT_COORDINATES",
       });
     }
 
@@ -203,7 +279,10 @@ const createEvent = async (req, res) => {
       .insert([
         {
           event_name: finalEventName.trim(),
-          event_location: event_location || null,
+          event_location: cleanOptionalText(event_location, 160),
+          event_address: cleanOptionalText(event_address, 500),
+          event_latitude: coordinates.latitude,
+          event_longitude: coordinates.longitude,
           user_id: userId,
           packet_level_id: packetLevelId,
           event_date: event_date || null,
@@ -218,7 +297,7 @@ const createEvent = async (req, res) => {
         },
       ])
       .select(
-        "event_id, event_name, event_location, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .single();
 
@@ -299,7 +378,7 @@ const getEventByCode = async (req, res) => {
     const { data: event, error } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .eq("event_code", eventCode.toUpperCase())
       .maybeSingle();
@@ -366,7 +445,7 @@ const getEventDetail = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, user_id",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, user_id",
       )
       .eq("event_id", eventId)
       .eq("user_id", userId)
@@ -597,6 +676,98 @@ const removeEventCover = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Etkinlik fotoğrafı kaldırılamadı.",
+      error: error.message,
+    });
+  }
+};
+
+const updateEventLocation = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+    const {
+      event_location,
+      event_address,
+      event_latitude,
+      event_longitude,
+    } = req.body || {};
+
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID zorunludur.",
+        code: "EVENT_ID_REQUIRED",
+      });
+    }
+
+    const coordinates = normalizeEventCoordinates(
+      event_latitude,
+      event_longitude,
+    );
+
+    if (coordinates.error) {
+      return res.status(400).json({
+        success: false,
+        message: coordinates.error,
+        code: "INVALID_EVENT_COORDINATES",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select("event_id, user_id")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event kontrol edilirken hata oluştu.",
+        error: eventError.message,
+      });
+    }
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event bulunamadı veya konumu değiştirme yetkin yok.",
+        code: "EVENT_NOT_FOUND_OR_FORBIDDEN",
+      });
+    }
+
+    const { data: updatedEvent, error: updateError } = await supabase
+      .from("event")
+      .update({
+        event_location: cleanOptionalText(event_location, 160),
+        event_address: cleanOptionalText(event_address, 500),
+        event_latitude: coordinates.latitude,
+        event_longitude: coordinates.longitude,
+      })
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .select(
+        "event_id, event_location, event_address, event_latitude, event_longitude",
+      )
+      .single();
+
+    if (updateError || !updatedEvent) {
+      return res.status(500).json({
+        success: false,
+        message: "Etkinlik konumu güncellenemedi.",
+        error: updateError?.message || "Güncellenen event alınamadı.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Etkinlik konumu başarıyla güncellendi.",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Etkinlik konumu güncellenemedi.",
       error: error.message,
     });
   }
@@ -881,6 +1052,9 @@ async function getPublicEventGallery(req, res) {
         event_id,
         event_name,
         event_location,
+        event_address,
+        event_latitude,
+        event_longitude,
         event_date,
         event_start_time,
         event_finish_time,
@@ -1146,6 +1320,9 @@ async function downloadEventMemoryBookV3(req, res) {
         event_id,
         event_name,
         event_location,
+        event_address,
+        event_latitude,
+        event_longitude,
         event_date,
         event_start_time,
         event_finish_time,
@@ -1209,6 +1386,9 @@ async function downloadPublicMemoryBook(req, res) {
         event_id,
         event_name,
         event_location,
+        event_address,
+        event_latitude,
+        event_longitude,
         event_date,
         event_start_time,
         event_finish_time,
@@ -1287,6 +1467,7 @@ module.exports = {
   getEventDetail,
   updateEventCover,
   removeEventCover,
+  updateEventLocation,
   updateEventSettings,
   deleteEvent,
   getEventGuests,

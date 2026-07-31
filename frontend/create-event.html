@@ -28,7 +28,15 @@
     <link rel="stylesheet" href="css/theme.css?v=event-cover-2" />
     <link
       rel="stylesheet"
-      href="css/create-event-page.css?v=event-cover-crop-1"
+      href="css/vendor/leaflet.css?v=1.9.4"
+    />
+    <link
+      rel="stylesheet"
+      href="css/location-map-picker.css?v=location-map-2"
+    />
+    <link
+      rel="stylesheet"
+      href="css/create-event-page.css?v=location-map-2"
     />
     <link
       rel="stylesheet"
@@ -38,7 +46,8 @@
       src="js/create-event-i18n.js?v=event-cover-crop-1"
       defer
     ></script>
-    <script src="js/i18n.js?v=event-cover-2" defer></script>
+    <script src="js/location-i18n.js?v=location-map-2" defer></script>
+    <script src="js/i18n.js?v=location-map-2" defer></script>
   </head>
 
   <body class="create-event-page">
@@ -120,15 +129,80 @@
               />
             </label>
 
-            <label>
-              <span>Location</span>
-              <input
-                type="text"
-                id="eventLocation"
-                placeholder="Example: Istanbul"
-                autocomplete="off"
-              />
-            </label>
+            <div class="location-field-group">
+              <div class="location-field-group__head">
+                <div>
+                  <strong>Event location</strong>
+                  <small>
+                    Add a venue and full address so guests can open it in Maps.
+                  </small>
+                </div>
+                <span>Optional</span>
+              </div>
+
+              <div class="location-fields">
+                <label>
+                  <span>Venue</span>
+                  <input
+                    type="text"
+                    id="eventLocation"
+                    maxlength="160"
+                    placeholder="Example: Bosphorus Garden"
+                    autocomplete="organization"
+                  />
+                </label>
+
+                <label>
+                  <span>Full address</span>
+                  <input
+                    type="text"
+                    id="eventAddress"
+                    maxlength="500"
+                    placeholder="Example: Ortaköy, Beşiktaş, Istanbul"
+                    autocomplete="street-address"
+                  />
+                </label>
+              </div>
+
+              <div class="location-map-picker">
+                <div class="location-map-picker__head">
+                  <div>
+                    <strong>Choose on map</strong>
+                    <small>
+                      Click the map or drag the pin to select the exact location.
+                    </small>
+                  </div>
+                </div>
+
+                <div
+                  class="location-map"
+                  id="createEventLocationMap"
+                  aria-label="Choose event location on map"
+                ></div>
+
+                <div class="location-map-picker__status-row">
+                  <span
+                    class="location-map-picker__status"
+                    id="createEventLocationStatus"
+                    data-state="empty"
+                    aria-live="polite"
+                  >
+                    No pin selected
+                  </span>
+                  <button
+                    type="button"
+                    class="location-map-picker__clear"
+                    id="createEventLocationClear"
+                    hidden
+                  >
+                    Clear pin
+                  </button>
+                </div>
+
+                <input type="hidden" id="eventLatitude" />
+                <input type="hidden" id="eventLongitude" />
+              </div>
+            </div>
 
             <div class="form-row">
               <label>
@@ -689,9 +763,10 @@
       </div>
     </div>
 
+    <script src="js/vendor/leaflet.js?v=1.9.4"></script>
     <script
       type="module"
-      src="js/create-event-page.js?v=event-cover-crop-1"
+      src="js/create-event-page.js?v=location-map-2"
     ></script>
     <script src="js/theme.js?v=create-event-refresh-1"></script>
   </body>

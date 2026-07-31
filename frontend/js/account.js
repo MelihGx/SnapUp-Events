@@ -201,7 +201,11 @@ function renderEvents(events) {
     .map((event) => {
       const eventId = encodeURIComponent(event.event_id);
       const eventName = event.event_name || t("Untitled Event");
-      const eventLocation = event.event_location || t("No location");
+      const eventLocation =
+        [event.event_location, event.event_address]
+          .map((value) => String(value || "").trim())
+          .filter(Boolean)
+          .join(", ") || t("No location");
       const eventDate = event.event_date
         ? formatDate(event.event_date)
         : t("No date");

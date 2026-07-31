@@ -7,7 +7,7 @@ import { initQRPreview } from "./qr-preview.js";
 import { initCopyCode } from "./copy-code.js";
 import { initUploadSimulation } from "./upload-simulation.js";
 import { testBackendConnection } from "./events-api.js";
-import { initJoinUploadModal } from "./join-upload-modal.js?v=all-media-success-popup-2";
+import { initJoinUploadModal } from "./join-upload-modal.js?v=location-map-2";
 
 function getStoredUser() {
   try {

@@ -1,4 +1,5 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import { createLocationMapPicker } from "./location-map-picker.js?v=location-map-2";
 
 const token = localStorage.getItem("snapup_token");
 
@@ -14,6 +15,18 @@ const shareQrButton = document.getElementById("shareQrButton");
 const eventDateInput = document.getElementById("eventDate");
 const eventStartTimeInput = document.getElementById("eventStartTime");
 const eventFinishTimeInput = document.getElementById("eventFinishTime");
+const eventLatitudeInput = document.getElementById("eventLatitude");
+const eventLongitudeInput = document.getElementById("eventLongitude");
+const eventAddressInput = document.getElementById("eventAddress");
+const createEventLocationMap = document.getElementById(
+  "createEventLocationMap",
+);
+const createEventLocationClear = document.getElementById(
+  "createEventLocationClear",
+);
+const createEventLocationStatus = document.getElementById(
+  "createEventLocationStatus",
+);
 const eventCoverInput = document.getElementById("eventCoverInput");
 const eventCoverPreview = document.getElementById("eventCoverPreview");
 const eventCoverPlaceholder = document.getElementById(
@@ -72,6 +85,16 @@ const EVENT_COVER_MAX_SIZE = 8 * 1024 * 1024;
 const EVENT_COVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const EVENT_COVER_OUTPUT_WIDTH = 1296;
 const EVENT_COVER_OUTPUT_HEIGHT = 1032;
+
+const eventLocationPicker = createLocationMapPicker({
+  mapElement: createEventLocationMap,
+  latitudeInput: eventLatitudeInput,
+  longitudeInput: eventLongitudeInput,
+  addressInput: eventAddressInput,
+  clearButton: createEventLocationClear,
+  statusElement: createEventLocationStatus,
+  translate: t,
+});
 
 if (!token) {
   sessionStorage.setItem("snapup_after_login", "create-event.html");
@@ -500,6 +523,14 @@ function buildEventPayload() {
     eventName: document.getElementById("eventName").value.trim(),
     event_location:
       document.getElementById("eventLocation").value.trim() || null,
+    event_address:
+      eventAddressInput.value.trim() || null,
+    event_latitude: eventLatitudeInput.value
+      ? Number(eventLatitudeInput.value)
+      : null,
+    event_longitude: eventLongitudeInput.value
+      ? Number(eventLongitudeInput.value)
+      : null,
     event_date: eventDateInput.value || null,
     event_start_time: formatTimeForDatabase(eventStartTimeInput.value),
     event_finish_time: formatTimeForDatabase(eventFinishTimeInput.value),

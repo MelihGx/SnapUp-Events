@@ -42,6 +42,8 @@ app.get("/api/health", (req, res) => {
     pdf_engine: "memory-book-v3",
     invitation_drafts: "v4-delete-popup-limit-3",
     event_cover: "v4-owner-change-remove-account-card",
+    location_details: "v2-map-pin-owner-edit",
+    event_delete_feedback: "v1-success-popup",
   });
 });
 

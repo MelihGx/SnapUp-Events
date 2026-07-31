@@ -454,6 +454,7 @@ html[data-theme="dark"] .form-section__head > span {
 
 .create-form-card > .form-section > label,
 .form-row > label,
+.location-fields > label,
 .payment-method-card label {
   display: grid;
   gap: 8px;
@@ -509,6 +510,72 @@ html[data-theme="dark"]
   color: var(--create-text);
   background: var(--create-field);
   border-color: var(--create-line);
+}
+
+.location-field-group {
+  display: grid;
+  gap: 14px;
+  padding: 17px;
+  background: var(--create-surface-raised);
+  border: 1px solid var(--create-line);
+  border-radius: 20px;
+}
+
+.location-field-group__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.location-field-group__head > div {
+  min-width: 0;
+}
+
+.location-field-group__head strong,
+.location-field-group__head small {
+  display: block;
+}
+
+.location-field-group__head strong {
+  color: var(--create-text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.location-field-group__head small {
+  max-width: 610px;
+  margin-top: 5px;
+  color: var(--create-text-faint);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.location-field-group__head > span {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  color: var(--create-purple);
+  background: rgba(124, 58, 237, 0.09);
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.location-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  gap: 13px;
+}
+
+.location-field-group .location-map-picker {
+  --location-map-accent: var(--create-purple);
+  --location-map-border: var(--create-line);
+  --location-map-muted: var(--create-text-faint);
+  padding-top: 2px;
 }
 
 .event-cover-field {
@@ -2203,8 +2270,13 @@ html[lang="ar"] .package-features li::before {
 
   .form-row,
   .form-row--two,
+  .location-fields,
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .location-field-group__head {
+    align-items: flex-start;
   }
 
   .setting-card--wide {

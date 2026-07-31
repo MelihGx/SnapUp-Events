@@ -28,7 +28,15 @@
     <link rel="stylesheet" href="css/theme.css?v=mobile-gallery-first-1" />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-cover-remove-1"
+      href="css/vendor/leaflet.css?v=1.9.4"
+    />
+    <link
+      rel="stylesheet"
+      href="css/location-map-picker.css?v=location-map-2"
+    />
+    <link
+      rel="stylesheet"
+      href="css/event-detail.css?v=location-map-2"
     />
     <link
       rel="stylesheet"
@@ -46,7 +54,8 @@
       src="js/invitation-studio-i18n.js?v=invitation-studio-8"
       defer
     ></script>
-    <script src="js/i18n.js?v=event-detail-refresh-1" defer></script>
+    <script src="js/location-i18n.js?v=location-map-2" defer></script>
+    <script src="js/i18n.js?v=location-map-2" defer></script>
   </head>
 
   <body class="event-detail-shell">
@@ -274,9 +283,36 @@
         </nav>
 
         <section class="detail-info-grid" id="eventInfoSection">
-          <div class="info-card">
-            <span>Location</span>
+          <div class="info-card info-card--location">
+            <span>Event location</span>
             <strong id="eventLocation">-</strong>
+            <small class="event-address" id="eventAddress" hidden></small>
+            <a
+              class="event-map-link"
+              id="eventMapLink"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 5h5v5"></path>
+                <path d="m19 5-8 8"></path>
+                <path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path>
+              </svg>
+              <span>Open in Maps</span>
+            </a>
+            <button
+              type="button"
+              class="event-location-edit-button"
+              id="eventLocationEditButton"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
+                <path d="m13.8 7.2 3 3"></path>
+              </svg>
+              <span>Change location</span>
+            </button>
           </div>
 
           <div class="info-card">
@@ -1434,6 +1470,120 @@
     </div>
 
     <div
+      class="location-editor-overlay"
+      id="locationEditorModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="locationEditorTitle"
+      aria-hidden="true"
+    >
+      <div class="location-editor-modal">
+        <button
+          type="button"
+          class="location-editor-close"
+          id="locationEditorClose"
+          aria-label="Close location editor"
+        >
+          ×
+        </button>
+
+        <div class="location-editor-head">
+          <span>Event location</span>
+          <h2 id="locationEditorTitle">Edit event location</h2>
+          <p>Update the venue, address or the map pin.</p>
+        </div>
+
+        <form class="location-editor-form" id="locationEditorForm">
+          <div class="location-editor-fields">
+            <label>
+              <span>Venue</span>
+              <input
+                type="text"
+                id="locationEditorVenue"
+                maxlength="160"
+                autocomplete="organization"
+                placeholder="Example: Bosphorus Garden"
+              />
+            </label>
+
+            <label>
+              <span>Full address</span>
+              <input
+                type="text"
+                id="locationEditorAddress"
+                maxlength="500"
+                autocomplete="street-address"
+                placeholder="Example: Ortaköy, Beşiktaş, Istanbul"
+              />
+            </label>
+          </div>
+
+          <div class="location-map-picker">
+            <div class="location-map-picker__head">
+              <div>
+                <strong>Choose on map</strong>
+                <small>
+                  Click the map or drag the pin to select the exact location.
+                </small>
+              </div>
+            </div>
+
+            <div
+              class="location-map"
+              id="locationEditorMap"
+              aria-label="Choose event location on map"
+            ></div>
+
+            <div class="location-map-picker__status-row">
+              <span
+                class="location-map-picker__status"
+                id="locationEditorMapStatus"
+                data-state="empty"
+                aria-live="polite"
+              >
+                No pin selected
+              </span>
+              <button
+                type="button"
+                class="location-map-picker__clear"
+                id="locationEditorMapClear"
+                hidden
+              >
+                Clear pin
+              </button>
+            </div>
+
+            <input type="hidden" id="locationEditorLatitude" />
+            <input type="hidden" id="locationEditorLongitude" />
+          </div>
+
+          <p
+            class="location-editor-result"
+            id="locationEditorResult"
+            aria-live="polite"
+          ></p>
+
+          <div class="location-editor-actions">
+            <button
+              type="button"
+              class="location-editor-cancel"
+              id="locationEditorCancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="location-editor-save"
+              id="locationEditorSave"
+            >
+              Save location
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
       class="gallery-lightbox"
       id="galleryLightbox"
       role="dialog"
@@ -1581,6 +1731,26 @@
       </div>
     </div>
 
+    <div
+      class="event-delete-success-overlay"
+      id="eventDeleteSuccessModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="eventDeleteSuccessTitle"
+      aria-hidden="true"
+    >
+      <div class="event-delete-success-modal">
+        <div class="event-delete-success-icon" aria-hidden="true">✓</div>
+        <span>Completed</span>
+        <h2 id="eventDeleteSuccessTitle">Event deleted</h2>
+        <p>The event was deleted successfully.</p>
+        <button type="button" id="eventDeleteSuccessButton">
+          Back to My Events
+        </button>
+      </div>
+    </div>
+
+    <script src="js/vendor/leaflet.js?v=1.9.4"></script>
     <script src="js/vendor/pdfmake.min.js?v=browser-memory-book-2"></script>
     <script src="js/vendor/vfs_fonts.js?v=browser-memory-book-2"></script>
     <script src="js/vendor/qrcode-generator.js?v=invitation-studio-3"></script>
@@ -1589,7 +1759,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-cover-remove-1"
+      src="js/event-detail.js?v=location-map-2"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

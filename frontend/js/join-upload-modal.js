@@ -1,4 +1,5 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 
 const API_BASE_URL = API_URL;
 
@@ -196,6 +197,17 @@ function getEventGalleryUrl(event) {
   galleryUrl.searchParams.set("code", event.event_code);
 
   return galleryUrl.toString();
+}
+
+function getEventLocationParts(event) {
+  return {
+    venue: String(event?.event_location || "").trim(),
+    address: String(event?.event_address || "").trim(),
+  };
+}
+
+function getEventMapUrl(event) {
+  return buildEventMapUrl(event);
 }
 
 function ensureGalleryButton(preview) {
@@ -408,6 +420,8 @@ function renderEventPreview(event) {
   const preview = document.getElementById("joinEventPreview");
   const name = document.getElementById("joinEventName");
   const meta = document.getElementById("joinEventMeta");
+  const addressElement = document.getElementById("joinEventAddress");
+  const mapLink = document.getElementById("joinEventMapLink");
   const cover = document.getElementById("joinEventCover");
   const coverImage = document.getElementById("joinEventCoverImage");
   const coverPlaceholder = document.getElementById(
@@ -418,6 +432,8 @@ function renderEventPreview(event) {
     !preview ||
     !name ||
     !meta ||
+    !addressElement ||
+    !mapLink ||
     !cover ||
     !coverImage ||
     !coverPlaceholder
@@ -431,6 +447,12 @@ function renderEventPreview(event) {
     preview.hidden = true;
     name.textContent = "";
     meta.textContent = "";
+    addressElement.textContent = "";
+    addressElement.hidden = true;
+    mapLink.hidden = true;
+    mapLink.removeAttribute("href");
+    mapLink.removeAttribute("title");
+    mapLink.removeAttribute("aria-label");
     cover.classList.remove("has-image");
     coverImage.hidden = true;
     coverImage.removeAttribute("src");
@@ -464,13 +486,31 @@ function renderEventPreview(event) {
     coverPlaceholder.hidden = false;
   }
 
+  const { venue, address } = getEventLocationParts(event);
+  const mapUrl = getEventMapUrl(event);
   const parts = [
-    event.event_location || "",
+    venue || address,
     formatDate(event.event_date),
     event.event_code || "",
   ].filter(Boolean);
 
   meta.textContent = parts.join(" · ");
+  addressElement.textContent = venue && address ? address : "";
+  addressElement.hidden = !(venue && address);
+  mapLink.hidden = !mapUrl;
+
+  if (mapUrl) {
+    mapLink.href = mapUrl;
+    mapLink.title = translate("Open event location in Maps");
+    mapLink.setAttribute(
+      "aria-label",
+      translate("Open event location in Maps"),
+    );
+  } else {
+    mapLink.removeAttribute("href");
+    mapLink.removeAttribute("title");
+    mapLink.removeAttribute("aria-label");
+  }
 
   if (event.allow_gallery_view === false) {
     galleryButton.hidden = true;

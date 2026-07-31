@@ -558,7 +558,9 @@ function drawCoverPage(doc, event, moments, coverBuffer) {
     });
 
   const date = formatEventDate(event.event_date);
-  const location = cleanText(event.event_location);
+  const location = cleanText(
+    [event.event_location, event.event_address].filter(Boolean).join(", "),
+  );
   const startTime = formatTime(event.event_start_time);
   const finishTime = formatTime(event.event_finish_time);
   const eventTime = [startTime, finishTime].filter(Boolean).join(" - ");

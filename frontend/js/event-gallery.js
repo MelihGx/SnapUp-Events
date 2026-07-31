@@ -157,8 +157,12 @@ function showContent() {
 function renderEvent(event) {
   galleryEventTitle.textContent = event.event_name || t("Untitled Event");
 
+  const locationText = [event.event_location, event.event_address]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(", ");
   const metaParts = [
-    event.event_location || "",
+    locationText,
     formatDate(event.event_date),
     event.event_code || "",
   ].filter(Boolean);
