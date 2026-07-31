@@ -78,7 +78,7 @@ function setResult(element, message = "", state = "") {
 }
 
 if (!token) {
-  window.location.href = "login.html";
+  window.location.replace("login.html");
 }
 
 function getAuthHeaders() {

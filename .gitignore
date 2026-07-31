@@ -1,13 +1,13 @@
+# Dependencies
 node_modules/
+
+# Environment files
 .env
 .env.local
 
-backend/node_modules/
-backend/.env
-backend/.env.local
-
-frontend/.env
-frontend/.env.local
-
+# System files
 .DS_Store
 Thumbs.db
+
+# ZIP archives
+*.zip

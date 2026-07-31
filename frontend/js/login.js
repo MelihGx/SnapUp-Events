@@ -1,4 +1,4 @@
-﻿import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
 
 const loginForm = document.getElementById("loginForm");
 
@@ -82,8 +82,17 @@ loginForm.addEventListener("submit", async (event) => {
 
     showLoginResult("Login successful. Redirecting...", "success");
 
+    const storedRedirect = sessionStorage.getItem("snapup_after_login");
+    const isSafeRedirect =
+      storedRedirect &&
+      !storedRedirect.startsWith("//") &&
+      !storedRedirect.includes(":") &&
+      /^[a-zA-Z0-9._/?=&%#-]+$/.test(storedRedirect);
+
+    sessionStorage.removeItem("snapup_after_login");
+
     setTimeout(() => {
-      window.location.href = "account.html";
+      window.location.replace(isSafeRedirect ? storedRedirect : "account.html");
     }, 800);
   } catch (error) {
     console.error("Login error:", error);

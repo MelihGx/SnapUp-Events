@@ -97,8 +97,9 @@ const eventLocationPicker = createLocationMapPicker({
 });
 
 if (!token) {
-  sessionStorage.setItem("snapup_after_login", "create-event.html");
-  window.location.href = "login.html";
+  const currentPage = `${window.location.pathname.split("/").pop() || "create-event.html"}${window.location.search}${window.location.hash}`;
+  sessionStorage.setItem("snapup_after_login", currentPage);
+  window.location.replace("login.html");
 }
 
 function t(key, replacements = {}) {

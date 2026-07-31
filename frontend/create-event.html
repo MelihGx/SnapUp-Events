@@ -13,6 +13,18 @@
 
     <script>
       (() => {
+        const token = localStorage.getItem("snapup_token");
+
+        if (!token) {
+          const currentPage = `${window.location.pathname.split("/").pop() || "create-event.html"}${window.location.search}${window.location.hash}`;
+          sessionStorage.setItem("snapup_after_login", currentPage);
+          window.location.replace("login.html");
+        }
+      })();
+    </script>
+
+    <script>
+      (() => {
         try {
           const savedTheme = localStorage.getItem("snapup_theme");
           document.documentElement.dataset.theme =

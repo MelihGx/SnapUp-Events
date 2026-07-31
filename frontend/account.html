@@ -13,6 +13,14 @@
 
     <script>
       (() => {
+        if (!localStorage.getItem("snapup_token")) {
+          window.location.replace("login.html");
+        }
+      })();
+    </script>
+
+    <script>
+      (() => {
         try {
           const savedTheme = localStorage.getItem("snapup_theme");
           document.documentElement.dataset.theme =
