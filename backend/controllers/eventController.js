@@ -1165,8 +1165,7 @@ async function getPublicEventGallery(req, res) {
       )
       .eq("event_id", event.event_id)
       .eq("media_status", "approved")
-      .eq("media_type", "image")
-      .not("media_url", "is", null)
+      .in("media_type", ["image", "video", "message"])
       .order("media_created_at", { ascending: false });
 
     if (mediaError) {
@@ -1177,7 +1176,17 @@ async function getPublicEventGallery(req, res) {
       });
     }
 
-    const mediaList = media || [];
+    const galleryItems = media || [];
+    const mediaList = galleryItems.filter(
+      (item) =>
+        ["image", "video"].includes(item.media_type) && Boolean(item.media_url),
+    );
+    const messageList = galleryItems.filter(
+      (item) =>
+        item.media_type === "message" &&
+        typeof item.message === "string" &&
+        item.message.trim() !== "",
+    );
     const mediaIds = mediaList.map((item) => item.media_id);
 
     let likes = [];
@@ -1227,6 +1236,7 @@ async function getPublicEventGallery(req, res) {
       },
       guests: guests || [],
       media: mediaWithLikes,
+      messages: messageList,
     });
   } catch (error) {
     return res.status(500).json({

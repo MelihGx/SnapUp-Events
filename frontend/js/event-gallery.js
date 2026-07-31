@@ -15,7 +15,7 @@ const galleryEventDescription = document.getElementById(
 );
 const guestCountTitle = document.getElementById("guestCountTitle");
 const participantList = document.getElementById("participantList");
-const photoCountBadge = document.getElementById("photoCountBadge");
+const memoryCountBadge = document.getElementById("memoryCountBadge");
 const approvedGalleryGrid = document.getElementById("approvedGalleryGrid");
 
 const publicLightbox = document.getElementById("publicLightbox");
@@ -219,7 +219,7 @@ function getLikeButtonHtml(item) {
 
   const likesCount = Number(item.likes_count || 0);
   const userLiked = Boolean(item.user_liked);
-  const label = userLiked ? t("Unlike this photo") : t("Like this photo");
+  const label = userLiked ? t("Unlike this memory") : t("Like this memory");
 
   return `
     <button
@@ -235,20 +235,250 @@ function getLikeButtonHtml(item) {
   `;
 }
 
-function renderApprovedPhotos(media) {
-  approvedPhotos = media || [];
-  photoCountBadge.textContent = t(
-    approvedPhotos.length === 1
-      ? `${approvedPhotos.length} photo`
-      : `${approvedPhotos.length} photos`,
+function getCreatedAtTime(item) {
+  const timestamp = new Date(item?.media_created_at || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function getMessageCardHtml(item) {
+  const guestName = item.guest_name || t("Unknown Guest");
+  const uploadedAt = item.media_created_at
+    ? formatDateTime(item.media_created_at)
+    : "";
+  const guestInitial =
+    guestName
+      .trim()
+      .charAt(0)
+      .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+
+  return `
+    <article class="approved-message-card approved-feed-message">
+      <div class="approved-message-quote" aria-hidden="true">“</div>
+      <p>${escapeHtml(item.message.trim())}</p>
+
+      <footer class="approved-message-author">
+        <span class="approved-message-avatar" aria-hidden="true">
+          ${escapeHtml(guestInitial)}
+        </span>
+        <span>
+          <strong>${escapeHtml(guestName)}</strong>
+          ${
+            uploadedAt
+              ? `<time datetime="${escapeHtml(
+                  item.media_created_at,
+                )}">${escapeHtml(uploadedAt)}</time>`
+              : ""
+          }
+        </span>
+      </footer>
+    </article>
+  `;
+}
+
+function getPhotoCardHtml(item, photoIndex) {
+  const guestName = item.guest_name || t("Unknown Guest");
+  const message = item.message || t("Approved photo");
+  const uploadedAt = item.media_created_at
+    ? formatDateTime(item.media_created_at)
+    : "";
+  const uploadedBy = t("Uploaded by {name}", { name: guestName });
+  const openLabel = t("Open approved photo uploaded by {name}", {
+    name: guestName,
+  });
+  const guestInitial =
+    guestName
+      .trim()
+      .charAt(0)
+      .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+
+  return `
+    <article class="approved-card">
+      <header class="approved-card-head">
+        <span class="approved-card-avatar" aria-hidden="true">
+          ${escapeHtml(guestInitial)}
+        </span>
+        <span class="approved-card-identity">
+          <strong>${escapeHtml(guestName)}</strong>
+          ${
+            uploadedAt
+              ? `<time datetime="${escapeHtml(
+                  item.media_created_at,
+                )}">${escapeHtml(uploadedAt)}</time>`
+              : ""
+          }
+        </span>
+      </header>
+
+      <button
+        type="button"
+        class="approved-media-button"
+        data-photo-index="${photoIndex}"
+        aria-label="${escapeHtml(openLabel)}"
+      >
+        <img
+          src="${escapeHtml(item.media_url)}"
+          alt="${escapeHtml(uploadedBy)}"
+          loading="lazy"
+          decoding="async"
+        />
+        <span class="approved-media-overlay" aria-hidden="true">
+          <span class="approved-overlay-author">
+            <i>${escapeHtml(guestInitial)}</i>
+            <span>
+              <strong>${escapeHtml(guestName)}</strong>
+              ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
+            </span>
+          </span>
+          <span class="approved-overlay-open">
+            <svg viewBox="0 0 24 24">
+              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+            </svg>
+          </span>
+        </span>
+      </button>
+
+      <div class="approved-card-body">
+        <div class="approved-card-actions">
+          ${getLikeButtonHtml(item)}
+          <button
+            type="button"
+            class="public-expand-button"
+            data-photo-index="${photoIndex}"
+            aria-label="${escapeHtml(openLabel)}"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+            </svg>
+          </button>
+        </div>
+
+        <p class="approved-card-caption">
+          <strong>${escapeHtml(guestName)}</strong>
+          <span>${escapeHtml(message)}</span>
+        </p>
+      </div>
+    </article>
+  `;
+}
+
+function getVideoCardHtml(item) {
+  const guestName = item.guest_name || t("Unknown Guest");
+  const message = item.message || t("Approved video");
+  const uploadedAt = item.media_created_at
+    ? formatDateTime(item.media_created_at)
+    : "";
+  const uploadedBy = t("Uploaded by {name}", { name: guestName });
+  const guestInitial =
+    guestName
+      .trim()
+      .charAt(0)
+      .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+
+  return `
+    <article class="approved-card approved-video-card">
+      <header class="approved-card-head approved-video-head">
+        <span class="approved-card-avatar" aria-hidden="true">
+          ${escapeHtml(guestInitial)}
+        </span>
+        <span class="approved-card-identity">
+          <strong>${escapeHtml(guestName)}</strong>
+          ${
+            uploadedAt
+              ? `<time datetime="${escapeHtml(
+                  item.media_created_at,
+                )}">${escapeHtml(uploadedAt)}</time>`
+              : ""
+          }
+        </span>
+      </header>
+
+      <div class="approved-video-frame">
+        <video
+          controls
+          playsinline
+          preload="metadata"
+          aria-label="${escapeHtml(t("Approved video uploaded by {name}", { name: guestName }))}"
+        >
+          <source src="${escapeHtml(item.media_url)}" />
+          ${escapeHtml(t("Your browser does not support video playback."))}
+        </video>
+
+        <span class="approved-video-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="m9 7 8 5-8 5Z"></path>
+          </svg>
+          ${escapeHtml(t("Video"))}
+        </span>
+      </div>
+
+      <div class="approved-card-body approved-video-body">
+        <div class="approved-card-actions approved-video-actions">
+          ${getLikeButtonHtml(item)}
+        </div>
+
+        <p class="approved-card-caption approved-video-caption">
+          <strong>${escapeHtml(guestName)}</strong>
+          <span>${escapeHtml(message)}</span>
+        </p>
+      </div>
+    </article>
+  `;
+}
+
+function renderApprovedFeed(media, messages) {
+  const approvedVisualMedia = (media || []).filter(
+    (item) =>
+      ["image", "video"].includes(item.media_type) && Boolean(item.media_url),
   );
 
-  if (approvedPhotos.length === 0) {
+  approvedPhotos = approvedVisualMedia.filter(
+    (item) => item.media_type === "image",
+  );
+
+  const photoIndexById = new Map(
+    approvedPhotos.map((item, index) => [String(item.media_id), index]),
+  );
+
+  const messageItems = [];
+  const seenMessageIds = new Set();
+
+  [...(messages || []), ...(media || [])]
+    .filter(
+      (item) =>
+        item.media_type === "message" &&
+        typeof item.message === "string" &&
+        item.message.trim() !== "",
+    )
+    .forEach((item) => {
+      const key = item.media_id
+        ? String(item.media_id)
+        : `${item.guest_id || "guest"}-${item.media_created_at || ""}-${item.message}`;
+
+      if (!seenMessageIds.has(key)) {
+        seenMessageIds.add(key);
+        messageItems.push(item);
+      }
+    });
+
+  const approvedFeed = [
+    ...approvedVisualMedia.map((item) => ({
+      ...item,
+      feed_type: item.media_type,
+    })),
+    ...messageItems.map((item) => ({ ...item, feed_type: "message" })),
+  ].sort((a, b) => getCreatedAtTime(b) - getCreatedAtTime(a));
+
+  memoryCountBadge.textContent = t(
+    approvedFeed.length === 1 ? "{count} memory" : "{count} memories",
+    { count: approvedFeed.length },
+  );
+
+  if (approvedFeed.length === 0) {
     approvedGalleryGrid.innerHTML = `
       <div class="empty-box">
         ${escapeHtml(
           t(
-            "No approved photos yet. Photos will appear here after admin approval.",
+            "No approved memories yet. Photos, videos and messages will appear here after admin approval.",
           ),
         )}
       </div>
@@ -256,91 +486,20 @@ function renderApprovedPhotos(media) {
     return;
   }
 
-  approvedGalleryGrid.innerHTML = approvedPhotos
-    .map((item, index) => {
-      const guestName = item.guest_name || t("Unknown Guest");
-      const message = item.message || t("Approved photo");
-      const uploadedAt = item.media_created_at
-        ? formatDateTime(item.media_created_at)
-        : "";
-      const uploadedBy = t("Uploaded by {name}", { name: guestName });
-      const openLabel = t("Open approved photo uploaded by {name}", {
-        name: guestName,
-      });
-      const guestInitial =
-        guestName
-          .trim()
-          .charAt(0)
-          .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+  approvedGalleryGrid.innerHTML = approvedFeed
+    .map((item) => {
+      if (item.feed_type === "message") {
+        return getMessageCardHtml(item);
+      }
 
-      return `
-        <article class="approved-card">
-          <header class="approved-card-head">
-            <span class="approved-card-avatar" aria-hidden="true">
-              ${escapeHtml(guestInitial)}
-            </span>
-            <span class="approved-card-identity">
-              <strong>${escapeHtml(guestName)}</strong>
-              ${
-                uploadedAt
-                  ? `<time datetime="${escapeHtml(
-                      item.media_created_at,
-                    )}">${escapeHtml(uploadedAt)}</time>`
-                  : ""
-              }
-            </span>
-          </header>
+      if (item.feed_type === "video") {
+        return getVideoCardHtml(item);
+      }
 
-          <button
-            type="button"
-            class="approved-media-button"
-            data-photo-index="${index}"
-            aria-label="${escapeHtml(openLabel)}"
-          >
-            <img
-              src="${escapeHtml(item.media_url)}"
-              alt="${escapeHtml(uploadedBy)}"
-              loading="lazy"
-              decoding="async"
-            />
-            <span class="approved-media-overlay" aria-hidden="true">
-              <span class="approved-overlay-author">
-                <i>${escapeHtml(guestInitial)}</i>
-                <span>
-                  <strong>${escapeHtml(guestName)}</strong>
-                  ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
-                </span>
-              </span>
-              <span class="approved-overlay-open">
-                <svg viewBox="0 0 24 24">
-                  <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
-                </svg>
-              </span>
-            </span>
-          </button>
-
-          <div class="approved-card-body">
-            <div class="approved-card-actions">
-              ${getLikeButtonHtml(item)}
-              <button
-                type="button"
-                class="public-expand-button"
-                data-photo-index="${index}"
-                aria-label="${escapeHtml(openLabel)}"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
-                </svg>
-              </button>
-            </div>
-
-            <p class="approved-card-caption">
-              <strong>${escapeHtml(guestName)}</strong>
-              <span>${escapeHtml(message)}</span>
-            </p>
-          </div>
-        </article>
-      `;
+      return getPhotoCardHtml(
+        item,
+        photoIndexById.get(String(item.media_id)) ?? 0,
+      );
     })
     .join("");
 }
@@ -411,7 +570,7 @@ function updateLikeButtons(mediaId, liked, likesCount) {
     button.setAttribute("aria-pressed", liked ? "true" : "false");
     button.setAttribute(
       "aria-label",
-      liked ? t("Unlike this photo") : t("Like this photo"),
+      liked ? t("Unlike this memory") : t("Like this memory"),
     );
 
     const icon = button.querySelector("span");
@@ -508,7 +667,7 @@ async function loadGallery() {
 
     renderEvent(data.event || {});
     renderGuests(data.guests || []);
-    renderApprovedPhotos(data.media || []);
+    renderApprovedFeed(data.media || [], data.messages || []);
     showContent();
   } catch (error) {
     console.error("Public gallery error:", error);

@@ -675,4 +675,43 @@
       ...translations,
     };
   });
+
+  const guestMessagePhrases = {
+    Messages: { tr: "Mesajlar" },
+    "Guest messages": { tr: "Misafir mesajları" },
+    "Messages approved by the event admin are shared here.": {
+      tr: "Etkinlik yöneticisinin onayladığı mesajlar burada paylaşılır.",
+    },
+    "{count} message": { tr: "{count} mesaj" },
+    "{count} messages": { tr: "{count} mesaj" },
+    "No approved messages yet. Messages will appear here after admin approval.": {
+      tr: "Henüz onaylanmış mesaj yok. Mesajlar yönetici onayından sonra burada görünecek.",
+    },
+    Memories: { tr: "Anılar" },
+    Video: { tr: "Video" },
+    "Approved video": { tr: "Onaylı video" },
+    "Approved video uploaded by {name}": {
+      tr: "{name} tarafından yüklenen onaylı video",
+    },
+    "Your browser does not support video playback.": {
+      tr: "Tarayıcın video oynatmayı desteklemiyor.",
+    },
+    "Like this memory": { tr: "Bu anıyı beğen" },
+    "Unlike this memory": { tr: "Bu anıdaki beğeniyi kaldır" },
+    "Approved photos, videos and guest messages are shown together from newest to oldest.": {
+      tr: "Onaylı fotoğraflar, videolar ve misafir mesajları en yeniden en eskiye birlikte gösterilir.",
+    },
+    "{count} memory": { tr: "{count} anı" },
+    "{count} memories": { tr: "{count} anı" },
+    "No approved memories yet. Photos, videos and messages will appear here after admin approval.": {
+      tr: "Henüz onaylanmış anı yok. Fotoğraflar, videolar ve mesajlar yönetici onayından sonra burada görünecek.",
+    },
+  };
+
+  Object.entries(guestMessagePhrases).forEach(([key, translations]) => {
+    window.SnapUpPagePhrases[key] = {
+      ...(window.SnapUpPagePhrases[key] || {}),
+      ...translations,
+    };
+  });
 })();
