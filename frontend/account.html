@@ -34,8 +34,9 @@
     </script>
 
     <link rel="stylesheet" href="css/theme.css?v=account-dashboard-1" />
-    <link rel="stylesheet" href="css/account.css?v=event-cover-account-1" />
+    <link rel="stylesheet" href="css/account.css?v=email-verification-1" />
     <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
+    <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
     <script src="js/i18n.js?v=account-delete-i18n-1" defer></script>
   </head>
 
@@ -212,6 +213,39 @@
                 ></p>
               </form>
 
+              <section
+                class="account-email-verification"
+                id="emailVerificationCard"
+                aria-labelledby="emailVerificationTitle"
+              >
+                <div class="account-email-verification__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8" />
+                    <path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+
+                <div class="account-email-verification__copy">
+                  <span class="account-eyebrow">Email verification</span>
+                  <h3 id="emailVerificationTitle">Verify your email</h3>
+                  <p id="emailVerificationDescription">
+                    Verify your email address to create new events.
+                  </p>
+                  <p
+                    class="account-email-verification__result"
+                    id="emailVerificationResult"
+                    aria-live="polite"
+                  ></p>
+                </div>
+
+                <div class="account-email-verification__actions">
+                  <strong id="emailVerificationStatus">Checking...</strong>
+                  <button type="button" id="resendVerificationButton" hidden>
+                    Resend verification email
+                  </button>
+                </div>
+              </section>
+
               <div class="password-section">
                 <div class="password-section-head">
                   <span class="account-eyebrow">Password</span>
@@ -309,6 +343,11 @@
               <div class="summary-item">
                 <span>Created at</span>
                 <strong id="summaryCreatedAt">-</strong>
+              </div>
+
+              <div class="summary-item">
+                <span>Email status</span>
+                <strong id="summaryEmailStatus">Checking...</strong>
               </div>
 
               <div class="summary-note">
@@ -421,7 +460,7 @@
       </section>
     </div>
 
-    <script type="module" src="js/account.js?v=account-delete-1"></script>
+    <script type="module" src="js/account.js?v=email-verification-1"></script>
     <script src="js/theme.js?v=account-dashboard-1"></script>
   </body>
 </html>

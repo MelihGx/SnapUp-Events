@@ -1,4 +1,4 @@
-﻿import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
 
 const registerForm = document.getElementById("registerForm");
 
@@ -129,11 +129,18 @@ registerForm.addEventListener("submit", async (event) => {
     localStorage.setItem("snapup_token", data.token);
     localStorage.setItem("snapup_user", JSON.stringify(data.user));
 
-    showResult("Account created successfully. Redirecting...", "success");
+    const verificationEmailSent = data.verification_email_sent !== false;
+
+    showResult(
+      verificationEmailSent
+        ? "Account created. Check your inbox to verify your email."
+        : "Account created, but the verification email could not be sent. You can resend it on the next page.",
+      "success",
+    );
 
     setTimeout(() => {
-      window.location.href = "index.html";
-    }, 1000);
+      window.location.href = `verify-email.html?sent=${verificationEmailSent ? "1" : "0"}`;
+    }, 900);
   } catch (error) {
     console.error("Register error:", error);
     showResult("Backend connection error.", "error");

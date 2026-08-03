@@ -1725,3 +1725,126 @@ html[data-theme="dark"] .account-delete-dialog {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Email verification */
+.account-email-verification {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid rgba(255, 90, 54, 0.2);
+  border-radius: 20px;
+  background: rgba(255, 90, 54, 0.07);
+}
+
+.account-email-verification.is-verified {
+  border-color: rgba(25, 135, 84, 0.2);
+  background: rgba(25, 135, 84, 0.07);
+}
+
+.account-email-verification__icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(255, 90, 54, 0.12);
+  color: #ff5a36;
+}
+
+.account-email-verification.is-verified .account-email-verification__icon {
+  background: rgba(25, 135, 84, 0.12);
+  color: #198754;
+}
+
+.account-email-verification__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.account-email-verification__copy h3,
+.account-email-verification__copy p {
+  margin: 0;
+}
+
+.account-email-verification__copy h3 {
+  margin-top: 4px;
+}
+
+.account-email-verification__copy > p:not(.account-email-verification__result) {
+  margin-top: 7px;
+  color: rgba(23, 18, 15, 0.62);
+  line-height: 1.5;
+}
+
+.account-email-verification__result {
+  min-height: 18px;
+  margin-top: 8px !important;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.account-email-verification__result[data-state="success"] {
+  color: #198754;
+}
+
+.account-email-verification__result[data-state="error"] {
+  color: #dc3545;
+}
+
+.account-email-verification__actions {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.account-email-verification__actions strong {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(255, 90, 54, 0.12);
+  color: #d43b1f;
+  font-size: 12px;
+}
+
+.account-email-verification.is-verified .account-email-verification__actions strong {
+  background: rgba(25, 135, 84, 0.12);
+  color: #198754;
+}
+
+.account-email-verification__actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #ff5a36;
+  color: #fff;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.account-email-verification__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+html[data-theme="dark"] .account-email-verification__copy > p:not(.account-email-verification__result) {
+  color: rgba(255, 250, 243, 0.62);
+}
+
+@media (max-width: 680px) {
+  .account-email-verification {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .account-email-verification__actions {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .account-email-verification__actions strong {
+    justify-self: start;
+  }
+}

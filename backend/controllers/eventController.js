@@ -206,6 +206,37 @@ const createEvent = async (req, res) => {
 
   try {
     const userId = req.user.user_id;
+
+    const { data: eventOwner, error: eventOwnerError } = await supabase
+      .from("users")
+      .select("user_id, is_user_active, is_email_verified")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventOwnerError) {
+      return res.status(500).json({
+        success: false,
+        message: "Kullanıcı doğrulama durumu kontrol edilemedi.",
+        error: eventOwnerError.message,
+      });
+    }
+
+    if (!eventOwner || !eventOwner.is_user_active) {
+      return res.status(403).json({
+        success: false,
+        message: "Bu kullanıcı hesabı aktif değil.",
+        code: "USER_NOT_ACTIVE",
+      });
+    }
+
+    if (!eventOwner.is_email_verified) {
+      return res.status(403).json({
+        success: false,
+        message: "Etkinlik oluşturmak için e-posta adresinizi doğrulayın.",
+        code: "EMAIL_NOT_VERIFIED",
+      });
+    }
+
     let requestBody = req.body || {};
 
     if (typeof requestBody.payload === "string") {

@@ -86,6 +86,7 @@ app.get("/api/health", (req, res) => {
     event_cover: "v4-owner-change-remove-account-card",
     location_details: "v2-map-pin-owner-edit",
     event_delete_feedback: "v1-success-popup",
+    email_verification: "v1-resend-token-hash",
   });
 });
 

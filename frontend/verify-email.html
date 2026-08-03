@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification — SnapUp Events</title>
+    <meta
+      name="description"
+      content="Verify your SnapUp Events email address."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#0d0b0a" />
+
+    <script>
+      (() => {
+        const saved = localStorage.getItem("snapup_theme");
+        const theme =
+          saved ||
+          (matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+
+    <link rel="stylesheet" href="css/i18n.css?v=email-verification-1" />
+    <link rel="stylesheet" href="css/theme.css?v=email-verification-1" />
+    <link rel="stylesheet" href="css/auth.css?v=email-verification-1" />
+    <link rel="stylesheet" href="css/verify-email.css?v=email-verification-1" />
+    <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
+    <script src="js/i18n.js?v=email-verification-1" defer></script>
+  </head>
+
+  <body>
+    <main class="verify-page">
+      <section class="verify-card" aria-labelledby="verifyTitle">
+        <a href="index.html" class="verify-brand" aria-label="SnapUp Events home">
+          <img
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="48"
+            height="48"
+          />
+          <strong>SnapUp<span>Events</span></strong>
+        </a>
+
+        <div class="verify-state-icon is-loading" id="verifyIcon" aria-hidden="true">
+          <span class="verify-spinner"></span>
+          <svg class="verify-success-icon" viewBox="0 0 24 24" fill="none">
+            <path d="m5 12.5 4.2 4.2L19 7" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg class="verify-error-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v5M12 16.8h.01M10.3 4.8 3.6 16.6c-.7 1.2.2 2.7 1.6 2.7h13.6c1.4 0 2.3-1.5 1.6-2.7L13.7 4.8c-.8-1.3-2.6-1.3-3.4 0Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <svg class="verify-mail-icon" viewBox="0 0 24 24" fill="none">
+            <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8" />
+            <path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+
+        <p class="verify-eyebrow">Email verification</p>
+        <h1 id="verifyTitle">Verifying your email...</h1>
+        <p class="verify-description" id="verifyDescription">
+          Please wait while we check your verification link.
+        </p>
+
+        <p class="verify-result" id="verifyResult" aria-live="polite"></p>
+
+        <div class="verify-actions">
+          <button type="button" class="verify-primary" id="resendVerificationButton" hidden>
+            Resend verification email
+          </button>
+          <a class="verify-primary" id="verifyContinueLink" href="account.html" hidden>
+            Go to account
+          </a>
+          <a class="verify-secondary" id="verifyLoginLink" href="login.html" hidden>
+            Go to login
+          </a>
+          <a class="verify-secondary" href="index.html">Back to home</a>
+        </div>
+
+        <p class="verify-note">
+          The verification link is valid for 24 hours and can only be used once.
+        </p>
+      </section>
+    </main>
+
+    <script type="module" src="js/verify-email.js?v=email-verification-1"></script>
+    <script src="js/theme.js?v=email-verification-1"></script>
+  </body>
+</html>

@@ -19,6 +19,26 @@ const accountPhone = document.getElementById("accountPhone");
 const accountSaveButton = document.getElementById("accountSaveButton");
 const accountResult = document.getElementById("accountResult");
 
+const emailVerificationCard = document.getElementById(
+  "emailVerificationCard",
+);
+const emailVerificationTitle = document.getElementById(
+  "emailVerificationTitle",
+);
+const emailVerificationDescription = document.getElementById(
+  "emailVerificationDescription",
+);
+const emailVerificationStatus = document.getElementById(
+  "emailVerificationStatus",
+);
+const summaryEmailStatus = document.getElementById("summaryEmailStatus");
+const resendVerificationButton = document.getElementById(
+  "resendVerificationButton",
+);
+const emailVerificationResult = document.getElementById(
+  "emailVerificationResult",
+);
+
 const summaryEvents = document.getElementById("summaryEvents");
 const summaryStatus = document.getElementById("summaryStatus");
 const summaryCreatedAt = document.getElementById("summaryCreatedAt");
@@ -249,6 +269,116 @@ async function loadProfile() {
     setResult(accountResult, "Backend connection error.", "error");
   }
 }
+
+function updateStoredVerificationStatus(user) {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("snapup_user") || "{}");
+    localStorage.setItem(
+      "snapup_user",
+      JSON.stringify({ ...storedUser, ...user }),
+    );
+  } catch (_) {}
+}
+
+function renderEmailVerificationStatus(user) {
+  const isVerified = Boolean(user?.is_email_verified);
+
+  emailVerificationCard.classList.toggle("is-verified", isVerified);
+  emailVerificationStatus.textContent = t(isVerified ? "Verified" : "Not verified");
+  summaryEmailStatus.textContent = t(isVerified ? "Verified" : "Not verified");
+  resendVerificationButton.hidden = isVerified;
+
+  emailVerificationTitle.textContent = t(
+    isVerified ? "Email verified" : "Verify your email",
+  );
+  emailVerificationDescription.textContent = t(
+    isVerified
+      ? "Your email address is verified and event creation is enabled."
+      : "Verify your email address to create new events.",
+  );
+
+  updateStoredVerificationStatus(user);
+}
+
+async function loadEmailVerificationStatus() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok || !data.success) {
+      setResult(
+        emailVerificationResult,
+        data.message || "Email verification status could not be loaded.",
+        "error",
+      );
+      return;
+    }
+
+    renderEmailVerificationStatus(data.user);
+  } catch (error) {
+    console.error("Email verification status error:", error);
+    setResult(emailVerificationResult, "Backend connection error.", "error");
+  }
+}
+
+async function resendVerificationEmail() {
+  try {
+    resendVerificationButton.disabled = true;
+    resendVerificationButton.textContent = t("Sending...");
+    setResult(emailVerificationResult);
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/auth/resend-verification`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok || !data.success) {
+      setResult(
+        emailVerificationResult,
+        data.code === "VERIFICATION_EMAIL_COOLDOWN"
+          ? "Please wait before requesting another verification email."
+          : "Verification email could not be sent.",
+        "error",
+      );
+      return;
+    }
+
+    if (data.already_verified) {
+      renderEmailVerificationStatus({ is_email_verified: true });
+      setResult(emailVerificationResult, "Email already verified.", "success");
+      return;
+    }
+
+    setResult(emailVerificationResult, "Verification email sent.", "success");
+  } catch (error) {
+    console.error("Verification resend error:", error);
+    setResult(emailVerificationResult, "Backend connection error.", "error");
+  } finally {
+    resendVerificationButton.disabled = false;
+    resendVerificationButton.textContent = t("Resend verification email");
+  }
+}
+
+resendVerificationButton.addEventListener("click", resendVerificationEmail);
 
 function renderNoEventsMessage() {
   eventsList.innerHTML = `
@@ -525,6 +655,7 @@ accountForm.addEventListener("submit", async (event) => {
       : "S";
 
     setResult(accountResult, "Account updated successfully.", "success");
+    await loadEmailVerificationStatus();
   } catch (error) {
     console.error("Update error:", error);
 
@@ -727,4 +858,5 @@ deleteAccountForm.addEventListener("submit", async (event) => {
 
 setActivePanel("events");
 loadProfile();
+loadEmailVerificationStatus();
 loadEvents();

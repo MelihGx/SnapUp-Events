@@ -657,9 +657,11 @@ async function createEventOnBackend() {
       ? t(errorKeyByCode[data.code])
       : "";
 
-    throw new Error(
+    const requestError = new Error(
       translatedError || data.message || t("Event could not be created."),
     );
+    requestError.code = data.code || "EVENT_CREATE_FAILED";
+    throw requestError;
   }
 
   return data.event;
@@ -815,6 +817,16 @@ paymentDemoButton.addEventListener("click", async () => {
     paymentDemoButton.textContent = t("Try Again");
     paymentDemoNote.textContent = error.message;
     showResult(error.message);
+
+    if (error.code === "EMAIL_NOT_VERIFIED") {
+      const currentPage = `${window.location.pathname.split("/").pop() || "create-event.html"}${window.location.search}${window.location.hash}`;
+      sessionStorage.setItem("snapup_after_verification", currentPage);
+      closePaymentPopup({ restoreFocus: false });
+
+      window.setTimeout(() => {
+        window.location.replace("verify-email.html?required=1");
+      }, 700);
+    }
   }
 });
 
