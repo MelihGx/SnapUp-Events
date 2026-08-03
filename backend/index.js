@@ -9,8 +9,50 @@ const mediaRoutes = require("./routes/mediaRoutes");
 
 const app = express();
 
+const configuredOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
+  "https://snapup-events.netlify.app",
+  "https://snapup-events.pages.dev",
+  ...configuredOrigins,
+]);
+
+function isAllowedOrigin(origin) {
+  // Postman, curl and server-to-server requests usually do not send Origin.
+  if (!origin) {
+    return true;
+  }
+
+  if (allowedOrigins.has(origin)) {
+    return true;
+  }
+
+  // Allow local frontend development on any localhost port.
+  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+    return true;
+  }
+
+  // Allow Cloudflare Pages preview deployment addresses such as:
+  // https://a09a7da4.snapup-events.pages.dev
+  return /^https:\/\/[a-z0-9-]+\.snapup-events\.pages\.dev$/i.test(origin);
+}
+
 app.use(
   cors({
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      const corsError = new Error(`CORS blocked origin: ${origin}`);
+      corsError.code = "CORS_ORIGIN_NOT_ALLOWED";
+      return callback(corsError);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     exposedHeaders: [
       "Content-Disposition",
       "X-SnapUp-PDF-Engine",
@@ -48,6 +90,14 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use((error, req, res, next) => {
+  if (error?.code === "CORS_ORIGIN_NOT_ALLOWED") {
+    return res.status(403).json({
+      success: false,
+      message: "Bu kaynaktan gelen isteğe izin verilmiyor.",
+      code: "CORS_ORIGIN_NOT_ALLOWED",
+    });
+  }
+
   if (error?.type === "entity.too.large") {
     return res.status(413).json({
       success: false,
