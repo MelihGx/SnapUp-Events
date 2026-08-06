@@ -15,8 +15,10 @@ const configuredOrigins = (process.env.CORS_ORIGINS || "")
   .filter(Boolean);
 
 const allowedOrigins = new Set([
-  "https://snapup-events.netlify.app",
+  "https://snapupevents.com",
+  "https://www.snapupevents.com",
   "https://snapup-events.pages.dev",
+  "https://snapup-events.netlify.app",
   ...configuredOrigins,
 ]);
 
