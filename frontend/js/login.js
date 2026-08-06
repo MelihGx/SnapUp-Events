@@ -21,8 +21,18 @@ function clearLoginErrors() {
 }
 
 function showLoginResult(message, type) {
-  loginResult.textContent = message;
-  loginResult.style.color = type === "success" ? "#21c55d" : "#ff4d4d";
+  const translatedMessage = window.SnapUpI18n?.t?.(message) || message;
+  loginResult.textContent = translatedMessage;
+  loginResult.className = `auth-result show ${type}`;
+}
+
+const loginParams = new URLSearchParams(window.location.search);
+if (loginParams.get("passwordReset") === "1") {
+  showLoginResult(
+    "Password updated. You can now login with your new password.",
+    "success",
+  );
+  window.history.replaceState({}, document.title, "login.html");
 }
 
 toggleLoginPassword.addEventListener("click", () => {

@@ -1059,3 +1059,36 @@ html[data-theme="dark"] .auth-password-row input {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Password recovery link inside the login form. */
+.auth-field-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.auth-field-heading label {
+  color: var(--auth-ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-forgot-link {
+  color: var(--auth-brand);
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.auth-forgot-link:hover {
+  color: var(--auth-brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.auth-forgot-link:focus-visible {
+  outline: 3px solid rgba(94, 234, 212, 0.42);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
