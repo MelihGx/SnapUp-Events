@@ -18,6 +18,7 @@ function clearLoginErrors() {
   loginMailError.textContent = "";
   loginPasswordError.textContent = "";
   loginResult.textContent = "";
+  loginResult.className = "auth-result";
 }
 
 function showLoginResult(message, type) {

@@ -29,7 +29,7 @@
     </script>
     <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
     <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
-    <link rel="stylesheet" href="css/auth.css?v=password-reset-1" />
+    <link rel="stylesheet" href="css/auth.css?v=login-status-stable-1" />
     <script src="js/password-reset-i18n.js?v=password-reset-1" defer></script>
     <script src="js/i18n.js?v=landing-sections-2" defer></script>
   </head>
@@ -190,7 +190,7 @@
               Login
             </button>
 
-            <div class="auth-result" id="loginResult" role="status"></div>
+            <div class="auth-result" id="loginResult" role="status" aria-live="polite"></div>
           </form>
 
           <p class="auth-bottom">
@@ -201,7 +201,7 @@
       </section>
     </main>
 
-    <script type="module" src="js/login.js?v=runtime-api-2"></script>
+    <script type="module" src="js/login.js?v=login-status-stable-1"></script>
       <script src="js/theme.js?v=dark-gallery-colors-1"></script>
   </body>
 </html>
