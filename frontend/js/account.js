@@ -694,10 +694,10 @@ passwordForm.addEventListener("submit", async (event) => {
   }
 
   const newPasswordBytes = new TextEncoder().encode(new_password).length;
-  if (new_password.length < 12 || newPasswordBytes > 72) {
+  if (new_password.length < 6 || newPasswordBytes > 72) {
     setResult(
       passwordResult,
-      "New password must be at least 12 characters and at most 72 UTF-8 bytes.",
+      "New password must be at least 6 characters and at most 72 UTF-8 bytes.",
       "error",
     );
     return;

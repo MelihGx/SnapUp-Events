@@ -146,10 +146,11 @@ const getMyProfile = async (req, res) => {
       user,
     });
   } catch (error) {
-    return res.status(500).json({
+    const statusCode = Number(error.statusCode) || 500;
+    return res.status(statusCode).json({
       success: false,
-      message: "Sunucu hatası.",
-      error: error.message,
+      message: statusCode === 400 ? error.message : "Sunucu hatası.",
+      ...(statusCode === 400 ? { code: error.code } : { error: error.message }),
     });
   }
 };

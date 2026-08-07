@@ -75,10 +75,10 @@ registerForm.addEventListener("submit", async (event) => {
 
   if (
     password &&
-    (password.length < 12 || new TextEncoder().encode(password).length > 72)
+    (password.length < 6 || new TextEncoder().encode(password).length > 72)
   ) {
     passwordError.textContent =
-      "Password must be at least 12 characters and at most 72 UTF-8 bytes.";
+      "Password must be at least 6 characters and at most 72 UTF-8 bytes.";
     hasError = true;
   }
 

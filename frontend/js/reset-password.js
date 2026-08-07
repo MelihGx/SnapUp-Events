@@ -107,9 +107,9 @@ form.addEventListener("submit", async (event) => {
   if (!newPassword) {
     newPasswordError.textContent = t("New password is required.");
     hasError = true;
-  } else if (newPassword.length < 12 || new TextEncoder().encode(newPassword).length > 72) {
+  } else if (newPassword.length < 6 || new TextEncoder().encode(newPassword).length > 72) {
     newPasswordError.textContent = t(
-      "Password must be at least 12 characters and at most 72 UTF-8 bytes.",
+      "Password must be at least 6 characters and at most 72 UTF-8 bytes.",
     );
     hasError = true;
   }

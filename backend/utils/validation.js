@@ -25,8 +25,8 @@ function normalizeEmail(value) {
 function validatePassword(value) {
   const password = String(value ?? "");
   const bytes = Buffer.byteLength(password, "utf8");
-  if (password.length < 12 || bytes > 72) {
-    const error = new Error("Password must be at least 12 characters and at most 72 UTF-8 bytes.");
+  if (password.length < 6 || bytes > 72) {
+    const error = new Error("Password must be at least 6 characters and at most 72 UTF-8 bytes.");
     error.statusCode = 400;
     error.code = "INVALID_PASSWORD";
     throw error;

@@ -250,10 +250,13 @@ const resetPassword = async (req, res) => {
       message: "Your password has been updated successfully.",
     });
   } catch (error) {
-    return res.status(500).json({
+    const statusCode = Number(error.statusCode) || 500;
+    return res.status(statusCode).json({
       success: false,
-      message: "Password could not be updated.",
-      code: "PASSWORD_UPDATE_FAILED",
+      message:
+        statusCode === 400 ? error.message : "Password could not be updated.",
+      code:
+        statusCode === 400 ? error.code : "PASSWORD_UPDATE_FAILED",
     });
   }
 };
