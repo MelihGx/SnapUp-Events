@@ -36,7 +36,10 @@
     <link rel="stylesheet" href="css/theme.css?v=account-dashboard-1" />
     <link rel="stylesheet" href="css/account.css?v=email-verification-1" />
     <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
-    <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
+    <script
+      src="js/email-verification-i18n.js?v=email-verification-1"
+      defer
+    ></script>
     <script src="js/i18n.js?v=account-delete-i18n-1" defer></script>
   </head>
 
@@ -218,10 +221,27 @@
                 id="emailVerificationCard"
                 aria-labelledby="emailVerificationTitle"
               >
-                <div class="account-email-verification__icon" aria-hidden="true">
+                <div
+                  class="account-email-verification__icon"
+                  aria-hidden="true"
+                >
                   <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8" />
-                    <path d="m5 7 7 5.5L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect
+                      x="3.5"
+                      y="5.5"
+                      width="17"
+                      height="13"
+                      rx="2.5"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+                    <path
+                      d="m5 7 7 5.5L19 7"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                 </div>
 
@@ -293,7 +313,10 @@
                 </form>
               </div>
 
-              <section class="account-danger-zone" aria-labelledby="deleteAccountTitle">
+              <section
+                class="account-danger-zone"
+                aria-labelledby="deleteAccountTitle"
+              >
                 <div class="account-danger-zone__copy">
                   <span class="account-eyebrow">Danger zone</span>
                   <h3 id="deleteAccountTitle">Delete account</h3>
@@ -309,7 +332,13 @@
                   id="deleteAccountOpenButton"
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                    <path d="M4 7H20M9 7V4.8C9 4.36 9.36 4 9.8 4H14.2C14.64 4 15 4.36 15 4.8V7M6.5 7L7.25 19C7.3 19.56 7.77 20 8.34 20H15.66C16.23 20 16.7 19.56 16.75 19L17.5 7M10 10.5V16.5M14 10.5V16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <path
+                      d="M4 7H20M9 7V4.8C9 4.36 9.36 4 9.8 4H14.2C14.64 4 15 4.36 15 4.8V7M6.5 7L7.25 19C7.3 19.56 7.77 20 8.34 20H15.66C16.23 20 16.7 19.56 16.75 19L17.5 7M10 10.5V16.5M14 10.5V16.5"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
                   </svg>
                   <span>Delete my account</span>
                 </button>
@@ -360,14 +389,15 @@
       </main>
     </div>
 
-
-
     <div
       class="account-delete-modal"
       id="deleteAccountModal"
       aria-hidden="true"
     >
-      <div class="account-delete-modal__backdrop" data-delete-account-close></div>
+      <div
+        class="account-delete-modal__backdrop"
+        data-delete-account-close
+      ></div>
 
       <section
         class="account-delete-dialog"
@@ -383,13 +413,24 @@
           aria-label="Close"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
-            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path
+              d="M6 6L18 18M18 6L6 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
 
         <div class="account-delete-dialog__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none">
-            <path d="M12 8V13M12 17H12.01M10.28 4.5L3.45 16.5C2.69 17.83 3.65 19.5 5.18 19.5H18.82C20.35 19.5 21.31 17.83 20.55 16.5L13.72 4.5C12.96 3.17 11.04 3.17 10.28 4.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M12 8V13M12 17H12.01M10.28 4.5L3.45 16.5C2.69 17.83 3.65 19.5 5.18 19.5H18.82C20.35 19.5 21.31 17.83 20.55 16.5L13.72 4.5C12.96 3.17 11.04 3.17 10.28 4.5Z"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
 
@@ -460,7 +501,7 @@
       </section>
     </div>
 
-    <script type="module" src="js/account.js?v=email-verification-1"></script>
+    <script type="module" src="js/account.js?v=account-runtime-3"></script>
     <script src="js/theme.js?v=account-dashboard-1"></script>
   </body>
 </html>

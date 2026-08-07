@@ -965,7 +965,7 @@
       "ابحث باسم الضيف...",
     ),
     "Enter your name": p("Adını gir", "أدخل اسمك"),
-    "Example: A7K92P": p("Örnek: A7K92P", "مثال: A7K92P"),
+    "Example: 123456": p("Örnek: 123456", "مثال: 123456"),
     "Write a memory or wish...": p(
       "Bir anı veya dilek yaz...",
       "اكتب ذكرى أو أمنية...",

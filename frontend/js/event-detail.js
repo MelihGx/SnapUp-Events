@@ -286,6 +286,8 @@ let videoPreviewObjectUrls = [];
 let uploadSuccessLastFocusedElement = null;
 
 const MEDIA_UPLOAD_MAX_SIZE = 50 * 1024 * 1024;
+const MEDIA_UPLOAD_MAX_FILES = 15;
+const MEDIA_UPLOAD_MAX_TOTAL_SIZE = 200 * 1024 * 1024;
 const PHOTO_UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const VIDEO_UPLOAD_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 const EVENT_COVER_MAX_SIZE = 8 * 1024 * 1024;
@@ -308,10 +310,16 @@ function getAuthHeaders() {
   };
 }
 
-function logout() {
-  localStorage.removeItem("snapup_token");
-  localStorage.removeItem("snapup_user");
-  window.location.href = "login.html";
+async function logout() {
+  try {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, { method: "POST" });
+  } catch (_error) {
+    // Clear local state even when the backend cannot be reached.
+  } finally {
+    localStorage.removeItem("snapup_token");
+    localStorage.removeItem("snapup_user");
+    window.location.href = "login.html";
+  }
 }
 
 function escapeHtml(value) {
@@ -2208,12 +2216,24 @@ function appendUploadFiles(type, newFiles) {
     return true;
   });
 
+  const combinedFiles = [...currentFiles, ...uniqueNewFiles];
+
+  if (combinedFiles.length > MEDIA_UPLOAD_MAX_FILES) {
+    throw new Error("You can select up to 15 files at once.");
+  }
+
+  const totalBytes = combinedFiles.reduce((sum, file) => sum + file.size, 0);
+
+  if (totalBytes > MEDIA_UPLOAD_MAX_TOTAL_SIZE) {
+    throw new Error("Selected files must be 200 MB or smaller in total.");
+  }
+
   if (type === "video") {
-    queuedVideoFiles = [...queuedVideoFiles, ...uniqueNewFiles];
+    queuedVideoFiles = combinedFiles;
     return queuedVideoFiles;
   }
 
-  queuedPhotoFiles = [...queuedPhotoFiles, ...uniqueNewFiles];
+  queuedPhotoFiles = combinedFiles;
   return queuedPhotoFiles;
 }
 
@@ -2445,12 +2465,18 @@ async function createGuestForUpload(guestName) {
   return guestSession;
 }
 
-async function uploadFileToEvent(guestId, guestToken, file) {
+async function uploadFilesToEvent(guestId, guestToken, files) {
   const formData = new FormData();
 
-  formData.append("media", file);
+  files.forEach((file) => formData.append("media", file));
   formData.append("event_id", eventId);
   formData.append("guest_id", guestId);
+
+  if (uploadMediaBtn) {
+    uploadMediaBtn.textContent = t("Uploading...");
+  }
+
+  setUploadMessage(t("Uploading selected files, please wait..."), "info");
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
     method: "POST",
@@ -2464,41 +2490,10 @@ async function uploadFileToEvent(guestId, guestToken, file) {
     throw new Error(data.error || data.message || "Media upload failed.");
   }
 
-  return data.media;
-}
-
-async function uploadFilesToEvent(guestId, guestToken, files) {
-  const failures = [];
-  let uploaded = 0;
-
-  for (let index = 0; index < files.length; index += 1) {
-    const file = files[index];
-    const current = index + 1;
-
-    if (uploadMediaBtn) {
-      uploadMediaBtn.textContent = t("Uploading {current} / {total}", {
-        current,
-        total: files.length,
-      });
-    }
-
-    setUploadMessage(
-      t("Uploading file {current} of {total}...", {
-        current,
-        total: files.length,
-      }),
-      "info",
-    );
-
-    try {
-      await uploadFileToEvent(guestId, guestToken, file);
-      uploaded += 1;
-    } catch (error) {
-      failures.push({ file, error });
-    }
-  }
-
-  return { uploaded, failures };
+  return {
+    uploaded: Number(data.uploaded_count) || files.length,
+    failures: [],
+  };
 }
 
 async function sendMessageToEvent(guestId, guestToken, message) {
@@ -3260,25 +3255,23 @@ if (photoInput) {
         PHOTO_UPLOAD_TYPES,
         "Only JPG, PNG and WEBP images are allowed.",
       );
+      const files = appendUploadFiles("photo", newlySelectedFiles);
+
+      renderUploadPreviews("photo", files);
+      uploadMediaBtn.textContent = getUploadButtonLabel("photo");
+      setUploadMessage(
+        files.length === 1
+          ? t("1 photo selected. You can add more before uploading.")
+          : t("{count} photos selected. You can add more before uploading.", {
+              count: files.length,
+            }),
+        "info",
+      );
     } catch (error) {
-      photoInput.value = "";
       setUploadMessage(t(error.message), "error");
-      return;
+    } finally {
+      photoInput.value = "";
     }
-
-    const files = appendUploadFiles("photo", newlySelectedFiles);
-    photoInput.value = "";
-
-    renderUploadPreviews("photo", files);
-    uploadMediaBtn.textContent = getUploadButtonLabel("photo");
-    setUploadMessage(
-      files.length === 1
-        ? t("1 photo selected. You can add more before uploading.")
-        : t("{count} photos selected. You can add more before uploading.", {
-            count: files.length,
-          }),
-      "info",
-    );
   });
 }
 
@@ -3296,25 +3289,23 @@ if (videoInput) {
         VIDEO_UPLOAD_TYPES,
         "Only MP4, WEBM and MOV videos are allowed.",
       );
+      const files = appendUploadFiles("video", newlySelectedFiles);
+
+      renderUploadPreviews("video", files);
+      uploadMediaBtn.textContent = getUploadButtonLabel("video");
+      setUploadMessage(
+        files.length === 1
+          ? t("1 video selected. You can add more before uploading.")
+          : t("{count} videos selected. You can add more before uploading.", {
+              count: files.length,
+            }),
+        "info",
+      );
     } catch (error) {
-      videoInput.value = "";
       setUploadMessage(t(error.message), "error");
-      return;
+    } finally {
+      videoInput.value = "";
     }
-
-    const files = appendUploadFiles("video", newlySelectedFiles);
-    videoInput.value = "";
-
-    renderUploadPreviews("video", files);
-    uploadMediaBtn.textContent = getUploadButtonLabel("video");
-    setUploadMessage(
-      files.length === 1
-        ? t("1 video selected. You can add more before uploading.")
-        : t("{count} videos selected. You can add more before uploading.", {
-            count: files.length,
-          }),
-      "info",
-    );
   });
 }
 

@@ -198,10 +198,16 @@ function formatDate(dateValue) {
   }).format(new Date(dateValue));
 }
 
-function logout() {
-  localStorage.removeItem("snapup_token");
-  localStorage.removeItem("snapup_user");
-  window.location.href = "login.html";
+async function logout() {
+  try {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, { method: "POST" });
+  } catch (_error) {
+    // Clear local state even when the backend cannot be reached.
+  } finally {
+    localStorage.removeItem("snapup_token");
+    localStorage.removeItem("snapup_user");
+    window.location.href = "login.html";
+  }
 }
 
 function setActivePanel(panelName) {
@@ -411,7 +417,7 @@ function renderEvents(events) {
         [event.event_location, event.event_address]
           .map((value) => String(value || "").trim())
           .filter(Boolean)
-          .join(", ") || t("No location"));
+          .join(", ") || t("No location");
       const safeEventLocation = escapeHtml(eventLocation);
       const eventDate = event.event_date
         ? formatDate(event.event_date)
@@ -676,9 +682,9 @@ accountForm.addEventListener("submit", async (event) => {
 passwordForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const current_password = currentPassword.value.trim();
-  const new_password = newPassword.value.trim();
-  const confirm_new_password = confirmNewPassword.value.trim();
+  const current_password = currentPassword.value;
+  const new_password = newPassword.value;
+  const confirm_new_password = confirmNewPassword.value;
 
   setResult(passwordResult);
 
@@ -687,10 +693,11 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (new_password.length < 12) {
+  const newPasswordBytes = new TextEncoder().encode(new_password).length;
+  if (new_password.length < 12 || newPasswordBytes > 72) {
     setResult(
       passwordResult,
-      "New password must be at least 12 characters.",
+      "New password must be at least 12 characters and at most 72 UTF-8 bytes.",
       "error",
     );
     return;
@@ -741,6 +748,10 @@ passwordForm.addEventListener("submit", async (event) => {
     currentPassword.value = "";
     newPassword.value = "";
     confirmNewPassword.value = "";
+
+    window.setTimeout(() => {
+      void logout();
+    }, 1200);
   } catch (error) {
     console.error("Password update error:", error);
 

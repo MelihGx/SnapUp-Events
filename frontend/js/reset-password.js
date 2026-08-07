@@ -108,7 +108,9 @@ form.addEventListener("submit", async (event) => {
     newPasswordError.textContent = t("New password is required.");
     hasError = true;
   } else if (newPassword.length < 12 || new TextEncoder().encode(newPassword).length > 72) {
-    newPasswordError.textContent = t("Password must be between 6 and 72 characters.");
+    newPasswordError.textContent = t(
+      "Password must be at least 12 characters and at most 72 UTF-8 bytes.",
+    );
     hasError = true;
   }
 
@@ -143,6 +145,9 @@ form.addEventListener("submit", async (event) => {
       throw new Error(data.message || "Password could not be updated.");
     }
 
+    await fetch(`${API_BASE_URL}/api/auth/logout`, { method: "POST" }).catch(
+      () => {},
+    );
     localStorage.removeItem("snapup_token");
     localStorage.removeItem("snapup_user");
     sessionStorage.removeItem("snapup_after_login");

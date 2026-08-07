@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#17122B" />
     <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
     <script src="js/location-i18n.js?v=location-details-1" defer></script>
-    <script src="js/i18n.js?v=location-details-1" defer></script>
+    <script src="js/i18n.js?v=six-digit-code-1" defer></script>
       <script>
       (() => {
         const saved = localStorage.getItem("snapup_theme");
@@ -465,7 +465,7 @@
                       ></div>
                       <div class="flow-code-box">
                         <span>EVENT CODE</span>
-                        <strong id="eventCode">EJ2026</strong>
+                        <strong id="eventCode">245817</strong>
                         <button id="copyCode" type="button">Copy code</button>
                       </div>
                     </div>
@@ -481,7 +481,7 @@
                 >
                   <div class="flow-upload">
                     <div class="flow-screen-heading">
-                      <span>Guest view · EJ2026</span>
+                      <span>Guest view · 245817</span>
                       <h3>Add a memory</h3>
                       <p>No account or app download required.</p>
                     </div>
@@ -989,7 +989,7 @@
               <input
                 type="text"
                 id="joinEventCode"
-                placeholder="Example: A7K92P"
+                placeholder="Example: 123456"
                 maxlength="12"
                 autocomplete="off"
               />
@@ -1080,6 +1080,10 @@
               <input type="file" id="joinMediaFile" multiple />
             </label>
 
+            <p class="join-file-helper-text">
+              Up to 15 files · 50 MB each · 200 MB total
+            </p>
+
             <div class="join-file-preview" id="joinFilePreview" hidden></div>
           </div>
 
@@ -1159,7 +1163,7 @@
         });
       })();
     </script>
-    <script type="module" src="js/main.js?v=location-map-2"></script>
+    <script type="module" src="js/main.js?v=six-digit-code-1"></script>
       <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>

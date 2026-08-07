@@ -1,7 +1,7 @@
 const supabase = require("../config/supabaseClient");
-const crypto = require("crypto");
 const QRCode = require("qrcode");
 const { signedDeliveryUrl } = require("../services/cloudinaryDelivery");
+const { generateEventCode } = require("../utils/eventCode");
 const cloudinary = require("../config/cloudinary");
 const {
   MemoryBookPdfError,
@@ -69,17 +69,6 @@ function normalizeEventCoordinates(latitudeValue, longitudeValue) {
   };
 }
 
-function generateEventCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-
-  for (let i = 0; i < 12; i++) {
-    code += chars[crypto.randomInt(chars.length)];
-  }
-
-  return code;
-}
-
 async function createQrCodeUrl(eventCode) {
   const frontendUrl = (
     process.env.FRONTEND_URL || "http://127.0.0.1:5500/frontend"
@@ -95,7 +84,7 @@ async function createQrCodeUrl(eventCode) {
 async function generateUniqueEventCode() {
   let eventCode = generateEventCode();
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 20; i++) {
     const { data, error } = await supabase
       .from("event")
       .select("event_id")
@@ -168,7 +157,7 @@ function uploadEventCover(fileBuffer, eventCode) {
   });
 }
 
-async function deleteEventCover(publicId) {
+async function deleteEventCover(publicId, deliveryType = "authenticated") {
   if (!publicId) {
     return;
   }
@@ -176,7 +165,7 @@ async function deleteEventCover(publicId) {
   try {
     await cloudinary.uploader.destroy(publicId, {
       resource_type: "image",
-      type: "authenticated",
+      type: deliveryType,
       invalidate: true,
     });
   } catch (error) {
@@ -202,6 +191,12 @@ function getCloudinaryPublicId(mediaUrl) {
   } catch (error) {
     return null;
   }
+}
+
+function getCloudinaryDeliveryType(mediaUrl) {
+  return /\/(?:image|video)\/upload\//.test(String(mediaUrl || ""))
+    ? "upload"
+    : "authenticated";
 }
 
 const createEvent = async (req, res) => {
@@ -619,7 +614,10 @@ const updateEventCover = async (req, res) => {
     }
 
     uploadedCoverPublicId = null;
-    await deleteEventCover(getCloudinaryPublicId(event.event_cover_url));
+    await deleteEventCover(
+      getCloudinaryPublicId(event.event_cover_url),
+      getCloudinaryDeliveryType(event.event_cover_url),
+    );
 
     return res.status(200).json({
       success: true,
@@ -704,7 +702,10 @@ const removeEventCover = async (req, res) => {
       });
     }
 
-    await deleteEventCover(previousCoverPublicId);
+    await deleteEventCover(
+      previousCoverPublicId,
+      getCloudinaryDeliveryType(event.event_cover_url),
+    );
 
     return res.status(200).json({
       success: true,
@@ -954,7 +955,10 @@ const deleteEvent = async (req, res) => {
       });
     }
 
-    await deleteEventCover(getCloudinaryPublicId(event.event_cover_url));
+    await deleteEventCover(
+      getCloudinaryPublicId(event.event_cover_url),
+      getCloudinaryDeliveryType(event.event_cover_url),
+    );
 
     return res.status(200).json({
       success: true,

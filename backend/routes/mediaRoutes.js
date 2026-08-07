@@ -1,5 +1,9 @@
 const express = require("express");
 const multer = require("multer");
+const crypto = require("crypto");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const cloudinary = require("../config/cloudinary");
 const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -11,7 +15,20 @@ const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../servic
 
 const router = express.Router();
 
-const storage = multer.memoryStorage();
+const MAX_MEDIA_FILES_PER_REQUEST = 15;
+const MAX_MEDIA_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_MEDIA_REQUEST_BYTES = 200 * 1024 * 1024;
+const MAX_MEDIA_MULTIPART_BYTES = MAX_MEDIA_REQUEST_BYTES + 1024 * 1024;
+const MAX_VIDEO_DURATION_SECONDS = 5 * 60;
+const MAX_VIDEO_DIMENSION = 3840;
+const MEDIA_UPLOAD_DIRECTORY = path.join(os.tmpdir(), "snapup-media-uploads");
+
+fs.mkdirSync(MEDIA_UPLOAD_DIRECTORY, { recursive: true, mode: 0o700 });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, MEDIA_UPLOAD_DIRECTORY),
+  filename: (_req, _file, cb) => cb(null, crypto.randomUUID()),
+});
 
 const allowedTypes = [
   "image/jpeg",
@@ -25,19 +42,77 @@ const allowedTypes = [
 const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024,
-    files: 5,
+    fileSize: MAX_MEDIA_FILE_BYTES,
+    files: MAX_MEDIA_FILES_PER_REQUEST,
+    fields: 8,
+    parts: MAX_MEDIA_FILES_PER_REQUEST + 8,
   },
   fileFilter: (req, file, cb) => {
     if (!allowedTypes.includes(file.mimetype)) {
-      return cb(
-        new Error("Only JPG, PNG, WEBP, MP4, WEBM and MOV files are allowed."),
+      const error = new Error(
+        "Only JPG, PNG, WEBP, MP4, WEBM and MOV files are allowed.",
       );
+      error.statusCode = 400;
+      error.code = "UNSUPPORTED_MEDIA_TYPE";
+      return cb(error);
     }
 
     cb(null, true);
   },
 });
+
+async function cleanupTemporaryFiles(files = []) {
+  await Promise.allSettled(
+    files
+      .filter((file) => file?.path)
+      .map((file) => fs.promises.unlink(file.path)),
+  );
+}
+
+const mediaUploadFields = upload.fields([
+  { name: "media", maxCount: MAX_MEDIA_FILES_PER_REQUEST },
+  { name: "photo", maxCount: MAX_MEDIA_FILES_PER_REQUEST },
+  { name: "video", maxCount: MAX_MEDIA_FILES_PER_REQUEST },
+]);
+
+function handleMediaUpload(req, _res, next) {
+  mediaUploadFields(req, _res, async (error) => {
+    if (!error) {
+      return next();
+    }
+
+    const files = Object.values(req.files || {}).flat();
+    await cleanupTemporaryFiles(files);
+
+    if (error instanceof multer.MulterError) {
+      error.statusCode = error.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+
+      if (error.code === "LIMIT_FILE_SIZE") {
+        error.message = "Each media file must be 50 MB or smaller.";
+        error.code = "MEDIA_FILE_TOO_LARGE";
+      } else if (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE") {
+        error.message = "A maximum of 15 media files can be uploaded at once.";
+        error.code = "MEDIA_FILE_LIMIT_EXCEEDED";
+      }
+    }
+
+    return next(error);
+  });
+}
+
+function enforceMediaRequestSize(req, res, next) {
+  const contentLength = Number(req.get("content-length"));
+
+  if (Number.isFinite(contentLength) && contentLength > MAX_MEDIA_MULTIPART_BYTES) {
+    return res.status(413).json({
+      success: false,
+      message: "The selected files must be 200 MB or smaller in total.",
+      code: "MEDIA_REQUEST_TOO_LARGE",
+    });
+  }
+
+  return next();
+}
 
 function getMediaKindFromMime(mimetype) {
   if (mimetype.startsWith("image/")) {
@@ -158,7 +233,7 @@ async function checkGuestUploadLimit(eventId, guestId, incomingFileCount) {
   }
 }
 
-function uploadToCloudinary(fileBuffer, eventId, resourceType) {
+function uploadToCloudinary(file, eventId, resourceType) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -166,6 +241,7 @@ function uploadToCloudinary(fileBuffer, eventId, resourceType) {
         resource_type: resourceType,
         type: "authenticated",
         allowed_formats: resourceType === "image" ? ["jpg", "jpeg"] : ["mp4", "webm", "mov"],
+        media_metadata: resourceType === "video",
       },
       (error, result) => {
         if (error) return reject(error);
@@ -173,8 +249,37 @@ function uploadToCloudinary(fileBuffer, eventId, resourceType) {
       },
     );
 
-    stream.end(fileBuffer);
+    const input = fs.createReadStream(file.path);
+    input.once("error", reject);
+    input.pipe(stream);
   });
+}
+
+function validateCloudinaryVideo(result) {
+  const duration = Number(result?.duration);
+  const width = Number(result?.width);
+  const height = Number(result?.height);
+  const format = String(result?.format || "").toLowerCase();
+
+  const isValid =
+    result?.resource_type === "video" &&
+    ["mp4", "webm", "mov"].includes(format) &&
+    Number.isFinite(duration) &&
+    duration > 0 &&
+    duration <= MAX_VIDEO_DURATION_SECONDS &&
+    Number.isFinite(width) &&
+    width > 0 &&
+    width <= MAX_VIDEO_DIMENSION &&
+    Number.isFinite(height) &&
+    height > 0 &&
+    height <= MAX_VIDEO_DIMENSION;
+
+  if (!isValid) {
+    throw createHttpError(
+      "Video must be MP4, WEBM or MOV, no longer than 5 minutes, and no larger than 4K.",
+      400,
+    );
+  }
 }
 
 function getCloudinaryPublicId(mediaUrl) {
@@ -314,16 +419,18 @@ router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/upload", uploadLimiter, upload.fields([
-  { name: "media", maxCount: 5 },
-  { name: "photo", maxCount: 5 },
-  { name: "video", maxCount: 5 },
-]), validateUploadedFiles, async (req, res) => {
+router.post(
+  "/upload",
+  uploadLimiter,
+  enforceMediaRequestSize,
+  handleMediaUpload,
+  validateUploadedFiles,
+  async (req, res) => {
   const uploadedItems = [];
+  const files = Object.values(req.files || {}).flat();
+
   try {
     const { event_id, guest_id, message } = req.body;
-
-    const files = Object.values(req.files || {}).flat().slice(0, 5);
 
     if (!event_id) {
       return res.status(400).json({
@@ -343,6 +450,23 @@ router.post("/upload", uploadLimiter, upload.fields([
       return res.status(400).json({
         success: false,
         message: "At least one media file is required.",
+      });
+    }
+
+    if (files.length > MAX_MEDIA_FILES_PER_REQUEST) {
+      return res.status(400).json({
+        success: false,
+        message: "A maximum of 15 media files can be uploaded at once.",
+        code: "MEDIA_FILE_LIMIT_EXCEEDED",
+      });
+    }
+
+    const incomingBytes = files.reduce((sum, file) => sum + file.size, 0);
+    if (incomingBytes > MAX_MEDIA_REQUEST_BYTES) {
+      return res.status(413).json({
+        success: false,
+        message: "The selected files must be 200 MB or smaller in total.",
+        code: "MEDIA_REQUEST_TOO_LARGE",
       });
     }
 
@@ -366,7 +490,6 @@ router.post("/upload", uploadLimiter, upload.fields([
     if (onlyUsers && !guestSecurity.user_id) {
       return res.status(403).json({ success: false, message: "Registered users only.", code: "REGISTERED_USERS_ONLY" });
     }
-    const incomingBytes = files.reduce((sum, file) => sum + file.size, 0);
     const { data: usageRows, error: usageError } = await supabase.from("media")
       .select("bytes").eq("event_id", event_id).eq("guest_id", guest_id);
     if (usageError) throw createHttpError("Storage usage could not be checked.", 500);
@@ -382,21 +505,29 @@ router.post("/upload", uploadLimiter, upload.fields([
       const mediaKind = getMediaKindFromMime(file.mimetype);
 
       if (!mediaKind) {
-        return res.status(400).json({
-          success: false,
-          message: "Unsupported media type.",
-        });
+        throw createHttpError("Unsupported media type.", 400);
       }
 
       const resourceType = mediaKind === "video" ? "video" : "image";
+      const mediaTypeId = await getMediaTypeId(mediaKind);
 
       const cloudinaryResult = await uploadToCloudinary(
-        file.buffer,
+        file,
         event_id,
         resourceType,
       );
 
-      const mediaTypeId = await getMediaTypeId(mediaKind);
+      if (mediaKind === "video") {
+        try {
+          validateCloudinaryVideo(cloudinaryResult);
+        } catch (error) {
+          await cloudinary.uploader.destroy(cloudinaryResult.public_id, {
+            resource_type: "video",
+            type: cloudinaryResult.type || "authenticated",
+          });
+          throw error;
+        }
+      }
 
       uploadedItems.push({
         event_id,
@@ -462,11 +593,18 @@ router.post("/upload", uploadLimiter, upload.fields([
     )));
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Media upload failed.",
+      message:
+        error.statusCode && error.statusCode < 500
+          ? error.message
+          : "Media upload failed.",
+      code: error.code || "MEDIA_UPLOAD_FAILED",
       error: error.message,
     });
+  } finally {
+    await cleanupTemporaryFiles(files);
   }
-});
+  },
+);
 
 router.post("/message", uploadLimiter, async (req, res) => {
   try {

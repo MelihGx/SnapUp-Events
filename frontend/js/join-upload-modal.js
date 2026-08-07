@@ -2,10 +2,16 @@ import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 
 const API_BASE_URL = API_URL;
+const MAX_MEDIA_FILES = 15;
+const MAX_MEDIA_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_MEDIA_TOTAL_BYTES = 200 * 1024 * 1024;
+const IMAGE_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const VIDEO_MEDIA_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 
 let selectedMediaType = "message";
 let selectedEvent = null;
 let selectedFiles = [];
+let selectedFilePreviewUrls = [];
 let successPopupHideTimer = null;
 
 const successButtonLabels = {
@@ -227,6 +233,8 @@ function ensureGalleryButton(preview) {
 
 function clearSelectedFiles() {
   selectedFiles = [];
+  selectedFilePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+  selectedFilePreviewUrls = [];
 
   const fileInput = document.getElementById("joinMediaFile");
   const filePreview = document.getElementById("joinFilePreview");
@@ -251,14 +259,42 @@ function isSameFile(fileA, fileB) {
 
 function addFilesToSelection(files) {
   const incomingFiles = Array.from(files || []);
+  const allowedTypes = selectedMediaType === "video"
+    ? VIDEO_MEDIA_TYPES
+    : IMAGE_MEDIA_TYPES;
 
   incomingFiles.forEach((file) => {
-    const alreadyExists = selectedFiles.some((item) => isSameFile(item, file));
+    if (!allowedTypes.has(file.type)) {
+      throw new Error(
+        selectedMediaType === "video"
+          ? "Only MP4, WEBM and MOV videos are allowed."
+          : "Only JPG, PNG and WEBP images are allowed.",
+      );
+    }
 
-    if (!alreadyExists) {
-      selectedFiles.push(file);
+    if (file.size > MAX_MEDIA_FILE_BYTES) {
+      throw new Error("Each file must be 50 MB or smaller.");
     }
   });
+
+  const uniqueIncomingFiles = incomingFiles.filter(
+    (file) => !selectedFiles.some((item) => isSameFile(item, file)),
+  );
+
+  if (selectedFiles.length + uniqueIncomingFiles.length > MAX_MEDIA_FILES) {
+    throw new Error("You can select up to 15 files at once.");
+  }
+
+  const totalBytes = [...selectedFiles, ...uniqueIncomingFiles].reduce(
+    (sum, file) => sum + file.size,
+    0,
+  );
+
+  if (totalBytes > MAX_MEDIA_TOTAL_BYTES) {
+    throw new Error("Selected files must be 200 MB or smaller in total.");
+  }
+
+  selectedFiles.push(...uniqueIncomingFiles);
 }
 
 function removeSelectedFile(index) {
@@ -272,7 +308,9 @@ function createFileThumbnail(file) {
 
   if (file.type.startsWith("image/")) {
     const image = document.createElement("img");
-    image.src = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(file);
+    selectedFilePreviewUrls.push(objectUrl);
+    image.src = objectUrl;
     image.alt = file.name;
     thumb.appendChild(image);
     return thumb;
@@ -298,6 +336,8 @@ function renderFilePreview() {
 
   if (!filePreview) return;
 
+  selectedFilePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+  selectedFilePreviewUrls = [];
   filePreview.innerHTML = "";
 
   if (selectedFiles.length === 0) {
@@ -370,7 +410,7 @@ function renderFilePreview() {
   const helper = document.createElement("p");
   helper.className = "join-file-helper-text";
   helper.textContent =
-    "You can click Choose Files again to add more files before sending.";
+    "Up to 15 files · 50 MB each · 200 MB total. You can reopen the file picker to add more.";
 
   filePreview.appendChild(previewHeader);
   filePreview.appendChild(fileList);
@@ -408,7 +448,7 @@ function updateMediaFields() {
   messageText.placeholder = "Add a caption for this media...";
 
   if (selectedMediaType === "image") {
-    fileInput.accept = "image/*";
+    fileInput.accept = "image/jpeg,image/png,image/webp";
   }
 
   if (selectedMediaType === "video") {
@@ -661,9 +701,18 @@ function initFilePreview() {
   if (!fileInput) return;
 
   fileInput.addEventListener("change", () => {
-    addFilesToSelection(fileInput.files);
-    fileInput.value = "";
-    renderFilePreview();
+    try {
+      addFilesToSelection(fileInput.files);
+      renderFilePreview();
+      setResult(
+        `${selectedFiles.length} of ${MAX_MEDIA_FILES} file slot(s) selected.`,
+        "info",
+      );
+    } catch (error) {
+      setResult(error.message, "error");
+    } finally {
+      fileInput.value = "";
+    }
   });
 }
 
@@ -681,7 +730,10 @@ function initEventCodeLookup() {
 
     clearTimeout(timeoutId);
 
-    const code = eventCodeInput.value.trim().toUpperCase();
+    const code = eventCodeInput.value
+      .replace(/[^a-z0-9]/gi, "")
+      .slice(0, 12)
+      .toUpperCase();
 
     eventCodeInput.value = code;
 
@@ -734,6 +786,11 @@ function initFormSubmit() {
 
       if (submissionMediaType !== "message" && selectedFiles.length === 0) {
         setResult("Please choose at least one file.", "error");
+        return;
+      }
+
+      if (selectedFiles.length > MAX_MEDIA_FILES) {
+        setResult("You can select up to 15 files at once.", "error");
         return;
       }
 

@@ -7,7 +7,17 @@ import { initQRPreview } from "./qr-preview.js";
 import { initCopyCode } from "./copy-code.js";
 import { initUploadSimulation } from "./upload-simulation.js";
 import { testBackendConnection } from "./events-api.js";
-import { initJoinUploadModal } from "./join-upload-modal.js?v=location-map-2";
+import { initJoinUploadModal } from "./join-upload-modal.js?v=six-digit-code-1";
+import { API_URL } from "./config.js?v=runtime-api-2";
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function getStoredUser() {
   try {
@@ -17,11 +27,16 @@ function getStoredUser() {
   }
 }
 
-function logoutUser() {
-  fetch(`${API_URL}/api/auth/logout`, { method: "POST" }).catch(() => {});
-  localStorage.removeItem("snapup_token");
-  localStorage.removeItem("snapup_user");
-  window.location.href = "index.html";
+async function logoutUser() {
+  try {
+    await fetch(`${API_URL}/api/auth/logout`, { method: "POST" });
+  } catch (_error) {
+    // Local session state must still be cleared if the backend is unreachable.
+  } finally {
+    localStorage.removeItem("snapup_token");
+    localStorage.removeItem("snapup_user");
+    window.location.href = "index.html";
+  }
 }
 
 function renderAuthArea(container, isMobile = false) {
@@ -62,7 +77,7 @@ function renderAuthArea(container, isMobile = false) {
       </span>
 
       <span class="nav-account-text">
-        ${isMobile ? "My Account" : user.user_name || "My Account"}
+        ${escapeHtml(isMobile ? "My Account" : user.user_name || "My Account")}
       </span>
     </a>
 

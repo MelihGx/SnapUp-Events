@@ -19,11 +19,17 @@
       "Memory type": "Anı türü",
       Photo: "Fotoğraf",
       "Choose photos": "Fotoğrafları seç",
-      "JPG, PNG or WEBP · Reopen the file picker to add more before uploading":
-        "JPG, PNG veya WEBP · Yüklemeden önce dosya seçiciyi tekrar açarak yeni dosyalar ekleyebilirsin",
+      "JPG, PNG or WEBP · Up to 15 files · 50 MB each · 200 MB total":
+        "JPG, PNG veya WEBP · En fazla 15 dosya · Dosya başına 50 MB · Toplam 200 MB",
       "Choose videos": "Videoları seç",
-      "MP4, WEBM or MOV · Maximum 100 MB each · Reopen the file picker to add more":
-        "MP4, WEBM veya MOV · Her dosya en fazla 100 MB · Yeni dosyalar eklemek için dosya seçiciyi tekrar açabilirsin",
+      "MP4, WEBM or MOV · Up to 15 files · 50 MB each · 5 minutes · 200 MB total":
+        "MP4, WEBM veya MOV · En fazla 15 dosya · Dosya başına 50 MB · 5 dakika · Toplam 200 MB",
+      "You can select up to 15 files at once.":
+        "Tek seferde en fazla 15 dosya seçebilirsin.",
+      "Selected files must be 200 MB or smaller in total.":
+        "Seçilen dosyaların toplamı 200 MB veya daha küçük olmalıdır.",
+      "Uploading selected files, please wait...":
+        "Seçilen dosyalar yükleniyor, lütfen bekleyin...",
       "Close upload confirmation": "Yükleme onayını kapat",
       Completed: "Tamamlandı",
       "Upload complete": "Yükleme tamamlandı",
@@ -71,8 +77,8 @@
       "Write message": "Mesaj yaz",
       "Write a memory, note or wish...": "Bir anı, not veya dilek yaz...",
       "Maximum 1000 characters": "En fazla 1000 karakter",
-      "MP4, WEBM or MOV · Maximum 100 MB":
-        "MP4, WEBM veya MOV · En fazla 100 MB",
+      "MP4, WEBM or MOV · Maximum 50 MB":
+        "MP4, WEBM veya MOV · En fazla 50 MB",
       "Upload Video": "Video Yükle",
       "Send Message": "Mesaj Gönder",
       "Please choose a video first.": "Lütfen önce bir video seçin.",
@@ -85,8 +91,8 @@
       "Message sent successfully!": "Mesaj başarıyla gönderildi!",
       "Only MP4, WEBM and MOV videos are allowed.":
         "Yalnızca MP4, WEBM ve MOV videolarına izin verilir.",
-      "The selected file must be 100 MB or smaller.":
-        "Seçilen dosya 100 MB veya daha küçük olmalıdır.",
+      "The selected file must be 50 MB or smaller.":
+        "Seçilen dosya 50 MB veya daha küçük olmalıdır.",
       "Media upload failed.": "Medya yüklenemedi.",
       "Message could not be sent.": "Mesaj gönderilemedi.",
       "Sending...": "Gönderiliyor...",

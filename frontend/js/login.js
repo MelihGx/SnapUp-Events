@@ -48,7 +48,7 @@ loginForm.addEventListener("submit", async (event) => {
   clearLoginErrors();
 
   const user_mail = loginMailInput.value.trim();
-  const password = loginPasswordInput.value.trim();
+  const password = loginPasswordInput.value;
 
   let hasError = false;
 

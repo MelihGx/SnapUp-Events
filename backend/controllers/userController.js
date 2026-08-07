@@ -28,6 +28,12 @@ function getCloudinaryResourceType(mediaUrl) {
   return /\/video\/(?:upload|authenticated)\//.test(String(mediaUrl || "")) ? "video" : "image";
 }
 
+function getCloudinaryDeliveryType(mediaUrl) {
+  return /\/(?:image|video)\/upload\//.test(String(mediaUrl || ""))
+    ? "upload"
+    : "authenticated";
+}
+
 function isMissingRelationError(error) {
   const message = String(error?.message || "");
   return (
@@ -77,15 +83,17 @@ async function cleanupCloudinaryAssets(assetUrls) {
         url,
         publicId: getCloudinaryPublicId(url),
         resourceType: getCloudinaryResourceType(url),
+        deliveryType: getCloudinaryDeliveryType(url),
       }))
       .filter((asset) => asset.publicId),
-    (asset) => `${asset.resourceType}:${asset.publicId}`,
+    (asset) => `${asset.resourceType}:${asset.deliveryType}:${asset.publicId}`,
   );
 
   const results = await Promise.allSettled(
     assets.map((asset) =>
       cloudinary.uploader.destroy(asset.publicId, {
         resource_type: asset.resourceType,
+        type: asset.deliveryType,
         invalidate: true,
       }),
     ),

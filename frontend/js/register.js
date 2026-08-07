@@ -53,8 +53,8 @@ registerForm.addEventListener("submit", async (event) => {
   const user_name = userNameInput.value.trim();
   const user_mail = userMailInput.value.trim();
   const user_phone = userPhoneInput.value.trim();
-  const password = passwordInput.value.trim();
-  const confirmPassword = confirmPasswordInput.value.trim();
+  const password = passwordInput.value;
+  const confirmPassword = confirmPasswordInput.value;
 
   let hasError = false;
 
@@ -73,8 +73,12 @@ registerForm.addEventListener("submit", async (event) => {
     hasError = true;
   }
 
-  if (password && password.length < 12) {
-    passwordError.textContent = "Password must be at least 12 characters.";
+  if (
+    password &&
+    (password.length < 12 || new TextEncoder().encode(password).length > 72)
+  ) {
+    passwordError.textContent =
+      "Password must be at least 12 characters and at most 72 UTF-8 bytes.";
     hasError = true;
   }
 
