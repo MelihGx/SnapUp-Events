@@ -538,10 +538,17 @@ async function findEventByCode(eventCode) {
 }
 
 async function createGuest(eventId, guestName) {
+  const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
+    if (cached?.guest_id && cached?.guest_access_token) return cached;
+  } catch (_error) {}
+  const userToken = localStorage.getItem("snapup_token");
   const response = await fetch(`${API_BASE_URL}/api/media/guests`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
     },
     body: JSON.stringify({
       event_id: eventId,
@@ -557,14 +564,17 @@ async function createGuest(eventId, guestName) {
     );
   }
 
-  return data.guest;
+  const guestSession = { ...data.guest, guest_access_token: data.guest_access_token };
+  sessionStorage.setItem(sessionKey, JSON.stringify(guestSession));
+  return guestSession;
 }
 
-async function sendMessage(eventId, guestId, message) {
+async function sendMessage(eventId, guestId, guestToken, message) {
   const response = await fetch(`${API_BASE_URL}/api/media/message`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Guest-Token": guestToken,
     },
     body: JSON.stringify({
       event_id: eventId,
@@ -582,7 +592,7 @@ async function sendMessage(eventId, guestId, message) {
   return data;
 }
 
-async function uploadMedia(eventId, guestId, files, messageText = "") {
+async function uploadMedia(eventId, guestId, guestToken, files, messageText = "") {
   const mediaFiles = Array.from(files || []);
 
   if (mediaFiles.length === 0) {
@@ -604,6 +614,7 @@ async function uploadMedia(eventId, guestId, files, messageText = "") {
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
     method: "POST",
+    headers: { "X-Guest-Token": guestToken },
     body: formData,
   });
 
@@ -741,7 +752,7 @@ function initFormSubmit() {
       const guest = await createGuest(eventData.event_id, guestName);
 
       if (submissionMediaType === "message") {
-        await sendMessage(eventData.event_id, guest.guest_id, messageText);
+        await sendMessage(eventData.event_id, guest.guest_id, guest.guest_access_token, messageText);
 
         setResult("Message sent successfully!", "success");
         resetFormAfterSuccess();
@@ -751,6 +762,7 @@ function initFormSubmit() {
         const uploadResult = await uploadMedia(
           eventData.event_id,
           guest.guest_id,
+          guest.guest_access_token,
           selectedFiles,
           messageText,
         );

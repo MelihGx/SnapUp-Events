@@ -3,6 +3,8 @@ const multer = require("multer");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
+const { eventCodeLimiter, pdfLimiter } = require("../middlewares/security");
+const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const {
   listEventInvitations,
   createEventInvitation,
@@ -70,7 +72,7 @@ function handleEventCoverUpload(req, res, next) {
   });
 }
 
-router.post("/", authMiddleware, handleEventCoverUpload, createEvent);
+router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, createEvent);
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
@@ -106,6 +108,7 @@ router.put(
   "/detail/:eventId/cover",
   authMiddleware,
   handleEventCoverUpload,
+  validateUploadedFiles,
   updateEventCover,
 );
 router.delete(
@@ -124,10 +127,10 @@ router.put("/detail/:eventId/settings", authMiddleware, updateEventSettings);
 
 router.delete("/detail/:eventId", authMiddleware, deleteEvent);
 
-router.get("/:eventCode/memory-book", downloadPublicMemoryBook);
+router.get("/:eventCode/memory-book", eventCodeLimiter, pdfLimiter, downloadPublicMemoryBook);
 
-router.get("/:eventCode/gallery", getPublicEventGallery);
+router.get("/:eventCode/gallery", eventCodeLimiter, getPublicEventGallery);
 
-router.get("/:eventCode", getEventByCode);
+router.get("/:eventCode", eventCodeLimiter, getEventByCode);
 
 module.exports = router;

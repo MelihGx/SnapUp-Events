@@ -73,8 +73,8 @@ registerForm.addEventListener("submit", async (event) => {
     hasError = true;
   }
 
-  if (password && password.length < 6) {
-    passwordError.textContent = "Password must be at least 6 characters.";
+  if (password && password.length < 12) {
+    passwordError.textContent = "Password must be at least 12 characters.";
     hasError = true;
   }
 

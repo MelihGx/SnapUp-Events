@@ -10,6 +10,8 @@ const {
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
+const { authLimiter, emailLimiter } = require("../middlewares/security");
+const { clearAuthCookie } = require("../utils/authCookie");
 
 const {
   requestPasswordReset,
@@ -17,17 +19,22 @@ const {
   resetPassword,
 } = require("../controllers/passwordResetController");
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/verify-email", verifyEmail);
-router.post("/forgot-password", requestPasswordReset);
-router.post("/validate-reset-token", validatePasswordResetToken);
-router.post("/reset-password", resetPassword);
+router.post("/register", authLimiter, register);
+router.post("/login", authLimiter, login);
+router.post("/verify-email", authLimiter, verifyEmail);
+router.post("/forgot-password", emailLimiter, requestPasswordReset);
+router.post("/validate-reset-token", authLimiter, validatePasswordResetToken);
+router.post("/reset-password", authLimiter, resetPassword);
 router.post(
   "/resend-verification",
+  emailLimiter,
   authMiddleware,
   resendVerificationEmail,
 );
 router.get("/me", authMiddleware, getMe);
+router.post("/logout", (req, res) => {
+  clearAuthCookie(res);
+  res.status(200).json({ success: true });
+});
 
 module.exports = router;

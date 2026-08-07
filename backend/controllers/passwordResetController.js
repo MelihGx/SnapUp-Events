@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const supabase = require("../config/supabaseClient");
+const { validatePassword } = require("../utils/validation");
 const {
   PASSWORD_RESET_COOLDOWN_MS,
   hashPasswordResetToken,
@@ -212,13 +213,7 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6 || newPassword.length > 72) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be between 6 and 72 characters.",
-        code: "INVALID_NEW_PASSWORD",
-      });
-    }
+    validatePassword(newPassword);
 
     const result = await getUsableResetToken(rawToken);
 
@@ -234,34 +229,18 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    const changedAt = new Date().toISOString();
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const { data: resetResult, error: passwordUpdateError } = await supabase.rpc(
+      "consume_password_reset",
+      { p_token_hash: hashPasswordResetToken(rawToken), p_password_hash: passwordHash },
+    );
 
-    const { error: passwordUpdateError } = await supabase
-      .from("users")
-      .update({ password_hash: passwordHash })
-      .eq("user_id", result.user.user_id);
-
-    if (passwordUpdateError) {
+    if (passwordUpdateError || resetResult !== true) {
       return res.status(500).json({
         success: false,
         message: "Password could not be updated.",
         code: "PASSWORD_UPDATE_FAILED",
       });
-    }
-
-    const { error: tokenUpdateError } = await supabase
-      .from("password_reset_tokens")
-      .update({ used_at: changedAt })
-      .eq("reset_id", result.resetToken.reset_id)
-      .is("used_at", null)
-      .is("revoked_at", null);
-
-    if (tokenUpdateError) {
-      console.error(
-        "Password reset token could not be marked as used:",
-        tokenUpdateError.message,
-      );
     }
 
     await revokeActivePasswordResetTokens(result.user.user_id);

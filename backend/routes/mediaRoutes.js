@@ -3,6 +3,11 @@ const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
+const optionalAuth = require("../middlewares/optionalAuth");
+const { validateUploadedFiles } = require("../middlewares/fileValidation");
+const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
+const { cleanText } = require("../utils/validation");
+const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
 
 const router = express.Router();
 
@@ -20,8 +25,8 @@ const allowedTypes = [
 const upload = multer({
   storage,
   limits: {
-    fileSize: 100 * 1024 * 1024,
-    files: 20,
+    fileSize: 50 * 1024 * 1024,
+    files: 5,
   },
   fileFilter: (req, file, cb) => {
     if (!allowedTypes.includes(file.mimetype)) {
@@ -87,7 +92,7 @@ async function getUploadStatusForEvent(eventId) {
 
   const { data: settings, error: settingsError } = await supabase
     .from("event_settings")
-    .select("allow_upload, require_approval, max_upload_per_guest")
+    .select("allow_upload, require_approval, max_upload_per_guest, max_storage_per_guest, only_users")
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -102,6 +107,8 @@ async function getUploadStatusForEvent(eventId) {
   return {
     mediaStatus: settings?.require_approval ? "pending" : "approved",
     maxUploadPerGuest: Number(settings?.max_upload_per_guest) || 20,
+    maxStoragePerGuest: Math.min(Number(settings?.max_storage_per_guest) || 250, 2048),
+    onlyUsers: settings?.only_users === true,
   };
 }
 
@@ -157,6 +164,8 @@ function uploadToCloudinary(fileBuffer, eventId, resourceType) {
       {
         folder: `snapup-events/${eventId}`,
         resource_type: resourceType,
+        type: "authenticated",
+        allowed_formats: resourceType === "image" ? ["jpg", "jpeg"] : ["mp4", "webm", "mov"],
       },
       (error, result) => {
         if (error) return reject(error);
@@ -169,13 +178,13 @@ function uploadToCloudinary(fileBuffer, eventId, resourceType) {
 }
 
 function getCloudinaryPublicId(mediaUrl) {
-  if (!mediaUrl || !mediaUrl.includes("/upload/")) {
+  if (!mediaUrl || !/\/(?:upload|authenticated)\//.test(mediaUrl)) {
     return null;
   }
 
   try {
     const url = new URL(mediaUrl);
-    const afterUpload = url.pathname.split("/upload/")[1];
+    const afterUpload = url.pathname.split(/\/(?:upload|authenticated)\//)[1];
 
     if (!afterUpload) {
       return null;
@@ -223,7 +232,7 @@ async function getOwnedMedia(mediaId, userId) {
   return media;
 }
 
-router.post("/guests", async (req, res) => {
+router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
   try {
     const { event_id, guest_name } = req.body;
 
@@ -241,11 +250,15 @@ router.post("/guests", async (req, res) => {
       });
     }
 
-    const cleanGuestName = guest_name.trim();
+    const cleanGuestName = cleanText(guest_name, { min: 1, max: 80, field: "guest_name" });
+    const uploadStatus = await getUploadStatusForEvent(event_id);
+    if (uploadStatus.onlyUsers && !req.user?.user_id) {
+      return res.status(401).json({ success: false, message: "A registered user session is required.", code: "REGISTERED_USERS_ONLY" });
+    }
 
     const { data: existingGuests, error: existingGuestError } = await supabase
       .from("event_guests")
-      .select("*")
+      .select("guest_id")
       .eq("event_id", event_id)
       .ilike("guest_name", cleanGuestName);
 
@@ -258,11 +271,7 @@ router.post("/guests", async (req, res) => {
     }
 
     if (existingGuests && existingGuests.length > 0) {
-      return res.status(200).json({
-        success: true,
-        message: "Guest already exists.",
-        guest: existingGuests[0],
-      });
+      return res.status(409).json({ success: false, message: "This guest name is already in use. Choose another name.", code: "GUEST_NAME_IN_USE" });
     }
 
     const { data, error } = await supabase
@@ -270,8 +279,9 @@ router.post("/guests", async (req, res) => {
       .insert({
         event_id,
         guest_name: cleanGuestName,
+        user_id: req.user?.user_id || null,
       })
-      .select()
+      .select("guest_id, event_id, guest_name, user_id")
       .single();
 
     if (error) {
@@ -282,10 +292,18 @@ router.post("/guests", async (req, res) => {
       });
     }
 
+    const guestToken = issueGuestToken({ guestId: data.guest_id, eventId: data.event_id, userId: data.user_id });
+    const { error: tokenError } = await supabase
+      .from("event_guests")
+      .update({ guest_access_token_hash: hashGuestToken(guestToken) })
+      .eq("guest_id", data.guest_id);
+    if (tokenError) throw createHttpError("Guest session could not be created.", 500);
+
     return res.status(201).json({
       success: true,
       message: "Guest created successfully.",
-      guest: data,
+      guest: { guest_id: data.guest_id, event_id: data.event_id, guest_name: data.guest_name },
+      guest_access_token: guestToken,
     });
   } catch (error) {
     return res.status(500).json({
@@ -296,14 +314,16 @@ router.post("/guests", async (req, res) => {
   }
 });
 
-router.post("/upload", upload.any(), async (req, res) => {
+router.post("/upload", uploadLimiter, upload.fields([
+  { name: "media", maxCount: 5 },
+  { name: "photo", maxCount: 5 },
+  { name: "video", maxCount: 5 },
+]), validateUploadedFiles, async (req, res) => {
+  const uploadedItems = [];
   try {
     const { event_id, guest_id, message } = req.body;
 
-    const files =
-      req.files?.filter((item) =>
-        ["media", "photo", "video"].includes(item.fieldname),
-      ) || [];
+    const files = Object.values(req.files || {}).flat().slice(0, 5);
 
     if (!event_id) {
       return res.status(400).json({
@@ -326,15 +346,37 @@ router.post("/upload", upload.any(), async (req, res) => {
       });
     }
 
-    await checkGuestBelongsToEvent(event_id, guest_id);
+    const guestToken = String(req.get("x-guest-token") || "");
+    let guestClaims;
+    try { guestClaims = verifyGuestToken(guestToken); } catch (_error) {
+      return res.status(401).json({ success: false, message: "Guest session is invalid or expired.", code: "INVALID_GUEST_SESSION" });
+    }
+    if (String(guestClaims.event_id) !== String(event_id) || String(guestClaims.guest_id) !== String(guest_id)) {
+      return res.status(403).json({ success: false, message: "Guest session does not match this event.", code: "GUEST_SESSION_MISMATCH" });
+    }
+    const guest = await checkGuestBelongsToEvent(event_id, guest_id);
+    const { data: guestSecurity } = await supabase.from("event_guests")
+      .select("guest_access_token_hash, user_id").eq("guest_id", guest_id).maybeSingle();
+    if (!guestSecurity || guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)) {
+      return res.status(401).json({ success: false, message: "Guest session has been revoked.", code: "GUEST_SESSION_REVOKED" });
+    }
     await checkGuestUploadLimit(event_id, guest_id, files.length);
 
-    const { mediaStatus } = await getUploadStatusForEvent(event_id);
+    const { mediaStatus, maxStoragePerGuest, onlyUsers } = await getUploadStatusForEvent(event_id);
+    if (onlyUsers && !guestSecurity.user_id) {
+      return res.status(403).json({ success: false, message: "Registered users only.", code: "REGISTERED_USERS_ONLY" });
+    }
+    const incomingBytes = files.reduce((sum, file) => sum + file.size, 0);
+    const { data: usageRows, error: usageError } = await supabase.from("media")
+      .select("bytes").eq("event_id", event_id).eq("guest_id", guest_id);
+    if (usageError) throw createHttpError("Storage usage could not be checked.", 500);
+    const usedBytes = (usageRows || []).reduce((sum, row) => sum + Number(row.bytes || 0), 0);
+    if (usedBytes + incomingBytes > maxStoragePerGuest * 1024 * 1024) {
+      return res.status(413).json({ success: false, message: "Guest storage quota exceeded.", code: "GUEST_STORAGE_QUOTA_EXCEEDED" });
+    }
 
     const cleanMessage =
-      message && message.trim() !== "" ? message.trim() : null;
-
-    const uploadedItems = [];
+      message && message.trim() !== "" ? cleanText(message, { max: 2000, field: "message" }) : null;
 
     for (const file of files) {
       const mediaKind = getMediaKindFromMime(file.mimetype);
@@ -367,6 +409,9 @@ router.post("/upload", upload.any(), async (req, res) => {
           url: cloudinaryResult.secure_url,
           public_id: cloudinaryResult.public_id,
           resource_type: cloudinaryResult.resource_type,
+          bytes: cloudinaryResult.bytes,
+          format: cloudinaryResult.format,
+          type: cloudinaryResult.type,
         },
       });
     }
@@ -377,7 +422,12 @@ router.post("/upload", upload.any(), async (req, res) => {
       media_type_id: item.media_type_id,
       media_url: item.media_url,
       message: item.message,
-      media_status: item.media_status,
+        media_status: item.media_status,
+        bytes: item.cloudinary.bytes,
+        cloudinary_public_id: item.cloudinary.public_id,
+        resource_type: item.cloudinary.resource_type,
+        delivery_type: item.cloudinary.type || "authenticated",
+        format: item.cloudinary.format,
     }));
 
     const { data, error } = await supabase
@@ -386,6 +436,10 @@ router.post("/upload", upload.any(), async (req, res) => {
       .select();
 
     if (error) {
+      await Promise.allSettled(uploadedItems.map((item) => cloudinary.uploader.destroy(
+        item.cloudinary.public_id,
+        { resource_type: item.cloudinary.resource_type, type: item.cloudinary.type || "authenticated" },
+      )));
       return res.status(500).json({
         success: false,
         message: "Files uploaded to Cloudinary but Supabase insert failed.",
@@ -402,6 +456,10 @@ router.post("/upload", upload.any(), async (req, res) => {
       cloudinary: uploadedItems.map((item) => item.cloudinary),
     });
   } catch (error) {
+    await Promise.allSettled(uploadedItems.map((item) => cloudinary.uploader.destroy(
+      item.cloudinary.public_id,
+      { resource_type: item.cloudinary.resource_type, type: item.cloudinary.type || "authenticated" },
+    )));
     return res.status(error.statusCode || 500).json({
       success: false,
       message: "Media upload failed.",
@@ -410,7 +468,7 @@ router.post("/upload", upload.any(), async (req, res) => {
   }
 });
 
-router.post("/message", async (req, res) => {
+router.post("/message", uploadLimiter, async (req, res) => {
   try {
     const { event_id, guest_id, message } = req.body;
 
@@ -435,7 +493,18 @@ router.post("/message", async (req, res) => {
       });
     }
 
-    await checkGuestBelongsToEvent(event_id, guest_id);
+    const guestToken = String(req.get("x-guest-token") || "");
+    let claims;
+    try { claims = verifyGuestToken(guestToken); } catch (_error) {
+      return res.status(401).json({ success: false, message: "Guest session is invalid or expired.", code: "INVALID_GUEST_SESSION" });
+    }
+    if (String(claims.event_id) !== String(event_id) || String(claims.guest_id) !== String(guest_id)) {
+      return res.status(403).json({ success: false, message: "Guest session mismatch." });
+    }
+    const { data: guestSecurity } = await supabase.from("event_guests").select("guest_access_token_hash, user_id").eq("guest_id", guest_id).maybeSingle();
+    if (!guestSecurity || guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)) {
+      return res.status(401).json({ success: false, message: "Guest session has been revoked." });
+    }
     await checkGuestUploadLimit(event_id, guest_id, 1);
 
     const { mediaStatus } = await getUploadStatusForEvent(event_id);
@@ -448,7 +517,7 @@ router.post("/message", async (req, res) => {
         guest_id,
         media_type_id: mediaTypeId,
         media_url: null,
-        message: message.trim(),
+        message: cleanText(message, { min: 1, max: 2000, field: "message" }),
         media_status: mediaStatus,
       })
       .select()
@@ -476,7 +545,7 @@ router.post("/message", async (req, res) => {
   }
 });
 
-router.post("/:mediaId/like", async (req, res) => {
+router.post("/:mediaId/like", likeLimiter, async (req, res) => {
   try {
     const { mediaId } = req.params;
     const { like_key } = req.body;
@@ -809,6 +878,7 @@ router.delete("/:mediaId", authMiddleware, async (req, res) => {
           resource_type: media.media_url.includes("/video/")
             ? "video"
             : "image",
+          type: "authenticated",
         })
         .catch((error) => {
           console.error("Cloudinary delete error:", error.message);

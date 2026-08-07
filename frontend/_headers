@@ -1,0 +1,15 @@
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://*.tile.openstreetmap.org; media-src 'self' blob: https://res.cloudinary.com; connect-src 'self' https://snapup-events-api.onrender.com https://api.snapupevents.com https://nominatim.openstreetmap.org; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:; upgrade-insecure-requests
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+/reset-password.html
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
+/verify-email.html
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer

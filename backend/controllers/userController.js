@@ -1,16 +1,17 @@
 const supabase = require("../config/supabaseClient");
 const bcrypt = require("bcryptjs");
 const cloudinary = require("../config/cloudinary");
+const { validatePassword } = require("../utils/validation");
 
 
 function getCloudinaryPublicId(mediaUrl) {
-  if (!mediaUrl || !mediaUrl.includes("/upload/")) {
+  if (!mediaUrl || !/\/(?:upload|authenticated)\//.test(mediaUrl)) {
     return null;
   }
 
   try {
     const url = new URL(mediaUrl);
-    const afterUpload = url.pathname.split("/upload/")[1];
+    const afterUpload = url.pathname.split(/\/(?:upload|authenticated)\//)[1];
 
     if (!afterUpload) {
       return null;
@@ -24,7 +25,7 @@ function getCloudinaryPublicId(mediaUrl) {
 }
 
 function getCloudinaryResourceType(mediaUrl) {
-  return String(mediaUrl || "").includes("/video/upload/") ? "video" : "image";
+  return /\/video\/(?:upload|authenticated)\//.test(String(mediaUrl || "")) ? "video" : "image";
 }
 
 function isMissingRelationError(error) {
@@ -262,12 +263,7 @@ const changeMyPassword = async (req, res) => {
       });
     }
 
-    if (new_password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Yeni şifre en az 6 karakter olmalıdır.",
-      });
-    }
+    validatePassword(new_password);
 
     if (new_password !== confirm_new_password) {
       return res.status(400).json({
@@ -278,7 +274,7 @@ const changeMyPassword = async (req, res) => {
 
     const { data: user, error: userError } = await supabase
       .from("users")
-      .select("user_id, password_hash")
+      .select("user_id, password_hash, token_version")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -309,12 +305,13 @@ const changeMyPassword = async (req, res) => {
       });
     }
 
-    const newPasswordHash = await bcrypt.hash(new_password, 10);
+    const newPasswordHash = await bcrypt.hash(new_password, 12);
 
     const { error: updateError } = await supabase
       .from("users")
       .update({
         password_hash: newPasswordHash,
+        token_version: Number(user.token_version || 0) + 1,
       })
       .eq("user_id", userId);
 
@@ -395,6 +392,26 @@ const deleteMyAccount = async (req, res) => {
       });
     }
 
+    const { data: deletionResult, error: deletionError } = await supabase.rpc(
+      "delete_user_account",
+      { p_user_id: String(userId) },
+    );
+    if (deletionError || !deletionResult?.deleted) {
+      return res.status(500).json({
+        success: false,
+        message: "Hesap güvenli biçimde silinemedi.",
+        code: "ACCOUNT_DELETE_FAILED",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Hesabın silindi. Medya varlıkları güvenli temizleme kuyruğuna alındı.",
+      deleted: deletionResult,
+    });
+
+    /* Legacy non-transactional cleanup retained temporarily for rollback reference.
+       It is unreachable after the atomic RPC above and can be removed after the
+       migration has been deployed successfully. */
     const { data: ownedEvents, error: eventsError } = await supabase
       .from("event")
       .select("event_id, event_cover_url")

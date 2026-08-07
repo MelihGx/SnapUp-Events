@@ -285,7 +285,7 @@ let photoPreviewObjectUrls = [];
 let videoPreviewObjectUrls = [];
 let uploadSuccessLastFocusedElement = null;
 
-const MEDIA_UPLOAD_MAX_SIZE = 100 * 1024 * 1024;
+const MEDIA_UPLOAD_MAX_SIZE = 50 * 1024 * 1024;
 const PHOTO_UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const VIDEO_UPLOAD_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 const EVENT_COVER_MAX_SIZE = 8 * 1024 * 1024;
@@ -2402,7 +2402,7 @@ function validateUploadFile(file, allowedTypes, invalidTypeMessage) {
   }
 
   if (file.size > MEDIA_UPLOAD_MAX_SIZE) {
-    throw new Error("The selected file must be 100 MB or smaller.");
+    throw new Error("The selected file must be 50 MB or smaller.");
   }
 }
 
@@ -2413,6 +2413,11 @@ function validateUploadFiles(files, allowedTypes, invalidTypeMessage) {
 }
 
 async function createGuestForUpload(guestName) {
+  const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
+    if (cached?.guest_id && cached?.guest_access_token) return cached;
+  } catch (_error) {}
   const response = await fetch(`${API_BASE_URL}/api/media/guests`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -2435,10 +2440,12 @@ async function createGuestForUpload(guestName) {
     );
   }
 
-  return data.guest;
+  const guestSession = { ...data.guest, guest_access_token: data.guest_access_token };
+  sessionStorage.setItem(sessionKey, JSON.stringify(guestSession));
+  return guestSession;
 }
 
-async function uploadFileToEvent(guestId, file) {
+async function uploadFileToEvent(guestId, guestToken, file) {
   const formData = new FormData();
 
   formData.append("media", file);
@@ -2447,6 +2454,7 @@ async function uploadFileToEvent(guestId, file) {
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
     method: "POST",
+    headers: { "X-Guest-Token": guestToken },
     body: formData,
   });
 
@@ -2459,7 +2467,7 @@ async function uploadFileToEvent(guestId, file) {
   return data.media;
 }
 
-async function uploadFilesToEvent(guestId, files) {
+async function uploadFilesToEvent(guestId, guestToken, files) {
   const failures = [];
   let uploaded = 0;
 
@@ -2483,7 +2491,7 @@ async function uploadFilesToEvent(guestId, files) {
     );
 
     try {
-      await uploadFileToEvent(guestId, file);
+      await uploadFileToEvent(guestId, guestToken, file);
       uploaded += 1;
     } catch (error) {
       failures.push({ file, error });
@@ -2493,10 +2501,10 @@ async function uploadFilesToEvent(guestId, files) {
   return { uploaded, failures };
 }
 
-async function sendMessageToEvent(guestId, message) {
+async function sendMessageToEvent(guestId, guestToken, message) {
   const response = await fetch(`${API_BASE_URL}/api/media/message`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: { ...getAuthHeaders(), "X-Guest-Token": guestToken },
     body: JSON.stringify({
       event_id: eventId,
       guest_id: guestId,
@@ -3382,7 +3390,7 @@ if (uploadMediaBtn) {
       }
 
       if (selectedType === "message") {
-        await sendMessageToEvent(guest.guest_id, message);
+        await sendMessageToEvent(guest.guest_id, guest.guest_access_token, message);
         setUploadMessage(t("Message sent successfully!"), "success");
         resetUploadInput("message");
         openUploadSuccessPopup(
@@ -3392,6 +3400,7 @@ if (uploadMediaBtn) {
       } else {
         const uploadResult = await uploadFilesToEvent(
           guest.guest_id,
+          guest.guest_access_token,
           selectedFiles,
         );
 

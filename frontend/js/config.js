@@ -15,6 +15,13 @@ export const API_URL = isLocalFrontend()
   ? LOCAL_API_URL
   : PRODUCTION_API_URL;
 
+const nativeFetch = window.fetch.bind(window);
+window.fetch = function snapUpFetch(input, init = {}) {
+  const target = typeof input === "string" ? input : input?.url || "";
+  if (!String(target).startsWith(API_URL)) return nativeFetch(input, init);
+  return nativeFetch(input, { ...init, credentials: "include" });
+};
+
 export function apiUrl(path = "") {
   const normalizedPath = path
     ? `/${String(path).replace(/^\/+/, "")}`

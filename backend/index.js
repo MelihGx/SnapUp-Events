@@ -1,25 +1,32 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
+const { requestContext, globalLimiter } = require("./middlewares/security");
 
 const app = express();
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
 
 const configuredOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = new Set([
+const productionOrigins = new Set([
   "https://snapupevents.com",
   "https://www.snapupevents.com",
+  ...configuredOrigins,
+]);
+const developmentOrigins = new Set([
+  ...productionOrigins,
   "https://snapup-events.pages.dev",
   "https://snapup-events.netlify.app",
-  ...configuredOrigins,
 ]);
 
 function isAllowedOrigin(origin) {
@@ -28,19 +35,38 @@ function isAllowedOrigin(origin) {
     return true;
   }
 
+  const allowedOrigins = process.env.NODE_ENV === "production"
+    ? productionOrigins
+    : developmentOrigins;
+
   if (allowedOrigins.has(origin)) {
     return true;
   }
 
-  // Allow local frontend development on any localhost port.
-  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+  if (process.env.NODE_ENV !== "production" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
     return true;
   }
 
   // Allow Cloudflare Pages preview deployment addresses such as:
   // https://a09a7da4.snapup-events.pages.dev
-  return /^https:\/\/[a-z0-9-]+\.snapup-events\.pages\.dev$/i.test(origin);
+  return process.env.NODE_ENV !== "production" &&
+    /^https:\/\/[a-z0-9-]+\.snapup-events\.pages\.dev$/i.test(origin);
 }
+
+app.use(requestContext);
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  referrerPolicy: { policy: "no-referrer" },
+  strictTransportSecurity: process.env.NODE_ENV === "production"
+    ? { maxAge: 31_536_000, includeSubDomains: true, preload: true }
+    : false,
+}));
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+  next();
+});
+app.use(globalLimiter);
 
 app.use(
   cors({
@@ -54,7 +80,7 @@ app.use(
       return callback(corsError);
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id"],
     exposedHeaders: [
       "Content-Disposition",
       "X-SnapUp-PDF-Engine",
@@ -62,9 +88,19 @@ app.use(
       "X-Memory-Book-Photos",
       "X-Memory-Book-Skipped",
     ],
+    credentials: true,
   }),
 );
-app.use(express.json({ limit: "2mb" }));
+app.use((req, res, next) => {
+  const unsafe = !["GET", "HEAD", "OPTIONS"].includes(req.method);
+  const cookieAuth = /(?:^|;\s*)(?:__Host-)?snapup_session=/.test(String(req.headers.cookie || ""));
+  const origin = req.get("origin");
+  if (unsafe && cookieAuth && (!origin || !isAllowedOrigin(origin))) {
+    return res.status(403).json({ success: false, message: "Request origin is not allowed.", code: "CSRF_ORIGIN_REJECTED" });
+  }
+  next();
+});
+app.use(express.json({ limit: "256kb", strict: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -81,14 +117,7 @@ app.get("/", (req, res) => {
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Backend bağlantısı başarılı",
-    project: "SnapUp Events",
-    pdf_engine: "memory-book-v3",
-    invitation_drafts: "v4-delete-popup-limit-3",
-    event_cover: "v4-owner-change-remove-account-card",
-    location_details: "v2-map-pin-owner-edit",
-    event_delete_feedback: "v1-success-popup",
-    email_verification: "v1-resend-token-hash",
+    status: "ok",
   });
 });
 
@@ -117,7 +146,19 @@ app.use((error, req, res, next) => {
     });
   }
 
-  return next(error);
+  console.error(JSON.stringify({
+    level: "error",
+    request_id: req.requestId,
+    message: error?.message || "Unhandled error",
+    code: error?.code,
+  }));
+  return res.status(error?.statusCode || 500).json({
+    success: false,
+    message: error?.statusCode && error.statusCode < 500
+      ? error.message
+      : "Unexpected server error.",
+    code: error?.code || "INTERNAL_ERROR",
+  });
 });
 
 app.use((req, res) => {

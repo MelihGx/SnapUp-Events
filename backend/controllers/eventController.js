@@ -1,4 +1,7 @@
 const supabase = require("../config/supabaseClient");
+const crypto = require("crypto");
+const QRCode = require("qrcode");
+const { signedDeliveryUrl } = require("../services/cloudinaryDelivery");
 const cloudinary = require("../config/cloudinary");
 const {
   MemoryBookPdfError,
@@ -67,17 +70,17 @@ function normalizeEventCoordinates(latitudeValue, longitudeValue) {
 }
 
 function generateEventCode() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
 
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 12; i++) {
+    code += chars[crypto.randomInt(chars.length)];
   }
 
   return code;
 }
 
-function createQrCodeUrl(eventCode) {
+async function createQrCodeUrl(eventCode) {
   const frontendUrl = (
     process.env.FRONTEND_URL || "http://127.0.0.1:5500/frontend"
   ).replace(/\/$/, "");
@@ -86,9 +89,7 @@ function createQrCodeUrl(eventCode) {
     eventCode,
   )}`;
 
-  return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=10&data=${encodeURIComponent(
-    joinUrl,
-  )}`;
+  return QRCode.toDataURL(joinUrl, { width: 260, margin: 1, errorCorrectionLevel: "M" });
 }
 
 async function generateUniqueEventCode() {
@@ -150,6 +151,8 @@ function uploadEventCover(fileBuffer, eventCode) {
         folder: "snapup-events/event-covers",
         public_id: `${eventCode.toLowerCase()}-${Date.now()}`,
         resource_type: "image",
+        type: "authenticated",
+        allowed_formats: ["jpg", "jpeg"],
       },
       (error, result) => {
         if (error) {
@@ -173,6 +176,7 @@ async function deleteEventCover(publicId) {
   try {
     await cloudinary.uploader.destroy(publicId, {
       resource_type: "image",
+      type: "authenticated",
       invalidate: true,
     });
   } catch (error) {
@@ -181,13 +185,13 @@ async function deleteEventCover(publicId) {
 }
 
 function getCloudinaryPublicId(mediaUrl) {
-  if (!mediaUrl || !mediaUrl.includes("/upload/")) {
+  if (!mediaUrl || !/\/(?:upload|authenticated)\//.test(mediaUrl)) {
     return null;
   }
 
   try {
     const url = new URL(mediaUrl);
-    const afterUpload = url.pathname.split("/upload/")[1];
+    const afterUpload = url.pathname.split(/\/(?:upload|authenticated)\//)[1];
 
     if (!afterUpload) {
       return null;
@@ -293,7 +297,7 @@ const createEvent = async (req, res) => {
     const packetLevelId = await getPacketLevelId(selectedPackage);
 
     const eventCode = await generateUniqueEventCode();
-    const qrCodeUrl = createQrCodeUrl(eventCode);
+    const qrCodeUrl = await createQrCodeUrl(eventCode);
     let eventCoverUrl = null;
 
     if (req.file) {
@@ -1306,7 +1310,7 @@ function getValidApprovedImages(media) {
       item.media_url &&
       item.media_status === "approved" &&
       item.media_type === "image",
-  );
+  ).map((item) => ({ ...item, media_url: signedDeliveryUrl(item.media_url) }));
 }
 
 function encodeDownloadFileName(fileName) {
@@ -1325,7 +1329,10 @@ async function buildAndSendMemoryBook(res, event, media) {
 
   const { buffer, includedCount, skippedCount } =
     await buildEventMemoryBookPdf({
-      event,
+      event: {
+        ...event,
+        event_cover_url: signedDeliveryUrl(event.event_cover_url),
+      },
       media: validImages,
       logger: console,
     });

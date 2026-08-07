@@ -5,7 +5,9 @@ const PDFDocument = require("pdfkit");
 const PAGE_WIDTH = 1080;
 const PAGE_HEIGHT = 607.5;
 const IMAGE_TIMEOUT_MS = 15_000;
-const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const MAX_TOTAL_IMAGE_BYTES = 120 * 1024 * 1024;
+const MAX_PDF_IMAGES = 100;
 const DOWNLOAD_CONCURRENCY = 3;
 
 const COLORS = {
@@ -167,6 +169,9 @@ async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
   if (!["http:", "https:"].includes(parsedUrl.protocol)) {
     throw new Error("Only HTTP and HTTPS image URLs are supported.");
   }
+  if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "res.cloudinary.com") {
+    throw new Error("PDF images must come from the configured Cloudinary delivery host.");
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
@@ -240,7 +245,9 @@ async function prepareMemoryBookAssets({
   fetchImpl = globalThis.fetch,
   logger = console,
 }) {
-  const approvedImages = Array.isArray(media) ? media : [];
+  const allApprovedImages = Array.isArray(media) ? media : [];
+  const approvedImages = allApprovedImages.slice(0, MAX_PDF_IMAGES);
+  let totalBytes = 0;
 
   const downloaded = await mapWithConcurrency(
     approvedImages,
@@ -248,6 +255,10 @@ async function prepareMemoryBookAssets({
     async (item) => {
       try {
         const imageBuffer = await downloadImage(item.media_url, fetchImpl);
+        totalBytes += imageBuffer.length;
+        if (totalBytes > MAX_TOTAL_IMAGE_BYTES) {
+          throw new MemoryBookPdfError("Memory Book image budget exceeded.", "PDF_IMAGE_BUDGET_EXCEEDED");
+        }
         return { item, imageBuffer };
       } catch (error) {
         logger.warn("Memory Book skipped an image.", {
@@ -283,7 +294,7 @@ async function prepareMemoryBookAssets({
   return {
     moments,
     coverBuffer,
-    skippedCount: approvedImages.length - moments.length,
+    skippedCount: allApprovedImages.length - moments.length,
   };
 }
 

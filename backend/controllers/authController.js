@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const supabase = require("../config/supabaseClient");
+const { cleanText, normalizeEmail, validatePassword } = require("../utils/validation");
+const { setAuthCookie } = require("../utils/authCookie");
 const {
   RESEND_COOLDOWN_MS,
   hashVerificationToken,
@@ -13,10 +15,14 @@ const createToken = (user) => {
     {
       user_id: user.user_id,
       user_mail: user.user_mail,
+      token_version: Number(user.token_version) || 0,
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+      expiresIn: process.env.JWT_EXPIRES_IN || "15m",
+      algorithm: "HS256",
+      issuer: "snapup-events",
+      audience: "snapup-web",
     },
   );
 };
@@ -35,14 +41,10 @@ const register = async (req, res) => {
       });
     }
 
-    if (rawPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Şifre en az 6 karakter olmalıdır.",
-      });
-    }
-
-    const normalizedMail = user_mail.toLowerCase().trim();
+    const validatedPassword = validatePassword(rawPassword);
+    const normalizedMail = normalizeEmail(user_mail);
+    const cleanName = cleanText(user_name, { min: 1, max: 100, field: "user_name" });
+    const cleanPhone = user_phone ? cleanText(user_phone, { max: 32, field: "user_phone" }) : null;
 
     const { data: existingUser, error: existingUserError } = await supabase
       .from("users")
@@ -65,15 +67,15 @@ const register = async (req, res) => {
       });
     }
 
-    const passwordHash = await bcrypt.hash(rawPassword, 10);
+    const passwordHash = await bcrypt.hash(validatedPassword, 12);
 
     const { data: newUser, error: insertError } = await supabase
       .from("users")
       .insert([
         {
-          user_name: user_name.trim(),
+          user_name: cleanName,
           user_mail: normalizedMail,
-          user_phone: user_phone || null,
+          user_phone: cleanPhone,
           password_hash: passwordHash,
           is_user_active: true,
           is_email_verified: false,
@@ -107,13 +109,14 @@ const register = async (req, res) => {
     }
 
     const token = createToken(newUser);
+    setAuthCookie(res, token);
 
     return res.status(201).json({
       success: true,
       message: verificationEmailSent
         ? "Account created. Please verify your email."
         : "Account created, but the verification email could not be sent. You can resend it from your account.",
-      token,
+      token: process.env.NODE_ENV === "production" ? "cookie" : token,
       user: newUser,
       requires_email_verification: true,
       verification_email_sent: verificationEmailSent,
@@ -139,12 +142,12 @@ const login = async (req, res) => {
       });
     }
 
-    const normalizedMail = user_mail.toLowerCase().trim();
+    const normalizedMail = normalizeEmail(user_mail);
 
     const { data: user, error } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at",
+        "user_id, user_name, user_mail, user_phone, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at, token_version",
       )
       .eq("user_mail", normalizedMail)
       .maybeSingle();
@@ -192,14 +195,16 @@ const login = async (req, res) => {
       is_user_active: user.is_user_active,
       is_email_verified: user.is_email_verified,
       email_verified_at: user.email_verified_at,
+      token_version: Number(user.token_version) || 0,
     };
 
     const token = createToken(safeUser);
+    setAuthCookie(res, token);
 
     return res.status(200).json({
       success: true,
       message: "Login successful.",
-      token,
+      token: process.env.NODE_ENV === "production" ? "cookie" : token,
       user: safeUser,
     });
   } catch (error) {

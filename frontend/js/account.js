@@ -406,20 +406,27 @@ function renderEvents(events) {
   eventsList.innerHTML = eventItems
     .map((event) => {
       const eventId = encodeURIComponent(event.event_id);
-      const eventName = event.event_name || t("Untitled Event");
+      const eventName = escapeHtml(event.event_name || t("Untitled Event"));
       const eventLocation =
         [event.event_location, event.event_address]
           .map((value) => String(value || "").trim())
           .filter(Boolean)
-          .join(", ") || t("No location");
+          .join(", ") || t("No location"));
+      const safeEventLocation = escapeHtml(eventLocation);
       const eventDate = event.event_date
         ? formatDate(event.event_date)
         : t("No date");
       const createdAt = formatDate(event.event_created_at);
-      const eventCode = event.event_code || "------";
-      const eventStatus = t(event.is_event_active ? "Active" : "Passive");
+      const eventCode = escapeHtml(event.event_code || "------");
+      const eventStatus = escapeHtml(t(event.is_event_active ? "Active" : "Passive"));
       const statusClass = event.is_event_active ? "active" : "passive";
-      const eventCoverUrl = event.event_cover_url || "";
+      let eventCoverUrl = "";
+      try {
+        const candidate = new URL(event.event_cover_url || "");
+        if (candidate.protocol === "https:" && candidate.hostname === "res.cloudinary.com") {
+          eventCoverUrl = candidate.href;
+        }
+      } catch (_error) {}
       const eventCoverImage = eventCoverUrl
         ? `
           <img
@@ -436,7 +443,7 @@ function renderEvents(events) {
         <a 
           href="event-detail.html?event_id=${eventId}" 
           class="event-item event-item-link sweet-event-card"
-          aria-label="${t("Open event gallery")}: ${eventName}"
+          aria-label="${escapeHtml(t("Open event gallery"))}: ${eventName}"
         >
           <div class="sweet-event-cover${eventCoverUrl ? " has-image" : ""}">
             ${eventCoverImage}
@@ -497,7 +504,7 @@ function renderEvents(events) {
 
                 <div>
                   <small>Location</small>
-                  <strong>${eventLocation}</strong>
+                  <strong>${safeEventLocation}</strong>
                 </div>
               </div>
 
@@ -680,10 +687,10 @@ passwordForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (new_password.length < 6) {
+  if (new_password.length < 12) {
     setResult(
       passwordResult,
-      "New password must be at least 6 characters.",
+      "New password must be at least 12 characters.",
       "error",
     );
     return;

@@ -2,6 +2,11 @@ import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
 
 const params = new URLSearchParams(window.location.search);
 const rawToken = String(params.get("token") || "").trim();
+if (params.has("token")) {
+  params.delete("token");
+  const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, document.title, cleanUrl);
+}
 
 const statusBox = document.getElementById("resetPasswordStatus");
 const form = document.getElementById("resetPasswordForm");
@@ -102,7 +107,7 @@ form.addEventListener("submit", async (event) => {
   if (!newPassword) {
     newPasswordError.textContent = t("New password is required.");
     hasError = true;
-  } else if (newPassword.length < 6 || newPassword.length > 72) {
+  } else if (newPassword.length < 12 || new TextEncoder().encode(newPassword).length > 72) {
     newPasswordError.textContent = t("Password must be between 6 and 72 characters.");
     hasError = true;
   }

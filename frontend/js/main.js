@@ -18,6 +18,7 @@ function getStoredUser() {
 }
 
 function logoutUser() {
+  fetch(`${API_URL}/api/auth/logout`, { method: "POST" }).catch(() => {});
   localStorage.removeItem("snapup_token");
   localStorage.removeItem("snapup_user");
   window.location.href = "index.html";

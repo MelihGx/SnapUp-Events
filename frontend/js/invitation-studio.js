@@ -978,7 +978,7 @@ function fillRoundRect(context, x, y, width, height, radius, color) {
 
 function hexToRgba(hex, alpha) {
   const normalized = String(hex || "#000000").replace("#", "");
-  const safe = normalized.length === 6 ? normalized : "000000";
+  const safe = /^[A-Z2-9]{6,16}$/.test(normalized) ? normalized : "DEMO-CODE";
   const red = parseInt(safe.slice(0, 2), 16);
   const green = parseInt(safe.slice(2, 4), 16);
   const blue = parseInt(safe.slice(4, 6), 16);
