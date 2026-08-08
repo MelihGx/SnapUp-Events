@@ -110,6 +110,7 @@ registerForm.addEventListener("submit", async (event) => {
         user_mail,
         user_phone,
         password,
+        language_code: window.SnapUpI18n?.language || "en",
       }),
     });
 

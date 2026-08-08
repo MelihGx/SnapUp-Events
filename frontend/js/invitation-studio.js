@@ -333,6 +333,17 @@ function getLocale() {
     it: "it-IT",
     nl: "nl-NL",
     ar: "ar",
+    hi: "hi-IN",
+    ur: "ur-PK",
+    fa: "fa-IR",
+    ja: "ja-JP",
+    zh: "zh-CN",
+    ko: "ko-KR",
+    ...Object.fromEntries(
+      Object.entries(window.SnapUpAdditionalLanguages || {}).map(
+        ([code, metadata]) => [code, metadata.locale],
+      ),
+    ),
   };
 
   return locales[language] || "en-US";

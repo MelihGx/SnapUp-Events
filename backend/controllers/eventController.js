@@ -396,7 +396,7 @@ const createEvent = async (req, res) => {
 
 const getEventByCode = async (req, res) => {
   try {
-    const { eventCode } = req.params;
+    const eventCode = req.params.eventCode?.trim().toUpperCase();
 
     if (!eventCode) {
       return res.status(400).json({
@@ -410,7 +410,7 @@ const getEventByCode = async (req, res) => {
       .select(
         "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
-      .eq("event_code", eventCode.toUpperCase())
+      .eq("event_code", eventCode)
       .eq("is_event_active", true)
       .maybeSingle();
 

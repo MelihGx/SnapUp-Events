@@ -1,5 +1,9 @@
 const crypto = require("node:crypto");
 const supabase = require("../config/supabaseClient");
+const {
+  getEmailCopy,
+  normalizeEmailLanguage,
+} = require("./emailTranslations");
 
 const PASSWORD_RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
 const PASSWORD_RESET_COOLDOWN_MS = 60 * 1000;
@@ -28,14 +32,23 @@ function escapeHtml(value = "") {
   });
 }
 
-function getPasswordResetUrl(rawToken) {
+function formatEmailText(template, replacements = {}) {
+  return Object.entries(replacements).reduce(
+    (result, [key, value]) =>
+      result.replaceAll(`{{${key}}}`, String(value ?? "")),
+    String(template || ""),
+  );
+}
+
+function getPasswordResetUrl(rawToken, languageCode) {
   const frontendUrl = String(process.env.FRONTEND_URL || "").replace(/\/+$/, "");
 
   if (!frontendUrl) {
     throw new Error("FRONTEND_URL environment variable is missing.");
   }
 
-  return `${frontendUrl}/reset-password.html?token=${encodeURIComponent(rawToken)}`;
+  const language = normalizeEmailLanguage(languageCode);
+  return `${frontendUrl}/reset-password.html?token=${encodeURIComponent(rawToken)}&lang=${encodeURIComponent(language)}`;
 }
 
 function getEmailLogoUrl() {
@@ -83,7 +96,12 @@ async function createPasswordResetToken(userId, email) {
   };
 }
 
-async function sendPasswordResetEmail({ email, userName, rawToken }) {
+async function sendPasswordResetEmail({
+  email,
+  userName,
+  rawToken,
+  languageCode,
+}) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
 
@@ -99,8 +117,11 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
     throw new Error("This backend requires Node.js 18 or newer for email sending.");
   }
 
-  const resetUrl = getPasswordResetUrl(rawToken);
-  const safeUserName = escapeHtml(userName || "there");
+  const { language, metadata, copy } = getEmailCopy(languageCode);
+  const resetUrl = getPasswordResetUrl(rawToken, language);
+  const displayName = userName || copy.common.fallbackName;
+  const helloText = formatEmailText(copy.common.hello, { name: displayName });
+  const safeHelloText = escapeHtml(helloText);
   const safeResetUrl = escapeHtml(resetUrl);
   const safeLogoUrl = escapeHtml(getEmailLogoUrl());
 
@@ -113,26 +134,26 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
     body: JSON.stringify({
       from,
       to: [email],
-      subject: "Reset your password — SnapUp Events",
+      subject: copy.passwordReset.subject,
       text: [
-        `Hello ${userName || "there"},`,
+        helloText,
         "",
-        "We received a request to reset your SnapUp Events password.",
+        copy.passwordReset.textRequest,
         "",
         resetUrl,
         "",
-        "This reset link expires in 30 minutes and can only be used once.",
-        "If you did not request a password reset, you can safely ignore this email.",
+        copy.passwordReset.textExpires,
+        copy.passwordReset.textIgnore,
       ].join("\n"),
       html: `
         <!doctype html>
-        <html lang="en">
+        <html lang="${language}" dir="${metadata.direction}">
           <head>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <meta name="color-scheme" content="light only" />
             <meta name="supported-color-schemes" content="light" />
-            <title>Reset your SnapUp Events password</title>
+            <title>${escapeHtml(copy.passwordReset.documentTitle)}</title>
             <style>
               @media only screen and (max-width: 620px) {
                 .email-shell { padding: 20px 10px !important; }
@@ -145,9 +166,9 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
               }
             </style>
           </head>
-          <body style="margin:0;padding:0;background-color:#0b071c;color:#201a35;font-family:Inter,Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+          <body dir="${metadata.direction}" style="margin:0;padding:0;background-color:#0b071c;color:#201a35;font-family:Inter,Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;direction:${metadata.direction};">
             <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
-              Use this secure, single-use link to reset your SnapUp Events password.
+              ${escapeHtml(copy.passwordReset.preheader)}
             </div>
 
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background-color:#0b071c;background-image:linear-gradient(135deg,#0b071c 0%,#1b0d3a 48%,#32152d 100%);">
@@ -178,7 +199,7 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
                                     </table>
                                   </td>
                                   <td align="right" valign="middle" style="color:#bdb4d2;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;">
-                                    Account security
+                                    ${escapeHtml(copy.passwordReset.headerLabel)}
                                   </td>
                                 </tr>
                               </table>
@@ -190,27 +211,27 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
                               <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                                 <tr>
                                   <td style="padding:8px 13px;border-radius:999px;background-color:#f8e9f1;color:#db2777;font-size:11px;font-weight:900;letter-spacing:1.4px;text-transform:uppercase;">
-                                    Password recovery
+                                    ${escapeHtml(copy.passwordReset.eyebrow)}
                                   </td>
                                 </tr>
                               </table>
 
                               <h1 class="email-title" style="margin:22px 0 0;color:#201a35;font-size:38px;line-height:1.08;letter-spacing:-1.5px;font-weight:900;">
-                                Reset your password.
+                                ${escapeHtml(copy.passwordReset.heading)}
                               </h1>
 
                               <p style="margin:20px 0 0;color:#514a60;font-size:16px;line-height:1.7;">
-                                Hello <strong style="color:#201a35;">${safeUserName}</strong>,
+                                ${safeHelloText}
                               </p>
                               <p style="margin:8px 0 0;color:#6f687b;font-size:16px;line-height:1.7;">
-                                We received a request to create a new password for your SnapUp Events account.
+                                ${escapeHtml(copy.passwordReset.introduction)}
                               </p>
 
                               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:28px;">
                                 <tr>
                                   <td align="center" style="border-radius:16px;background-color:#ec4899;background-image:linear-gradient(90deg,#7c3aed 0%,#ec4899 52%,#ff6b4a 100%);box-shadow:0 16px 34px rgba(236,72,153,.28);">
                                     <a class="email-button" href="${safeResetUrl}" target="_blank" style="display:block;padding:17px 24px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:900;line-height:1.2;border-radius:16px;">
-                                      Create a new password
+                                      ${escapeHtml(copy.passwordReset.button)}
                                     </a>
                                   </td>
                                 </tr>
@@ -220,14 +241,14 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
                                 <tr>
                                   <td width="5" style="width:5px;background-color:#22d3c5;border-radius:18px 0 0 18px;font-size:0;line-height:0;">&nbsp;</td>
                                   <td style="padding:17px 18px;color:#5c5968;font-size:13px;line-height:1.65;">
-                                    <strong style="color:#201a35;">Secure, single-use link.</strong>
-                                    It expires in 30 minutes. If you did not request this change, your current password remains unchanged.
+                                    <strong style="color:#201a35;">${escapeHtml(copy.passwordReset.secureLabel)}</strong>
+                                    ${escapeHtml(copy.passwordReset.secureText)}
                                   </td>
                                 </tr>
                               </table>
 
                               <p style="margin:24px 0 7px;color:#8a8492;font-size:12px;line-height:1.6;">
-                                Button not working? Copy and paste this address into your browser:
+                                ${escapeHtml(copy.common.buttonFallback)}
                               </p>
                               <p style="margin:0;word-break:break-all;color:#7c3aed;font-size:12px;line-height:1.55;">
                                 <a href="${safeResetUrl}" style="color:#7c3aed;text-decoration:underline;">${safeResetUrl}</a>
@@ -241,8 +262,8 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
                     <tr>
                       <td align="center" style="padding:22px 18px 0;color:#a9a0bb;font-size:12px;line-height:1.7;">
                         <strong style="color:#ffffff;">SnapUp Events</strong><br />
-                        Every guest. Every moment. One shared album.<br />
-                        This is an automated account-security email.
+                        ${escapeHtml(copy.common.footerTagline)}<br />
+                        ${escapeHtml(copy.common.footerSecurity)}
                       </td>
                     </tr>
                   </table>
@@ -268,7 +289,12 @@ async function sendPasswordResetEmail({ email, userName, rawToken }) {
   return result;
 }
 
-async function issueAndSendPasswordResetEmail({ userId, email, userName }) {
+async function issueAndSendPasswordResetEmail({
+  userId,
+  email,
+  userName,
+  languageCode,
+}) {
   await revokeActivePasswordResetTokens(userId);
   const { rawToken, resetToken } = await createPasswordResetToken(userId, email);
 
@@ -277,6 +303,7 @@ async function issueAndSendPasswordResetEmail({ userId, email, userName }) {
       email,
       userName,
       rawToken,
+      languageCode,
     });
 
     return {

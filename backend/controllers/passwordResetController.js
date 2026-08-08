@@ -137,6 +137,8 @@ const requestPasswordReset = async (req, res) => {
         userId: user.user_id,
         email: user.user_mail,
         userName: user.user_name,
+        languageCode:
+          req.body?.language_code || req.get("Accept-Language") || "en",
       });
     } catch (error) {
       console.error("Password reset email could not be sent:", error.message);

@@ -158,6 +158,9 @@ async function resendVerificationEmail() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken}`,
       },
+      body: JSON.stringify({
+        language_code: window.SnapUpI18n?.language || "en",
+      }),
     });
 
     const data = await response.json();

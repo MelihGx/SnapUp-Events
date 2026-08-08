@@ -95,6 +95,17 @@ const localeByLanguage = {
   bs: "bs-BA",
   sq: "sq-AL",
   mk: "mk-MK",
+  hi: "hi-IN",
+  ur: "ur-PK",
+  fa: "fa-IR",
+  ja: "ja-JP",
+  zh: "zh-CN",
+  ko: "ko-KR",
+  ...Object.fromEntries(
+    Object.entries(window.SnapUpAdditionalLanguages || {}).map(
+      ([code, metadata]) => [code, metadata.locale],
+    ),
+  ),
 };
 
 function t(value) {
@@ -347,6 +358,9 @@ async function resendVerificationEmail() {
       {
         method: "POST",
         headers: getAuthHeaders(),
+        body: JSON.stringify({
+          language_code: window.SnapUpI18n?.language || "en",
+        }),
       },
     );
 

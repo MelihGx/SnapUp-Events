@@ -7,7 +7,7 @@ import { initQRPreview } from "./qr-preview.js";
 import { initCopyCode } from "./copy-code.js";
 import { initUploadSimulation } from "./upload-simulation.js";
 import { testBackendConnection } from "./events-api.js";
-import { initJoinUploadModal } from "./join-upload-modal.js?v=six-digit-code-1";
+import { initJoinUploadModal } from "./join-upload-modal.js?v=alphanumeric-code-1";
 import { API_URL } from "./config.js?v=runtime-api-2";
 
 function escapeHtml(value) {

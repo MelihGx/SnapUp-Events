@@ -14,44 +14,6 @@ let selectedFiles = [];
 let selectedFilePreviewUrls = [];
 let successPopupHideTimer = null;
 
-const successButtonLabels = {
-  en: "Continue",
-  tr: "Devam Et",
-  ar: "متابعة",
-  de: "Weiter",
-  fr: "Continuer",
-  es: "Continuar",
-  it: "Continua",
-  nl: "Doorgaan",
-  bg: "Продължи",
-  ro: "Continuă",
-  el: "Συνέχεια",
-  sr: "Nastavi",
-  hr: "Nastavi",
-  bs: "Nastavi",
-  sq: "Vazhdo",
-  mk: "Продолжи",
-};
-
-const messageSuccessTitleLabels = {
-  en: "Sent!",
-  tr: "Gönderildi!",
-  ar: "تم الإرسال!",
-  de: "Gesendet!",
-  fr: "Envoyé !",
-  es: "¡Enviado!",
-  it: "Inviato!",
-  nl: "Verzonden!",
-  bg: "Изпратено!",
-  ro: "Trimis!",
-  el: "Στάλθηκε!",
-  sr: "Poslato!",
-  hr: "Poslano!",
-  bs: "Poslano!",
-  sq: "U dërgua!",
-  mk: "Испратено!",
-};
-
 function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
 }
@@ -73,18 +35,16 @@ function openUploadSuccessPopup(mediaType, uploadedCount = 1) {
 
   window.clearTimeout(successPopupHideTimer);
 
-  const language = window.SnapUpI18n?.language || "en";
   const safeCount = Number(uploadedCount) || 1;
   const isMessage = mediaType === "message";
 
   title.textContent = isMessage
-    ? messageSuccessTitleLabels[language] || messageSuccessTitleLabels.en
+    ? translate("Message sent successfully!")
     : translate("Uploaded!");
   message.textContent = isMessage
     ? translate("Message sent successfully!")
     : translate(`${safeCount} file(s) uploaded successfully!`);
-  button.textContent =
-    successButtonLabels[language] || successButtonLabels.en;
+  button.textContent = translate("Continue");
 
   popup.hidden = false;
   popup.setAttribute("aria-hidden", "false");

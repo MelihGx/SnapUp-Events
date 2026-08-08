@@ -21,9 +21,10 @@
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
     <meta name="theme-color" content="#17122B" />
-    <link rel="stylesheet" href="css/i18n.css?v=mobile-controls-balanced-1" />
+    <link rel="stylesheet" href="css/i18n.css?v=global-languages-2" />
     <script src="js/location-i18n.js?v=location-details-1" defer></script>
-    <script src="js/i18n.js?v=six-digit-code-1" defer></script>
+    <script src="js/asian-i18n.js?v=global-languages-2" defer></script>
+    <script src="js/i18n.js?v=global-languages-2" defer></script>
       <script>
       (() => {
         const saved = localStorage.getItem("snapup_theme");
@@ -465,7 +466,7 @@
                       ></div>
                       <div class="flow-code-box">
                         <span>EVENT CODE</span>
-                        <strong id="eventCode">245817</strong>
+                        <strong id="eventCode">A7K3P9</strong>
                         <button id="copyCode" type="button">Copy code</button>
                       </div>
                     </div>
@@ -481,7 +482,7 @@
                 >
                   <div class="flow-upload">
                     <div class="flow-screen-heading">
-                      <span>Guest view · 245817</span>
+                      <span>Guest view · A7K3P9</span>
                       <h3>Add a memory</h3>
                       <p>No account or app download required.</p>
                     </div>
@@ -989,9 +990,11 @@
               <input
                 type="text"
                 id="joinEventCode"
-                placeholder="Example: 123456"
+                placeholder="Example: A7K3P9"
                 maxlength="12"
                 autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
               />
             </label>
 
@@ -1163,7 +1166,7 @@
         });
       })();
     </script>
-    <script type="module" src="js/main.js?v=six-digit-code-1"></script>
+    <script type="module" src="js/main.js?v=alphanumeric-code-1"></script>
       <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>

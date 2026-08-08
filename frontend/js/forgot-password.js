@@ -44,7 +44,10 @@ form.addEventListener("submit", async (event) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_mail: userMail }),
+      body: JSON.stringify({
+        user_mail: userMail,
+        language_code: window.SnapUpI18n?.language || "en",
+      }),
     });
 
     const data = await response.json().catch(() => ({}));

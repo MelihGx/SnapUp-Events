@@ -147,24 +147,29 @@
   letter-spacing: 0.08em;
 }
 
-.snapup-language__menu button[lang="ar"] span {
+.snapup-language__menu button:is(
+  [lang="ar"],
+  [lang="ur"],
+  [lang="fa"],
+  [lang="he"]
+) span {
   direction: rtl;
   unicode-bidi: isolate;
 }
 
-html[lang="ar"] body,
-html[lang="ar"] button,
-html[lang="ar"] input,
-html[lang="ar"] select,
-html[lang="ar"] textarea {
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) body,
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) button,
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input,
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) select,
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) textarea {
   font-family: Tahoma, Arial, sans-serif;
 }
 
 /*
- * Arabic is applied to text only. The document itself stays LTR so navigation,
+ * RTL direction is applied to text only. The document itself stays LTR so navigation,
  * cards, columns, media, controls and icons keep the original layout.
  */
-html[lang="ar"] :where(
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) :where(
   h1,
   h2,
   h3,
@@ -187,7 +192,7 @@ html[lang="ar"] :where(
   text-align: right;
 }
 
-html[lang="ar"] input:not(
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input:not(
   [type="email"],
   [type="tel"],
   [type="password"],
@@ -195,31 +200,31 @@ html[lang="ar"] input:not(
   [type="date"],
   [type="time"]
 ),
-html[lang="ar"] textarea {
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) textarea {
   direction: rtl;
   text-align: right;
 }
 
-html[lang="ar"] input[type="email"],
-html[lang="ar"] input[type="tel"],
-html[lang="ar"] input[type="password"],
-html[lang="ar"] input[type="number"],
-html[lang="ar"] input[type="date"],
-html[lang="ar"] input[type="time"],
-html[lang="ar"] input[inputmode="numeric"],
-html[lang="ar"] .event-code,
-html[lang="ar"] code {
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="email"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="tel"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="password"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="number"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="date"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[type="time"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) input[inputmode="numeric"],
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) .event-code,
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) code {
   direction: ltr;
   text-align: left;
 }
 
-/* Keep the hero composition fixed while letting each Arabic line read RTL. */
-html[lang="ar"] .hero-title {
+/* Keep the hero composition fixed while letting RTL-script lines read correctly. */
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) .hero-title {
   direction: ltr;
   text-align: left;
 }
 
-html[lang="ar"] .hero-title__line {
+html:is([lang="ar"], [lang="ur"], [lang="fa"], [lang="he"]) .hero-title__line {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: right;
@@ -263,6 +268,50 @@ html[lang="ar"] .hero-title__line {
     width: 176px;
     max-height: min(390px, calc(100vh - 72px));
     border-radius: 16px;
+  }
+}
+
+/* Keep longer newly added translations inside the mobile hero viewport. */
+@media (max-width: 720px) {
+  html:is(
+    [lang="pt"],
+    [lang="ru"],
+    [lang="id"],
+    [lang="pl"],
+    [lang="vi"],
+    [lang="uk"],
+    [lang="th"],
+    [lang="cs"],
+    [lang="he"],
+    [lang="hu"],
+    [lang="sv"],
+    [lang="bn"],
+    [lang="ms"],
+    [lang="fil"]
+  ) .hero h1 {
+    font-size: clamp(33px, 9.8vw, 43px);
+    line-height: 0.96;
+  }
+}
+
+@media (max-width: 380px) {
+  html:is(
+    [lang="pt"],
+    [lang="ru"],
+    [lang="id"],
+    [lang="pl"],
+    [lang="vi"],
+    [lang="uk"],
+    [lang="th"],
+    [lang="cs"],
+    [lang="he"],
+    [lang="hu"],
+    [lang="sv"],
+    [lang="bn"],
+    [lang="ms"],
+    [lang="fil"]
+  ) .hero h1 {
+    font-size: clamp(29px, 8.9vw, 37px);
   }
 }
 

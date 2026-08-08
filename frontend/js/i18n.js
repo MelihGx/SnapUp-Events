@@ -2,7 +2,9 @@
   "use strict";
 
   const STORAGE_KEY = "snapup_language";
-  const SUPPORTED = [
+  const ADDITIONAL_LANGUAGE_METADATA =
+    window.SnapUpAdditionalLanguages || window.SnapUpAsianLanguages || {};
+  const BASE_SUPPORTED = [
     "en",
     "tr",
     "ar",
@@ -20,7 +22,20 @@
     "sq",
     "mk",
   ];
-  const saved = localStorage.getItem(STORAGE_KEY);
+  const SUPPORTED = [
+    ...BASE_SUPPORTED,
+    ...Object.keys(ADDITIONAL_LANGUAGE_METADATA).filter(
+      (code) => !BASE_SUPPORTED.includes(code),
+    ),
+  ];
+  const urlLanguage = new URLSearchParams(window.location.search)
+    .get("lang")
+    ?.toLowerCase()
+    .split("-")[0];
+  if (SUPPORTED.includes(urlLanguage)) {
+    localStorage.setItem(STORAGE_KEY, urlLanguage);
+  }
+  const saved = urlLanguage || localStorage.getItem(STORAGE_KEY);
   const language = SUPPORTED.includes(saved) ? saved : "en";
 
   document.documentElement.lang = language;
@@ -965,7 +980,7 @@
       "ابحث باسم الضيف...",
     ),
     "Enter your name": p("Adını gir", "أدخل اسمك"),
-    "Example: 123456": p("Örnek: 123456", "مثال: 123456"),
+    "Example: A7K3P9": p("Örnek: A7K3P9", "مثال: A7K3P9"),
     "Write a memory or wish...": p(
       "Bir anı veya dilek yaz...",
       "اكتب ذكرى أو أمنية...",
@@ -6501,6 +6516,16 @@
     const item = phrases[key];
     if (item?.[lang]) return item[lang];
 
+    const translatedTemplate = (templateKey, replacements) => {
+      const template = phrases[templateKey]?.[lang];
+      if (!template) return null;
+      return Object.entries(replacements).reduce(
+        (result, [name, replacement]) =>
+          result.replaceAll(`{${name}}`, String(replacement)),
+        template,
+      );
+    };
+
     const guestCount = key.match(/^(\d+) guests$/i);
     if (guestCount) {
       const labels = {
@@ -6519,8 +6544,19 @@
         bs: "gostiju",
         sq: "të ftuar",
         mk: "гости",
+        hi: "मेहमान",
+        ur: "مہمان",
+        fa: "مهمان",
+        ja: "人のゲスト",
+        zh: "位宾客",
+        ko: "명의 게스트",
       };
-      return `${guestCount[1]} ${labels[lang] || "guests"}`;
+      if (labels[lang]) return `${guestCount[1]} ${labels[lang]}`;
+      return (
+        translatedTemplate("{count} guests", {
+          count: guestCount[1],
+        }) || `${guestCount[1]} guests`
+      );
     }
     const photoCount = key.match(/^(\d+) photos?$/i);
     if (photoCount) {
@@ -6540,8 +6576,18 @@
         bs: "fotografija",
         sq: "foto",
         mk: "фотографии",
+        hi: "फ़ोटो",
+        ur: "تصاویر",
+        fa: "عکس",
+        ja: "枚の写真",
+        zh: "张照片",
+        ko: "장의 사진",
       };
-      return `${photoCount[1]} ${labels[lang] || "photos"}`;
+      if (labels[lang]) return `${photoCount[1]} ${labels[lang]}`;
+      const translatedLabel = phrases.Photos?.[lang];
+      return translatedLabel
+        ? `${photoCount[1]} ${translatedLabel}`
+        : `${photoCount[1]} photos`;
     }
     const memoryCount = key.match(/^(\d+) memories?$/i);
     if (memoryCount) {
@@ -6561,8 +6607,19 @@
         bs: "uspomena",
         sq: "kujtim",
         mk: "спомени",
+        hi: "यादें",
+        ur: "یادیں",
+        fa: "خاطره",
+        ja: "件の思い出",
+        zh: "条回忆",
+        ko: "개의 추억",
       };
-      return `${memoryCount[1]} ${labels[lang] || "memories"}`;
+      if (labels[lang]) return `${memoryCount[1]} ${labels[lang]}`;
+      return (
+        translatedTemplate("{count} memories", {
+          count: memoryCount[1],
+        }) || `${memoryCount[1]} memories`
+      );
     }
     const uploadedBy = key.match(/^Uploaded by (.+)$/i);
     if (uploadedBy) {
@@ -6582,8 +6639,18 @@
         bs: `Otpremio/la ${uploadedBy[1]}`,
         sq: `Ngarkuar nga ${uploadedBy[1]}`,
         mk: `Прикачено од ${uploadedBy[1]}`,
+        hi: `${uploadedBy[1]} द्वारा अपलोड किया गया`,
+        ur: `${uploadedBy[1]} نے اپ لوڈ کیا`,
+        fa: `بارگذاری‌شده توسط ${uploadedBy[1]}`,
+        ja: `${uploadedBy[1]}がアップロード`,
+        zh: `由 ${uploadedBy[1]} 上传`,
+        ko: `${uploadedBy[1]} 님이 업로드함`,
       };
-      return templates[lang] || key;
+      return (
+        templates[lang] ||
+        translatedTemplate("Uploaded by {name}", { name: uploadedBy[1] }) ||
+        key
+      );
     }
     const uploadingFiles = key.match(/^Uploading (\d+) file\(s\)\.\.\.$/i);
     if (uploadingFiles) {
@@ -6603,8 +6670,16 @@
         bs: `Otpremanje ${uploadingFiles[1]} datoteka...`,
         sq: `Duke ngarkuar ${uploadingFiles[1]} skedarë...`,
         mk: `Прикачување ${uploadingFiles[1]} датотеки...`,
+        hi: `${uploadingFiles[1]} फ़ाइल अपलोड हो रही हैं...`,
+        ur: `${uploadingFiles[1]} فائلیں اپ لوڈ ہو رہی ہیں...`,
+        fa: `${uploadingFiles[1]} فایل در حال بارگذاری است...`,
+        ja: `${uploadingFiles[1]} 件のファイルをアップロード中...`,
+        zh: `正在上传 ${uploadingFiles[1]} 个文件...`,
+        ko: `${uploadingFiles[1]}개 파일 업로드 중...`,
       };
-      return templates[lang] || key;
+      if (templates[lang]) return templates[lang];
+      const status = phrases["Uploading..."]?.[lang];
+      return status ? `${status} (${uploadingFiles[1]})` : key;
     }
     const uploadedFiles = key.match(
       /^(\d+) file\(s\) uploaded successfully!$/i,
@@ -6626,8 +6701,16 @@
         bs: `${uploadedFiles[1]} datoteka je uspješno otpremljeno!`,
         sq: `${uploadedFiles[1]} skedarë u ngarkuan me sukses!`,
         mk: `${uploadedFiles[1]} датотеки се успешно прикачени!`,
+        hi: `${uploadedFiles[1]} फ़ाइल सफलतापूर्वक अपलोड हुईं!`,
+        ur: `${uploadedFiles[1]} فائلیں کامیابی سے اپ لوڈ ہو گئیں!`,
+        fa: `${uploadedFiles[1]} فایل با موفقیت بارگذاری شد!`,
+        ja: `${uploadedFiles[1]} 件のファイルをアップロードしました！`,
+        zh: `${uploadedFiles[1]} 个文件上传成功！`,
+        ko: `${uploadedFiles[1]}개 파일을 업로드했습니다!`,
       };
-      return templates[lang] || key;
+      if (templates[lang]) return templates[lang];
+      const status = phrases["Upload complete"]?.[lang];
+      return status ? `${status} (${uploadedFiles[1]})` : key;
     }
     const guestsFound = key.match(/^(\d+) of (\d+) guests found\.$/i);
     if (guestsFound) {
@@ -6647,8 +6730,21 @@
         bs: `Pronađeno je ${guestsFound[1]} od ${guestsFound[2]} gostiju.`,
         sq: `U gjetën ${guestsFound[1]} nga ${guestsFound[2]} të ftuar.`,
         mk: `Пронајдени се ${guestsFound[1]} од ${guestsFound[2]} гости.`,
+        hi: `${guestsFound[2]} में से ${guestsFound[1]} मेहमान मिले।`,
+        ur: `${guestsFound[2]} میں سے ${guestsFound[1]} مہمان ملے۔`,
+        fa: `${guestsFound[1]} مهمان از ${guestsFound[2]} پیدا شد.`,
+        ja: `${guestsFound[2]} 人中 ${guestsFound[1]} 人のゲストが見つかりました。`,
+        zh: `找到 ${guestsFound[2]} 位宾客中的 ${guestsFound[1]} 位。`,
+        ko: `${guestsFound[2]}명 중 ${guestsFound[1]}명의 게스트를 찾았습니다.`,
       };
-      return templates[lang] || key;
+      return (
+        templates[lang] ||
+        translatedTemplate("{visible} of {total} guests found.", {
+          visible: guestsFound[1],
+          total: guestsFound[2],
+        }) ||
+        key
+      );
     }
 
     return value;
@@ -6714,9 +6810,29 @@
       bs: ["Jedan zajednički", "album."],
       sq: ["Një album", "i përbashkët."],
       mk: ["Еден заеднички", "албум."],
+      hi: ["एक साझा", "एल्बम।"],
+      ur: ["ایک مشترکہ", "البم۔"],
+      fa: ["یک آلبوم", "مشترک."],
+      ja: ["ひとつの共有", "アルバム。"],
+      zh: ["一个共享", "相册。"],
+      ko: ["하나의 공유", "앨범."],
     };
 
-    const [firstLine, secondLine] = lines[language] || lines.en;
+    let localizedLines = lines[language];
+    if (!localizedLines) {
+      const localizedHighlight = translate("One shared album.", language);
+      const words = localizedHighlight.split(/\s+/).filter(Boolean);
+      if (words.length < 2) {
+        localizedLines = [localizedHighlight, ""];
+      } else {
+        const splitAt = Math.ceil(words.length / 2);
+        localizedLines = [
+          words.slice(0, splitAt).join(" "),
+          words.slice(splitAt).join(" "),
+        ];
+      }
+    }
+    const [firstLine, secondLine] = localizedLines;
     highlight.replaceChildren(
       Object.assign(document.createElement("span"), {
         className: "hero-highlight__mobile-line",
@@ -6755,28 +6871,31 @@
       bs: { short: "BS", label: "Bosanski" },
       sq: { short: "SQ", label: "Shqip" },
       mk: { short: "MK", label: "Македонски" },
+      hi: { short: "HI", label: "हिन्दी" },
+      ur: { short: "UR", label: "اردو" },
+      fa: { short: "FA", label: "فارسی" },
+      ja: { short: "JA", label: "日本語" },
+      zh: { short: "ZH", label: "简体中文" },
+      ko: { short: "KO", label: "한국어" },
+      ...Object.fromEntries(
+        Object.entries(ADDITIONAL_LANGUAGE_METADATA).map(([code, metadata]) => [
+          code,
+          {
+            short: code.toUpperCase(),
+            label: metadata.label || code.toUpperCase(),
+          },
+        ]),
+      ),
     };
     const wrapper = document.createElement("div");
     wrapper.className = "snapup-language";
-    const selectorLabels = {
-      en: "Choose language",
-      tr: "Dil seç",
-      ar: "اختر اللغة",
-      de: "Sprache wählen",
-      fr: "Choisir la langue",
-      es: "Elegir idioma",
-      it: "Scegli la lingua",
-      nl: "Taal kiezen",
-      bg: "Изберете език",
-      ro: "Alege limba",
-      el: "Επιλογή γλώσσας",
-      sr: "Izaberi jezik",
-      hr: "Odaberi jezik",
-      bs: "Izaberi jezik",
-      sq: "Zgjidh gjuhën",
-      mk: "Избери јазик",
-    };
-    wrapper.setAttribute("aria-label", selectorLabels[language]);
+    const selectorLabels = Object.fromEntries(
+      SUPPORTED.map((code) => [code, translate("Choose language", code)]),
+    );
+    wrapper.setAttribute(
+      "aria-label",
+      selectorLabels[language] || selectorLabels.en,
+    );
     wrapper.innerHTML = `
       <button
         class="snapup-language__trigger"

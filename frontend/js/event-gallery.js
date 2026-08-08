@@ -49,6 +49,17 @@ const localeByLanguage = {
   bs: "bs-BA",
   sq: "sq-AL",
   mk: "mk-MK",
+  hi: "hi-IN",
+  ur: "ur-PK",
+  fa: "fa-IR",
+  ja: "ja-JP",
+  zh: "zh-CN",
+  ko: "ko-KR",
+  ...Object.fromEntries(
+    Object.entries(window.SnapUpAdditionalLanguages || {}).map(
+      ([code, metadata]) => [code, metadata.locale],
+    ),
+  ),
 };
 
 let approvedPhotos = [];

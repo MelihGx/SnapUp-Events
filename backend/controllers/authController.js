@@ -102,6 +102,8 @@ const register = async (req, res) => {
         userId: newUser.user_id,
         email: newUser.user_mail,
         userName: newUser.user_name,
+        languageCode:
+          req.body?.language_code || req.get("Accept-Language") || "en",
       });
       verificationEmailSent = true;
     } catch (error) {
@@ -467,6 +469,8 @@ const resendVerificationEmail = async (req, res) => {
       userId: user.user_id,
       email: user.user_mail,
       userName: user.user_name,
+      languageCode:
+        req.body?.language_code || req.get("Accept-Language") || "en",
     });
 
     return res.status(200).json({
