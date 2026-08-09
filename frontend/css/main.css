@@ -8103,3 +8103,10 @@ html[data-theme="dark"]
 .hero-buttons .btn-ghost {
   border-color: transparent !important;
 }
+
+/* Hide the decorative phone preview on mobile while preserving desktop hero. */
+@media (max-width: 720px) {
+  .hero-device {
+    display: none;
+  }
+}
