@@ -18,6 +18,62 @@ function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
 }
 
+function getUserToken() {
+  return localStorage.getItem("snapup_token") || "";
+}
+
+function getUserAuthHeaders() {
+  const userToken = getUserToken();
+  return userToken ? { Authorization: `Bearer ${userToken}` } : {};
+}
+
+function createApiError(response, data, fallbackMessage) {
+  const error = new Error(data.message || data.error || fallbackMessage);
+  error.code = data.code || "";
+  error.status = response.status;
+  return error;
+}
+
+function needsRegisteredUserLogin(event = selectedEvent) {
+  return event?.only_users === true && !getUserToken();
+}
+
+function getSubmitButtonLabel() {
+  return needsRegisteredUserLogin() ? "Login" : "Send to Event";
+}
+
+function showEventAccessStatus(event) {
+  if (needsRegisteredUserLogin(event)) {
+    setResult("Only registered users can upload.", "error");
+  } else {
+    setResult("Event found. You can send your memory.", "success");
+  }
+
+  setLoading(false);
+}
+
+function redirectToLogin(eventCode) {
+  const code = String(eventCode || selectedEvent?.event_code || "")
+    .trim()
+    .toUpperCase();
+  const returnUrl = code
+    ? `index.html?code=${encodeURIComponent(code)}`
+    : "index.html";
+
+  sessionStorage.setItem("snapup_after_login", returnUrl);
+  window.location.href = "login.html";
+}
+
+function handleRegisteredOnlyError(error, eventCode) {
+  if (error?.code !== "REGISTERED_USERS_ONLY") return false;
+
+  localStorage.removeItem("snapup_token");
+  localStorage.removeItem("snapup_user");
+  setResult("Only registered users can upload.", "error");
+  redirectToLogin(eventCode);
+  return true;
+}
+
 function isSuccessPopupOpen() {
   return document
     .getElementById("joinUploadSuccess")
@@ -125,7 +181,7 @@ function setLoading(isLoading) {
   button.classList.toggle("is-loading", isLoading);
   button.setAttribute("aria-busy", String(isLoading));
   button.textContent = translate(
-    isLoading ? "Sending..." : "Send to Event",
+    isLoading ? "Sending..." : getSubmitButtonLabel(),
   );
 }
 
@@ -137,6 +193,7 @@ function openModal() {
   selectedEvent = null;
   renderEventPreview(null);
   setResult("");
+  setLoading(false);
 
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
@@ -570,16 +627,20 @@ async function findEventByCode(eventCode) {
 
 async function createGuest(eventId, guestName) {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
+  let cached = null;
+
   try {
-    const cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
-    if (cached?.guest_id && cached?.guest_access_token) return cached;
+    cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
   } catch (_error) {}
-  const userToken = localStorage.getItem("snapup_token");
+
   const response = await fetch(`${API_BASE_URL}/api/media/guests`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
+      ...getUserAuthHeaders(),
+      ...(cached?.guest_access_token
+        ? { "X-Guest-Token": cached.guest_access_token }
+        : {}),
     },
     body: JSON.stringify({
       event_id: eventId,
@@ -590,9 +651,15 @@ async function createGuest(eventId, guestName) {
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(
-      data.error || data.message || "Guest could not be created.",
-    );
+    if (
+      data.code === "INVALID_GUEST_SESSION" ||
+      data.code === "GUEST_SESSION_REVOKED" ||
+      data.code === "REGISTERED_USER_SESSION_MISMATCH"
+    ) {
+      sessionStorage.removeItem(sessionKey);
+    }
+
+    throw createApiError(response, data, "Guest could not be created.");
   }
 
   const guestSession = { ...data.guest, guest_access_token: data.guest_access_token };
@@ -606,6 +673,7 @@ async function sendMessage(eventId, guestId, guestToken, message) {
     headers: {
       "Content-Type": "application/json",
       "X-Guest-Token": guestToken,
+      ...getUserAuthHeaders(),
     },
     body: JSON.stringify({
       event_id: eventId,
@@ -617,7 +685,7 @@ async function sendMessage(eventId, guestId, guestToken, message) {
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(data.error || data.message || "Message could not be sent.");
+    throw createApiError(response, data, "Message could not be sent.");
   }
 
   return data;
@@ -645,16 +713,17 @@ async function uploadMedia(eventId, guestId, guestToken, files, messageText = ""
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
     method: "POST",
-    headers: { "X-Guest-Token": guestToken },
+    headers: {
+      "X-Guest-Token": guestToken,
+      ...getUserAuthHeaders(),
+    },
     body: formData,
   });
 
   const data = await response.json();
 
   if (!response.ok || !data.success) {
-    throw new Error(
-      data.error || data.message || "Media could not be uploaded.",
-    );
+    throw createApiError(response, data, "Media could not be uploaded.");
   }
 
   return data;
@@ -749,6 +818,7 @@ function initEventCodeLookup() {
     selectedEvent = null;
     renderEventPreview(null);
     setResult("");
+    setLoading(false);
 
     clearTimeout(timeoutId);
 
@@ -766,7 +836,7 @@ function initEventCodeLookup() {
         setResult("Checking event code...", "info");
         selectedEvent = await findEventByCode(code);
         renderEventPreview(selectedEvent);
-        setResult("Event found. You can send your memory.", "success");
+        showEventAccessStatus(selectedEvent);
       } catch (error) {
         selectedEvent = null;
         renderEventPreview(null);
@@ -793,6 +863,19 @@ function initFormSubmit() {
     try {
       if (!eventCode) {
         setResult("Please enter event code.", "error");
+        return;
+      }
+
+      const eventData =
+        selectedEvent?.event_code === eventCode.toUpperCase()
+          ? selectedEvent
+          : await findEventByCode(eventCode);
+      selectedEvent = eventData;
+      renderEventPreview(eventData);
+
+      if (needsRegisteredUserLogin(eventData)) {
+        setResult("Only registered users can upload.", "error");
+        redirectToLogin(eventData.event_code || eventCode);
         return;
       }
 
@@ -824,10 +907,6 @@ function initFormSubmit() {
         setResult(`Uploading ${selectedFiles.length} file(s)...`, "info");
       }
 
-      const eventData = selectedEvent || (await findEventByCode(eventCode));
-      selectedEvent = eventData;
-      renderEventPreview(eventData);
-
       const guest = await createGuest(eventData.event_id, guestName);
 
       if (submissionMediaType === "message") {
@@ -856,6 +935,7 @@ function initFormSubmit() {
       }
     } catch (error) {
       console.error("Join upload error:", error);
+      if (handleRegisteredOnlyError(error, eventCode)) return;
       setResult(error.message || "Upload failed.", "error");
     } finally {
       setLoading(false);

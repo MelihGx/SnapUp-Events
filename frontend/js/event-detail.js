@@ -49,6 +49,13 @@ function t(value, replacements = {}) {
   );
 }
 
+function createApiError(response, data, fallbackMessage) {
+  const error = new Error(data.message || data.error || fallbackMessage);
+  error.code = data.code || "";
+  error.status = response.status;
+  return error;
+}
+
 function getCurrentLocale() {
   const language = window.SnapUpI18n?.language || "en";
   return localeByLanguage[language] || "en-US";
@@ -2535,13 +2542,20 @@ function validateUploadFiles(files, allowedTypes, invalidTypeMessage) {
 
 async function createGuestForUpload(guestName) {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
+  let cached = null;
+
   try {
-    const cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
-    if (cached?.guest_id && cached?.guest_access_token) return cached;
+    cached = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
   } catch (_error) {}
+
   const response = await fetch(`${API_BASE_URL}/api/media/guests`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      ...(cached?.guest_access_token
+        ? { "X-Guest-Token": cached.guest_access_token }
+        : {}),
+    },
     body: JSON.stringify({
       event_id: eventId,
       guest_name: guestName,
@@ -2551,14 +2565,20 @@ async function createGuestForUpload(guestName) {
   const data = await response.json();
 
   if (response.status === 401) {
-    logout();
-    return null;
+    await logout();
+    throw createApiError(response, data, "Session is no longer valid.");
   }
 
   if (!response.ok || !data.success) {
-    throw new Error(
-      data.error || data.message || "Guest could not be created.",
-    );
+    if (
+      data.code === "INVALID_GUEST_SESSION" ||
+      data.code === "GUEST_SESSION_REVOKED" ||
+      data.code === "REGISTERED_USER_SESSION_MISMATCH"
+    ) {
+      sessionStorage.removeItem(sessionKey);
+    }
+
+    throw createApiError(response, data, "Guest could not be created.");
   }
 
   const guestSession = { ...data.guest, guest_access_token: data.guest_access_token };
@@ -2581,14 +2601,22 @@ async function uploadFilesToEvent(guestId, guestToken, files) {
 
   const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
     method: "POST",
-    headers: { "X-Guest-Token": guestToken },
+    headers: {
+      "X-Guest-Token": guestToken,
+      Authorization: `Bearer ${token}`,
+    },
     body: formData,
   });
 
   const data = await response.json();
 
+  if (response.status === 401) {
+    await logout();
+    throw createApiError(response, data, "Session is no longer valid.");
+  }
+
   if (!response.ok || !data.success) {
-    throw new Error(data.error || data.message || "Media upload failed.");
+    throw createApiError(response, data, "Media upload failed.");
   }
 
   return {
@@ -2611,12 +2639,12 @@ async function sendMessageToEvent(guestId, guestToken, message) {
   const data = await response.json();
 
   if (response.status === 401) {
-    logout();
-    return null;
+    await logout();
+    throw createApiError(response, data, "Session is no longer valid.");
   }
 
   if (!response.ok || !data.success) {
-    throw new Error(data.error || data.message || "Message could not be sent.");
+    throw createApiError(response, data, "Message could not be sent.");
   }
 
   return data.media;

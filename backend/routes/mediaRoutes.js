@@ -12,6 +12,9 @@ const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
 const { cleanText } = require("../utils/validation");
 const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
+const {
+  assertRegisteredUserAccess,
+} = require("../services/registeredUserAccessService");
 
 const router = express.Router();
 
@@ -140,9 +143,10 @@ async function getMediaTypeId(mediaTypeName) {
   return data.media_type_id;
 }
 
-function createHttpError(message, statusCode = 500) {
+function createHttpError(message, statusCode = 500, code = null) {
   const error = new Error(message);
   error.statusCode = statusCode;
+  if (code) error.code = code;
   return error;
 }
 
@@ -204,6 +208,65 @@ async function checkGuestBelongsToEvent(eventId, guestId) {
   }
 
   return guest;
+}
+
+async function getGuestSecurity(eventId, guestId) {
+  const { data, error } = await supabase
+    .from("event_guests")
+    .select("guest_id, event_id, guest_name, user_id, guest_access_token_hash")
+    .eq("guest_id", guestId)
+    .eq("event_id", eventId)
+    .maybeSingle();
+
+  if (error) {
+    throw createHttpError(error.message, 500);
+  }
+
+  return data;
+}
+
+function findGuestForSession(existingGuests, guestToken, eventId) {
+  if (!guestToken) return null;
+
+  try {
+    const claims = verifyGuestToken(guestToken);
+    if (String(claims.event_id) !== String(eventId)) return null;
+
+    const guest = existingGuests.find(
+      (item) =>
+        String(item.guest_id) === String(claims.guest_id) &&
+        item.guest_access_token_hash === hashGuestToken(guestToken),
+    );
+
+    return guest ? { guest, claims } : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function refreshGuestSession(guest, userId = null) {
+  const guestToken = issueGuestToken({
+    guestId: guest.guest_id,
+    eventId: guest.event_id,
+    userId,
+  });
+
+  const { data, error } = await supabase
+    .from("event_guests")
+    .update({
+      user_id: userId,
+      guest_access_token_hash: hashGuestToken(guestToken),
+    })
+    .eq("guest_id", guest.guest_id)
+    .eq("event_id", guest.event_id)
+    .select("guest_id, event_id, guest_name, user_id")
+    .single();
+
+  if (error || !data) {
+    throw createHttpError("Guest session could not be refreshed.", 500);
+  }
+
+  return { guest: data, guestToken };
 }
 
 async function checkGuestUploadLimit(eventId, guestId, incomingFileCount) {
@@ -363,7 +426,7 @@ router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
 
     const { data: existingGuests, error: existingGuestError } = await supabase
       .from("event_guests")
-      .select("guest_id")
+      .select("guest_id, event_id, guest_name, user_id, guest_access_token_hash")
       .eq("event_id", event_id)
       .ilike("guest_name", cleanGuestName);
 
@@ -372,6 +435,47 @@ router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
         success: false,
         message: "Guest could not be checked.",
         error: existingGuestError.message,
+      });
+    }
+
+    const currentUserId = req.user?.user_id || null;
+    const existingGuestToken = String(req.get("x-guest-token") || "");
+    const validatedSession = findGuestForSession(
+      existingGuests || [],
+      existingGuestToken,
+      event_id,
+    );
+    const reusableGuest =
+      validatedSession?.guest ||
+      (currentUserId
+        ? existingGuests?.find(
+            (item) => String(item.user_id || "") === String(currentUserId),
+          )
+        : null);
+
+    if (reusableGuest) {
+      if (
+        reusableGuest.user_id &&
+        currentUserId &&
+        String(reusableGuest.user_id) !== String(currentUserId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "This guest session belongs to another registered user.",
+          code: "REGISTERED_USER_SESSION_MISMATCH",
+        });
+      }
+
+      const refreshed = await refreshGuestSession(
+        reusableGuest,
+        currentUserId || reusableGuest.user_id || null,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Guest session refreshed successfully.",
+        guest: refreshed.guest,
+        guest_access_token: refreshed.guestToken,
       });
     }
 
@@ -407,13 +511,22 @@ router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Guest created successfully.",
-      guest: { guest_id: data.guest_id, event_id: data.event_id, guest_name: data.guest_name },
+      guest: {
+        guest_id: data.guest_id,
+        event_id: data.event_id,
+        guest_name: data.guest_name,
+        user_id: data.user_id,
+      },
       guest_access_token: guestToken,
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Guest creation failed.",
+      message:
+        error.statusCode && error.statusCode < 500
+          ? error.message
+          : "Guest creation failed.",
+      code: error.code || "GUEST_CREATION_FAILED",
       error: error.message,
     });
   }
@@ -422,6 +535,7 @@ router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
 router.post(
   "/upload",
   uploadLimiter,
+  optionalAuth,
   enforceMediaRequestSize,
   handleMediaUpload,
   validateUploadedFiles,
@@ -478,18 +592,20 @@ router.post(
     if (String(guestClaims.event_id) !== String(event_id) || String(guestClaims.guest_id) !== String(guest_id)) {
       return res.status(403).json({ success: false, message: "Guest session does not match this event.", code: "GUEST_SESSION_MISMATCH" });
     }
-    const guest = await checkGuestBelongsToEvent(event_id, guest_id);
-    const { data: guestSecurity } = await supabase.from("event_guests")
-      .select("guest_access_token_hash, user_id").eq("guest_id", guest_id).maybeSingle();
+    await checkGuestBelongsToEvent(event_id, guest_id);
+    const guestSecurity = await getGuestSecurity(event_id, guest_id);
     if (!guestSecurity || guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)) {
       return res.status(401).json({ success: false, message: "Guest session has been revoked.", code: "GUEST_SESSION_REVOKED" });
     }
-    await checkGuestUploadLimit(event_id, guest_id, files.length);
 
     const { mediaStatus, maxStoragePerGuest, onlyUsers } = await getUploadStatusForEvent(event_id);
-    if (onlyUsers && !guestSecurity.user_id) {
-      return res.status(403).json({ success: false, message: "Registered users only.", code: "REGISTERED_USERS_ONLY" });
-    }
+    assertRegisteredUserAccess({
+      onlyUsers,
+      currentUser: req.user,
+      guestSecurity,
+      guestClaims,
+    });
+    await checkGuestUploadLimit(event_id, guest_id, files.length);
     const { data: usageRows, error: usageError } = await supabase.from("media")
       .select("bytes").eq("event_id", event_id).eq("guest_id", guest_id);
     if (usageError) throw createHttpError("Storage usage could not be checked.", 500);
@@ -606,7 +722,7 @@ router.post(
   },
 );
 
-router.post("/message", uploadLimiter, async (req, res) => {
+router.post("/message", uploadLimiter, optionalAuth, async (req, res) => {
   try {
     const { event_id, guest_id, message } = req.body;
 
@@ -639,13 +755,19 @@ router.post("/message", uploadLimiter, async (req, res) => {
     if (String(claims.event_id) !== String(event_id) || String(claims.guest_id) !== String(guest_id)) {
       return res.status(403).json({ success: false, message: "Guest session mismatch." });
     }
-    const { data: guestSecurity } = await supabase.from("event_guests").select("guest_access_token_hash, user_id").eq("guest_id", guest_id).maybeSingle();
+    const guestSecurity = await getGuestSecurity(event_id, guest_id);
     if (!guestSecurity || guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)) {
-      return res.status(401).json({ success: false, message: "Guest session has been revoked." });
+      return res.status(401).json({ success: false, message: "Guest session has been revoked.", code: "GUEST_SESSION_REVOKED" });
     }
-    await checkGuestUploadLimit(event_id, guest_id, 1);
 
-    const { mediaStatus } = await getUploadStatusForEvent(event_id);
+    const { mediaStatus, onlyUsers } = await getUploadStatusForEvent(event_id);
+    assertRegisteredUserAccess({
+      onlyUsers,
+      currentUser: req.user,
+      guestSecurity,
+      guestClaims: claims,
+    });
+    await checkGuestUploadLimit(event_id, guest_id, 1);
     const mediaTypeId = await getMediaTypeId("message");
 
     const { data, error } = await supabase
@@ -677,7 +799,11 @@ router.post("/message", uploadLimiter, async (req, res) => {
   } catch (error) {
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Message save failed.",
+      message:
+        error.statusCode && error.statusCode < 500
+          ? error.message
+          : "Message save failed.",
+      code: error.code || "MESSAGE_SAVE_FAILED",
       error: error.message,
     });
   }
