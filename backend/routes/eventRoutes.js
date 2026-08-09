@@ -11,6 +11,10 @@ const {
   updateEventInvitation,
   deleteEventInvitation,
 } = require("../controllers/invitationController");
+const {
+  getLiveSlideshow,
+  updateLiveSlideshow,
+} = require("../controllers/liveSlideshowController");
 
 const {
   createEvent,
@@ -76,6 +80,16 @@ router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, 
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
+router.get(
+  "/detail/:eventId/slideshow",
+  authMiddleware,
+  getLiveSlideshow,
+);
+router.put(
+  "/detail/:eventId/slideshow",
+  authMiddleware,
+  updateLiveSlideshow,
+);
 
 router.get(
   "/detail/:eventId/invitations",

@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=join-upload-modern-2"
+      href="css/event-detail.css?v=live-slideshow-1"
     />
     <link
       rel="stylesheet"
@@ -56,6 +56,7 @@
     ></script>
     <script src="js/location-i18n.js?v=location-map-2" defer></script>
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/live-slideshow-i18n.js?v=live-slideshow-1" defer></script>
     <script src="js/i18n.js?v=only-users-3" defer></script>
   </head>
 
@@ -222,6 +223,23 @@
                 <span>
                   <strong>Prepare Memory Book</strong>
                   <small id="memoryBookButtonMeta">Waiting for approved photos</small>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                id="liveSlideshowOpen"
+                class="live-slideshow-open"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3.5" y="4" width="17" height="13" rx="2.5"></rect>
+                  <path d="M8 21h8M12 17v4"></path>
+                  <path d="m9.5 8 5 2.5-5 2.5Z"></path>
+                </svg>
+                <span>
+                  <strong>Open Live Slideshow</strong>
+                  <small>Display approved photos on the event screen</small>
                 </span>
               </button>
 
@@ -2043,7 +2061,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=only-users-3"
+      src="js/event-detail.js?v=live-slideshow-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

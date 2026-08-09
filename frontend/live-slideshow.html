@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Slideshow — SnapUp Events</title>
+
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <meta name="theme-color" id="slideshowThemeColor" content="#17122b" />
+
+    <script>
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_error) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+
+    <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
+    <link rel="stylesheet" href="css/live-slideshow.css?v=live-slideshow-theme-modes-5" />
+    <script src="js/event-detail-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/live-slideshow-i18n.js?v=live-slideshow-panel-languages-2" defer></script>
+    <script src="js/i18n.js?v=only-users-3" defer></script>
+  </head>
+
+  <body class="live-slideshow-page controls-open">
+    <main class="slideshow-stage" id="slideshowStage" aria-live="polite">
+      <div class="slide-backdrop" id="slideBackdrop" aria-hidden="true"></div>
+      <div class="slide-vignette" aria-hidden="true"></div>
+
+      <div class="slideshow-loading" id="slideshowLoading">
+        <div class="slideshow-loader" aria-hidden="true"></div>
+        <strong>Preparing live slideshow...</strong>
+        <span>Approved photos are loading.</span>
+      </div>
+
+      <div class="slideshow-empty" id="slideshowEmpty" hidden>
+        <div class="slideshow-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <rect x="3.5" y="4" width="17" height="16" rx="3"></rect>
+            <circle cx="9" cy="9" r="1.6"></circle>
+            <path d="m5.5 17 4.2-4 3.1 2.8 2.4-2.2 3.3 3.4"></path>
+          </svg>
+        </div>
+        <h1 id="slideshowEmptyTitle">Waiting for approved photos</h1>
+        <p id="slideshowEmptyText">
+          New approved photos will appear here automatically.
+        </p>
+      </div>
+
+      <div class="slide-canvas" id="slideCanvas" hidden>
+        <img class="slide-image is-visible" id="slideImageA" alt="" />
+        <img class="slide-image" id="slideImageB" alt="" />
+      </div>
+
+      <header class="slideshow-topbar">
+        <a class="slideshow-brand" href="index.html" aria-label="SnapUp Events home">
+          <img
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="42"
+            height="42"
+          />
+          <span>
+            <strong id="slideshowEventName">SnapUp Events</strong>
+            <small id="slideshowEventCode">LIVE SLIDESHOW</small>
+          </span>
+        </a>
+
+        <div class="slideshow-live-status">
+          <span class="live-dot" aria-hidden="true"></span>
+          <strong>LIVE</strong>
+          <small id="slideshowSyncStatus">Connecting...</small>
+        </div>
+
+        <div class="slideshow-top-actions">
+          <button
+            type="button"
+            class="slideshow-theme-button"
+            id="slideshowThemeButton"
+            aria-pressed="false"
+            aria-label="Switch to dark mode"
+            title="Dark mode"
+          >
+            <svg class="slideshow-theme-button__moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path>
+            </svg>
+            <svg class="slideshow-theme-button__sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.8"></circle>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+            </svg>
+            <span id="slideshowThemeLabel">Dark mode</span>
+          </button>
+          <button type="button" id="slideshowPresentButton">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
+            </svg>
+            <span>Start Full Screen</span>
+          </button>
+          <button type="button" id="slideshowControlsButton" aria-expanded="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path>
+              <path d="m19.4 13.4 1.85 1.45-2 3.45-2.2-.9a8 8 0 0 1-2.45 1.32L14.25 21h-4.5l-.35-2.28a8 8 0 0 1-2.45-1.32l-2.2.9-2-3.45L4.6 13.4a10 10 0 0 1 0-2.8L2.75 9.15l2-3.45 2.2.9A8 8 0 0 1 9.4 5.28L9.75 3h4.5l.35 2.28a8 8 0 0 1 2.45 1.32l2.2-.9 2 3.45-1.85 1.45a10 10 0 0 1 0 2.8Z"></path>
+            </svg>
+            <span>Controls</span>
+          </button>
+          <a id="slideshowBackLink" href="event-detail.html">
+            <span>Back to Event</span>
+          </a>
+        </div>
+      </header>
+
+      <footer class="slide-meta" id="slideMeta" hidden>
+        <div>
+          <span id="slideGuestLabel">Uploaded by</span>
+          <strong id="slideGuestName">Guest</strong>
+        </div>
+        <p id="slideMessage" hidden></p>
+        <time id="slideCreatedAt"></time>
+      </footer>
+
+      <div class="slide-mode-badge" id="slideModeBadge">
+        <span class="live-dot" aria-hidden="true"></span>
+        <strong id="slideModeLabel">Newest photo</strong>
+      </div>
+
+      <div class="presentation-help" aria-hidden="true">
+        Press H to show controls · F11 for browser full screen
+      </div>
+    </main>
+
+    <aside class="slideshow-controls" id="slideshowControls" aria-label="Slideshow controls">
+      <div class="slideshow-controls-head">
+        <div>
+          <span>DISPLAY CONTROL</span>
+          <h1>Live Slideshow</h1>
+          <p>Choose how approved photos appear on the event screen.</p>
+        </div>
+        <button type="button" id="slideshowControlsClose" aria-label="Hide controls">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="slideshowSettingsForm">
+        <fieldset class="slideshow-mode-list">
+          <legend>Slideshow mode</legend>
+
+          <label class="slideshow-mode-card">
+            <input type="radio" name="slideshowMode" value="latest" checked />
+            <span class="mode-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 5v7l4 2"></path>
+                <circle cx="12" cy="12" r="8.5"></circle>
+              </svg>
+            </span>
+            <span>
+              <strong>Newest photo</strong>
+              <small>Show newly approved photos in arrival order.</small>
+            </span>
+            <i aria-hidden="true"></i>
+          </label>
+
+          <label class="slideshow-mode-card">
+            <input type="radio" name="slideshowMode" value="random" />
+            <span class="mode-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7h3c5 0 5 10 10 10h3"></path>
+                <path d="m17 14 3 3-3 3M4 17h3c1.3 0 2.3-.7 3.2-1.7M14 8.7C14.9 7.7 15.8 7 17 7h3"></path>
+                <path d="m17 4 3 3-3 3"></path>
+              </svg>
+            </span>
+            <span>
+              <strong>Random photos</strong>
+              <small>Rotate through approved photos automatically.</small>
+            </span>
+            <i aria-hidden="true"></i>
+          </label>
+
+          <label class="slideshow-mode-card">
+            <input type="radio" name="slideshowMode" value="selected" />
+            <span class="mode-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+                <path d="m7 16 4-4 3 3 2-2 2 3"></path>
+              </svg>
+            </span>
+            <span>
+              <strong>Selected photo</strong>
+              <small>Keep one admin-selected photo on screen.</small>
+            </span>
+            <i aria-hidden="true"></i>
+          </label>
+        </fieldset>
+
+        <section class="slideshow-mode-settings" data-mode-settings="latest">
+          <label for="latestMinSeconds">
+            <span>Minimum time on screen</span>
+            <small>Each new photo remains visible for at least this long.</small>
+          </label>
+          <div class="duration-input">
+            <input id="latestMinSeconds" type="number" min="3" max="300" step="1" value="10" />
+            <span>seconds</span>
+          </div>
+        </section>
+
+        <section class="slideshow-mode-settings" data-mode-settings="random" hidden>
+          <label for="randomIntervalSeconds">
+            <span>Photo change interval</span>
+            <small>Choose how often a random photo changes.</small>
+          </label>
+          <div class="duration-input">
+            <input id="randomIntervalSeconds" type="number" min="3" max="300" step="1" value="10" />
+            <span>seconds</span>
+          </div>
+        </section>
+
+        <section class="slideshow-photo-selection" data-mode-settings="selected" hidden>
+          <div class="photo-selection-head">
+            <span>
+              <strong>Choose a photo</strong>
+              <small id="slideshowPhotoCount"></small>
+            </span>
+            <em id="slideshowSelectedStatus">No photo selected</em>
+          </div>
+          <div class="slideshow-photo-grid" id="slideshowPhotoGrid"></div>
+        </section>
+
+        <div class="slideshow-form-status" id="slideshowFormStatus" aria-live="polite"></div>
+
+        <div class="slideshow-control-actions">
+          <button type="submit" id="slideshowSaveButton">Save and Apply</button>
+          <button type="button" id="slideshowStartButton">
+            Start Show
+            <span>Then press F11</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="slideshow-shortcuts">
+        <span><kbd>H</kbd> Show or hide controls</span>
+        <span><kbd>F11</kbd> Browser full screen</span>
+        <span><kbd>ESC</kbd> Return to controls</span>
+      </div>
+    </aside>
+
+    <div class="slideshow-toast" id="slideshowToast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="js/live-slideshow.js?v=live-slideshow-theme-modes-3"></script>
+  </body>
+</html>

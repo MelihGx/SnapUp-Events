@@ -190,6 +190,7 @@ const copyCodeButton = document.getElementById("copyCodeButton");
 const copyJoinLinkButton = document.getElementById("copyJoinLinkButton");
 const downloadQrButton = document.getElementById("downloadQrButton");
 const memoryBookOpen = document.getElementById("memoryBookOpen");
+const liveSlideshowOpen = document.getElementById("liveSlideshowOpen");
 const memoryBookButtonMeta = document.getElementById("memoryBookButtonMeta");
 const memoryBookModal = document.getElementById("memoryBookModal");
 const memoryBookModalBackdrop = document.getElementById(
@@ -961,6 +962,10 @@ async function removeCurrentEventCover() {
 
 function renderEventInfo(event) {
   currentEvent = event;
+
+  if (liveSlideshowOpen) {
+    liveSlideshowOpen.disabled = false;
+  }
 
   eventTitle.textContent = event.event_name || t("Untitled Event");
   eventDescription.textContent =
@@ -2869,6 +2874,18 @@ eventDeleteSuccessButton?.addEventListener(
 
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);
+}
+
+if (liveSlideshowOpen) {
+  liveSlideshowOpen.addEventListener("click", () => {
+    if (!eventId || !currentEvent) {
+      return;
+    }
+
+    const slideshowUrl = new URL("live-slideshow.html", window.location.href);
+    slideshowUrl.searchParams.set("event_id", eventId);
+    window.open(slideshowUrl.href, "_blank", "noopener,noreferrer");
+  });
 }
 
 if (settingsModalClose) {
