@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=quick-upload-queue-3"
+      href="css/event-detail.css?v=join-upload-modern-2"
     />
     <link
       rel="stylesheet"
@@ -44,10 +44,10 @@
     />
     <link
       rel="stylesheet"
-      href="css/i18n.css?v=global-languages-2"
+      href="css/i18n.css?v=global-languages-3"
     />
     <script
-      src="js/event-detail-i18n.js?v=quick-upload-queue-3"
+      src="js/event-detail-i18n.js?v=join-upload-modern-2"
       defer
     ></script>
     <script
@@ -55,8 +55,8 @@
       defer
     ></script>
     <script src="js/location-i18n.js?v=location-map-2" defer></script>
-    <script src="js/asian-i18n.js?v=global-languages-2" defer></script>
-    <script src="js/i18n.js?v=global-languages-2" defer></script>
+    <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/i18n.js?v=join-upload-modern-2" defer></script>
   </head>
 
   <body class="event-detail-shell">
@@ -420,18 +420,65 @@
                 data-upload-panel="photo"
                 role="tabpanel"
               >
-                <label for="photoInput">Choose photos</label>
-                <input
-                  type="file"
-                  id="photoInput"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                />
-                <small class="upload-file-helper">
+                <span class="upload-file-label">Choose photos</span>
+
+                <label
+                  class="detail-file-picker"
+                  for="photoInput"
+                  data-detail-file-picker="photo"
+                >
+                  <input
+                    class="detail-file-input"
+                    type="file"
+                    id="photoInput"
+                    accept="image/jpeg,image/png,image/webp"
+                    aria-describedby="photoFilePickerHint photoFileHelper"
+                    multiple
+                  />
+
+                  <span class="detail-file-picker__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 16V4"></path>
+                      <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                      <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                    </svg>
+                  </span>
+
+                  <span class="detail-file-picker__copy">
+                    <strong>Choose photos</strong>
+                    <span id="photoFilePickerHint">
+                      Drop photo or video here
+                    </span>
+                  </span>
+
+                  <span
+                    class="detail-file-picker__count"
+                    id="photoFilePickerCount"
+                    aria-live="polite"
+                    hidden
+                  ></span>
+
+                  <span class="detail-file-picker__arrow" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <path d="m7.5 4.5 5 5-5 5"></path>
+                    </svg>
+                  </span>
+                </label>
+
+                <small class="upload-file-helper" id="photoFileHelper">
                   JPG, PNG or WEBP · Up to 15 files · 50 MB each · 200 MB total
                 </small>
 
                 <div id="photoPreviewBox" class="photo-preview-box hidden">
+                  <div class="upload-preview-toolbar">
+                    <div>
+                      <strong>Selected files</strong>
+                      <span id="photoSelectionSummary"></span>
+                    </div>
+                    <button type="button" id="photoClearButton">
+                      Clear all
+                    </button>
+                  </div>
                   <div
                     id="photoPreviewList"
                     class="upload-preview-grid"
@@ -447,18 +494,65 @@
                 role="tabpanel"
                 hidden
               >
-                <label for="videoInput">Choose videos</label>
-                <input
-                  type="file"
-                  id="videoInput"
-                  accept="video/mp4,video/webm,video/quicktime"
-                  multiple
-                />
-                <small class="upload-file-helper">
+                <span class="upload-file-label">Choose videos</span>
+
+                <label
+                  class="detail-file-picker"
+                  for="videoInput"
+                  data-detail-file-picker="video"
+                >
+                  <input
+                    class="detail-file-input"
+                    type="file"
+                    id="videoInput"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    aria-describedby="videoFilePickerHint videoFileHelper"
+                    multiple
+                  />
+
+                  <span class="detail-file-picker__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 16V4"></path>
+                      <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                      <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                    </svg>
+                  </span>
+
+                  <span class="detail-file-picker__copy">
+                    <strong>Choose videos</strong>
+                    <span id="videoFilePickerHint">
+                      Drop photo or video here
+                    </span>
+                  </span>
+
+                  <span
+                    class="detail-file-picker__count"
+                    id="videoFilePickerCount"
+                    aria-live="polite"
+                    hidden
+                  ></span>
+
+                  <span class="detail-file-picker__arrow" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <path d="m7.5 4.5 5 5-5 5"></path>
+                    </svg>
+                  </span>
+                </label>
+
+                <small class="upload-file-helper" id="videoFileHelper">
                   MP4, WEBM or MOV · Up to 15 files · 50 MB each · 5 minutes · 200 MB total
                 </small>
 
                 <div id="videoPreviewBox" class="video-preview-box hidden">
+                  <div class="upload-preview-toolbar">
+                    <div>
+                      <strong>Selected files</strong>
+                      <span id="videoSelectionSummary"></span>
+                    </div>
+                    <button type="button" id="videoClearButton">
+                      Clear all
+                    </button>
+                  </div>
                   <div
                     id="videoPreviewList"
                     class="upload-preview-grid upload-preview-grid-video"
@@ -661,6 +755,20 @@
                   <option value="bn">বাংলা</option>
                   <option value="ms">Bahasa Melayu</option>
                   <option value="fil">Filipino</option>
+                  <option value="zh-tw">繁體中文</option>
+                  <option value="pt-pt">Português (Portugal)</option>
+                  <option value="da">Dansk</option>
+                  <option value="fi">Suomi</option>
+                  <option value="nb">Norsk bokmål</option>
+                  <option value="sk">Slovenčina</option>
+                  <option value="lt">Lietuvių</option>
+                  <option value="lv">Latviešu</option>
+                  <option value="et">Eesti</option>
+                  <option value="sl">Slovenščina</option>
+                  <option value="ta">தமிழ்</option>
+                  <option value="te">తెలుగు</option>
+                  <option value="mr">मराठी</option>
+                  <option value="sw">Kiswahili</option>
                 </select>
               </label>
 
@@ -1935,7 +2043,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=quick-upload-queue-3"
+      src="js/event-detail.js?v=join-upload-modern-2"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

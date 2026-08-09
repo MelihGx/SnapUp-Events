@@ -6,6 +6,81 @@ const EMAIL_LANGUAGE_METADATA = {
     "locale": "en-US",
     "direction": "ltr"
   },
+  "tr": {
+    "label": "Türkçe",
+    "locale": "tr-TR",
+    "direction": "ltr"
+  },
+  "ar": {
+    "label": "العربية",
+    "locale": "ar-SA",
+    "direction": "rtl"
+  },
+  "de": {
+    "label": "Deutsch",
+    "locale": "de-DE",
+    "direction": "ltr"
+  },
+  "fr": {
+    "label": "Français",
+    "locale": "fr-FR",
+    "direction": "ltr"
+  },
+  "es": {
+    "label": "Español",
+    "locale": "es-ES",
+    "direction": "ltr"
+  },
+  "it": {
+    "label": "Italiano",
+    "locale": "it-IT",
+    "direction": "ltr"
+  },
+  "nl": {
+    "label": "Nederlands",
+    "locale": "nl-NL",
+    "direction": "ltr"
+  },
+  "bg": {
+    "label": "Български",
+    "locale": "bg-BG",
+    "direction": "ltr"
+  },
+  "ro": {
+    "label": "Română",
+    "locale": "ro-RO",
+    "direction": "ltr"
+  },
+  "el": {
+    "label": "Ελληνικά",
+    "locale": "el-GR",
+    "direction": "ltr"
+  },
+  "sr": {
+    "label": "Srpski",
+    "locale": "sr-RS",
+    "direction": "ltr"
+  },
+  "hr": {
+    "label": "Hrvatski",
+    "locale": "hr-HR",
+    "direction": "ltr"
+  },
+  "bs": {
+    "label": "Bosanski",
+    "locale": "bs-BA",
+    "direction": "ltr"
+  },
+  "sq": {
+    "label": "Shqip",
+    "locale": "sq-AL",
+    "direction": "ltr"
+  },
+  "mk": {
+    "label": "Македонски",
+    "locale": "mk-MK",
+    "direction": "ltr"
+  },
   "hi": {
     "label": "हिन्दी",
     "locale": "hi-IN",
@@ -106,6 +181,79 @@ const EMAIL_LANGUAGE_METADATA = {
     "label": "Filipino",
     "locale": "fil-PH",
     "direction": "ltr"
+  },
+  "zh-tw": {
+    "label": "繁體中文",
+    "locale": "zh-TW",
+    "direction": "ltr",
+    "translationCode": "zh-TW"
+  },
+  "pt-pt": {
+    "label": "Português (Portugal)",
+    "locale": "pt-PT",
+    "direction": "ltr",
+    "translationCode": "pt-PT"
+  },
+  "da": {
+    "label": "Dansk",
+    "locale": "da-DK",
+    "direction": "ltr"
+  },
+  "fi": {
+    "label": "Suomi",
+    "locale": "fi-FI",
+    "direction": "ltr"
+  },
+  "nb": {
+    "label": "Norsk bokmål",
+    "locale": "nb-NO",
+    "direction": "ltr",
+    "translationCode": "no"
+  },
+  "sk": {
+    "label": "Slovenčina",
+    "locale": "sk-SK",
+    "direction": "ltr"
+  },
+  "lt": {
+    "label": "Lietuvių",
+    "locale": "lt-LT",
+    "direction": "ltr"
+  },
+  "lv": {
+    "label": "Latviešu",
+    "locale": "lv-LV",
+    "direction": "ltr"
+  },
+  "et": {
+    "label": "Eesti",
+    "locale": "et-EE",
+    "direction": "ltr"
+  },
+  "sl": {
+    "label": "Slovenščina",
+    "locale": "sl-SI",
+    "direction": "ltr"
+  },
+  "ta": {
+    "label": "தமிழ்",
+    "locale": "ta-IN",
+    "direction": "ltr"
+  },
+  "te": {
+    "label": "తెలుగు",
+    "locale": "te-IN",
+    "direction": "ltr"
+  },
+  "mr": {
+    "label": "मराठी",
+    "locale": "mr-IN",
+    "direction": "ltr"
+  },
+  "sw": {
+    "label": "Kiswahili",
+    "locale": "sw-KE",
+    "direction": "ltr"
   }
 };
 
@@ -147,6 +295,591 @@ const EMAIL_COPIES = {
       "textRequest": "We received a request to reset your SnapUp Events password.",
       "textExpires": "This reset link expires in 30 minutes and can only be used once.",
       "textIgnore": "If you did not request a password reset, you can safely ignore this email."
+    }
+  },
+  "tr": {
+    "common": {
+      "fallbackName": "işte orada",
+      "hello": "merhaba {{name}},",
+      "buttonFallback": "düğme çalışmıyor mu? bu adresi tarayıcınıza kopyalayın ve yapıştırın:",
+      "footerTagline": "her misafir. her an. sayıda bir albüm.",
+      "footerSecurity": "bu otomatik bir hesap-güvenlik e-postasıdır."
+    },
+    "verification": {
+      "subject": "e-postanızı doğrulayın — SnapUp Events",
+      "documentTitle": "e-postanızı SnapUp Events doğrulayın",
+      "preheader": "güncelleştirmeler SnapUp Events üzerinden etkinlik oluşturmaya başlamak için e-posta adresinizi doğrulayın.",
+      "headerLabel": "-E-posta doğrulaması",
+      "eyebrow": "tebrikler SnapUp",
+      "heading": "e-postanızı doğrulayın",
+      "introduction": "calim oluşturmaya başlamak, QR kodlarını paylaşmak QR ve paylaşılan bir albümde her konuk anını toplamak için e-posta adresinizi onaylayın.",
+      "button": "e-postamı doğrulayın",
+      "secureLabel": "güvenli bağlantı:",
+      "secureText": "bu bağlantı 24 saat içinde sona erer ve sadece bir kez kullanılabilir. eğer bu hesabı oluşturmadıysanız, herhangi bir eylem gerekmez.",
+      "textWelcome": "tebrikler. SnapUp Events adresine hoş geldiniz. cay oluşturmak ve yönetmeye başlamak için e-posta adresinizi doğrulayın.",
+      "textExpires": "bu doğrulama bağlantısı 24 saat içinde sona erer ve yalnızca bir kez kullanılabilir.",
+      "textIgnore": "eğer bu hesabı oluşturmadıysanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+    },
+    "passwordReset": {
+      "subject": "şifrenizi sıfırla — SnapUp Events",
+      "documentTitle": "son dakikanızı SnapUp Events şifrenizi sıfırlayın",
+      "preheader": "SnapUp Events şifrenizi sıfırlamak için bu güvenli, tek kullanımlık bağlantıyı kullanın.",
+      "headerLabel": "lu hesap güvenliği",
+      "eyebrow": "luluk kurtarma",
+      "heading": "şifrenizi sıfırlayın.",
+      "introduction": "lu yazınız SnapUp Events hesabı için yeni bir şifre oluşturma talebi aldık.",
+      "button": "yeni bir şifre oluşturun",
+      "secureLabel": "güvenli, tek kullanımlık bir bağlantı.",
+      "secureText": "son 30 dakika içinde sona erer. eğer bu değişikliği talep etmediyseniz, mevcut şifreniz değişmeden kalır.",
+      "textRequest": "şifrenizi SnapUp Events sıfırlama talebi aldık.",
+      "textExpires": "bu sıfırlama bağlantısı 30 dakika içinde sona erer ve sadece bir kez kullanılabilir.",
+      "textIgnore": "parola sıfırlama talebinde bulunmadıysanız, bu e-postayı güvenle görmezden gelebilirsiniz."
+    }
+  },
+  "ar": {
+    "common": {
+      "fallbackName": "هناك",
+      "hello": "مرحبا {{name}},",
+      "buttonFallback": "الزر لا يعمل؟ نسخ ولصق هذا العنوان في المتصفح الخاص بك:",
+      "footerTagline": "كل ضيف. كل لحظة. الألبوم المشترك واحد.",
+      "footerSecurity": "ّهُ a رسالة بريد إلكتروني آلي لأمن الحساب."
+    },
+    "verification": {
+      "subject": "التحقق من البريد الإلكتروني الخاص بك — SnapUp Events",
+      "documentTitle": "التحقق من البريد الإلكتروني الخاص SnapUp Events",
+      "preheader": "التحقق من عنوان البريد الإلكتروني الخاص بك لبدء إنشاء الأحداث على SnapUp Events.",
+      "headerLabel": "التحقق من البريد الإلكتروني",
+      "eyebrow": "مرحبا بكم في SnapUp",
+      "heading": "التحقق من بريدك الإلكتروني",
+      "introduction": "تأكيد عنوان البريد الإلكتروني الخاص بك لبدء إنشاء الأحداث، وتبادل QR الرموز، وجمع كل لحظة ضيف في ألبوم واحد مشترك.",
+      "button": "التحقق من البريد الإلكتروني الخاص بي",
+      "secureLabel": "رابط آمن:",
+      "secureText": "تنتهي صلاحية هذا الرابط خلال 24 ساعة ولا يمكن استخدامه إلا مرة واحدة. إذا لم تقم بإنشاء هذا الحساب، لا يلزم اتخاذ إجراء.",
+      "textWelcome": "مرحبا بكم في SnapUp Events. على التحقق من عنوان بريدك الإلكتروني لبدء إنشاء الأحداث وإدارتها.",
+      "textExpires": "تنتهي صلاحية رابط التحقق هذا خلال 24 ساعة ولا يمكن استخدامه إلا مرة واحدة.",
+      "textIgnore": "إذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذا البريد الإلكتروني بأمان."
+    },
+    "passwordReset": {
+      "subject": "إعادة تعيين كلمة المرور الخاصة بك — SnapUp Events",
+      "documentTitle": "إعادة تعيين كلمة المرور الخاصة SnapUp Events",
+      "preheader": "استخدام هذا الرابط الآمن أحادي الاستخدام لإعادة تعيين كلمة مرورك SnapUp Events.",
+      "headerLabel": "تأمين الحساب",
+      "eyebrow": "استعادة كلمة المرور",
+      "heading": "إعادة تعيين كلمة المرور الخاصة بك.",
+      "introduction": "تلقينا طلبًا لإنشاء كلمة مرور جديدة لحسابك SnapUp Events.",
+      "button": "انشاء كلمة مرور جديدة",
+      "secureLabel": "رابط آمن، استخدام واحد.",
+      "secureText": "تنتهي صلاحيتها في 30 دقيقة. إذا لم تطلب هذا التغيير، تظل كلمة المرور الحالية دون تغيير.",
+      "textRequest": "تلقينا طلبًا لإعادة تعيين كلمة المرور الخاصة SnapUp Events.",
+      "textExpires": "تنتهي صلاحية رابط إعادة الضبط هذا في 30 دقيقة ولا يمكن استخدامه إلا مرة واحدة.",
+      "textIgnore": "إذا لم تطلب إعادة تعيين كلمة المرور ، فيمكنك تجاهل هذا البريد الإلكتروني بأمان."
+    }
+  },
+  "de": {
+    "common": {
+      "fallbackName": "Hin",
+      "hello": ". Hallo {{name}},",
+      "buttonFallback": "Button funktioniert nicht? Kopieren und fügen Sie diese Adresse in Ihren Browser ein:",
+      "footerTagline": "Jeder Gast. Jeden Moment. ein gemeinsames Album.",
+      "footerSecurity": "Eine automatisierte Account-Security-E-Mail."
+    },
+    "verification": {
+      "subject": "Überprüfen Sie Ihre E-Mail-Adresse — SnapUp Events",
+      "documentTitle": "Ihre SnapUp Events E-Mail-Adresse bestätigen",
+      "preheader": "Überprüfen Sie Ihre E-Mail-Adresse, um mit der Erstellung von Veranstaltungen auf SnapUp Events zu beginnen.",
+      "headerLabel": "E-Mail-Verifizierung",
+      "eyebrow": "Willkommen bei SnapUp",
+      "heading": "Überprüfen Sie Ihre E-Mail",
+      "introduction": "Bestätigen Sie Ihre E-Mail-Adresse, um mit der Erstellung von Veranstaltungen zu beginnen, Codes von QR zu teilen und jeden Gastmoment in einem gemeinsamen Album zu sammeln.",
+      "button": "Meine E-Mail bestätigen",
+      "secureLabel": "Sicherer Link:",
+      "secureText": "Dieser Link läuft innerhalb von 24 Stunden ab und kann nur einmal verwendet werden. Wenn Sie dieses Konto nicht erstellt haben, ist keine Aktion erforderlich.",
+      "textWelcome": "Willkommen bei SnapUp Events. Überprüfen Sie Ihre E-Mail-Adresse, um mit der Erstellung und Verwaltung von Ereignissen zu beginnen.",
+      "textExpires": "Dieser Verifizierungslink läuft innerhalb von 24 Stunden ab und kann nur einmal verwendet werden.",
+      "textIgnore": "Wenn Sie dieses Konto nicht erstellt haben, können Sie diese E-Mail sicher ignorieren."
+    },
+    "passwordReset": {
+      "subject": "Passwort zurücksetzen — SnapUp Events",
+      "documentTitle": "Passwort für SnapUp Events zurücksetzen",
+      "preheader": "Mit diesem sicheren Einweg-Link können Sie Ihr SnapUp Events-Passwort zurücksetzen.",
+      "headerLabel": "-Kontosicherheit",
+      "eyebrow": "Passwort Wiederherstellung",
+      "heading": "Ihr Passwort zurücksetzen.",
+      "introduction": "Wir haben eine Anfrage erhalten, um ein neues Passwort für Ihr SnapUp Events-Konto zu erstellen.",
+      "button": "Neues Passwort erstellen",
+      "secureLabel": "Sicherer, Einweg-Link.",
+      "secureText": "Es läuft in 30 Minuten ab. Wenn Sie diese Änderung nicht beantragt haben, bleibt Ihr aktuelles Passwort unverändert.",
+      "textRequest": "Wir haben eine Anfrage erhalten, um Ihr SnapUp Events Passwort zurückzusetzen.",
+      "textExpires": "Dieser Reset-Link läuft in 30 Minuten ab und kann nur einmal verwendet werden.",
+      "textIgnore": "Wenn Sie kein Zurücksetzen des Passworts angefordert haben, können Sie diese E-Mail sicher ignorieren."
+    }
+  },
+  "fr": {
+    "common": {
+      "fallbackName": "là",
+      "hello": "Bonjour {{name}},",
+      "buttonFallback": "Bouton ne fonctionne pas ? Copiez et collez cette adresse dans votre navigateur:",
+      "footerTagline": "Chaque invité. à chaque instant. Un album partagé.",
+      "footerSecurity": "Il s'agit d'un e-mail automatisé de sécurité de compte."
+    },
+    "verification": {
+      "subject": "Vérifiez votre email — SnapUp Events",
+      "documentTitle": "Vérifiez votre SnapUp Events email",
+      "preheader": "Vérifiez votre adresse e-mail pour commencer à créer des événements sur SnapUp Events.",
+      "headerLabel": "Vérification des courriels",
+      "eyebrow": "Bienvenue à SnapUp",
+      "heading": "Vérifiez votre email",
+      "introduction": "Confirmez votre adresse e-mail pour commencer à créer des événements, partager QR des codes et collecter chaque moment invité dans un album partagé.",
+      "button": "Vérifier mon email",
+      "secureLabel": "Lien sécurisé:",
+      "secureText": "Ce lien expire dans 24 heures et ne peut être utilisé qu'une seule fois. Si vous n'avez pas créé ce compte, aucune action n'est nécessaire.",
+      "textWelcome": "Bienvenue sur SnapUp Events. Vérifiez votre adresse e-mail pour commencer à créer et gérer des événements.",
+      "textExpires": "Ce lien de vérification expire en 24 heures et ne peut être utilisé qu'une seule fois.",
+      "textIgnore": "Si vous n'avez pas créé ce compte, vous pouvez ignorer ce courriel en toute sécurité."
+    },
+    "passwordReset": {
+      "subject": "Réinitialiser votre mot de passe — SnapUp Events",
+      "documentTitle": "Réinitialiser votre SnapUp Events mot de passe",
+      "preheader": "Utilisez ce lien sécurisé à usage unique pour réinitialiser votre SnapUp Events mot de passe.",
+      "headerLabel": "Sécurité du compte",
+      "eyebrow": "Récupération de mot de passe",
+      "heading": "Réinitialiser votre mot de passe.",
+      "introduction": "Nous avons reçu une demande pour créer un nouveau mot de passe pour votre SnapUp Events compte.",
+      "button": "Créer un nouveau mot de passe",
+      "secureLabel": "lien sécurisé à usage unique.",
+      "secureText": "Il expire dans 30 minutes. Si vous n'avez pas demandé cette modification, votre mot de passe actuel reste inchangé.",
+      "textRequest": "Nous avons reçu une demande de réinitialisation de votre SnapUp Events mot de passe.",
+      "textExpires": "Ce lien de réinitialisation expire dans 30 minutes et ne peut être utilisé qu'une seule fois.",
+      "textIgnore": "Si vous n'avez pas demandé de réinitialisation de mot de passe, vous pouvez ignorer ce courriel en toute sécurité."
+    }
+  },
+  "es": {
+    "common": {
+      "fallbackName": "ahí",
+      "hello": "HO {{name}},",
+      "buttonFallback": "boton no funciona? Copia y pega esta dirección en tu navegador:",
+      "footerTagline": "cada invitado. cada momento. Un álbum compartido.",
+      "footerSecurity": "se trata de un correo electrónico automatizado de seguridad de cuenta."
+    },
+    "verification": {
+      "subject": "Verifique su correo electrónico — SnapUp Events",
+      "documentTitle": "Verifique su SnapUp Events correo electrónico",
+      "preheader": "Verifique su dirección de correo electrónico para comenzar a crear eventos en SnapUp Events.",
+      "headerLabel": "de verificación de correo electrónico",
+      "eyebrow": "bienvenido a SnapUp",
+      "heading": "Verifique su correo electrónico",
+      "introduction": "confirma tu dirección de correo electrónico para comenzar a crear eventos, compartir QR códigos y recopilar cada momento de invitado en un álbum compartido.",
+      "button": "Verifique mi correo electrónico",
+      "secureLabel": "de enlace seguro:",
+      "secureText": "Este enlace expira en 24 horas y solo se puede utilizar una vez. Si no creó esta cuenta, no se requiere ninguna acción.",
+      "textWelcome": "bienvenido a SnapUp Events. Verifique su dirección de correo electrónico para comenzar a crear y administrar eventos.",
+      "textExpires": "Este enlace de verificación expira en 24 horas y solo se puede utilizar una vez.",
+      "textIgnore": "Si no creó esta cuenta, puede ignorar este correo electrónico de forma segura."
+    },
+    "passwordReset": {
+      "subject": "restablecer su contraseña — SnapUp Events",
+      "documentTitle": "restablecer su SnapUp Events contraseña",
+      "preheader": "Utilice este enlace seguro de un solo uso para restablecer su SnapUp Events contraseña.",
+      "headerLabel": "Seguridad de la cuenta",
+      "eyebrow": "Recuperación de contraseñas",
+      "heading": "restablecer su contraseña.",
+      "introduction": "Recibimos una solicitud para crear una nueva contraseña para su SnapUp Events cuenta.",
+      "button": "Crear una nueva contraseña",
+      "secureLabel": "Enlace seguro de un solo uso.",
+      "secureText": "expira en 30 minutos. Si no solicitó este cambio, su contraseña actual permanece sin cambios.",
+      "textRequest": "Recibimos una solicitud para restablecer su SnapUp Events contraseña.",
+      "textExpires": "Este enlace de reinicio expira en 30 minutos y solo se puede utilizar una vez.",
+      "textIgnore": "Si no solicitó un restablecimiento de contraseña, puede ignorar este correo electrónico de forma segura."
+    }
+  },
+  "it": {
+    "common": {
+      "fallbackName": "là",
+      "hello": "Ciao {{name}},",
+      "buttonFallback": "dei bottoni che non funzionano? copiare e incollare questo indirizzo nel tuo browser:",
+      "footerTagline": "ogni ospite. ogni momento. un album condiviso.",
+      "footerSecurity": "questa è un'e-mail di sicurezza dell'account automatizzato."
+    },
+    "verification": {
+      "subject": "— SnapUp Events",
+      "documentTitle": "Verifica la tua SnapUp Events email",
+      "preheader": "Verifica il tuo indirizzo email per iniziare a creare eventi su SnapUp Events.",
+      "headerLabel": "Verifica e-mail",
+      "eyebrow": "benvenuti su SnapUp",
+      "heading": "Verifica la tua email",
+      "introduction": "per iniziare a creare eventi, condividere QR codici e raccogliere ogni momento ospite in un album condiviso.",
+      "button": "Verifica la mia email",
+      "secureLabel": "di collegamento sicuro:",
+      "secureText": "questo link scade in 24 ore e può essere utilizzato solo una volta. se non hai creato questo account, non è necessaria alcuna azione.",
+      "textWelcome": "Benvenuti a SnapUp Events. verifica il tuo indirizzo email per iniziare a creare e gestire eventi.",
+      "textExpires": "questo link di verifica scade in 24 ore e può essere utilizzato solo una volta.",
+      "textIgnore": "se non hai creato questo account, puoi tranquillamente ignorare questa e-mail."
+    },
+    "passwordReset": {
+      "subject": "Leggi la password — SnapUp Events",
+      "documentTitle": "reimposta la password di SnapUp Events",
+      "preheader": "utilizzare questo collegamento sicuro e monouso per reimpostare la password SnapUp Events.",
+      "headerLabel": "sicurezza del conto",
+      "eyebrow": "di recupero della password",
+      "heading": "di reimposta la password.",
+      "introduction": "abbiamo ricevuto una richiesta per creare una nuova password per il tuo SnapUp Events account.",
+      "button": "crea una nuova password",
+      "secureLabel": "sicuro, collegamento monouso.",
+      "secureText": "scade in 30 minuti. se non hai richiesto questa modifica, la tua password attuale rimane invariata.",
+      "textRequest": "abbiamo ricevuto una richiesta per reimpostare la password di SnapUp Events.",
+      "textExpires": "questo link di reset scade in 30 minuti e può essere utilizzato solo una volta.",
+      "textIgnore": "se non hai richiesto un ripristino della password, puoi tranquillamente ignorare questa e-mail."
+    }
+  },
+  "nl": {
+    "common": {
+      "fallbackName": "daar",
+      "hello": "hal {{name}},",
+      "buttonFallback": "Button werkt niet? kopiëren en plakken van dit adres in uw browser:",
+      "footerTagline": "elke gast. elk moment. een gedeeld album.",
+      "footerSecurity": "dit is een geautomatiseerde accountbeveiligingsmail."
+    },
+    "verification": {
+      "subject": "uw e-mail verifiëren — SnapUp Events",
+      "documentTitle": "uw SnapUp Events e-mail verifiëren",
+      "preheader": "verifieer uw e-mailadres om te beginnen met het maken van evenementen op SnapUp Events.",
+      "headerLabel": "e-mailverificatie",
+      "eyebrow": "welkom op SnapUp",
+      "heading": "uw e-mail verifiëren",
+      "introduction": "Bevestig uw e-mailadres om te beginnen met het maken van evenementen, het delen QR van codes en het verzamelen van elk gastmoment in één gedeeld album.",
+      "button": "mijn e-mailadres verifiëren",
+      "secureLabel": "beveiligde link:",
+      "secureText": "Deze link vervalt binnen 24 uur en kan slechts één keer worden gebruikt. als u dit account niet hebt gemaakt, is er geen actie vereist.",
+      "textWelcome": "welkom bij SnapUp Events. verifieer uw e-mailadres om te beginnen met het maken en beheren van evenementen.",
+      "textExpires": "Deze verificatielink vervalt binnen 24 uur en kan slechts één keer worden gebruikt.",
+      "textIgnore": "heb je dit account niet aangemaakt, dan kun je deze e-mail veilig negeren."
+    },
+    "passwordReset": {
+      "subject": "uw wachtwoord opnieuw instellen — SnapUp Events",
+      "documentTitle": "uw SnapUp Events wachtwoord opnieuw instellen",
+      "preheader": "gebruik deze beveiligde link voor eenmalig gebruik om uw SnapUp Events wachtwoord opnieuw in te stellen.",
+      "headerLabel": "accountbeveiliging",
+      "eyebrow": "wachtwoord herstel",
+      "heading": "uw wachtwoord opnieuw instellen.",
+      "introduction": "we kregen een verzoek om een nieuw wachtwoord aan te maken voor uw SnapUp Events account.",
+      "button": "een nieuw wachtwoord aanmaken",
+      "secureLabel": "beveiligde link voor eenmalig gebruik.",
+      "secureText": "het vervalt binnen 30 minuten. hebt u deze wijziging niet aangevraagd, dan blijft uw huidige wachtwoord ongewijzigd.",
+      "textRequest": "we hebben een verzoek ontvangen om uw SnapUp Events wachtwoord opnieuw in te stellen.",
+      "textExpires": "Deze resetlink verloopt binnen 30 minuten en kan slechts één keer worden gebruikt.",
+      "textIgnore": "hebt u geen wachtwoordreset aangevraagd, dan kunt u deze e-mail veilig negeren."
+    }
+  },
+  "bg": {
+    "common": {
+      "fallbackName": "там",
+      "hello": "Здравейте {{name}},",
+      "buttonFallback": ", че Бътън не работи? копирайте и поставете този адрес в браузъра си:",
+      "footerTagline": "всеки гост. всеки миг. един споделен албум.",
+      "footerSecurity": "това е автоматизиран имейл за сигурност на акаунта."
+    },
+    "verification": {
+      "subject": "Проверете имейла си — SnapUp Events",
+      "documentTitle": "проверете вашия SnapUp Events имейл",
+      "preheader": "Проверете имейл адреса си, за да започнете да създавате събития на SnapUp Events.",
+      "headerLabel": "потвърждаване на имейл",
+      "eyebrow": "добре дошли в SnapUp",
+      "heading": "потвърждаване на вашия имейл",
+      "introduction": "потвърдете имейл адреса си, за да започнете да създавате събития, да споделяте QR кодове и да събирате всеки момент за гости в един споделен албум.",
+      "button": "потвърди имейла ми",
+      "secureLabel": "сигурна връзка:",
+      "secureText": "тази връзка изтича след 24 часа и може да се използва само веднъж. че не сте създали този акаунт, не се изискват действия.",
+      "textWelcome": "добре дошли в SnapUp Events. Потвърдете имейл адреса си, за да започнете да създавате и управлявате събития.",
+      "textExpires": "тази връзка за проверка изтича след 24 часа и може да се използва само веднъж.",
+      "textIgnore": "Ако не сте създали този акаунт, можете спокойно да игнорирате този имейл."
+    },
+    "passwordReset": {
+      "subject": "Нулиране на паролата ви — SnapUp Events",
+      "documentTitle": "Нулирайте паролата си SnapUp Events",
+      "preheader": "използвайте тази сигурна връзка за еднократна употреба, за да нулирате паролата си SnapUp Events.",
+      "headerLabel": "сигурност на сметката",
+      "eyebrow": "възстановяване на парола",
+      "heading": "нулирайте паролата си.",
+      "introduction": "получихме заявка за създаване на нова парола за вашия SnapUp Events акаунт.",
+      "button": "създаване на нова парола",
+      "secureLabel": "Secure, връзка за еднократна употреба.",
+      "secureText": "изтича след 30 минути. че не сте поискали тази промяна, текущата ви парола остава непроменена.",
+      "textRequest": "получихме заявка за нулиране на паролата ви SnapUp Events.",
+      "textExpires": "тази връзка за нулиране изтича след 30 минути и може да се използва само веднъж.",
+      "textIgnore": "Ако не сте поискали нулиране на паролата, можете спокойно да игнорирате този имейл."
+    }
+  },
+  "ro": {
+    "common": {
+      "fallbackName": "acolo",
+      "hello": "Bună {{name}},",
+      "buttonFallback": "ton nu funcţionează? aintește și lipește această adresă în browser:",
+      "footerTagline": "fiecare oaspete. în fiecare moment. un album comun.",
+      "footerSecurity": "acesta este un e-mail automat de securitate a contului."
+    },
+    "verification": {
+      "subject": "verifica e-mailul – SnapUp Events",
+      "documentTitle": "verificat adresa dvs. SnapUp Events",
+      "preheader": "verifica adresa ta de e-mail pentru a începe crearea de evenimente pe SnapUp Events.",
+      "headerLabel": "verificare prin e-mail",
+      "eyebrow": "are bun venit la SnapUp",
+      "heading": "verifica e-mailul tău",
+      "introduction": "tna adresa de e-mail pentru a începe să creezi evenimente, să împărtășești QR coduri și să colecționezi fiecare moment de invitat într-un album comun.",
+      "button": "Verifică-mi e-mailul",
+      "secureLabel": "securizat Link:",
+      "secureText": "acest link expiră în 24 de ore și poate fi folosit o singură dată. nu ați creat acest cont, nu este necesară nicio acțiune.",
+      "textWelcome": "are bun venit la SnapUp Events. verifica adresa de e-mail pentru a începe să creezi și să gestionezi evenimentele.",
+      "textExpires": "acest link de verificare expiră în 24 de ore și poate fi utilizat o singură dată.",
+      "textIgnore": "nu ați creat acest cont, puteți ignora în siguranță acest e-mail."
+    },
+    "passwordReset": {
+      "subject": "resetați parola — SnapUp Events",
+      "documentTitle": "resetați parola dvs. SnapUp Events",
+      "preheader": "foli acest link securizat, de unică folosință, pentru a reseta parola SnapUp Events.",
+      "headerLabel": "a securitatea contului",
+      "eyebrow": "recuperare de parolă",
+      "heading": "resetați parola.",
+      "introduction": "primit o solicitare pentru a crea o parolă nouă pentru contul tău SnapUp Events.",
+      "button": "Creează o nouă parolă",
+      "secureLabel": "securizat, o singură utilizare.",
+      "secureText": "expiră în 30 de minute. nu solicitați această modificare, parola curentă rămâne neschimbată.",
+      "textRequest": "primit o cerere de resetare a parolei dvs. SnapUp Events.",
+      "textExpires": "această legătură de resetare expiră în 30 de minute și poate fi utilizată o singură dată.",
+      "textIgnore": "nu ați solicitat o resetare a parolei, puteți ignora în siguranță acest e-mail."
+    }
+  },
+  "el": {
+    "common": {
+      "fallbackName": "κεί εκεί",
+      "hello": "Γεια σας {{name}},",
+      "buttonFallback": "Μπάτον δεν δουλεύει; \" Αντιγράψτε και επικολλήστε αυτή τη διεύθυνση στο πρόγραμμα περιήγησής σας:",
+      "footerTagline": "αραϊκανό. Κάθε καλεσμένος. Κάθε στιγμή. Ένα κοινό άλμπουμ.",
+      "footerSecurity": "Αυτό είναι ένα αυτοματοποιημένο email ασφαλείας λογαριασμού."
+    },
+    "verification": {
+      "subject": "Επαλάστε το email σας — SnapUp Events",
+      "documentTitle": "Επαλάστε το email σας SnapUp Events",
+      "preheader": "Επαλάστε τη διεύθυνση ηλεκτρονικού ταχυδρομείου σας για να αρχίσετε να δημιουργείτε εκδηλώσεις στο SnapUp Events.",
+      "headerLabel": "ΕΞΑΓκυλή Ηλεκτρονικού",
+      "eyebrow": "Καλώς ήρθατε στο SnapUp",
+      "heading": "Επαλάστε το email σας",
+      "introduction": "επιβεβαιώστε τη διεύθυνση ηλεκτρονικού ταχυδρομείου σας για να ξεκινήσετε τη δημιουργία εκδηλώσεων, την κοινή χρήση QR κωδίκων και τη συλλογή κάθε στιγμή επισκέπτη σε ένα κοινό άλμπουμ.",
+      "button": "Επαλάστε το email μου",
+      "secureLabel": "Ασφαλής σύνδεσμος:",
+      "secureText": "υροκοπά μία η σύνδεση λήγει σε 24 ώρες και μπορεί να χρησιμοποιηθεί μόνο μία φορά. Αν δεν δημιουργήσατε αυτόν τον λογαριασμό, δεν απαιτείται καμία ενέργεια.",
+      "textWelcome": "Καλώς ήρθατε στο SnapUp Events. ΕΞΕΡΑΤΕ τη διεύθυνση ηλεκτρονικού ταχυδρομείου σας για να ξεκινήσετε τη δημιουργία και τη διαχείριση συμβάντων.",
+      "textExpires": "Συναυλία αυτή η σύνδεση επαλήθευσης λήγει σε 24 ώρες και μπορεί να χρησιμοποιηθεί μόνο μία φορά.",
+      "textIgnore": "Αν δεν δημιουργήσατε αυτόν τον λογαριασμό, μπορείτε να αγνοήσετε με ασφάλεια αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου."
+    },
+    "passwordReset": {
+      "subject": "ρεπολόγηση του κωδικού πρόσβασής σας — SnapUp Events",
+      "documentTitle": "ρευμάνθηκε τον κωδικό πρόσβασης SnapUp Events",
+      "preheader": "χρησιμοποιήστε αυτόν τον ασφαλή σύνδεσμο μίας χρήσης για να επαναφέρετε τον κωδικό πρόσβασης σας SnapUp Events.",
+      "headerLabel": "ειρην αναφοράς\"",
+      "eyebrow": "ανωμερή αντιστοιχία κωδικού πρόσβασης",
+      "heading": "\" Επαναφορά του κωδικού πρόσβασής σας.",
+      "introduction": "Δεν λάβαμε ένα αίτημα για να δημιουργήσουμε έναν νέο κωδικό πρόσβασης για τον λογαριασμό σας SnapUp Events.",
+      "button": "Δημιουργία νέου κωδικού πρόσβασης",
+      "secureLabel": "Ασφαλής, ενιαίος σύνδεσμος χρήσης.",
+      "secureText": "ΛΟΜΩΝΤΑΛΗΣΚΕΙΑΣΕ σε 30 λεπτά. Αν δεν ζητήσατε αυτή την αλλαγή, ο τρέχων κωδικός πρόσβασής σας παραμένει αμετάβλητος.",
+      "textRequest": "Δεν λάβαμε αίτημα για επαναφορά του κωδικού πρόσβασής σας SnapUp Events.",
+      "textExpires": "ΑΛΗΛΟΣΑΜΑ ΑΡΕΤΑΙ αυτή η σύνδεση επαναδιατύπωσης λήγει σε 30 λεπτά και μπορεί να χρησιμοποιηθεί μόνο μία φορά.",
+      "textIgnore": "Αν δεν ζητήσατε επαναφορά κωδικού πρόσβασης, μπορείτε να αγνοήσετε με ασφάλεια αυτό το email."
+    }
+  },
+  "sr": {
+    "common": {
+      "fallbackName": "тамо",
+      "hello": "Здраво {{name}},",
+      "buttonFallback": "п> Дугме не ради? Копирајте и налепите ову адресу у свој претраживач:",
+      "footerTagline": "Сваки гост. Сваки тренутак. ка је један заједнички албум.",
+      "footerSecurity": "Ово је аутоматизована е-пошта о безбедности налога."
+    },
+    "verification": {
+      "subject": "Потврдите своју е-пошту - SnapUp Events",
+      "documentTitle": "потврдите своју SnapUp Events е-пошту",
+      "preheader": "Потврдите своју адресу е-поште да бисте почели да креирате догађаје на SnapUp Events.",
+      "headerLabel": "Верификација е-поште",
+      "eyebrow": "Добродошли на SnapUp",
+      "heading": "Верификујте своју е-пошту",
+      "introduction": "потврдите своју адресу е-поште да бисте започели креирање догађаја, дељење QR кодова и прикупљање сваког тренутка гостију у једном заједничком албуму.",
+      "button": "потврдите моју е-пошту",
+      "secureLabel": "Сигурна веза:",
+      "secureText": "овај линк истиче за 24 сата и може се користити само једном. ако нисте креирали овај налог, није потребна никаква радња.",
+      "textWelcome": "Добродошли на SnapUp Events. Потврдите своју адресу е-поште да бисте започели креирање и управљање догађајима.",
+      "textExpires": "ка за верификацију истиче за 24 сата и може се користити само једном.",
+      "textIgnore": "ако нисте креирали овај налог, можете безбедно да игноришете ову е-пошту."
+    },
+    "passwordReset": {
+      "subject": "Ресетујте лозинку - SnapUp Events",
+      "documentTitle": "ресетујте своју SnapUp Events лозинку",
+      "preheader": "користите ову безбедну везу за једнократну употребу да бисте ресетовали лозинку за SnapUp Events.",
+      "headerLabel": "Безбедност налога",
+      "eyebrow": "Опоравак лозинке",
+      "heading": "Ресетујте своју лозинку.",
+      "introduction": "Примили смо захтев за креирање нове лозинке за ваш SnapUp Events налог.",
+      "button": "Направите нову лозинку",
+      "secureLabel": "Сигурна веза за једнократну употребу.",
+      "secureText": "истиче за 30 минута. ако нисте затражили ову промену, ваша тренутна лозинка остаје непромењена.",
+      "textRequest": "Примили смо захтев за ресетовање ваше SnapUp Events лозинке.",
+      "textExpires": "ова веза за ресетовање истиче за 30 минута и може се користити само једном.",
+      "textIgnore": "Ако нисте затражили ресетовање лозинке, можете безбедно да игноришете ову е-пошту."
+    }
+  },
+  "hr": {
+    "common": {
+      "fallbackName": "tamo",
+      "hello": "Pozdrav {{name}},",
+      "buttonFallback": "Ton ne radi? Kopirajte i zalijepite ovu adresu u svoj preglednik:",
+      "footerTagline": "svaki gost. svaki trenutak. Jedan zajednički album.",
+      "footerSecurity": "Ovo je automatizirana e-pošta za sigurnost računa."
+    },
+    "verification": {
+      "subject": "Potvrdite svoju e-poštu — SnapUp Events",
+      "documentTitle": "Potvrdite svoju SnapUp Events e-poštu",
+      "preheader": "Potvrdite svoju adresu e-pošte da biste započeli stvaranje događaja na SnapUp Events.",
+      "headerLabel": "provjera e-pošte",
+      "eyebrow": "Dobrodošli na SnapUp",
+      "heading": "Potvrdi svoju e-poštu",
+      "introduction": "Potvrdite svoju adresu e-pošte da biste započeli stvaranje događaja, dijeljenje QR kodova i prikupljanje svakog trenutka gosta u jednom zajedničkom albumu.",
+      "button": "Potvrdi moju e-poštu",
+      "secureLabel": "Sigurna veza:",
+      "secureText": "Ova veza istječe za 24 sata i može se koristiti samo jednom. Ako niste stvorili ovaj račun, nije potrebna nikakva radnja.",
+      "textWelcome": "Dobrodošli na SnapUp Events. Provjerite svoju adresu e-pošte da biste započeli s stvaranjem i upravljanjem događajima.",
+      "textExpires": "Ova veza za potvrdu istječe za 24 sata i može se koristiti samo jednom.",
+      "textIgnore": "Ako niste stvorili ovaj račun, možete sigurno zanemariti ovu e-poštu."
+    },
+    "passwordReset": {
+      "subject": "Vratite lozinku — SnapUp Events",
+      "documentTitle": "Vratite lozinku za SnapUp Events",
+      "preheader": "Koristite ovu sigurnu vezu za jednokratnu upotrebu da biste resetirali lozinku SnapUp Events za resetiranje.",
+      "headerLabel": "Sigurnost računa",
+      "eyebrow": "oporavak lozinke",
+      "heading": "Vratite lozinku.",
+      "introduction": "Primili smo zahtjev za izradu nove lozinke za vaš SnapUp Events račun.",
+      "button": "Stvaranje nove lozinke",
+      "secureLabel": "Sigurna veza za jednokratnu upotrebu.",
+      "secureText": "Istječe za 30 minuta. Ako niste zatražili ovu promjenu, vaša trenutna lozinka ostaje nepromijenjena.",
+      "textRequest": "Primili smo zahtjev za resetiranje lozinke za SnapUp Events.",
+      "textExpires": "Ova veza za resetiranje istječe za 30 minuta i može se koristiti samo jednom.",
+      "textIgnore": "Ako niste zatražili ponovno postavljanje lozinke, možete sigurno zanemariti ovu e-poštu."
+    }
+  },
+  "bs": {
+    "common": {
+      "fallbackName": "tamo",
+      "hello": "Ćao {{name}},",
+      "buttonFallback": "Dugme ne radi? Kopirajte i nalepite ovu adresu u svoj pretraživač:",
+      "footerTagline": "svaki gost. s svakog momenta. jedan zajednički album.",
+      "footerSecurity": "Ovo je automatizovani e-mail za bezbednost računa."
+    },
+    "verification": {
+      "subject": ". Pogledajte svoj email — SnapUp Events",
+      "documentTitle": "Verifikujte svoj SnapUp Events email",
+      "preheader": "Verifikujte svoju email adresu da biste počeli da kreirate događaje na SnapUp Events.",
+      "headerLabel": "E-mail verifikacija",
+      "eyebrow": "Dobrodosli na SnapUp",
+      "heading": "Verifikujte svoj email",
+      "introduction": "Potvrdite svoju email adresu da biste počeli da kreirate događaje, delite QR kodove i prikupljate svaki trenutak za goste u jednom zajedničkom albumu.",
+      "button": "Verifikuj moj email",
+      "secureLabel": "Bezbedan link:",
+      "secureText": "Ovaj link ističe za 24 sata i može se koristiti samo jednom. Ukoliko niste kreirali ovaj nalog, nije potrebna nikakva akcija.",
+      "textWelcome": "Dobrodosli na SnapUp Events. Potvrdite svoju email adresu da biste počeli da kreirate i upravljate događajima.",
+      "textExpires": "Ovaj link za verifikaciju ističe za 24 sata i može se koristiti samo jednom.",
+      "textIgnore": "Ako niste kreirali ovaj nalog, možete bezbedno da ignorišete ovaj email."
+    },
+    "passwordReset": {
+      "subject": "Ponovo podesite svoju lozinku — SnapUp Events",
+      "documentTitle": "Resetujte svoju SnapUp Events lozinku",
+      "preheader": "Koristite ovu sigurnu vezu za jednokratnu upotrebu da resetujete svoju SnapUp Events lozinku.",
+      "headerLabel": "Bezbjednost računa",
+      "eyebrow": "Oporavak lozinke",
+      "heading": "Resetuj svoju lozinku.",
+      "introduction": "Dobili smo zahtev za kreiranje nove lozinke za Vaš SnapUp Events nalog.",
+      "button": "kreiraj novu lozinku",
+      "secureLabel": "Bezbedan, jednokratni link.",
+      "secureText": "ističe za 30 minuta. Ukoliko niste zahtevali ovu promenu, vaša trenutna lozinka ostaje nepromenjena.",
+      "textRequest": "Dobili smo zahtev za resetovanje vaše SnapUp Events lozinke.",
+      "textExpires": "Ovaj link za resetiranje ističe za 30 minuta i može se koristiti samo jednom.",
+      "textIgnore": "ako niste zatražili resetovanje lozinke, možete bezbedno da ignorišete ovaj email."
+    }
+  },
+  "sq": {
+    "common": {
+      "fallbackName": "mik",
+      "hello": "Përshëndetje {{name}},",
+      "buttonFallback": "Butoni nuk funksionon? Kopjoni dhe ngjisni këtë adresë në shfletuesin tuaj:",
+      "footerTagline": "Çdo i ftuar. Çdo çast. Një album i përbashkët.",
+      "footerSecurity": "Ky është një email i automatizuar për sigurinë e llogarisë."
+    },
+    "verification": {
+      "subject": "Verifikoni emailin tuaj — SnapUp Events",
+      "documentTitle": "Verifikoni emailin tuaj të SnapUp Events",
+      "preheader": "Verifikoni adresën tuaj të emailit për të filluar krijimin e eventeve në SnapUp Events.",
+      "headerLabel": "Verifikimi i emailit",
+      "eyebrow": "Mirë se vini në SnapUp",
+      "heading": "Verifikoni emailin tuaj",
+      "introduction": "Konfirmoni adresën tuaj të emailit për të filluar krijimin e eventeve, ndarjen e kodeve QR dhe mbledhjen e çdo çasti të të ftuarve në një album të përbashkët.",
+      "button": "Verifiko emailin tim",
+      "secureLabel": "Lidhje e sigurt:",
+      "secureText": "Kjo lidhje skadon pas 24 orësh dhe mund të përdoret vetëm një herë. Nëse nuk e keni krijuar këtë llogari, nuk kërkohet asnjë veprim.",
+      "textWelcome": "Mirë se vini në SnapUp Events. Verifikoni adresën tuaj të emailit për të filluar krijimin dhe menaxhimin e eventeve.",
+      "textExpires": "Kjo lidhje verifikimi skadon pas 24 orësh dhe mund të përdoret vetëm një herë.",
+      "textIgnore": "Nëse nuk e keni krijuar këtë llogari, mund ta shpërfillni pa problem këtë email."
+    },
+    "passwordReset": {
+      "subject": "Rivendosni fjalëkalimin tuaj — SnapUp Events",
+      "documentTitle": "Rivendosni fjalëkalimin tuaj të SnapUp Events",
+      "preheader": "Përdorni këtë lidhje të sigurt dhe njëpërdorimshme për të rivendosur fjalëkalimin tuaj të SnapUp Events.",
+      "headerLabel": "Siguria e llogarisë",
+      "eyebrow": "Rikuperimi i fjalëkalimit",
+      "heading": "Rivendosni fjalëkalimin tuaj.",
+      "introduction": "Kemi marrë një kërkesë për të krijuar një fjalëkalim të ri për llogarinë tuaj SnapUp Events.",
+      "button": "Krijo një fjalëkalim të ri",
+      "secureLabel": "Lidhje e sigurt, njëpërdorimshme.",
+      "secureText": "Skadon pas 30 minutash. Nëse nuk e keni kërkuar këtë ndryshim, fjalëkalimi juaj aktual mbetet i pandryshuar.",
+      "textRequest": "Kemi marrë një kërkesë për të rivendosur fjalëkalimin tuaj të SnapUp Events.",
+      "textExpires": "Kjo lidhje për rivendosjen skadon pas 30 minutash dhe mund të përdoret vetëm një herë.",
+      "textIgnore": "Nëse nuk keni kërkuar rivendosjen e fjalëkalimit, mund ta shpërfillni pa problem këtë email."
+    }
+  },
+  "mk": {
+    "common": {
+      "fallbackName": "пријателе",
+      "hello": "Здраво {{name}},",
+      "buttonFallback": "Копчето не работи? Копирајте ја и залепете ја оваа адреса во вашиот прелистувач:",
+      "footerTagline": "Секој гостин. Секој момент. Еден заеднички албум.",
+      "footerSecurity": "Ова е автоматска е-пошта за безбедноста на сметката."
+    },
+    "verification": {
+      "subject": "Потврдете ја вашата е-пошта — SnapUp Events",
+      "documentTitle": "Потврдете ја вашата е-пошта за SnapUp Events",
+      "preheader": "Потврдете ја вашата адреса за е-пошта за да започнете да создавате настани на SnapUp Events.",
+      "headerLabel": "Потврда на е-пошта",
+      "eyebrow": "Добре дојдовте во SnapUp",
+      "heading": "Потврдете ја вашата е-пошта",
+      "introduction": "Потврдете ја вашата адреса за е-пошта за да започнете да создавате настани, да споделувате QR-кодови и да го собирате секој момент на гостите во еден заеднички албум.",
+      "button": "Потврди ја мојата е-пошта",
+      "secureLabel": "Безбедна врска:",
+      "secureText": "Оваа врска истекува за 24 часа и може да се користи само еднаш. Ако не сте ја создале оваа сметка, не е потребно никакво дејство.",
+      "textWelcome": "Добре дојдовте во SnapUp Events. Потврдете ја вашата адреса за е-пошта за да започнете да создавате и управувате со настани.",
+      "textExpires": "Оваа врска за потврда истекува за 24 часа и може да се користи само еднаш.",
+      "textIgnore": "Ако не сте ја создале оваа сметка, можете безбедно да ја игнорирате оваа е-пошта."
+    },
+    "passwordReset": {
+      "subject": "Ресетирајте ја вашата лозинка — SnapUp Events",
+      "documentTitle": "Ресетирајте ја вашата лозинка за SnapUp Events",
+      "preheader": "Користете ја оваа безбедна врска за еднократна употреба за да ја ресетирате вашата лозинка за SnapUp Events.",
+      "headerLabel": "Безбедност на сметката",
+      "eyebrow": "Враќање на лозинката",
+      "heading": "Ресетирајте ја вашата лозинка.",
+      "introduction": "Добивме барање за создавање нова лозинка за вашата сметка на SnapUp Events.",
+      "button": "Создај нова лозинка",
+      "secureLabel": "Безбедна врска за еднократна употреба.",
+      "secureText": "Истекува за 30 минути. Ако не сте ја побарале оваа промена, вашата тековна лозинка останува непроменета.",
+      "textRequest": "Добивме барање за ресетирање на вашата лозинка за SnapUp Events.",
+      "textExpires": "Оваа врска за ресетирање истекува за 30 минути и може да се користи само еднаш.",
+      "textIgnore": "Ако не сте побарале ресетирање на лозинката, можете безбедно да ја игнорирате оваа е-пошта."
     }
   },
   "hi": {
@@ -928,11 +1661,573 @@ const EMAIL_COPIES = {
       "textExpires": "Mag-e-expire ang link na ito sa pag-reset sa loob ng 30 minuto at isang beses lang magagamit.",
       "textIgnore": "Kung hindi ka humiling ng pag-reset ng password, maaari mong ligtas na balewalain ang email na ito."
     }
+  },
+  "zh-tw": {
+    "common": {
+      "fallbackName": "朋友",
+      "hello": "哈囉{{name}},",
+      "buttonFallback": "按鈕無法運作? 將此地址複製並貼到您的瀏覽器中:",
+      "footerTagline": "每一位客人。 每一刻。 一張共享專輯。",
+      "footerSecurity": "這是一封自動化的帳戶安全電子郵件。"
+    },
+    "verification": {
+      "subject": "驗證您的電子郵件 — SnapUp Events",
+      "documentTitle": "確認您的SnapUp Events電子郵件",
+      "preheader": "請確認您的電子郵件地址,以開始在 SnapUp Events 上建立活動。",
+      "headerLabel": "電子郵件驗證",
+      "eyebrow": "歡迎來到SnapUp",
+      "heading": "驗證您的電子郵件",
+      "introduction": "確認您的電子郵件地址,開始建立活動、分享 QR 代碼,並收集一張共享相簿中的每位來賓。",
+      "button": "驗證我的電子郵件",
+      "secureLabel": "安全連結:",
+      "secureText": "此連結將於24小時內到期,且僅能使用一次。 如果您未建立此帳戶,則無需採取任何行動。",
+      "textWelcome": "歡迎使用SnapUp Events。 驗證您的電子郵件地址,以開始建立和管理事件。",
+      "textExpires": "此驗證連結將於24小時內到期,且僅可使用一次。",
+      "textIgnore": "如果您未建立此帳號,可以放心地忽略這封電子郵件。"
+    },
+    "passwordReset": {
+      "subject": "重設您的密碼 — SnapUp Events",
+      "documentTitle": "重設您的SnapUp Events密碼",
+      "preheader": "使用此安全的一次性連結來重設您的 SnapUp Events 密碼。",
+      "headerLabel": "帳戶安全",
+      "eyebrow": "密碼復原",
+      "heading": "重設您的密碼。",
+      "introduction": "我們收到申請,要為您的SnapUp Events帳戶建立新密碼。",
+      "button": "建立新的密碼",
+      "secureLabel": "安全且一次性的連結。",
+      "secureText": "30分鐘內就到期了。 如果您未要求變更此變更,您目前的密碼保持不變。",
+      "textRequest": "我們收到請求,要求重設您的SnapUp Events密碼。",
+      "textExpires": "此重置連結在30分鐘內到期,僅能使用一次。",
+      "textIgnore": "如果您未要求重設密碼,可以安全地忽略此電子郵件。"
+    }
+  },
+  "pt-pt": {
+    "common": {
+      "fallbackName": "lá",
+      "hello": "Olá {{name}},",
+      "buttonFallback": "Botão não funciona? Copiar e colar este endereço no seu navegador:",
+      "footerTagline": "Todos os convidados. Todos os momentos. Um álbum compartilhado.",
+      "footerSecurity": "Este é um e-mail automatizado de segurança de conta."
+    },
+    "verification": {
+      "subject": "Verifique seu e-mail — SnapUp Events",
+      "documentTitle": "Verifique o seu SnapUp Events e-mail",
+      "preheader": "Verifique seu endereço de e-mail para começar a criar eventos em SnapUp Events.",
+      "headerLabel": "Verificação de e-mail",
+      "eyebrow": "Bem-vindo ao SnapUp",
+      "heading": "Verifique seu e-mail",
+      "introduction": "Confirme seu endereço de e-mail para começar a criar eventos, compartilhar QR códigos e coletar cada momento do convidado em um álbum compartilhado.",
+      "button": "Verificar meu e-mail",
+      "secureLabel": "Link seguro:",
+      "secureText": "este link expira em 24 horas e só pode ser utilizado uma vez. Se você não criou essa conta, nenhuma ação é necessária.",
+      "textWelcome": "Bem-vindo ao SnapUp Events. Verifique seu endereço de e-mail para começar a criar e gerenciar eventos.",
+      "textExpires": "este link de verificação expira em 24 horas e só pode ser usado uma vez.",
+      "textIgnore": "Se você não criou esta conta, você pode ignorar com segurança este e-mail."
+    },
+    "passwordReset": {
+      "subject": "Redefina sua senha — SnapUp Events",
+      "documentTitle": "Redefina a sua SnapUp Events password",
+      "preheader": "Utilize este link seguro e de uso único para redefinir a sua SnapUp Events.",
+      "headerLabel": "Segurança da conta",
+      "eyebrow": "Recuperação de senha",
+      "heading": "Redefina a sua palavra-passe.",
+      "introduction": "Recebemos um pedido para criar uma nova senha para sua SnapUp Events conta.",
+      "button": "Criar uma nova senha",
+      "secureLabel": "com uma ligação segura e de uso único.",
+      "secureText": "expira em 30 minutos. Se você não solicitou essa alteração, sua senha atual permanece inalterada.",
+      "textRequest": "Recebemos uma solicitação para redefinir sua SnapUp Events senha.",
+      "textExpires": "este link de redefinição expira em 30 minutos e só pode ser usado uma vez.",
+      "textIgnore": "Se você não solicitou uma redefinição de senha, você pode ignorar com segurança este e-mail."
+    }
+  },
+  "da": {
+    "common": {
+      "fallbackName": "der er der",
+      "hello": "Hej {{name}},",
+      "buttonFallback": "Knap virker ikke? Kopier og indsæt denne adresse i din browser:",
+      "footerTagline": "alle hver gæst. hvert øjeblik. et af de delte album.",
+      "footerSecurity": "en automatiseret konto-sikkerheds-e-mail."
+    },
+    "verification": {
+      "subject": "Bekræft din e-mail — SnapUp Events",
+      "documentTitle": "din SnapUp Events e-mail",
+      "preheader": "din e-mail adresse skal begynde at oprette begivenheder på SnapUp Events.",
+      "headerLabel": "e-mail-bekræftelse",
+      "eyebrow": "voyelt til SnapUp",
+      "heading": "at bekræfte din e-mail",
+      "introduction": "bekræfte din e-mail-adresse for at begynde at oprette begivenheder, dele QR-koder og indsamle hvert gæsteøjeblik i et delt album.",
+      "button": "at bekræfte min e-mail",
+      "secureLabel": "Sikkert link:",
+      "secureText": "dette link udløber om 24 timer og kan kun bruges én gang. hvis du ikke har oprettet denne konto, kræves der ingen handling.",
+      "textWelcome": "voyet til SnapUp Events. din e-mail-adresse skal bestilles og administrere begivenheder.",
+      "textExpires": "dette verifikationslink udløber om 24 timer og kan kun bruges én gang.",
+      "textIgnore": "hvis du ikke har oprettet denne konto, kan du sikkert ignorere denne e-mail."
+    },
+    "passwordReset": {
+      "subject": "Nuser dig til din adgangskode — SnapUp Events",
+      "documentTitle": "Nusse dit SnapUp Events kodeord",
+      "preheader": "dette sikre link til engangsbrug for at nulstille din SnapUp Events adgangskode.",
+      "headerLabel": "sikkerhed på kontoen",
+      "eyebrow": "Adgangskode opsving opsving",
+      "heading": "Nulstil dit kodeord.",
+      "introduction": "vi har modtaget en anmodning om at oprette en ny adgangskode til din SnapUp Events konto.",
+      "button": "Opret en ny adgangskode",
+      "secureLabel": "Secure, engangs link.",
+      "secureText": "den udløber om 30 minutter. du ikke anmodede om denne ændring, forbliver din nuværende adgangskode uændret.",
+      "textRequest": "vi har modtaget en anmodning om at nulstille din SnapUp Events adgangskode.",
+      "textExpires": "dette nulstillingslink udløber på 30 minutter og kan kun bruges én gang.",
+      "textIgnore": "du ikke har anmodet om en nulstilling af adgangskode, kan du sikkert ignorere denne e-mail."
+    }
+  },
+  "fi": {
+    "common": {
+      "fallbackName": "siellä siellä",
+      "hello": "Hei {{name}},",
+      "buttonFallback": "ei toimi nappi? kopioi ja liitä tämä osoite selaimeesi:",
+      "footerTagline": "jokainen vieras. joka hetki. yksi jaettu albumi.",
+      "footerSecurity": "tämä on automaattinen tilin suojaussähköposti."
+    },
+    "verification": {
+      "subject": "Vahvista sähköpostiosoitteesi – SnapUp Events",
+      "documentTitle": "Vahvista SnapUp Events-sähköpostiosoitteesi",
+      "preheader": "Vahvista sähköpostiosoitteesi, niin aloitat tapahtumien luomisen osoitteessa SnapUp Events.",
+      "headerLabel": "sähköpostin vahvistus",
+      "eyebrow": "Osoitteeseen SnapUp",
+      "heading": "Vahvista sähköpostisi",
+      "introduction": "Vahvista sähköpostiosoitteesi aloittaaksesi tapahtumien luomisen, jakamalla QR-koodeja ja keräämällä jokaisen vierashetken yhdellä jaetulla albumilla.",
+      "button": "Vahvista sähköpostini",
+      "secureLabel": "suojattu linkki:",
+      "secureText": "tämä linkki vanhenee 24 tunnissa ja sitä voidaan käyttää vain kerran. jos et ole luonut tätä tiliä, mitään toimenpiteitä ei tarvita.",
+      "textWelcome": "Tervetuloa osoitteeseen SnapUp Events. Vahvista sähköpostiosoitteesi, jotta voit aloittaa tapahtumien luomisen ja hallinnan.",
+      "textExpires": "Tämä vahvistuslinkki vanhenee 24 tunnin kuluessa, ja sitä voidaan käyttää vain kerran.",
+      "textIgnore": "jos et luonut tätä tiliä, voit turvallisesti ohittaa tämän sähköpostin."
+    },
+    "passwordReset": {
+      "subject": "Nollaa salasanasi – SnapUp Events",
+      "documentTitle": "Nollaa SnapUp Events salasana",
+      "preheader": "Käytä tätä turvallista, kertakäyttöistä linkkiä palauttaaksesi SnapUp Events-salasanasi.",
+      "headerLabel": "tilin turvallisuus",
+      "eyebrow": "Salasanan palautus",
+      "heading": "Nollaa salasanasi.",
+      "introduction": "saimme pyynnön luoda uusi salasana tilillesi SnapUp Events.",
+      "button": "Luo uusi salasana",
+      "secureLabel": "Turvallinen, kertakäyttöinen linkki.",
+      "secureText": "se vanhenee 30 minuutissa. jos et ole pyytänyt tätä muutosta, nykyinen salasanasi pysyy muuttumattomana.",
+      "textRequest": "saimme pyynnön nollata SnapUp Events-salasanasi.",
+      "textExpires": "Tämä nollauslinkki vanhenee 30 minuutissa ja sitä voidaan käyttää vain kerran.",
+      "textIgnore": "Jos et pyytänyt salasanan vaihtamista, voit turvallisesti ohittaa tämän sähköpostin."
+    }
+  },
+  "nb": {
+    "common": {
+      "fallbackName": "dere",
+      "hello": "hil {{name}},",
+      "buttonFallback": "Button virker ikke? Kopier og lim inn denne adressen i nettleseren din:",
+      "footerTagline": "Alle gjester. hvert øyeblikk. Et av delt album.",
+      "footerSecurity": "Dette er en automatisert konto-sikkerhet-e-post."
+    },
+    "verification": {
+      "subject": "evert e-posten din — SnapUp Events",
+      "documentTitle": "er din SnapUp Events e-post",
+      "preheader": "rett e-postadressen din for å begynne å opprette hendelser på SnapUp Events.",
+      "headerLabel": "statsverifisering av e-",
+      "eyebrow": "Velkommen til SnapUp",
+      "heading": "er bekreftelse på e-posten din",
+      "introduction": "Bekreft e-postadressen din til å begynne å opprette arrangementer, dele QR-koder og samle hvert gjesteøyeblikk i ett delt album.",
+      "button": "Kontroller e-posten min",
+      "secureLabel": "Sikre link:",
+      "secureText": "Denne lenken utløper i løpet av 24 timer og kan bare brukes én gang. Hvis du ikke opprettet denne kontoen, er det ikke nødvendig med noen handling.",
+      "textWelcome": "Velkommen til SnapUp Events. er Bekreft e-postadressen din for å begynne å opprette og administrere hendelser.",
+      "textExpires": "Denne bekreftelseskoblingen utløper i løpet av 24 timer og kan kun brukes én gang.",
+      "textIgnore": "Hvis du ikke opprettet denne kontoen, kan du trygt ignorere denne e-posten."
+    },
+    "passwordReset": {
+      "subject": "Tilbakestill passordet ditt — SnapUp Events",
+      "documentTitle": "Tilbakestill ditt SnapUp Events passord",
+      "preheader": "Bruk denne sikre koblingen til engangsbruk for å tilbakestille passordet ditt SnapUp Events.",
+      "headerLabel": "Kontosikkerhet",
+      "eyebrow": "Passordgjenoppretting",
+      "heading": "Tilbakestill passordet ditt.",
+      "introduction": "Vi mottok en forespørsel om å opprette et nytt passord for din SnapUp Events-konto.",
+      "button": "Opprett et nytt passord",
+      "secureLabel": "Sikre, engangskobling.",
+      "secureText": "Den utløper om 30 minutter. Hvis du ikke har bedt om denne endringen, forblir ditt nåværende passord uendret.",
+      "textRequest": "Vi mottok en forespørsel om å tilbakestille passordet ditt SnapUp Events.",
+      "textExpires": "Denne tilbakestillingskoblingen utløper på 30 minutter og kan bare brukes én gang.",
+      "textIgnore": "Hvis du ikke har bedt om tilbakestilling av passord, kan du trygt ignorere denne e-posten."
+    }
+  },
+  "sk": {
+    "common": {
+      "fallbackName": "tam",
+      "hello": "Dobrý {{name}}, Dobrý deň,",
+      "buttonFallback": "aguľka nefunguje? skopírovať a vložiť túto adresu do vášho prehliadača:",
+      "footerTagline": "každého hosťa. každú chvíľu. jeden zdieľaný album.",
+      "footerSecurity": "je to automatizovaný e-mail s bezpečnosťou účtu."
+    },
+    "verification": {
+      "subject": "Overte si svoj e-mail – SnapUp Events",
+      "documentTitle": "Overte si SnapUp Events e-mail",
+      "preheader": "SnapUp Events si overte svoju e-mailovú adresu a začnite vytvárať udalosti.",
+      "headerLabel": "overenie e-mailu",
+      "eyebrow": "vítajte na SnapUp",
+      "heading": "overte si svoj e-mail",
+      "introduction": "potvrdenie vašej e-mailovej adresy, aby ste mohli začať vytvárať udalosti, zdieľať QR kódy a zhromažďovať každý moment hosťa v jednom zdieľanom albume.",
+      "button": "Overte si môj e-mail",
+      "secureLabel": "bezpečný odkaz:",
+      "secureText": "tento odkaz vyprší do 24 hodín a môže sa použiť iba raz. ak ste si tento účet nevytvorili, nie je potrebná žiadna akcia.",
+      "textWelcome": "Vitajte na SnapUp Events. Overte si svoju e-mailovú adresu a začnite vytvárať a spravovať udalosti.",
+      "textExpires": "toto overovacie spojenie uplynie do 24 hodín a môže sa použiť iba raz.",
+      "textIgnore": "ak ste si tento účet nevytvorili, môžete tento e-mail bezpečne ignorovať."
+    },
+    "passwordReset": {
+      "subject": "Obnoviť svoje heslo – SnapUp Events",
+      "documentTitle": "Obnoviť heslo na SnapUp Events",
+      "preheader": "na obnovenie vášho SnapUp Events hesla použite tento bezpečný odkaz na jedno použitie.",
+      "headerLabel": "účinkové zabezpečenie účtu",
+      "eyebrow": "Obnova hesla",
+      "heading": "Obnovte svoje heslo.",
+      "introduction": "SnapUp Events účtu sme dostali žiadosť o vytvorenie nového hesla.",
+      "button": "Vytvorenie nového hesla",
+      "secureLabel": "zabezpečený, jednorazový link.",
+      "secureText": "Vyprší o 30 minút. ak ste o túto zmenu nepožiadali, vaše aktuálne heslo zostáva nezmenené.",
+      "textRequest": "SnapUp Events heslo sme dostali žiadosť o obnovenie.",
+      "textExpires": "toto prepojenie na resetovanie vyprší do 30 minút a môže sa použiť iba raz.",
+      "textIgnore": "ak ste nepožiadali o obnovenie hesla, môžete tento e-mail bezpečne ignorovať."
+    }
+  },
+  "lt": {
+    "common": {
+      "fallbackName": "štai čia",
+      "hello": "hello {{name}}, Jungtinės Amerikos Valstijos",
+      "buttonFallback": "ar nedirba mygtukas? ir įklijuokite šį adresą į savo naršyklę:",
+      "footerTagline": "Kiekvienas svečias. kiekvieną akimirką. vienas bendras albumas.",
+      "footerSecurity": "tai automatinis paskyros saugumo el. paštas."
+    },
+    "verification": {
+      "subject": "tifikuokite savo el. laišką SnapUp Events",
+      "documentTitle": "TIRKITE savo SnapUp Events el. paštą",
+      "preheader": "tol. Patikrinkite savo el. pašto adresą, kad pradėtumėte kurti renginius SnapUp Events.",
+      "headerLabel": "el. pašto patvirtinimas",
+      "eyebrow": "SnapUp",
+      "heading": "Patvirtinkite savo el. laišką",
+      "introduction": "patvirtinkite savo el. pašto adresą, kad pradėtumėte kurti renginius, dalydamiesi QR kodais ir rinkdami kiekvieną svečio akimirką viename bendrame albume.",
+      "button": "Patvirtinkite mano el. laišką",
+      "secureLabel": ": Saugi nuoroda:",
+      "secureText": "ažaspalandis baigiasi per 24 valandas ir gali būti naudojamas tik vieną kartą. jei nesukūrėte šios paskyros, nereikia imtis jokių veiksmų.",
+      "textWelcome": "SnapUp Events. Patvirtinkite savo el. pašto adresą, kad pradėtumėte kurti ir valdyti įvykius.",
+      "textExpires": "žiuotė baigiasi per 24 valandas ir gali būti naudojama tik vieną kartą.",
+      "textIgnore": "Jeigu nesukūrėte šios paskyros, galite saugiai ignoruoti šį el. laišką."
+    },
+    "passwordReset": {
+      "subject": "iš naujo nustatykite slaptažodį – SnapUp Events",
+      "documentTitle": "iš naujo nustatykite savo SnapUp Events slaptažodį",
+      "preheader": "linti šią saugią, vienkartinio naudojimo nuorodą, kad iš naujo nustatytumėte savo SnapUp Events slaptažodį.",
+      "headerLabel": "sąskaitos užstatas",
+      "eyebrow": "word recovery Sisteminiai Reikalavimai",
+      "heading": "Iš naujo nustatykite savo slaptažodį.",
+      "introduction": "sulaukėme prašymo sukurti naują jūsų SnapUp Events paskyros slaptažodį.",
+      "button": "sukurti naują slaptažodį",
+      "secureLabel": "on, saugi, vienkartinio naudojimo nuoroda.",
+      "secureText": "Jis baigiasi po 30 minučių. jei šio pakeitimo neprašėte, dabartinis slaptažodis lieka nepakitęs.",
+      "textRequest": "gavome prašymą iš naujo nustatyti jūsų SnapUp Events slaptažodį.",
+      "textExpires": "kryptis į atstatymą baigiasi per 30 minučių ir gali būti naudojama tik vieną kartą.",
+      "textIgnore": "jei neprašėte slaptažodžio nustatymo, galite saugiai ignoruoti šį el. Laišką."
+    }
+  },
+  "lv": {
+    "common": {
+      "fallbackName": "tur",
+      "hello": "Sveiki {{name}},",
+      "buttonFallback": "a nestrādā, bet nestrādā? Kopēt un ielīmēt šo adresi savā pārlūkprogrammā:",
+      "footerTagline": "katrs viesis. katru mirkli. viens kopīgs albums.",
+      "footerSecurity": "Tas ir automatizēts konta drošības e-pasts."
+    },
+    "verification": {
+      "subject": "Pārbaudiet savu e-pastu: SnapUp Events",
+      "documentTitle": "Pārbaudiet savu SnapUp Events e-pastu",
+      "preheader": "Pārbaudiet savu e-pasta adresi, lai sāktu SnapUp Events notikumu veidošanu.",
+      "headerLabel": "a e-pasta pārbaude",
+      "eyebrow": "SnapUp laipni lūdzam",
+      "heading": "a e-pasta pārbaude",
+      "introduction": "ojiet savu e-pasta adresi, lai sāktu veidot notikumus, daloties QR kodos un apkopojot katru viesu brīdi vienā koplietošanas albumā.",
+      "button": "ojiet manu e-pastu",
+      "secureLabel": "droša saite:",
+      "secureText": "Šī saite beidzas 24 stundu laikā, un to var izmantot tikai vienu reizi. ja jūs neveidojāt šo kontu, nekādas darbības nav nepieciešamas.",
+      "textWelcome": "SnapUp Events. ojiet savu e-pasta adresi, lai sāktu veidot un pārvaldīt notikumus.",
+      "textExpires": "as verifikācijas saites derīguma termiņš beidzas 24 stundu laikā, un to var izmantot tikai vienu reizi.",
+      "textIgnore": "ja jūs neveidojāt šo kontu, jūs varat droši ignorēt šo e-pastu."
+    },
+    "passwordReset": {
+      "subject": "Atiestatiet paroli — SnapUp Events",
+      "documentTitle": "SnapUp Events paroles atiestatīšana",
+      "preheader": "Izmantojiet šo drošo, vienreizējās lietošanas saiti, lai SnapUp Events atiestatītu paroli.",
+      "headerLabel": "a konta drošība",
+      "eyebrow": "a paroles atgūšana",
+      "heading": ".",
+      "introduction": "mēs saņēmām pieprasījumu izveidot jaunu paroli jūsu SnapUp Events kontam.",
+      "button": "a jaunas paroles izveide",
+      "secureLabel": "Droša, vienreiz lietojama saite.",
+      "secureText": "am beidzas 30 minūšu laikā. ja jūs nepieprasījāt šīs izmaiņas, pašreizējā parole paliek nemainīga.",
+      "textRequest": "Mēs saņēmām pieprasījumu, lai SnapUp Events atiestatītu paroli.",
+      "textExpires": "Šī atiestatīšanas saite beidzas 30 minūtēs, un to var izmantot tikai vienu reizi.",
+      "textIgnore": "ja neesat pieprasījis paroles atiestatīšanu, varat droši ignorēt šo e-pastu."
+    }
+  },
+  "et": {
+    "common": {
+      "fallbackName": "seal",
+      "hello": "Tere {{name}},",
+      "buttonFallback": "Button ei tööta? Kopeerige ja kleepige see aadress oma brauserisse:",
+      "footerTagline": "iga külaline. iga hetk. Üks jagatud album.",
+      "footerSecurity": "See on automaatne konto turvalisuse e-kiri."
+    },
+    "verification": {
+      "subject": "Kontrollige oma e-posti aadressi - SnapUp Events",
+      "documentTitle": "Kontrollige oma SnapUp Events e-posti aadressi",
+      "preheader": "kontrollige oma e-posti aadressi, et alustada sündmuste loomist saidil SnapUp Events.",
+      "headerLabel": "E-posti kinnitamine",
+      "eyebrow": "Tere tulemast aadressile SnapUp",
+      "heading": "kinnita oma e-posti aadress",
+      "introduction": "kinnitage oma e-posti aadress, et alustada sündmuste loomist, jagada QR koode ja koguda iga külalishetke ühes jagatud albumis.",
+      "button": "kinnita minu e-posti aadress",
+      "secureLabel": "turvaline link:",
+      "secureText": "See link aegub 24 tunni jooksul ja seda saab kasutada ainult üks kord. Kui te seda kontot ei loonud, pole toimingut vaja.",
+      "textWelcome": "tere tulemast aadressile SnapUp Events. Kinnitage oma e-posti aadress, et alustada sündmuste loomist ja haldamist.",
+      "textExpires": "See kinnituslink aegub 24 tunni pärast ja seda saab kasutada ainult üks kord.",
+      "textIgnore": "Kui te seda kontot ei loonud, saate seda e-kirja turvaliselt ignoreerida."
+    },
+    "passwordReset": {
+      "subject": "lähetage oma parool — SnapUp Events",
+      "documentTitle": "Taastage oma SnapUp Events parool",
+      "preheader": "Kasutage seda turvalist ühekordselt kasutatavat linki oma SnapUp Events parooli lähtestamiseks.",
+      "headerLabel": "konto turvalisus",
+      "eyebrow": "Parooli taastamine",
+      "heading": "Lähtestage oma parool.",
+      "introduction": "Saime taotluse luua teie SnapUp Events kontole uus parool.",
+      "button": "Uue parooli loomine",
+      "secureLabel": "Turvaline, ühekordselt kasutatav link.",
+      "secureText": "See aegub 30 minuti pärast. Kui te seda muudatust ei taotlenud, jääb teie praegune parool muutmata.",
+      "textRequest": "Saime taotluse teie SnapUp Events parooli lähtestamiseks.",
+      "textExpires": "See lähtestamislink aegub 30 minuti pärast ja seda saab kasutada ainult üks kord.",
+      "textIgnore": "Kui te ei taotlenud parooli lähtestamist, võite seda e-kirja turvaliselt ignoreerida."
+    }
+  },
+  "sl": {
+    "common": {
+      "fallbackName": "raj tam je",
+      "hello": "OMAKNITE {{name}},",
+      "buttonFallback": "gumb, da ne deluje? ta naslov kopirajte in prilepite v brskalnik:",
+      "footerTagline": "vsak gost je. vsak trenutek. en skupni album.",
+      "footerSecurity": "to je avtomatizirano e-poštno sporočilo o varnosti računa."
+    },
+    "verification": {
+      "subject": "preverite svoj e-poštni naslov - SnapUp Events",
+      "documentTitle": "Preverite svojo SnapUp Events e-pošto",
+      "preheader": "SnapUp Events preverite svoj e-poštni naslov, da začnete ustvarjati dogodke na spletni strani www.",
+      "headerLabel": "preveditev e-pošte",
+      "eyebrow": "Dobrodošli na SnapUp",
+      "heading": "Preverite svojo e-pošto",
+      "introduction": "Potrdite svoj e-poštni naslov, da začnete ustvarjati dogodke, delite QR kode in zberete vsak trenutek gosta v enem albumu v skupni rabi.",
+      "button": "Preverite moj e-poštni naslov",
+      "secureLabel": "na varna povezava:",
+      "secureText": "ta povezava poteče v 24 urah in se lahko uporablja samo enkrat. če tega računa niste ustvarili, ni potrebno nobeno dejanje.",
+      "textWelcome": "OSLABITE na SnapUp Events. Preverite svoj e-poštni naslov, da začnete ustvarjati in upravljati dogodke.",
+      "textExpires": "a povezava za preverjanje preneha veljati v 24 urah in se lahko uporablja samo enkrat.",
+      "textIgnore": "če tega računa niste ustvarili, lahko to e-poštno sporočilo varno prezrete."
+    },
+    "passwordReset": {
+      "subject": "ponastavite svoje geslo - SnapUp Events",
+      "documentTitle": "ponastavite svoje SnapUp Events geslo",
+      "preheader": "to varno povezavo za enkratno uporabo uporabite za ponastavitev gesla na spletni strani SnapUp Events.",
+      "headerLabel": "OMOČANJE v zvezi z varnostjo računa",
+      "eyebrow": "ostovanje gesla",
+      "heading": "ponastavite svoje geslo.",
+      "introduction": "smo prejeli zahtevo za ustvarjanje novega gesla za vaš SnapUp Events račun.",
+      "button": "ustvarite novo geslo",
+      "secureLabel": "varen, enojni link.",
+      "secureText": "a se izteče čez 30 minut. če niste zahtevali te spremembe, vaše trenutno geslo ostaja nespremenjeno.",
+      "textRequest": "smo prejeli zahtevo za ponastavitev vašega SnapUp Events gesla.",
+      "textExpires": "a povezava za ponastavitev se izteče v 30 minutah in se lahko uporablja samo enkrat.",
+      "textIgnore": "če niste zahtevali ponastavitve gesla, lahko to e-poštno sporočilo varno prezrete."
+    }
+  },
+  "ta": {
+    "common": {
+      "fallbackName": "அங்கு",
+      "hello": "வணக்கம் {{name}},",
+      "buttonFallback": "பொத்தான் வேலை செய்யவில்லையா? நகலெடுத்து உங்கள் உலாவியில் இந்த முகவரியை ஒட்டவும்:",
+      "footerTagline": "ஒவ்வொரு விருந்தினரும். ஒவ்வொரு நொடியும். ஒருவர் ஆல்பத்தை பகிர்ந்து கொண்டார்.",
+      "footerSecurity": "இது ஒரு தானியங்கி கணக்கு-பாதுகாப்பு மின்னஞ்சல்."
+    },
+    "verification": {
+      "subject": "உங்கள் மின்னஞ்சலை சரிபார்க்கவும் — SnapUp Events",
+      "documentTitle": "உங்கள் SnapUp Events மின்னஞ்சலை சரிபார்க்கவும்",
+      "preheader": "SnapUp Events இல் நிகழ்வுகளை உருவாக்கத் தொடங்க உங்கள் மின்னஞ்சல் முகவரியைச் சரிபார்க்கவும்.",
+      "headerLabel": "மின்னஞ்சல் சரிபார்ப்பு",
+      "eyebrow": "SnapUp க்கு வரவேற்கிறோம்",
+      "heading": "உங்கள் மின்னஞ்சலை சரிபார்க்கவும்",
+      "introduction": "நிகழ்வுகளை உருவாக்கத் தொடங்கவும், QR குறியீடுகளைப் பகிரவும், ஒவ்வொரு விருந்தினர் தருணத்தையும் ஒரு பகிரப்பட்ட ஆல்பத்தில் சேகரிக்கவும் உங்கள் மின்னஞ்சல் முகவரியை உறுதிப்படுத்தவும்.",
+      "button": "எனது மின்னஞ்சலை சரிபார்க்கவும்",
+      "secureLabel": "பாதுகாப்பான இணைப்பு:",
+      "secureText": "இந்த இணைப்பு 24 மணி நேரத்தில் காலாவதியாகிறது, ஒரு முறை மட்டுமே பயன்படுத்த முடியும். இந்த கணக்கை நீங்கள் உருவாக்கவில்லை என்றால், எந்த நடவடிக்கையும் தேவையில்லை.",
+      "textWelcome": "SnapUp Events க்கு வரவேற்கிறோம். நிகழ்வுகளை உருவாக்க மற்றும் நிர்வகிக்கத் தொடங்க உங்கள் மின்னஞ்சல் முகவரியைச் சரிபார்க்கவும்.",
+      "textExpires": "சரிபார்ப்பு இணைப்பு 24 மணி நேரத்தில் காலாவதியாகிறது, ஒரு முறை மட்டுமே பயன்படுத்த முடியும்.",
+      "textIgnore": "இந்த கணக்கை நீங்கள் உருவாக்கவில்லை என்றால், இந்த மின்னஞ்சலை நீங்கள் பாதுகாப்பாக புறக்கணிக்கலாம்."
+    },
+    "passwordReset": {
+      "subject": "உங்கள் கடவுச்சொல்லை மீட்டமைக்கவும் — SnapUp Events",
+      "documentTitle": "உங்கள் SnapUp Events கடவுச்சொல்லை மீட்டமைக்கவும்",
+      "preheader": "உங்கள் SnapUp Events கடவுச்சொல்லை மீட்டமைக்க இந்த பாதுகாப்பான, ஒற்றை பயன்பாட்டு இணைப்பைப் பயன்படுத்தவும்.",
+      "headerLabel": "கணக்கு பாதுகாப்பு",
+      "eyebrow": "கடவுச்சொல் மீட்பு",
+      "heading": "உங்கள் கடவுச்சொல்லை மீட்டமைக்கவும்.",
+      "introduction": "உங்கள் SnapUp Events கணக்கிற்கான புதிய கடவுச்சொல்லை உருவாக்குவதற்கான கோரிக்கையை நாங்கள் பெற்றோம்.",
+      "button": "புதிய கடவுச்சொல்லை உருவாக்கவும்",
+      "secureLabel": "பாதுகாப்பான, ஒற்றை பயன்பாட்டு இணைப்பு.",
+      "secureText": "அது 30 நிமிடங்களில் காலாவதியாகிறது. இந்த மாற்றத்தை நீங்கள் கோரவில்லை என்றால், உங்கள் தற்போதைய கடவுச்சொல் மாறாமல் இருக்கும்.",
+      "textRequest": "உங்கள் SnapUp Events கடவுச்சொல்லை மீட்டமைக்க கோரிக்கை வந்தது.",
+      "textExpires": "மீட்டமைக்கும் இணைப்பு 30 நிமிடங்களில் காலாவதியாகிறது, ஒரு முறை மட்டுமே பயன்படுத்த முடியும்.",
+      "textIgnore": "கடவுச்சொல் மீட்டமைப்பை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை நீங்கள் பாதுகாப்பாக புறக்கணிக்கலாம்."
+    }
+  },
+  "te": {
+    "common": {
+      "fallbackName": "అక్కడ",
+      "hello": "హలో {{name}},",
+      "buttonFallback": "బటన్ పని లేదు? ఈ చిరునామాను మీ బ్రౌజర్లో కాపీ చేసి అతికించండి:",
+      "footerTagline": "ప్రతి అతిథి. ప్రతి క్షణం. ఒక ఉమ్మడి ఆల్బమ్.",
+      "footerSecurity": "ఇది స్వయంచాలక ఖాతా-భద్రత ఇమెయిల్."
+    },
+    "verification": {
+      "subject": "మీ ఇమెయిల్ను ధృవీకరించండి — SnapUp Events",
+      "documentTitle": "మీ SnapUp Events ఇమెయిల్ను ధృవీకరించండి",
+      "preheader": "లో SnapUp Events లో ఈవెంట్లను సృష్టించడం ప్రారంభించడానికి మీ ఇమెయిల్ చిరునామాను ధృవీకరించండి.",
+      "headerLabel": "ఇమెయిల్ ధృవీకరణ",
+      "eyebrow": "స్వాగతం SnapUp కు స్వాగతం",
+      "heading": "మీ ఇమెయిల్ను ధృవీకరించండి",
+      "introduction": "ఈవెంట్లను సృష్టించడం, భాగస్వామ్యం QR సంకేతాలు, మరియు ఒక భాగస్వామ్య ఆల్బమ్ లో ప్రతి అతిథి క్షణం సేకరించడం ప్రారంభించడానికి మీ ఇమెయిల్ చిరునామా నిర్ధారించండి.",
+      "button": "నా ఇమెయిల్ను ధృవీకరించండి",
+      "secureLabel": "సురక్షిత లింక్:",
+      "secureText": "ఈ లింక్ 24 గంటల్లో ముగుస్తుంది మరియు ఒకసారి మాత్రమే ఉపయోగించబడుతుంది. మీరు ఈ ఖాతాను సృష్టించకపోతే, ఎటువంటి చర్య అవసరం లేదు.",
+      "textWelcome": "SnapUp Events కు స్వాగతం. ఈవెంట్లను సృష్టించడం మరియు నిర్వహించడం ప్రారంభించడానికి మీ ఇమెయిల్ చిరునామాను ధృవీకరించండి.",
+      "textExpires": "ఈ ధృవీకరణ లింక్ 24 గంటల్లో ముగుస్తుంది మరియు ఒకసారి మాత్రమే ఉపయోగించబడుతుంది.",
+      "textIgnore": "మీరు ఈ ఖాతాను సృష్టించకపోతే, మీరు ఈ ఇమెయిల్ను సురక్షితంగా విస్మరించవచ్చు."
+    },
+    "passwordReset": {
+      "subject": "మీ పాస్వర్డ్ను రీసెట్ — SnapUp Events",
+      "documentTitle": "మీ SnapUp Events పాస్వర్డ్ను రీసెట్ చేయండి",
+      "preheader": "మీ SnapUp Events పాస్వర్డ్ను రీసెట్ చేయడానికి ఈ సురక్షిత, సింగిల్-యూజ్ లింక్ను ఉపయోగించండి.",
+      "headerLabel": "ఖాతా భద్రత",
+      "eyebrow": "సంకేతపదము రికవరీ",
+      "heading": "మీ పాస్వర్డ్ను పునరుద్ధరించండి.",
+      "introduction": "మీ SnapUp Events ఖాతా కోసం కొత్త పాస్వర్డ్ను సృష్టించమని మేము ఒక అభ్యర్థనను అందుకున్నాము.",
+      "button": "కొత్త సంకేతపదాలను సృష్టించండి",
+      "secureLabel": "సురక్షిత, సింగిల్-యూజ్ లింక్.",
+      "secureText": "30 నిమిషాల్లోనే అది ముగుస్తుంది. మీరు ఈ మార్పును అభ్యర్థించకపోతే, మీ ప్రస్తుత పాస్వర్డ్ మారదు.",
+      "textRequest": "మేము మీ SnapUp Events పాస్వర్డ్ను రీసెట్ చేయడానికి ఒక అభ్యర్థనను అందుకున్నాము.",
+      "textExpires": "ఈ రీసెట్ లింక్ 30 నిమిషాల్లో ముగుస్తుంది మరియు ఒకసారి మాత్రమే ఉపయోగించవచ్చు.",
+      "textIgnore": "మీరు పాస్వర్డ్ రీసెట్ను అభ్యర్థించకపోతే, మీరు ఈ ఇమెయిల్ను సురక్షితంగా విస్మరించవచ్చు."
+    }
+  },
+  "mr": {
+    "common": {
+      "fallbackName": "तिथे",
+      "hello": "नमस्कार {{name}},",
+      "buttonFallback": "बटण काम करत नाही? हा पत्ता तुमच्या ब्राउझरमध्ये कॉपी करून चिकटवाः",
+      "footerTagline": "प्रत्येक अतिथी. प्रत्येक क्षण. एक अल्बम सामायिक केला.",
+      "footerSecurity": "हा एक स्वयंचलित खाते-सुरक्षा ईमेल आहे."
+    },
+    "verification": {
+      "subject": "तुमचा ईमेल-SnapUp Events तपासा",
+      "documentTitle": "तुमचा SnapUp Events ईमेल तपासा",
+      "preheader": "SnapUp Events वर कार्यक्रम तयार करण्यास सुरुवात करण्यासाठी तुमचा ईमेल पत्ता तपासा.",
+      "headerLabel": "ईमेल पडताळणी",
+      "eyebrow": "SnapUp मध्ये आपले स्वागत आहे.",
+      "heading": "तुमचा ईमेल तपासा",
+      "introduction": "कार्यक्रम तयार करणे, QR कोड सामायिक करणे आणि सामायिक केलेल्या एका अल्बममध्ये प्रत्येक अतिथी क्षण गोळा करणे सुरू करण्यासाठी तुमच्या ईमेल पत्त्याची पुष्टी करा.",
+      "button": "माझा ईमेल तपासा",
+      "secureLabel": "सुरक्षित दुवाः",
+      "secureText": "हा दुवा 24 तासांत संपतो आणि फक्त एकदाच वापरला जाऊ शकतो. जर तुम्ही हे खाते तयार केले नसेल तर कोणत्याही कृतीची आवश्यकता नाही.",
+      "textWelcome": "SnapUp Events मध्ये आपले स्वागत आहे. कार्यक्रम तयार करणे आणि व्यवस्थापित करणे सुरू करण्यासाठी तुमचा ईमेल पत्ता तपासा.",
+      "textExpires": "या पडताळणी दुव्याची मुदत 24 तासांत संपते आणि तो फक्त एकदाच वापरला जाऊ शकतो.",
+      "textIgnore": "तुम्ही हे खाते तयार केले नसेल तर तुम्ही या ईमेलकडे सुरक्षितपणे दुर्लक्ष करू शकता."
+    },
+    "passwordReset": {
+      "subject": "तुमचा संकेतशब्द पुन्हा सेट करा-SnapUp Events",
+      "documentTitle": "तुमचा SnapUp Events संकेतशब्द पुन्हा सेट करा",
+      "preheader": "तुमचा SnapUp Events संकेतशब्द पुन्हा सेट करण्यासाठी हा सुरक्षित, एक-वापर दुवा वापरा.",
+      "headerLabel": "खात्याची सुरक्षा",
+      "eyebrow": "संकेतशब्द पुनर्प्राप्ती",
+      "heading": "तुमचा संकेतशब्द पुन्हा सेट करा.",
+      "introduction": "तुमच्या SnapUp Events खात्यासाठी नवीन संकेतशब्द तयार करण्याची विनंती आम्हाला प्राप्त झाली.",
+      "button": "नवीन संकेतशब्द तयार करा",
+      "secureLabel": "सुरक्षित, एक-वापर दुवा.",
+      "secureText": "30 मिनिटांत त्याची मुदत संपते. तुम्ही या बदलाची विनंती केली नसेल तर तुमचा सध्याचा संकेतशब्द बदललेला नाही.",
+      "textRequest": "तुमचा SnapUp Events पासवर्ड रीसेट करण्याची विनंती आम्हाला प्राप्त झाली.",
+      "textExpires": "ही रीसेट लिंक 30 मिनिटांत संपते आणि फक्त एकदाच वापरली जाऊ शकते.",
+      "textIgnore": "तुम्ही पासवर्ड रीसेट करण्याची विनंती केली नसेल, तर तुम्ही या ईमेलकडे सुरक्षितपणे दुर्लक्ष करू शकता."
+    }
+  },
+  "sw": {
+    "common": {
+      "fallbackName": "Kuna huko kuna",
+      "hello": "Salamu zangu za dhati {{name}},",
+      "buttonFallback": "Button kufanya kazi? nakala na kuweka anwani hii katika browser yako:",
+      "footerTagline": "Kila mgeni. Kila wakati. Albamu moja ya pamoja.",
+      "footerSecurity": "Hii ni barua pepe ya usalama wa akaunti."
+    },
+    "verification": {
+      "subject": "Angalia barua pepe yako - SnapUp Events",
+      "documentTitle": "Angalia barua pepe yako ya SnapUp Events",
+      "preheader": "Thibitisha anwani yako ya barua pepe ili kuanza kuunda matukio kwenye SnapUp Events.",
+      "headerLabel": "Ukaguzi wa Email",
+      "eyebrow": "Sifa za SnapUp",
+      "heading": "Angalia barua pepe yako",
+      "introduction": "Thibitisha anwani yako ya barua pepe kuanza kujenga matukio, kugawana msimbo wa QR, na kukusanya kila wakati wa wageni katika albamu moja iliyoshirikiwa.",
+      "button": "Angalia barua pepe yangu",
+      "secureLabel": "Mawasiliano ya uhakika:",
+      "secureText": "Kiungo hiki kinaisha ndani ya masaa ya 24 na kinaweza kutumika mara moja tu. Ikiwa haukuunda akaunti hii, hakuna hatua inahitajika.",
+      "textWelcome": "Karibu na SnapUp Events. Thibitisha anwani yako ya barua pepe ili kuanza kuunda na kusimamia matukio.",
+      "textExpires": "Kiungo hiki cha kuthibitisha kinakamilika ndani ya masaa ya 24 na kinaweza kutumika mara moja tu.",
+      "textIgnore": "Ikiwa haukuunda akaunti hii, unaweza kupuuza barua pepe hii kwa usalama."
+    },
+    "passwordReset": {
+      "subject": "Badilisha nywila yako - SnapUp Events",
+      "documentTitle": "Badilisha nywila yako ya SnapUp Events",
+      "preheader": "Tumia kiungo hiki salama, cha kutumia moja ili upya nywila yako ya SnapUp Events.",
+      "headerLabel": "Akaunti ya Usalama",
+      "eyebrow": "Kufufua Password",
+      "heading": "Badilisha password yako.",
+      "introduction": "Tulipokea ombi la kuunda nywila mpya kwa akaunti yako ya SnapUp Events.",
+      "button": "Kujenga password mpya",
+      "secureLabel": "Salama, matumizi ya moja kwa moja.",
+      "secureText": "Ikiwa haukuomba mabadiliko haya, nywila yako ya sasa bado haijabadilika.",
+      "textRequest": "Tulipokea ombi la kurekebisha nywila yako ya SnapUp Events.",
+      "textExpires": "Kiungo hiki cha upya kinakamilika katika dakika ya 30 na kinaweza kutumika mara moja tu.",
+      "textIgnore": "Ikiwa haukuomba upya nywila, unaweza kupuuza barua pepe hii kwa usalama."
+    }
   }
 };
 
+const EMAIL_LANGUAGE_ALIASES = {
+  "pt-br": "pt",
+  "zh-cn": "zh",
+  "zh-hans": "zh",
+  "zh-hant": "zh-tw",
+  "no": "nb",
+  "no-no": "nb",
+};
+
 function normalizeEmailLanguage(value) {
-  const requested = String(value || "en").toLowerCase().split(",")[0].split(";")[0].trim();
+  const requested = String(value || "en")
+    .toLowerCase()
+    .split(",")[0]
+    .split(";")[0]
+    .trim()
+    .replaceAll("_", "-");
+  const exact = EMAIL_LANGUAGE_ALIASES[requested] || requested;
+  if (Object.prototype.hasOwnProperty.call(EMAIL_COPIES, exact)) return exact;
   const base = requested.split("-")[0];
   return Object.prototype.hasOwnProperty.call(EMAIL_COPIES, base) ? base : "en";
 }

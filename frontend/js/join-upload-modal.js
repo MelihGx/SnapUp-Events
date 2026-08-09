@@ -81,31 +81,39 @@ function closeUploadSuccessPopup() {
 function formatDate(value) {
   if (!value) return "";
 
+  const locale = document.documentElement.lang || "en";
+
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [year, month, day] = value.split("-");
-    return `${day}.${month}.${year}`;
+    const [year, month, day] = value.split("-").map(Number);
+    return new Intl.DateTimeFormat(locale).format(
+      new Date(year, month - 1, day),
+    );
   }
 
-  return new Date(value).toLocaleDateString("tr-TR");
+  return new Date(value).toLocaleDateString(locale);
 }
 
 function formatFileSize(bytes) {
   if (!bytes && bytes !== 0) return "";
 
   const mb = bytes / (1024 * 1024);
+  const locale = document.documentElement.lang || "en";
 
   if (mb >= 1) {
-    return `${mb.toFixed(1)} MB`;
+    return `${mb.toLocaleString(locale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} MB`;
   }
 
-  return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${Math.round(bytes / 1024).toLocaleString(locale)} KB`;
 }
 
 function setResult(message, type = "info") {
   const result = document.getElementById("joinUploadResult");
   if (!result) return;
 
-  result.textContent = message;
+  result.textContent = translate(message);
   result.className = `join-upload-result ${type}`;
 }
 
@@ -183,8 +191,8 @@ function ensureGalleryButton(preview) {
     button = document.createElement("a");
     button.id = "joinEventGalleryLink";
     button.className = "join-event-gallery-link";
-    button.textContent = "View Gallery";
-    button.setAttribute("aria-label", "View approved event gallery");
+    button.textContent = translate("View Gallery");
+    button.setAttribute("aria-label", translate("View Gallery"));
     preview.appendChild(button);
   }
 
@@ -207,6 +215,27 @@ function clearSelectedFiles() {
     filePreview.hidden = true;
     filePreview.innerHTML = "";
   }
+
+  syncFilePickerState();
+}
+
+function syncFilePickerState() {
+  const picker = document.querySelector(".join-file-picker");
+  const count = document.getElementById("joinFilePickerCount");
+  const fileCount = selectedFiles.length;
+
+  picker?.classList.toggle("has-files", fileCount > 0);
+
+  if (!count) return;
+
+  count.hidden = fileCount === 0;
+  count.textContent = fileCount > 0 ? `${fileCount}/${MAX_MEDIA_FILES}` : "";
+  count.setAttribute(
+    "aria-label",
+    fileCount > 0
+      ? `${translate("Selected files")}: ${fileCount}/${MAX_MEDIA_FILES}`
+      : "",
+  );
 }
 
 function isSameFile(fileA, fileB) {
@@ -233,7 +262,7 @@ function addFilesToSelection(files) {
     }
 
     if (file.size > MAX_MEDIA_FILE_BYTES) {
-      throw new Error("Each file must be 50 MB or smaller.");
+      throw new Error("The selected file must be 50 MB or smaller.");
     }
   });
 
@@ -302,8 +331,11 @@ function renderFilePreview() {
 
   if (selectedFiles.length === 0) {
     filePreview.hidden = true;
+    syncFilePickerState();
     return;
   }
+
+  syncFilePickerState();
 
   const previewHeader = document.createElement("div");
   previewHeader.className = "join-selected-header";
@@ -311,13 +343,11 @@ function renderFilePreview() {
   const titleBox = document.createElement("div");
 
   const title = document.createElement("strong");
-  title.textContent = "Selected files";
+  title.textContent = translate("Selected files");
 
   const subtitle = document.createElement("span");
-  subtitle.textContent =
-    selectedFiles.length === 1
-      ? "1 file is ready to upload."
-      : `${selectedFiles.length} files are ready to upload.`;
+  const totalBytes = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+  subtitle.textContent = `${selectedFiles.length}/${MAX_MEDIA_FILES} · ${formatFileSize(totalBytes)}`;
 
   titleBox.appendChild(title);
   titleBox.appendChild(subtitle);
@@ -325,7 +355,7 @@ function renderFilePreview() {
   const clearButton = document.createElement("button");
   clearButton.type = "button";
   clearButton.className = "join-clear-files-button";
-  clearButton.textContent = "Clear all";
+  clearButton.textContent = translate("Clear all");
   clearButton.addEventListener("click", clearSelectedFiles);
 
   previewHeader.appendChild(titleBox);
@@ -355,7 +385,7 @@ function renderFilePreview() {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.className = "join-remove-file-button";
-    removeButton.textContent = "Remove";
+    removeButton.textContent = translate("Remove");
     removeButton.addEventListener("click", () => {
       removeSelectedFile(index);
     });
@@ -369,8 +399,9 @@ function renderFilePreview() {
 
   const helper = document.createElement("p");
   helper.className = "join-file-helper-text";
-  helper.textContent =
-    "Up to 15 files · 50 MB each · 200 MB total. You can reopen the file picker to add more.";
+  helper.textContent = translate(
+    "Up to 15 files · 50 MB each · 200 MB total",
+  );
 
   filePreview.appendChild(previewHeader);
   filePreview.appendChild(fileList);
@@ -396,7 +427,7 @@ function updateMediaFields() {
     fileInput.removeAttribute("multiple");
     fileInput.removeAttribute("accept");
 
-    messageText.placeholder = "Write your memory or wish...";
+    messageText.placeholder = translate("Write your memory or wish...");
     return;
   }
 
@@ -405,7 +436,7 @@ function updateMediaFields() {
   fileInput.multiple = true;
   fileInput.setAttribute("multiple", "multiple");
 
-  messageText.placeholder = "Add a caption for this media...";
+  messageText.placeholder = translate("Write your memory or wish...");
 
   if (selectedMediaType === "image") {
     fileInput.accept = "image/jpeg,image/png,image/webp";
@@ -657,22 +688,53 @@ function initMediaTypeButtons() {
 
 function initFilePreview() {
   const fileInput = document.getElementById("joinMediaFile");
+  const filePicker = document.querySelector(".join-file-picker");
 
   if (!fileInput) return;
 
-  fileInput.addEventListener("change", () => {
+  const handleSelectedFiles = (files) => {
     try {
-      addFilesToSelection(fileInput.files);
+      addFilesToSelection(files);
       renderFilePreview();
       setResult(
-        `${selectedFiles.length} of ${MAX_MEDIA_FILES} file slot(s) selected.`,
+        `${translate("Selected files")}: ${selectedFiles.length}/${MAX_MEDIA_FILES}`,
         "info",
       );
     } catch (error) {
       setResult(error.message, "error");
-    } finally {
-      fileInput.value = "";
     }
+  };
+
+  fileInput.addEventListener("change", () => {
+    handleSelectedFiles(fileInput.files);
+    fileInput.value = "";
+  });
+
+  if (!filePicker) return;
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    filePicker.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      if (!document.getElementById("joinFileField")?.hidden) {
+        filePicker.classList.add("is-dragover");
+      }
+    });
+  });
+
+  ["dragleave", "dragend"].forEach((eventName) => {
+    filePicker.addEventListener(eventName, () => {
+      filePicker.classList.remove("is-dragover");
+    });
+  });
+
+  filePicker.addEventListener("drop", (event) => {
+    event.preventDefault();
+    filePicker.classList.remove("is-dragover");
+
+    if (document.getElementById("joinFileField")?.hidden) return;
+
+    handleSelectedFiles(event.dataTransfer?.files);
+    fileInput.value = "";
   });
 }
 

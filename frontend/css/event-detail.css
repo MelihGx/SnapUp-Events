@@ -1980,23 +1980,145 @@ body.memory-book-open :where(.theme-toggle, .snapup-language) {
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
-.upload-form input[type="file"] {
-  min-height: 52px;
-  padding: 7px;
-  color: var(--detail-text-soft);
+.upload-file-label {
+  display: block;
+  margin-top: 1px;
+  color: var(--detail-text);
   font-size: 12px;
+  font-weight: 800;
 }
 
-.upload-form input[type="file"]::file-selector-button {
-  min-height: 36px;
-  margin-right: 10px;
-  padding: 8px 12px;
-  color: var(--detail-purple);
-  background: color-mix(in srgb, var(--detail-purple) 10%, transparent);
-  border: 0;
-  border-radius: 10px;
+.detail-file-picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 78px;
+  padding: 14px 15px;
+  overflow: hidden;
+  color: var(--detail-text);
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      color-mix(in srgb, var(--detail-purple) 12%, transparent),
+      transparent 42%
+    ),
+    var(--detail-field);
+  border: 1px dashed color-mix(in srgb, var(--detail-purple) 38%, var(--detail-line));
+  border-radius: 18px;
   cursor: pointer;
-  font-weight: 850;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.detail-file-picker:hover,
+.detail-file-picker:focus-within,
+.detail-file-picker.is-dragover {
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      color-mix(in srgb, var(--detail-purple) 20%, transparent),
+      transparent 44%
+    ),
+    var(--detail-surface-solid);
+  border-color: var(--detail-purple);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  transform: translateY(-1px);
+}
+
+.detail-file-picker.has-files {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--detail-purple) 62%, var(--detail-line));
+}
+
+.upload-form .detail-file-input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.detail-file-picker__icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 11%, var(--detail-surface-solid));
+  border: 1px solid color-mix(in srgb, var(--detail-purple) 16%, var(--detail-line));
+  border-radius: 14px;
+}
+
+.detail-file-picker__icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.detail-file-picker__copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.detail-file-picker__copy strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-file-picker__copy span {
+  overflow: hidden;
+  color: var(--detail-text-soft);
+  font-size: 11px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-file-picker__count {
+  min-width: 44px;
+  padding: 7px 9px;
+  color: var(--detail-purple);
+  background: color-mix(in srgb, var(--detail-purple) 11%, var(--detail-surface-solid));
+  border: 1px solid color-mix(in srgb, var(--detail-purple) 18%, var(--detail-line));
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.detail-file-picker__arrow {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--detail-text-soft);
+}
+
+.detail-file-picker__arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .upload-form textarea {
@@ -3896,6 +4018,65 @@ html[data-theme="dark"] body.event-detail-shell :is(
 .video-preview-box {
   max-height: 390px;
   overflow: auto;
+  background: var(--detail-surface-raised);
+}
+
+.upload-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 4px 3px 7px;
+  border-bottom: 1px solid var(--detail-line);
+}
+
+.upload-preview-toolbar > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.upload-preview-toolbar strong {
+  color: var(--detail-text);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.upload-preview-toolbar span {
+  color: var(--detail-text-faint);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.upload-preview-toolbar button,
+.upload-preview-remove {
+  position: relative;
+  z-index: 3;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.upload-preview-toolbar button {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  color: var(--detail-danger);
+  background: color-mix(in srgb, var(--detail-danger) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--detail-danger) 14%, var(--detail-line));
+  border-radius: 10px;
+  font-size: 9px;
+}
+
+.upload-preview-toolbar button:hover,
+.upload-preview-remove:hover {
+  color: #ffffff;
+  background: var(--detail-danger);
 }
 
 .upload-preview-grid {
@@ -3957,6 +4138,17 @@ html[data-theme="dark"] body.event-detail-shell :is(
   color: var(--detail-text-faint);
   font-size: 9px;
   font-weight: 750;
+}
+
+.upload-preview-remove {
+  width: calc(100% - 16px);
+  margin: 0 8px 8px;
+  padding: 6px 8px;
+  color: var(--detail-danger);
+  background: color-mix(in srgb, var(--detail-danger) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--detail-danger) 13%, var(--detail-line));
+  border-radius: 9px;
+  font-size: 9px;
 }
 
 /* Upload completed popup */
@@ -4081,6 +4273,32 @@ body.upload-success-open {
 }
 
 @media (max-width: 520px) {
+  .detail-file-picker {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 72px;
+    padding: 12px;
+  }
+
+  .detail-file-picker__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .detail-file-picker__arrow {
+    display: none;
+  }
+
+  .detail-file-picker__copy span {
+    white-space: normal;
+  }
+
+  .detail-file-picker__count {
+    min-width: 40px;
+    padding-inline: 7px;
+  }
+
   .upload-preview-grid {
     grid-template-columns: 1fr;
   }

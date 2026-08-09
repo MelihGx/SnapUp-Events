@@ -254,6 +254,26 @@ const photoPreviewBox = document.getElementById("photoPreviewBox");
 const photoPreviewList = document.getElementById("photoPreviewList");
 const videoPreviewBox = document.getElementById("videoPreviewBox");
 const videoPreviewList = document.getElementById("videoPreviewList");
+const photoFilePicker = document.querySelector(
+  '[data-detail-file-picker="photo"]',
+);
+const videoFilePicker = document.querySelector(
+  '[data-detail-file-picker="video"]',
+);
+const photoFilePickerCount = document.getElementById(
+  "photoFilePickerCount",
+);
+const videoFilePickerCount = document.getElementById(
+  "videoFilePickerCount",
+);
+const photoSelectionSummary = document.getElementById(
+  "photoSelectionSummary",
+);
+const videoSelectionSummary = document.getElementById(
+  "videoSelectionSummary",
+);
+const photoClearButton = document.getElementById("photoClearButton");
+const videoClearButton = document.getElementById("videoClearButton");
 const uploadSuccessPopup = document.getElementById("uploadSuccessPopup");
 const uploadSuccessBackdrop = document.getElementById("uploadSuccessBackdrop");
 const uploadSuccessTitle = document.getElementById("uploadSuccessTitle");
@@ -2260,6 +2280,61 @@ function formatUploadFileSize(size) {
   return `${Math.max(1, Math.round(size / 1024))} KB`;
 }
 
+function getUploadSelectionElements(type) {
+  return type === "video"
+    ? {
+        picker: videoFilePicker,
+        count: videoFilePickerCount,
+        summary: videoSelectionSummary,
+      }
+    : {
+        picker: photoFilePicker,
+        count: photoFilePickerCount,
+        summary: photoSelectionSummary,
+      };
+}
+
+function syncUploadPickerState(type, files = getSelectedUploadFiles(type)) {
+  const { picker, count, summary } = getUploadSelectionElements(type);
+  const fileCount = files.length;
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+
+  picker?.classList.toggle("has-files", fileCount > 0);
+
+  if (count) {
+    count.hidden = fileCount === 0;
+    count.textContent = fileCount > 0
+      ? `${fileCount}/${MEDIA_UPLOAD_MAX_FILES}`
+      : "";
+    count.setAttribute(
+      "aria-label",
+      fileCount > 0
+        ? `${t("Selected files")}: ${fileCount}/${MEDIA_UPLOAD_MAX_FILES}`
+        : "",
+    );
+  }
+
+  if (summary) {
+    summary.textContent = fileCount > 0
+      ? `${fileCount}/${MEDIA_UPLOAD_MAX_FILES} · ${formatUploadFileSize(totalBytes)}`
+      : "";
+  }
+}
+
+function removeQueuedUploadFile(type, index) {
+  if (type === "video") {
+    queuedVideoFiles.splice(index, 1);
+    renderUploadPreviews("video", queuedVideoFiles);
+  } else {
+    queuedPhotoFiles.splice(index, 1);
+    renderUploadPreviews("photo", queuedPhotoFiles);
+  }
+
+  if (uploadMediaBtn && activeUploadType === type) {
+    uploadMediaBtn.textContent = getUploadButtonLabel(type);
+  }
+}
+
 function renderUploadPreviews(type, files) {
   const isVideo = type === "video";
   const previewBox = isVideo ? videoPreviewBox : photoPreviewBox;
@@ -2272,6 +2347,7 @@ function renderUploadPreviews(type, files) {
   }
 
   previewList.innerHTML = "";
+  syncUploadPickerState(type, files);
 
   if (files.length === 0) {
     previewBox.classList.add("hidden");
@@ -2314,8 +2390,20 @@ function renderUploadPreviews(type, files) {
     const size = document.createElement("span");
     size.textContent = formatUploadFileSize(file.size);
 
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "upload-preview-remove";
+    removeButton.textContent = t("Remove");
+    removeButton.setAttribute(
+      "aria-label",
+      `${t("Remove")}: ${file.name}`,
+    );
+    removeButton.addEventListener("click", () => {
+      removeQueuedUploadFile(type, index);
+    });
+
     details.append(name, size);
-    item.append(mediaWrap, details);
+    item.append(mediaWrap, details, removeButton);
     previewList.appendChild(item);
   });
 
@@ -2396,6 +2484,7 @@ function resetUploadInput(type = activeUploadType) {
     }
 
     photoPreviewBox?.classList.add("hidden");
+    syncUploadPickerState("photo", []);
     return;
   }
 
@@ -2417,6 +2506,7 @@ function resetUploadInput(type = activeUploadType) {
     }
 
     videoPreviewBox?.classList.add("hidden");
+    syncUploadPickerState("video", []);
     return;
   }
 
@@ -3252,73 +3342,101 @@ uploadTypeButtons.forEach((button) => {
   });
 });
 
-if (photoInput) {
-  photoInput.addEventListener("change", () => {
-    const newlySelectedFiles = Array.from(photoInput.files || []);
+function handleUploadFileSelection(type, fileList) {
+  const newlySelectedFiles = Array.from(fileList || []);
 
-    if (newlySelectedFiles.length === 0) {
-      return;
+  if (newlySelectedFiles.length === 0) {
+    return;
+  }
+
+  const isVideo = type === "video";
+
+  try {
+    validateUploadFiles(
+      newlySelectedFiles,
+      isVideo ? VIDEO_UPLOAD_TYPES : PHOTO_UPLOAD_TYPES,
+      isVideo
+        ? "Only MP4, WEBM and MOV videos are allowed."
+        : "Only JPG, PNG and WEBP images are allowed.",
+    );
+    const files = appendUploadFiles(type, newlySelectedFiles);
+
+    renderUploadPreviews(type, files);
+
+    if (uploadMediaBtn && activeUploadType === type) {
+      uploadMediaBtn.textContent = getUploadButtonLabel(type);
     }
 
-    try {
-      validateUploadFiles(
-        newlySelectedFiles,
-        PHOTO_UPLOAD_TYPES,
-        "Only JPG, PNG and WEBP images are allowed.",
-      );
-      const files = appendUploadFiles("photo", newlySelectedFiles);
-
-      renderUploadPreviews("photo", files);
-      uploadMediaBtn.textContent = getUploadButtonLabel("photo");
-      setUploadMessage(
-        files.length === 1
+    setUploadMessage(
+      isVideo
+        ? files.length === 1
+          ? t("1 video selected. You can add more before uploading.")
+          : t("{count} videos selected. You can add more before uploading.", {
+              count: files.length,
+            })
+        : files.length === 1
           ? t("1 photo selected. You can add more before uploading.")
           : t("{count} photos selected. You can add more before uploading.", {
               count: files.length,
             }),
-        "info",
-      );
-    } catch (error) {
-      setUploadMessage(t(error.message), "error");
-    } finally {
-      photoInput.value = "";
-    }
+      "info",
+    );
+  } catch (error) {
+    setUploadMessage(t(error.message), "error");
+  }
+}
+
+function initDetailFilePicker(type, input, picker) {
+  if (!input) {
+    return;
+  }
+
+  input.addEventListener("change", () => {
+    handleUploadFileSelection(type, input.files);
+    input.value = "";
+  });
+
+  if (!picker) {
+    return;
+  }
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    picker.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      picker.classList.add("is-dragover");
+    });
+  });
+
+  ["dragleave", "dragend"].forEach((eventName) => {
+    picker.addEventListener(eventName, () => {
+      picker.classList.remove("is-dragover");
+    });
+  });
+
+  picker.addEventListener("drop", (event) => {
+    event.preventDefault();
+    picker.classList.remove("is-dragover");
+    handleUploadFileSelection(type, event.dataTransfer?.files);
+    input.value = "";
   });
 }
 
-if (videoInput) {
-  videoInput.addEventListener("change", () => {
-    const newlySelectedFiles = Array.from(videoInput.files || []);
+initDetailFilePicker("photo", photoInput, photoFilePicker);
+initDetailFilePicker("video", videoInput, videoFilePicker);
 
-    if (newlySelectedFiles.length === 0) {
-      return;
-    }
+photoClearButton?.addEventListener("click", () => {
+  resetUploadInput("photo");
+  uploadMediaBtn.textContent = getUploadButtonLabel("photo");
+  setUploadMessage("", "info");
+  photoInput?.focus();
+});
 
-    try {
-      validateUploadFiles(
-        newlySelectedFiles,
-        VIDEO_UPLOAD_TYPES,
-        "Only MP4, WEBM and MOV videos are allowed.",
-      );
-      const files = appendUploadFiles("video", newlySelectedFiles);
-
-      renderUploadPreviews("video", files);
-      uploadMediaBtn.textContent = getUploadButtonLabel("video");
-      setUploadMessage(
-        files.length === 1
-          ? t("1 video selected. You can add more before uploading.")
-          : t("{count} videos selected. You can add more before uploading.", {
-              count: files.length,
-            }),
-        "info",
-      );
-    } catch (error) {
-      setUploadMessage(t(error.message), "error");
-    } finally {
-      videoInput.value = "";
-    }
-  });
-}
+videoClearButton?.addEventListener("click", () => {
+  resetUploadInput("video");
+  uploadMediaBtn.textContent = getUploadButtonLabel("video");
+  setUploadMessage("", "info");
+  videoInput?.focus();
+});
 
 memoryMessageInput?.addEventListener("input", () => {
   updateMemoryMessageCount();

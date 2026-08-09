@@ -428,6 +428,68 @@ html[data-theme="dark"] .join-media-type button.active:hover {
   box-shadow: 0 10px 24px rgba(124, 58, 237, 0.26);
 }
 
+html[data-theme="dark"] .join-file-label {
+  color: #f7f3ff;
+}
+
+html[data-theme="dark"] .join-upload-form .join-file-picker {
+  border-color: rgba(196, 181, 253, 0.28);
+  background:
+    radial-gradient(
+      circle at 8% 12%,
+      rgba(124, 58, 237, 0.23),
+      transparent 40%
+    ),
+    linear-gradient(135deg, rgba(35, 28, 49, 0.98), rgba(25, 20, 35, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 14px 30px rgba(3, 2, 8, 0.24);
+}
+
+html[data-theme="dark"] :is(
+  .join-upload-form .join-file-picker:hover,
+  .join-upload-form .join-file-picker:focus-within,
+  .join-upload-form .join-file-picker.is-dragover
+) {
+  border-color: rgba(196, 181, 253, 0.65);
+  background:
+    radial-gradient(
+      circle at 8% 12%,
+      rgba(124, 58, 237, 0.32),
+      transparent 43%
+    ),
+    linear-gradient(135deg, rgba(42, 32, 59, 0.99), rgba(31, 24, 43, 0.99));
+  box-shadow:
+    0 0 0 4px rgba(124, 58, 237, 0.15),
+    0 18px 34px rgba(3, 2, 8, 0.32);
+}
+
+html[data-theme="dark"] .join-upload-form .join-file-picker.has-files {
+  border-color: rgba(74, 222, 128, 0.36);
+}
+
+html[data-theme="dark"] .join-file-picker__icon {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .join-file-picker__copy strong {
+  color: #f7f3ff;
+}
+
+html[data-theme="dark"] .join-file-picker__copy span {
+  color: #aaa2b9;
+}
+
+html[data-theme="dark"] .join-file-picker__count {
+  color: #ddd1ff;
+  background: rgba(124, 58, 237, 0.24);
+}
+
+html[data-theme="dark"] .join-file-picker__arrow {
+  color: #c8bed5;
+  background: rgba(255, 255, 255, 0.075);
+}
+
 html[data-theme="dark"] .join-event-preview {
   color: var(--theme-text);
   background: rgba(34, 211, 197, 0.075);

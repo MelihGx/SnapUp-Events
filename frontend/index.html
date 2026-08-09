@@ -14,17 +14,17 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/main.css?v=location-details-1" />
+    <link rel="stylesheet" href="css/main.css?v=join-upload-modern-2" />
     <link rel="stylesheet" href="css/mobile-edge-fix.css?v=4" />
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
     <link rel="manifest" href="icon/site.webmanifest" />
     <meta name="theme-color" content="#17122B" />
-    <link rel="stylesheet" href="css/i18n.css?v=global-languages-2" />
+    <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <script src="js/location-i18n.js?v=location-details-1" defer></script>
-    <script src="js/asian-i18n.js?v=global-languages-2" defer></script>
-    <script src="js/i18n.js?v=global-languages-2" defer></script>
+    <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/i18n.js?v=join-upload-modern-2" defer></script>
       <script>
       (() => {
         const saved = localStorage.getItem("snapup_theme");
@@ -45,7 +45,7 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="css/theme.css?v=all-media-success-popup-2" />
+    <link rel="stylesheet" href="css/theme.css?v=join-upload-modern-2" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -1078,12 +1078,52 @@
           </div>
 
           <div class="join-file-field" id="joinFileField" hidden>
-            <label>
+            <span class="join-file-label" data-i18n="Select File(s)">
               Select File(s)
-              <input type="file" id="joinMediaFile" multiple />
+            </span>
+
+            <label class="join-file-picker" for="joinMediaFile">
+              <input
+                class="join-file-input"
+                type="file"
+                id="joinMediaFile"
+                aria-describedby="joinFilePickerHint joinFileHelperText"
+                multiple
+              />
+
+              <span class="join-file-picker__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 16V4"></path>
+                  <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                  <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                </svg>
+              </span>
+
+              <span class="join-file-picker__copy">
+                <strong data-i18n="Select File(s)">Select File(s)</strong>
+                <span
+                  id="joinFilePickerHint"
+                  data-i18n="Drop photo or video here"
+                >
+                  Drop photo or video here
+                </span>
+              </span>
+
+              <span
+                class="join-file-picker__count"
+                id="joinFilePickerCount"
+                aria-live="polite"
+                hidden
+              ></span>
+
+              <span class="join-file-picker__arrow" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="m7.5 4.5 5 5-5 5"></path>
+                </svg>
+              </span>
             </label>
 
-            <p class="join-file-helper-text">
+            <p class="join-file-helper-text" id="joinFileHelperText">
               Up to 15 files · 50 MB each · 200 MB total
             </p>
 
@@ -1166,7 +1206,7 @@
         });
       })();
     </script>
-    <script type="module" src="js/main.js?v=alphanumeric-code-1"></script>
+    <script type="module" src="js/main.js?v=join-upload-modern-2"></script>
       <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>
