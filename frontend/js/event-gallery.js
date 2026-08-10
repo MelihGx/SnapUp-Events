@@ -1,4 +1,11 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import {
+  getEventCoverUrl,
+  getImageDeliveryUrl,
+  getImageSrcSet,
+  getVideoPlaybackUrl,
+  getVideoPosterUrl,
+} from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const API_BASE_URL = API_URL;
 
@@ -183,11 +190,13 @@ function renderEvent(event) {
   galleryEventDescription.textContent =
     event.description || t("Approved memories from this event.");
 
-  if (event.event_cover_url) {
+  const coverUrl = getEventCoverUrl(event, "display");
+
+  if (coverUrl) {
     galleryHero.classList.add("has-image");
     galleryHero.style.removeProperty("background-image");
     galleryHeroMedia.style.backgroundImage = `url(${JSON.stringify(
-      event.event_cover_url,
+      coverUrl,
     )})`;
   } else {
     galleryHero.classList.remove("has-image");
@@ -304,6 +313,11 @@ function getPhotoCardHtml(item, photoIndex) {
       .trim()
       .charAt(0)
       .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+  const feedUrl = getImageDeliveryUrl(item, "feed");
+  const feedSrcSet = getImageSrcSet(item);
+  const srcSetAttribute = feedSrcSet
+    ? `srcset="${escapeHtml(feedSrcSet)}"`
+    : "";
 
   return `
     <article class="approved-card">
@@ -330,7 +344,9 @@ function getPhotoCardHtml(item, photoIndex) {
         aria-label="${escapeHtml(openLabel)}"
       >
         <img
-          src="${escapeHtml(item.media_url)}"
+          src="${escapeHtml(feedUrl)}"
+          ${srcSetAttribute}
+          sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1180px) calc(50vw - 36px), 560px"
           alt="${escapeHtml(uploadedBy)}"
           loading="lazy"
           decoding="async"
@@ -387,6 +403,11 @@ function getVideoCardHtml(item) {
       .trim()
       .charAt(0)
       .toLocaleUpperCase(localeByLanguage[getLanguage()] || "en-US") || "?";
+  const videoUrl = getVideoPlaybackUrl(item);
+  const posterUrl = getVideoPosterUrl(item);
+  const posterAttribute = posterUrl
+    ? `poster="${escapeHtml(posterUrl)}"`
+    : "";
 
   return `
     <article class="approved-card approved-video-card">
@@ -410,10 +431,11 @@ function getVideoCardHtml(item) {
         <video
           controls
           playsinline
-          preload="metadata"
+          preload="none"
+          ${posterAttribute}
           aria-label="${escapeHtml(t("Approved video uploaded by {name}", { name: guestName }))}"
         >
-          <source src="${escapeHtml(item.media_url)}" />
+          <source src="${escapeHtml(videoUrl)}" />
           ${escapeHtml(t("Your browser does not support video playback."))}
         </video>
 
@@ -536,7 +558,7 @@ function showLightboxItem(index) {
     : "";
   const uploadedBy = t("Uploaded by {name}", { name: guestName });
 
-  publicLightboxImage.src = item.media_url;
+  publicLightboxImage.src = getImageDeliveryUrl(item, "display");
   publicLightboxImage.alt = uploadedBy;
   publicLightboxTitle.textContent = uploadedBy;
 

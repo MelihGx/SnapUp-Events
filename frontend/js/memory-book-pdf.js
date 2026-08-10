@@ -1,5 +1,10 @@
 "use strict";
 
+import {
+  getEventCoverUrl,
+  getImageDeliveryUrl,
+} from "./media-delivery.js?v=cloudinary-bandwidth-1";
+
 const PAGE_WIDTH = 960;
 const PAGE_HEIGHT = 540;
 const IMAGE_MAX_EDGE = 2200;
@@ -33,7 +38,7 @@ function shorten(value, limit) {
 }
 
 function getMediaUrl(media) {
-  return media?.media_url || media?.url || media?.file_url || "";
+  return getImageDeliveryUrl(media, "pdf");
 }
 
 function getGuestName(media) {
@@ -843,7 +848,7 @@ export async function createMemoryBookPdf({
 
   const prepared = await prepareImages(
     sourceItems,
-    event?.event_cover_url || "",
+    getEventCoverUrl(event, "pdf"),
     onProgress,
   );
 

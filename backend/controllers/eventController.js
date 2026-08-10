@@ -1,6 +1,9 @@
 const supabase = require("../config/supabaseClient");
 const QRCode = require("qrcode");
-const { signedDeliveryUrl } = require("../services/cloudinaryDelivery");
+const {
+  imageDeliveryUrl,
+  signedDeliveryUrl,
+} = require("../services/cloudinaryDelivery");
 const { generateEventCode } = require("../utils/eventCode");
 const cloudinary = require("../config/cloudinary");
 const {
@@ -1317,7 +1320,10 @@ function getValidApprovedImages(media) {
       item.media_url &&
       item.media_status === "approved" &&
       item.media_type === "image",
-  ).map((item) => ({ ...item, media_url: signedDeliveryUrl(item.media_url) }));
+  ).map((item) => ({
+    ...item,
+    media_url: imageDeliveryUrl(item.media_url, "pdf"),
+  }));
 }
 
 function encodeDownloadFileName(fileName) {
@@ -1338,7 +1344,9 @@ async function buildAndSendMemoryBook(res, event, media) {
     await buildEventMemoryBookPdf({
       event: {
         ...event,
-        event_cover_url: signedDeliveryUrl(event.event_cover_url),
+        event_cover_url: event.event_cover_url
+          ? imageDeliveryUrl(event.event_cover_url, "pdf")
+          : null,
       },
       media: validImages,
       logger: console,

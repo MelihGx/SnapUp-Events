@@ -1,10 +1,17 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
-import { createMemoryBookPdf } from "./memory-book-pdf.js?v=location-details-1";
-import { setInvitationStudioEvent } from "./invitation-studio.js?v=location-details-1";
+import { createMemoryBookPdf } from "./memory-book-pdf.js?v=cloudinary-bandwidth-1";
+import { setInvitationStudioEvent } from "./invitation-studio.js?v=cloudinary-bandwidth-1";
 import {
   buildEventMapUrl,
   createLocationMapPicker,
 } from "./location-map-picker.js?v=location-map-2";
+import {
+  getEventCoverUrl,
+  getImageDeliveryUrl,
+  getImageSrcSet,
+  getVideoPlaybackUrl,
+  getVideoPosterUrl,
+} from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -595,7 +602,16 @@ function showContent() {
   detailContent.hidden = false;
 }
 
-function setEventCoverBackground(coverUrl) {
+function setEventCoverBackground(eventOrUrl) {
+  const eventSource =
+    eventOrUrl && typeof eventOrUrl === "object"
+      ? eventOrUrl
+      : eventOrUrl
+        ? { ...currentEvent, event_cover_url: eventOrUrl }
+        : null;
+  const coverUrl = eventSource
+    ? getEventCoverUrl(eventSource, "display")
+    : "";
   const hasCover = Boolean(coverUrl);
 
   eventCover.classList.toggle("has-image", hasCover);
@@ -1015,7 +1031,7 @@ function renderEventInfo(event) {
   eventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
   eventPrivacy.textContent = t(event.is_event_private ? "Private" : "Public");
 
-  setEventCoverBackground(event.event_cover_url);
+  setEventCoverBackground(event);
 
   const joinUrl = getJoinUrl(event);
   const qrImageUrl = getQrImageUrl(event);
@@ -1069,8 +1085,8 @@ function updateMemoryBookPreview() {
   }
 
   const previewImageUrl =
-    currentEvent.event_cover_url ||
-    getMediaUrl(approvedMemoryBookPhotos[0] || {});
+    getEventCoverUrl(currentEvent, "display") ||
+    getImageDeliveryUrl(approvedMemoryBookPhotos[0] || {}, "display");
 
   if (memoryBookPreviewCover && previewImageUrl) {
     memoryBookPreviewCover.style.backgroundImage = `linear-gradient(
@@ -1626,11 +1642,23 @@ function renderMediaCards() {
       `;
 
       if (mediaUrl && mediaKind === "video") {
+        const videoUrl = getVideoPlaybackUrl(media);
+        const posterUrl = getVideoPosterUrl(media);
+        const posterAttribute = posterUrl
+          ? `poster="${escapeHtml(posterUrl)}"`
+          : "";
+
         return `
           <article class="media-card admin-media-card">
             <div class="media-preview-wrap">
               ${badgeHtml}
-              <video src="${escapeHtml(mediaUrl)}" controls></video>
+              <video
+                src="${escapeHtml(videoUrl)}"
+                controls
+                playsinline
+                preload="none"
+                ${posterAttribute}
+              ></video>
             </div>
 
             <div class="media-card-body">
@@ -1644,9 +1672,15 @@ function renderMediaCards() {
 
       if (mediaUrl && mediaKind === "image") {
         const galleryIndex = galleryLightboxItems.length;
+        const feedUrl = getImageDeliveryUrl(media, "feed");
+        const displayUrl = getImageDeliveryUrl(media, "display");
+        const feedSrcSet = getImageSrcSet(media);
+        const srcSetAttribute = feedSrcSet
+          ? `srcset="${escapeHtml(feedSrcSet)}"`
+          : "";
 
         galleryLightboxItems.push({
-          url: mediaUrl,
+          url: displayUrl,
           guestName,
           uploadedAt,
           message: message || t("Photo memory"),
@@ -1664,9 +1698,14 @@ function renderMediaCards() {
                   t("Open photo uploaded by {name}", { name: guestName }),
                 )}"
               >
-                <img src="${escapeHtml(mediaUrl)}" alt="Uploaded by ${escapeHtml(
-                  guestName,
-                )}" />
+                <img
+                  src="${escapeHtml(feedUrl)}"
+                  ${srcSetAttribute}
+                  sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1180px) calc(50vw - 42px), 520px"
+                  alt="Uploaded by ${escapeHtml(guestName)}"
+                  loading="lazy"
+                  decoding="async"
+                />
               </button>
             </div>
 
@@ -3451,7 +3490,7 @@ eventCoverEditorSave?.addEventListener("click", async () => {
     }
 
     currentEvent = { ...currentEvent, ...updatedEvent };
-    setEventCoverBackground(currentEvent.event_cover_url);
+    setEventCoverBackground(currentEvent);
     setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
     updateMemoryBookPreview();
     closeEventCoverEditor({ restoreFocus: false });

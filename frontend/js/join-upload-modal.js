@@ -1,5 +1,6 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
+import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const API_BASE_URL = API_URL;
 const MAX_MEDIA_FILES = 15;
@@ -553,7 +554,9 @@ function renderEventPreview(event) {
 
   name.textContent = event.event_name || "Untitled Event";
 
-  if (event.event_cover_url) {
+  const eventCoverUrl = getEventCoverUrl(event, "card");
+
+  if (eventCoverUrl) {
     coverImage.onload = () => {
       cover.classList.add("has-image");
       coverImage.hidden = false;
@@ -565,7 +568,7 @@ function renderEventPreview(event) {
       coverPlaceholder.hidden = false;
     };
     coverImage.alt = event.event_name || "Event";
-    coverImage.src = event.event_cover_url;
+    coverImage.src = eventCoverUrl;
   } else {
     cover.classList.remove("has-image");
     coverImage.hidden = true;

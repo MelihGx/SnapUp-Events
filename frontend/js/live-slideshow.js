@@ -1,4 +1,8 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import {
+  getImageDeliveryUrl,
+  getSlideshowImageUrl,
+} from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const token = localStorage.getItem("snapup_token");
 const eventId = new URLSearchParams(window.location.search).get("event_id");
@@ -61,6 +65,7 @@ let approvedPhotos = [];
 let knownPhotoIds = new Set();
 let latestQueue = [];
 let currentPhotoId = null;
+let currentPhotoUrl = "";
 let currentShownAt = 0;
 let selectedMediaIdDraft = null;
 let activeLayerIndex = 0;
@@ -73,6 +78,7 @@ let pollTimer = null;
 let modeTimer = null;
 let latestQueueTimer = null;
 let toastTimer = null;
+let resolutionTimer = null;
 
 function t(value, replacements = {}) {
   const translated = window.SnapUpI18n?.t?.(value) || value;
@@ -305,8 +311,15 @@ function renderPhotoGrid(force = false) {
       .forEach((button) => {
         const photo = photoById.get(button.dataset.mediaId);
         const image = button.querySelector("img");
-        if (photo && image && image.src !== photo.media_url) {
-          image.src = photo.media_url;
+        const thumbnailUrl = photo
+          ? getImageDeliveryUrl(photo, "thumbnail")
+          : "";
+        if (
+          photo &&
+          image &&
+          image.getAttribute("src") !== thumbnailUrl
+        ) {
+          image.src = thumbnailUrl;
         }
       });
     updateSelectedPhotoUi();
@@ -341,7 +354,7 @@ function renderPhotoGrid(force = false) {
           t("Select approved photo {number}", { number: index + 1 }),
         );
 
-        image.src = photo.media_url;
+        image.src = getImageDeliveryUrl(photo, "thumbnail");
         image.alt = photo.guest_name
           ? t("Photo uploaded by {name}", { name: photo.guest_name })
           : t("Approved event photo");
@@ -391,6 +404,7 @@ function showEmptyState(title, text) {
   elements.backdrop.classList.remove("has-image");
   elements.backdrop.style.removeProperty("background-image");
   currentPhotoId = null;
+  currentPhotoUrl = "";
   currentShownAt = 0;
 }
 
@@ -421,7 +435,13 @@ function showPhoto(photo, { force = false } = {}) {
     return;
   }
 
-  if (!force && currentPhotoId === photo.media_id) {
+  const displayUrl = getSlideshowImageUrl(photo);
+
+  if (
+    !force &&
+    currentPhotoId === photo.media_id &&
+    currentPhotoUrl === displayUrl
+  ) {
     updatePhotoMeta(photo);
     if (currentSettings.slideshow_mode === "random" && !modeTimer) {
       scheduleRandomPhoto();
@@ -444,7 +464,7 @@ function showPhoto(photo, { force = false } = {}) {
     const nextLayer = elements.imageLayers[nextLayerIndex];
     const previousLayer = elements.imageLayers[activeLayerIndex];
 
-    nextLayer.src = photo.media_url;
+    nextLayer.src = displayUrl;
     nextLayer.alt = photo.guest_name
       ? t("Photo uploaded by {name}", { name: photo.guest_name })
       : t("Approved event photo");
@@ -455,11 +475,12 @@ function showPhoto(photo, { force = false } = {}) {
     elements.loading.hidden = true;
     elements.empty.hidden = true;
     elements.canvas.hidden = false;
-    elements.backdrop.style.backgroundImage = `url("${photo.media_url.replaceAll('"', "%22")}")`;
+    elements.backdrop.style.backgroundImage = `url("${displayUrl.replaceAll('"', "%22")}")`;
     elements.backdrop.classList.add("has-image");
     updatePhotoMeta(photo);
 
     currentPhotoId = photo.media_id;
+    currentPhotoUrl = displayUrl;
     currentShownAt = Date.now();
 
     if (currentSettings.slideshow_mode === "latest" && latestQueue.length > 0) {
@@ -498,7 +519,7 @@ function showPhoto(photo, { force = false } = {}) {
     }
   };
 
-  preloader.src = photo.media_url;
+  preloader.src = displayUrl;
 }
 
 function randomPhoto() {
@@ -799,6 +820,22 @@ function bindEvents() {
     }
   });
 
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resolutionTimer);
+    resolutionTimer = window.setTimeout(() => {
+      const currentPhoto = approvedPhotos.find(
+        (photo) => photo.media_id === currentPhotoId,
+      );
+
+      if (
+        currentPhoto &&
+        getSlideshowImageUrl(currentPhoto) !== currentPhotoUrl
+      ) {
+        showPhoto(currentPhoto, { force: true });
+      }
+    }, 250);
+  });
+
   colorSchemeQuery.addEventListener?.("change", (event) => {
     if (!storedTheme()) {
       applyTheme(event.matches ? "dark" : "light");
@@ -836,6 +873,7 @@ async function init() {
 
 window.addEventListener("beforeunload", () => {
   window.clearInterval(pollTimer);
+  window.clearTimeout(resolutionTimer);
   clearPlaybackTimers();
 });
 
