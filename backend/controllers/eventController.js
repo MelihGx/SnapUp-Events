@@ -516,7 +516,8 @@ const getEventDetail = async (req, res) => {
     const { data: media, error: mediaError } = await supabase
       .from("events_media")
       .select("*")
-      .eq("event_id", eventId);
+      .eq("event_id", eventId)
+      .order("media_created_at", { ascending: false });
 
     if (mediaError) {
       return res.status(500).json({

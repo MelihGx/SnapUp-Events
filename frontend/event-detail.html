@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=live-slideshow-1"
+      href="css/event-detail.css?v=cover-copy-bottom-left-1"
     />
     <link
       rel="stylesheet"
@@ -122,6 +122,12 @@
       <section class="detail-content" id="detailContent" hidden>
         <section class="detail-hero">
           <div class="detail-cover" id="eventCover">
+            <div
+              class="detail-cover-media"
+              id="eventCoverMedia"
+              aria-hidden="true"
+            ></div>
+
             <div class="event-cover-actions">
               <button
                 type="button"
@@ -161,9 +167,11 @@
             />
 
             <div class="detail-cover-overlay">
-              <span class="rec-chip"><i></i> EVENT DETAIL</span>
-              <h1 id="eventTitle">Event title</h1>
-              <p id="eventDescription">Event description</p>
+              <div class="detail-cover-copy">
+                <span class="rec-chip"><i></i> EVENT DETAIL</span>
+                <h1 id="eventTitle">Event title</h1>
+                <p id="eventDescription">Event description</p>
+              </div>
             </div>
           </div>
 
@@ -681,6 +689,18 @@
               >
                 Approve All Photos
               </button>
+            </div>
+
+            <div
+              class="active-guest-media-filter"
+              id="activeGuestMediaFilter"
+              hidden
+            >
+              <div>
+                <span>All</span>
+                <strong id="activeGuestMediaFilterLabel"></strong>
+              </div>
+              <button type="button" id="clearGuestMediaFilter">All</button>
             </div>
 
             <div class="media-filter-bar" id="mediaFilterBar"></div>
@@ -2061,7 +2081,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=live-slideshow-1"
+      src="js/event-detail.js?v=cover-inner-layer-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

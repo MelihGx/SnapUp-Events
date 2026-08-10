@@ -33,12 +33,8 @@ const elements = {
   eventName: document.getElementById("slideshowEventName"),
   eventCode: document.getElementById("slideshowEventCode"),
   syncStatus: document.getElementById("slideshowSyncStatus"),
-  backLink: document.getElementById("slideshowBackLink"),
   themeButton: document.getElementById("slideshowThemeButton"),
-  themeLabel: document.getElementById("slideshowThemeLabel"),
   themeColor: document.getElementById("slideshowThemeColor"),
-  presentButton: document.getElementById("slideshowPresentButton"),
-  controlsButton: document.getElementById("slideshowControlsButton"),
   controls: document.getElementById("slideshowControls"),
   controlsClose: document.getElementById("slideshowControlsClose"),
   settingsForm: document.getElementById("slideshowSettingsForm"),
@@ -112,9 +108,6 @@ function applyTheme(theme, { persist = false } = {}) {
   elements.themeButton?.setAttribute("aria-label", actionLabel);
   if (elements.themeButton) {
     elements.themeButton.title = modeLabel;
-  }
-  if (elements.themeLabel) {
-    elements.themeLabel.textContent = modeLabel;
   }
   if (elements.themeColor) {
     elements.themeColor.content = isDark ? "#17122b" : "#f7f3ff";
@@ -257,7 +250,6 @@ async function apiRequest(path, options = {}) {
 function setControls(open) {
   elements.body.classList.toggle("controls-open", open);
   elements.body.classList.toggle("presentation-mode", !open);
-  elements.controlsButton.setAttribute("aria-expanded", String(open));
 
   if (open) {
     elements.controls.scrollTop = 0;
@@ -613,9 +605,6 @@ function updateHeader() {
 
   elements.eventName.textContent = currentEvent.event_name || "SnapUp Events";
   elements.eventCode.textContent = `${t("EVENT CODE")} · ${currentEvent.event_code || "------"}`;
-  elements.backLink.href = `event-detail.html?event_id=${encodeURIComponent(
-    currentEvent.event_id,
-  )}`;
   document.title = `${currentEvent.event_name || "Live Slideshow"} — ${t("Live Slideshow")}`;
 }
 
@@ -757,11 +746,7 @@ async function startPresentation() {
 
 function bindEvents() {
   elements.themeButton?.addEventListener("click", toggleTheme);
-  elements.controlsButton.addEventListener("click", () => {
-    setControls(!elements.body.classList.contains("controls-open"));
-  });
   elements.controlsClose.addEventListener("click", () => setControls(false));
-  elements.presentButton.addEventListener("click", startPresentation);
   elements.startButton.addEventListener("click", startPresentation);
   elements.settingsForm.addEventListener("submit", saveSettings);
 

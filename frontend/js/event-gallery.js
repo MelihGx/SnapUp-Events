@@ -8,6 +8,7 @@ const galleryErrorText = document.getElementById("galleryErrorText");
 const galleryContent = document.getElementById("galleryContent");
 
 const galleryHero = document.getElementById("galleryHero");
+const galleryHeroMedia = document.getElementById("galleryHeroMedia");
 const galleryEventTitle = document.getElementById("galleryEventTitle");
 const galleryEventMeta = document.getElementById("galleryEventMeta");
 const galleryEventDescription = document.getElementById(
@@ -184,12 +185,14 @@ function renderEvent(event) {
 
   if (event.event_cover_url) {
     galleryHero.classList.add("has-image");
-    galleryHero.style.backgroundImage = `url(${JSON.stringify(
+    galleryHero.style.removeProperty("background-image");
+    galleryHeroMedia.style.backgroundImage = `url(${JSON.stringify(
       event.event_cover_url,
     )})`;
   } else {
     galleryHero.classList.remove("has-image");
     galleryHero.style.removeProperty("background-image");
+    galleryHeroMedia.style.removeProperty("background-image");
   }
 }
 

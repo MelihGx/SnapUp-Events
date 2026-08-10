@@ -67,6 +67,7 @@ const detailErrorText = document.getElementById("detailErrorText");
 const detailContent = document.getElementById("detailContent");
 
 const eventCover = document.getElementById("eventCover");
+const eventCoverMedia = document.getElementById("eventCoverMedia");
 const eventCoverChangeButton = document.getElementById(
   "eventCoverChangeButton",
 );
@@ -169,6 +170,16 @@ const eventPrivacy = document.getElementById("eventPrivacy");
 
 const settingsList = document.getElementById("settingsList");
 const mediaGallery = document.getElementById("mediaGallery");
+const eventGallerySection = document.getElementById("eventGallerySection");
+const activeGuestMediaFilter = document.getElementById(
+  "activeGuestMediaFilter",
+);
+const activeGuestMediaFilterLabel = document.getElementById(
+  "activeGuestMediaFilterLabel",
+);
+const clearGuestMediaFilter = document.getElementById(
+  "clearGuestMediaFilter",
+);
 
 const guestList = document.getElementById("guestList");
 const guestSearchInput = document.getElementById("guestSearchInput");
@@ -317,6 +328,7 @@ let activeMediaFilter = "all";
 
 let allGuests = [];
 let guestSearchTerm = "";
+let selectedGuestMediaFilter = null;
 let activeUploadType = "photo";
 let queuedPhotoFiles = [];
 let queuedVideoFiles = [];
@@ -587,11 +599,12 @@ function setEventCoverBackground(coverUrl) {
   const hasCover = Boolean(coverUrl);
 
   eventCover.classList.toggle("has-image", hasCover);
+  eventCover.style.removeProperty("background-image");
 
   if (hasCover) {
-    eventCover.style.backgroundImage = `url(${JSON.stringify(coverUrl)})`;
+    eventCoverMedia.style.backgroundImage = `url(${JSON.stringify(coverUrl)})`;
   } else {
-    eventCover.style.removeProperty("background-image");
+    eventCoverMedia.style.removeProperty("background-image");
   }
 
   if (eventCoverChangeLabel) {
@@ -1214,6 +1227,10 @@ function shouldShowApproveAllImagesButton(mediaList) {
     return false;
   }
 
+  if (selectedGuestMediaFilter) {
+    return false;
+  }
+
   if (!mediaList || mediaList.length === 0) {
     return false;
   }
@@ -1254,32 +1271,170 @@ function getMediaKind(media) {
   return "message";
 }
 
-function getFilteredMediaList() {
-  if (activeMediaFilter === "all") {
+function normalizeGuestName(value) {
+  return String(value || "").trim().toLocaleLowerCase("tr-TR");
+}
+
+function getGuestFilterIds(guest) {
+  const ids = Array.isArray(guest?.duplicate_guest_ids)
+    ? guest.duplicate_guest_ids
+    : [];
+  const allIds = [guest?.guest_id, ...ids]
+    .filter(Boolean)
+    .map((id) => String(id));
+
+  return [...new Set(allIds)];
+}
+
+function isSameGuestFilter(guest, filter) {
+  if (!guest || !filter) {
+    return false;
+  }
+
+  const guestIds = getGuestFilterIds(guest);
+  const filterIds = getGuestFilterIds(filter);
+
+  if (guestIds.length && filterIds.length) {
+    return guestIds.some((id) => filterIds.includes(id));
+  }
+
+  return (
+    normalizeGuestName(guest.guest_name) ===
+    normalizeGuestName(filter.guest_name)
+  );
+}
+
+function mediaMatchesGuestFilter(media, guestFilter) {
+  if (!guestFilter) {
+    return true;
+  }
+
+  const mediaGuestId = media?.guest_id || media?.guestId;
+  const guestIds = getGuestFilterIds(guestFilter);
+
+  if (mediaGuestId && guestIds.length) {
+    return guestIds.includes(String(mediaGuestId));
+  }
+
+  const mediaGuestName =
+    media?.guest_name ||
+    media?.guestName ||
+    media?.user_name ||
+    media?.userName ||
+    "";
+
+  return (
+    normalizeGuestName(mediaGuestName) ===
+    normalizeGuestName(guestFilter.guest_name)
+  );
+}
+
+function getGuestScopedMediaItems() {
+  if (!selectedGuestMediaFilter) {
     return allMediaItems;
   }
 
-  if (activeMediaFilter === "pending") {
-    return allMediaItems.filter((media) => getMediaStatus(media) === "pending");
+  return allMediaItems.filter((media) =>
+    mediaMatchesGuestFilter(media, selectedGuestMediaFilter),
+  );
+}
+
+function getFilteredMediaList() {
+  const guestScopedMediaItems = getGuestScopedMediaItems();
+
+  if (activeMediaFilter === "all") {
+    return guestScopedMediaItems;
   }
 
-  return allMediaItems.filter(
+  if (activeMediaFilter === "pending") {
+    return guestScopedMediaItems.filter(
+      (media) => getMediaStatus(media) === "pending",
+    );
+  }
+
+  return guestScopedMediaItems.filter(
     (media) => getMediaKind(media) === activeMediaFilter,
   );
 }
 
 function getFilterCount(filterKey) {
+  const guestScopedMediaItems = getGuestScopedMediaItems();
+
   if (filterKey === "all") {
-    return allMediaItems.length;
+    return guestScopedMediaItems.length;
   }
 
   if (filterKey === "pending") {
-    return allMediaItems.filter((media) => getMediaStatus(media) === "pending")
-      .length;
+    return guestScopedMediaItems.filter(
+      (media) => getMediaStatus(media) === "pending",
+    ).length;
   }
 
-  return allMediaItems.filter((media) => getMediaKind(media) === filterKey)
-    .length;
+  return guestScopedMediaItems.filter(
+    (media) => getMediaKind(media) === filterKey,
+  ).length;
+}
+
+function renderActiveGuestMediaFilter() {
+  if (
+    !activeGuestMediaFilter ||
+    !activeGuestMediaFilterLabel ||
+    !clearGuestMediaFilter
+  ) {
+    return;
+  }
+
+  if (!selectedGuestMediaFilter) {
+    activeGuestMediaFilter.hidden = true;
+    return;
+  }
+
+  const guestName =
+    selectedGuestMediaFilter.guest_name || t("Unknown Guest");
+
+  activeGuestMediaFilter.querySelector("span").textContent = t("All");
+  activeGuestMediaFilterLabel.textContent = guestName;
+  clearGuestMediaFilter.textContent = t("All");
+  activeGuestMediaFilter.hidden = false;
+}
+
+function applyGuestMediaFilter(guest) {
+  if (!guest) {
+    return;
+  }
+
+  selectedGuestMediaFilter = {
+    guest_id: guest.guest_id,
+    duplicate_guest_ids: getGuestFilterIds(guest),
+    guest_name: guest.guest_name || t("Unknown Guest"),
+  };
+  activeMediaFilter = "all";
+
+  renderGuests();
+  renderActiveGuestMediaFilter();
+  renderMediaFilters();
+  renderMediaCards();
+
+  const reduceMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  eventGallerySection?.scrollIntoView({
+    behavior: reduceMotion ? "auto" : "smooth",
+    block: "start",
+  });
+}
+
+function clearSelectedGuestMediaFilter() {
+  if (!selectedGuestMediaFilter) {
+    return;
+  }
+
+  selectedGuestMediaFilter = null;
+  renderGuests();
+  renderActiveGuestMediaFilter();
+  renderMediaFilters();
+  renderMediaCards();
 }
 
 function ensureMediaFilterBar() {
@@ -1547,6 +1702,7 @@ function renderMedia(mediaList) {
   updateMemoryBookAvailability();
   updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
 
+  renderActiveGuestMediaFilter();
   renderMediaFilters();
   renderMediaCards();
 }
@@ -1858,23 +2014,32 @@ function renderGuests() {
   guestList.innerHTML = filteredGuests
     .map((guest) => {
       const guestName = guest.guest_name || t("Unknown Guest");
+      const isSelected = isSameGuestFilter(
+        guest,
+        selectedGuestMediaFilter,
+      );
       const totalUploads = guest.total_uploads || 0;
       const pendingUploads = guest.pending_uploads || 0;
       const approvedUploads = guest.approved_uploads || 0;
       const rejectedUploads = guest.rejected_uploads || 0;
 
       return `
-        <article class="guest-card">
+        <article class="guest-card ${isSelected ? "is-selected" : ""}">
           <div class="guest-avatar">
             ${escapeHtml(guestName.charAt(0).toUpperCase())}
           </div>
 
-          <div class="guest-main">
+          <button
+            type="button"
+            class="guest-main guest-filter-button"
+            data-guest-filter-id="${escapeHtml(guest.guest_id || "")}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
             <strong>${escapeHtml(guestName)}</strong>
             <span>${escapeHtml(
               t("{count} uploads", { count: totalUploads }),
             )}</span>
-          </div>
+          </button>
 
           <div class="guest-stats">
             <span class="approved">${escapeHtml(
@@ -2998,6 +3163,30 @@ if (guestSearchInput) {
     guestSearchTerm = guestSearchInput.value || "";
     renderGuests();
   });
+}
+
+if (guestList) {
+  guestList.addEventListener("click", (event) => {
+    const guestButton = event.target.closest("[data-guest-filter-id]");
+
+    if (!guestButton) {
+      return;
+    }
+
+    const guestId = guestButton.dataset.guestFilterId;
+    const guest = allGuests.find((item) =>
+      getGuestFilterIds(item).includes(String(guestId)),
+    );
+
+    applyGuestMediaFilter(guest);
+  });
+}
+
+if (clearGuestMediaFilter) {
+  clearGuestMediaFilter.addEventListener(
+    "click",
+    clearSelectedGuestMediaFilter,
+  );
 }
 
 if (galleryLightboxClose) {
