@@ -231,6 +231,10 @@ const eventArchiveOpen = document.getElementById("eventArchiveOpen");
 const eventArchiveButtonMeta = document.getElementById(
   "eventArchiveButtonMeta",
 );
+const eventHighlightsOpen = document.getElementById("eventHighlightsOpen");
+const eventHighlightsButtonMeta = document.getElementById(
+  "eventHighlightsButtonMeta",
+);
 const eventArchiveModal = document.getElementById("eventArchiveModal");
 const eventArchiveModalBackdrop = document.getElementById(
   "eventArchiveModalBackdrop",
@@ -1046,6 +1050,17 @@ function renderEventInfo(event) {
 
   if (eventArchiveOpen) {
     eventArchiveOpen.disabled = false;
+  }
+
+  if (eventHighlightsOpen) {
+    eventHighlightsOpen.disabled = false;
+  }
+
+  if (eventHighlightsButtonMeta) {
+    eventHighlightsButtonMeta.textContent =
+      event.is_event_active === false
+        ? t("Highlights are ready to share")
+        : t("Private preview until the event ends");
   }
 
   eventTitle.textContent = event.event_name || t("Untitled Event");
@@ -3397,6 +3412,19 @@ if (liveSlideshowOpen) {
   });
 }
 
+if (eventHighlightsOpen) {
+  eventHighlightsOpen.addEventListener("click", () => {
+    if (!eventId || !currentEvent?.event_code) {
+      return;
+    }
+
+    const highlightsUrl = new URL("event-highlights.html", window.location.href);
+    highlightsUrl.searchParams.set("event_id", eventId);
+    highlightsUrl.searchParams.set("code", currentEvent.event_code);
+    window.open(highlightsUrl.href, "_blank", "noopener,noreferrer");
+  });
+}
+
 if (settingsModalClose) {
   settingsModalClose.addEventListener("click", closeSettingsModal);
 }
@@ -3428,6 +3456,13 @@ if (settingsForm) {
       }
 
       renderSettings(updatedSettings);
+
+      if (currentEvent) {
+        renderEventInfo({
+          ...currentEvent,
+          is_event_active: updatedSettings.is_event_active !== false,
+        });
+      }
 
       settingsResult.textContent = t("Settings updated successfully.");
       settingsResult.dataset.state = "success";

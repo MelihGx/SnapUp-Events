@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-archive-1"
+      href="css/event-detail.css?v=event-highlights-palette-2"
     />
     <link
       rel="stylesheet"
@@ -58,6 +58,7 @@
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
     <script src="js/live-slideshow-i18n.js?v=live-slideshow-1" defer></script>
     <script src="js/event-archive-i18n.js?v=event-archive-1" defer></script>
+    <script src="js/event-highlights-i18n.js?v=event-highlights-1" defer></script>
     <script src="js/i18n.js?v=only-users-3" defer></script>
   </head>
 
@@ -252,6 +253,27 @@
                   </span>
                   <small id="eventArchiveButtonMeta">
                     Download photos, videos and messages as ZIP
+                  </small>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                id="eventHighlightsOpen"
+                class="event-highlights-open"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3.5 14.2 8l4.9.7-3.5 3.5.8 4.9L12 14.8l-4.4 2.3.8-4.9-3.5-3.5L9.8 8Z"></path>
+                  <path d="M19 3v3M17.5 4.5h3"></path>
+                </svg>
+                <span>
+                  <span class="event-highlights-title-row">
+                    <strong>Event Highlights</strong>
+                    <em>PREMIUM</em>
+                  </span>
+                  <small id="eventHighlightsButtonMeta">
+                    Most liked photo, top uploader and event summary
                   </small>
                 </span>
               </button>
@@ -2297,7 +2319,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-archive-1"
+      src="js/event-detail.js?v=event-highlights-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

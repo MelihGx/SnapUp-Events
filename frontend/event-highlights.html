@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Highlights — SnapUp Events</title>
+
+    <link rel="icon" href="icon/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
+    <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
+    <link rel="manifest" href="icon/site.webmanifest" />
+    <meta name="theme-color" content="#7c3aed" />
+
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_) {}
+      })();
+    </script>
+
+    <link rel="stylesheet" href="css/theme.css?v=mobile-gallery-first-1" />
+    <link
+      rel="stylesheet"
+      href="css/event-highlights.css?v=hero-frame-fix-1"
+    />
+    <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
+    <script
+      src="js/event-highlights-i18n.js?v=event-highlights-1"
+      defer
+    ></script>
+    <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/i18n.js?v=only-users-3" defer></script>
+  </head>
+
+  <body class="event-highlights-shell">
+    <div
+      class="highlights-ambient highlights-ambient-one"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="highlights-ambient highlights-ambient-two"
+      aria-hidden="true"
+    ></div>
+
+    <header class="highlights-header">
+      <a
+        href="index.html"
+        class="highlights-brand"
+        aria-label="SnapUp Events home"
+      >
+        <img
+          src="icon/snapup-brand-mark-fixed-v3.png"
+          alt=""
+          width="45"
+          height="45"
+        />
+        <strong>SnapUp<span>Events</span></strong>
+      </a>
+
+      <div class="highlights-header-actions">
+        <a
+          href="index.html"
+          id="highlightsBackLink"
+          class="highlights-back-link"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 5-7 7 7 7"></path>
+          </svg>
+          <span>Back</span>
+        </a>
+        <button type="button" id="shareHighlightsButton" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="18" cy="5" r="2.5"></circle>
+            <circle cx="6" cy="12" r="2.5"></circle>
+            <circle cx="18" cy="19" r="2.5"></circle>
+            <path d="m8.3 10.9 7.4-4.6M8.3 13.1l7.4 4.6"></path>
+          </svg>
+          <span id="shareHighlightsText">Share Highlights</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="highlights-page">
+      <section
+        class="highlights-loading"
+        id="highlightsLoading"
+        aria-live="polite"
+      >
+        <div class="highlights-loader" aria-hidden="true"></div>
+        <strong>Preparing Event Highlights...</strong>
+        <span>Collecting the best moments from this event.</span>
+      </section>
+
+      <section class="highlights-error" id="highlightsError" hidden>
+        <div class="highlights-error-icon" aria-hidden="true">!</div>
+        <span>Event Highlights</span>
+        <h1>Highlights could not be loaded</h1>
+        <p id="highlightsErrorText">Please check the link and try again.</p>
+        <a href="index.html">Back to Home</a>
+      </section>
+
+      <div id="highlightsContent" hidden>
+        <section class="highlights-hero" id="highlightsHero">
+          <div
+            class="highlights-hero-media"
+            id="highlightsHeroMedia"
+            aria-hidden="true"
+          ></div>
+          <div class="highlights-hero-scrim" aria-hidden="true"></div>
+          <div class="highlights-hero-copy">
+            <div class="highlights-kicker-row">
+              <span class="highlights-kicker">
+                <i aria-hidden="true"></i>
+                EVENT HIGHLIGHTS
+              </span>
+              <span class="highlights-access-badge" id="highlightsAccessBadge">
+                PRIVATE PREVIEW
+              </span>
+            </div>
+            <h1 id="highlightsEventName">Event name</h1>
+            <p id="highlightsEventDate">Event date</p>
+          </div>
+          <div class="highlights-hero-mark" aria-hidden="true">✦</div>
+        </section>
+
+        <section
+          class="highlights-preview-notice"
+          id="highlightsPreviewNotice"
+          hidden
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3.5 20 7v5c0 4.6-3.2 7.6-8 9-4.8-1.4-8-4.4-8-9V7Z"
+            ></path>
+            <path d="M9.2 12.2 11 14l3.8-4"></path>
+          </svg>
+          <div>
+            <strong>Private owner preview</strong>
+            <span>End the event to make this page shareable with guests.</span>
+          </div>
+        </section>
+
+        <section class="highlights-summary" aria-labelledby="eventSummaryTitle">
+          <div class="highlights-section-heading">
+            <span>By the numbers</span>
+            <h2 id="eventSummaryTitle">Event Summary</h2>
+          </div>
+
+          <div class="highlights-stat-grid">
+            <article class="highlights-stat-card stat-participants">
+              <span class="highlights-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="9" cy="8" r="3"></circle>
+                  <circle cx="17" cy="10" r="2.2"></circle>
+                  <path
+                    d="M3.8 19c.5-3.5 2.3-5.3 5.2-5.3s4.7 1.8 5.2 5.3M14 15.2c.8-.7 1.8-1.1 3-1.1 2.2 0 3.5 1.4 3.9 4"
+                  ></path>
+                </svg>
+              </span>
+              <strong id="participantsCount">0</strong>
+              <span>Participants</span>
+            </article>
+
+            <article class="highlights-stat-card stat-photos">
+              <span class="highlights-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3.5" y="4" width="17" height="16" rx="3"></rect>
+                  <circle cx="9" cy="9" r="1.6"></circle>
+                  <path d="m5.5 17 4.2-4 3.1 2.8 2.4-2.2 3.3 3.4"></path>
+                </svg>
+              </span>
+              <strong id="photosCount">0</strong>
+              <span>Photos</span>
+            </article>
+
+            <article class="highlights-stat-card stat-videos">
+              <span class="highlights-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3.5" y="5" width="13" height="14" rx="3"></rect>
+                  <path d="m16.5 10 4-2v8l-4-2Z"></path>
+                </svg>
+              </span>
+              <strong id="videosCount">0</strong>
+              <span>Videos</span>
+            </article>
+
+            <article class="highlights-stat-card stat-comments">
+              <span class="highlights-stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 5h14v11H9l-4 4Z"></path>
+                  <path d="M8.5 9h7M8.5 12.5h5"></path>
+                </svg>
+              </span>
+              <strong id="commentsCount">0</strong>
+              <span>Comments</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="highlights-winners" aria-label="Event winners">
+          <article class="highlight-feature-card highlight-photo-card">
+            <div class="highlight-card-heading">
+              <div>
+                <span>Guest favorite</span>
+                <h2>Most Liked Photo</h2>
+              </div>
+              <span class="highlight-card-medal" aria-hidden="true">♥</span>
+            </div>
+
+            <div class="highlight-photo-frame" id="mostLikedPhotoFrame">
+              <img id="mostLikedPhoto" alt="Most liked event photo" hidden />
+              <div class="highlight-empty" id="mostLikedPhotoEmpty">
+                <span aria-hidden="true">♡</span>
+                <strong>No liked photo yet</strong>
+                <p>
+                  The winner will appear after guests like an approved photo.
+                </p>
+              </div>
+              <div
+                class="highlight-photo-caption"
+                id="mostLikedPhotoCaption"
+                hidden
+              >
+                <div>
+                  <span>Shared by</span>
+                  <strong id="mostLikedPhotoGuest">Guest</strong>
+                </div>
+                <span class="highlight-like-count">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M20.8 5.8c-2-2.1-5.2-1.7-6.8.4L12 8.7l-2-2.5C8.4 4.1 5.2 3.7 3.2 5.8c-2.2 2.4-1.7 6.2.5 8.4L12 22l8.3-7.8c2.2-2.2 2.7-6 .5-8.4Z"
+                    ></path>
+                  </svg>
+                  <strong id="mostLikedPhotoLikes">0</strong>
+                </span>
+              </div>
+            </div>
+          </article>
+
+          <article class="highlight-feature-card highlight-uploader-card">
+            <div class="highlight-card-heading">
+              <div>
+                <span>Memory maker</span>
+                <h2>Top Photo Uploader</h2>
+              </div>
+              <span class="highlight-card-medal" aria-hidden="true">✦</span>
+            </div>
+
+            <div class="highlight-uploader-content" id="topUploaderContent">
+              <div
+                class="highlight-uploader-avatar"
+                id="topUploaderAvatar"
+                aria-hidden="true"
+              >
+                ?
+              </div>
+              <div class="highlight-uploader-copy">
+                <span>Most active photographer</span>
+                <h3 id="topUploaderName">No uploader yet</h3>
+                <p id="topUploaderDescription">
+                  Approved photo uploads will be counted here.
+                </p>
+              </div>
+              <div class="highlight-uploader-score">
+                <strong id="topUploaderPhotoCount">0</strong>
+                <span>Photos uploaded</span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <footer class="highlights-footer">
+          <img
+            src="icon/snapup-brand-mark-fixed-v3.png"
+            alt=""
+            width="36"
+            height="36"
+          />
+          <p>Every guest. Every moment. One shared album.</p>
+        </footer>
+      </div>
+    </main>
+
+    <div
+      class="highlights-toast"
+      id="highlightsToast"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <script
+      type="module"
+      src="js/event-highlights.js?v=hero-frame-fix-1"
+    ></script>
+    <script src="js/theme.js?v=browser-memory-book-2"></script>
+  </body>
+</html>

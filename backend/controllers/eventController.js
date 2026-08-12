@@ -19,6 +19,10 @@ const {
   streamEventArchive,
   verifyArchiveTicket,
 } = require("../services/eventArchiveService");
+const {
+  EventHighlightsError,
+  loadEventHighlightsData,
+} = require("../services/eventHighlightsService");
 
 function cleanOptionalText(value, maxLength) {
   if (typeof value !== "string") {
@@ -1110,6 +1114,148 @@ async function getEventGuests(req, res) {
   }
 }
 
+const EVENT_HIGHLIGHTS_SELECT = `
+  event_id,
+  event_name,
+  event_date,
+  event_start_time,
+  event_finish_time,
+  event_code,
+  event_cover_url,
+  is_event_active
+`;
+
+function handleEventHighlightsError(res, error) {
+  console.error("Event Highlights error:", {
+    code: error.code,
+    message: error.message,
+  });
+
+  const statusCode =
+    error instanceof EventHighlightsError ? error.statusCode : 500;
+
+  return res.status(statusCode).json({
+    success: false,
+    message:
+      statusCode < 500
+        ? error.message
+        : "Event Highlights could not be loaded.",
+    code: error.code || "EVENT_HIGHLIGHTS_FAILED",
+  });
+}
+
+async function buildEventHighlightsResponse(event, { ownerPreview = false } = {}) {
+  const highlights = await loadEventHighlightsData(supabase, event);
+  const isPublic = event.is_event_active === false;
+
+  return {
+    ...highlights,
+    access: {
+      owner_preview: ownerPreview,
+      is_public: isPublic,
+      shareable: isPublic,
+      event_code: event.event_code,
+    },
+  };
+}
+
+async function getOwnedEventHighlights(req, res) {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      throw new EventHighlightsError(
+        "Event ID is required.",
+        "HIGHLIGHTS_EVENT_ID_REQUIRED",
+        400,
+      );
+    }
+
+    const { data: event, error } = await supabase
+      .from("event")
+      .select(EVENT_HIGHLIGHTS_SELECT)
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      throw new EventHighlightsError(
+        "Event ownership could not be checked.",
+        "HIGHLIGHTS_EVENT_CHECK_FAILED",
+        500,
+      );
+    }
+
+    if (!event) {
+      throw new EventHighlightsError(
+        "Event not found or you do not have permission.",
+        "HIGHLIGHTS_EVENT_NOT_FOUND",
+        404,
+      );
+    }
+
+    const payload = await buildEventHighlightsResponse(event, {
+      ownerPreview: true,
+    });
+
+    return res.status(200).json({ success: true, ...payload });
+  } catch (error) {
+    return handleEventHighlightsError(res, error);
+  }
+}
+
+async function getPublicEventHighlights(req, res) {
+  try {
+    const eventCode = String(req.params.eventCode || "")
+      .trim()
+      .toUpperCase();
+
+    if (!eventCode) {
+      throw new EventHighlightsError(
+        "Event code is required.",
+        "HIGHLIGHTS_EVENT_CODE_REQUIRED",
+        400,
+      );
+    }
+
+    const { data: event, error } = await supabase
+      .from("event")
+      .select(EVENT_HIGHLIGHTS_SELECT)
+      .eq("event_code", eventCode)
+      .maybeSingle();
+
+    if (error) {
+      throw new EventHighlightsError(
+        "Event could not be loaded.",
+        "HIGHLIGHTS_EVENT_QUERY_FAILED",
+        500,
+      );
+    }
+
+    if (!event) {
+      throw new EventHighlightsError(
+        "Event not found.",
+        "HIGHLIGHTS_EVENT_NOT_FOUND",
+        404,
+      );
+    }
+
+    if (event.is_event_active !== false) {
+      throw new EventHighlightsError(
+        "Event Highlights becomes shareable after the event is ended.",
+        "HIGHLIGHTS_NOT_PUBLIC",
+        403,
+      );
+    }
+
+    const payload = await buildEventHighlightsResponse(event);
+    return res.status(200).json({ success: true, ...payload });
+  } catch (error) {
+    return handleEventHighlightsError(res, error);
+  }
+}
+
 async function getPublicEventGallery(req, res) {
   try {
     const eventCode = req.params.eventCode?.trim().toUpperCase();
@@ -1741,6 +1887,8 @@ module.exports = {
   updateEventSettings,
   deleteEvent,
   getEventGuests,
+  getOwnedEventHighlights,
+  getPublicEventHighlights,
   getPublicEventGallery,
   createEventArchiveTicket,
   downloadEventArchive,

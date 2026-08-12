@@ -13,6 +13,10 @@ function getDeliveryProfile(req) {
     return "gallery";
   }
 
+  if (/\/highlights(?:\/[^/]+)?\/?$/i.test(path)) {
+    return "gallery";
+  }
+
   if (/\/api\/users\/me\/events\/?$/i.test(path)) {
     return "card";
   }

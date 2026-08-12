@@ -31,6 +31,8 @@ const {
   updateEventSettings,
   deleteEvent,
   getEventGuests,
+  getOwnedEventHighlights,
+  getPublicEventHighlights,
   getPublicEventGallery,
   createEventArchiveTicket,
   downloadEventArchive,
@@ -87,6 +89,11 @@ router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, 
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
+router.get(
+  "/detail/:eventId/highlights",
+  authMiddleware,
+  getOwnedEventHighlights,
+);
 router.get(
   "/detail/:eventId/slideshow",
   authMiddleware,
@@ -158,6 +165,12 @@ router.put(
 router.put("/detail/:eventId/settings", authMiddleware, updateEventSettings);
 
 router.delete("/detail/:eventId", authMiddleware, deleteEvent);
+
+router.get(
+  "/highlights/:eventCode",
+  eventCodeLimiter,
+  getPublicEventHighlights,
+);
 
 router.get("/:eventCode/memory-book", eventCodeLimiter, pdfLimiter, downloadPublicMemoryBook);
 
