@@ -1196,11 +1196,13 @@ html[data-theme="dark"] .pricing .btn-glass:hover {
   border-color: rgba(167, 139, 250, 0.4);
 }
 
-/* "Every event" remains a deliberate dark brand band in both themes. */
+/* Occasion showcase: deep purple in dark mode, paired with main.css light mode. */
 html[data-theme="dark"] .event-types {
   color: #ffffff;
-  background: #121016;
-  background-image: none;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(145, 70, 199, 0.12), transparent 28%),
+    radial-gradient(circle at 2% 100%, rgba(61, 200, 183, 0.07), transparent 25%),
+    #100d17;
 }
 
 html[data-theme="dark"] .event-types__intro h2,
@@ -1224,8 +1226,9 @@ html[data-theme="dark"] .event-type-card:hover {
 }
 
 html[data-theme="dark"] .event-types__cta {
-  color: #17122b;
-  background: #fff8ed;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(105deg, #8d35e8, #eb4c9b 57%, #5fcfe2);
 }
 
 /*
