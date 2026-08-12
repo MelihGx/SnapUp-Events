@@ -67,6 +67,12 @@ const IMAGE_PRESETS = Object.freeze({
     crop: "limit",
     quality: "auto:good",
   }),
+  archive: Object.freeze({
+    width: 2000,
+    height: 2000,
+    crop: "limit",
+    quality: "auto:good",
+  }),
   cover_card: Object.freeze({
     width: 640,
     height: 640,
@@ -97,6 +103,12 @@ const VIDEO_PRESETS = Object.freeze({
     crop: "limit",
     quality: "auto:good",
     fetch_format: "auto",
+  }),
+  archive: Object.freeze({
+    width: 1920,
+    height: 1080,
+    crop: "limit",
+    quality: "auto:good",
   }),
 });
 
@@ -199,7 +211,7 @@ function imageDeliveryUrl(urlValue, presetName) {
 
   return createDeliveryUrl(asset, {
     transformation: preset,
-    format: presetName === "pdf" ? "jpg" : asset.format,
+    format: ["pdf", "archive"].includes(presetName) ? "jpg" : asset.format,
   });
 }
 
@@ -213,7 +225,12 @@ function videoDeliveryUrl(urlValue, presetName) {
 
   return createDeliveryUrl(asset, {
     transformation: preset,
-    format: presetName === "poster" ? "jpg" : asset.format,
+    format:
+      presetName === "poster"
+        ? "jpg"
+        : presetName === "archive"
+          ? "mp4"
+          : asset.format,
   });
 }
 

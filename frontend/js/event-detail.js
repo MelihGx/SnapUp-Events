@@ -227,6 +227,52 @@ const memoryBookPreviewTitle = document.getElementById(
   "memoryBookPreviewTitle",
 );
 const memoryBookPreviewMeta = document.getElementById("memoryBookPreviewMeta");
+const eventArchiveOpen = document.getElementById("eventArchiveOpen");
+const eventArchiveButtonMeta = document.getElementById(
+  "eventArchiveButtonMeta",
+);
+const eventArchiveModal = document.getElementById("eventArchiveModal");
+const eventArchiveModalBackdrop = document.getElementById(
+  "eventArchiveModalBackdrop",
+);
+const eventArchiveClose = document.getElementById("eventArchiveClose");
+const eventArchiveCancel = document.getElementById("eventArchiveCancel");
+const eventArchiveForm = document.getElementById("eventArchiveForm");
+const eventArchiveDownload = document.getElementById("eventArchiveDownload");
+const eventArchiveStatus = document.getElementById("eventArchiveStatus");
+const eventArchivePhotoCount = document.getElementById(
+  "eventArchivePhotoCount",
+);
+const eventArchiveVideoCount = document.getElementById(
+  "eventArchiveVideoCount",
+);
+const eventArchiveMessageCount = document.getElementById(
+  "eventArchiveMessageCount",
+);
+const eventArchivePhotosMeta = document.getElementById(
+  "eventArchivePhotosMeta",
+);
+const eventArchiveVideosMeta = document.getElementById(
+  "eventArchiveVideosMeta",
+);
+const eventArchiveMessagesMeta = document.getElementById(
+  "eventArchiveMessagesMeta",
+);
+const eventArchiveIncludePhotos = document.getElementById(
+  "eventArchiveIncludePhotos",
+);
+const eventArchiveIncludeVideos = document.getElementById(
+  "eventArchiveIncludeVideos",
+);
+const eventArchiveIncludeMessages = document.getElementById(
+  "eventArchiveIncludeMessages",
+);
+const eventArchiveIncludeInfo = document.getElementById(
+  "eventArchiveIncludeInfo",
+);
+const eventArchiveDownloadFrame = document.getElementById(
+  "eventArchiveDownloadFrame",
+);
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
@@ -315,6 +361,8 @@ let currentRenderedMediaList = [];
 let approvedMemoryBookPhotos = [];
 let memoryBookReturnTarget = null;
 let memoryBookScrollY = 0;
+let eventArchiveReturnTarget = null;
+let eventArchiveScrollY = 0;
 let eventCoverEditorSourceFile = null;
 let eventCoverEditorObjectUrl = null;
 let eventCoverEditorImageWidth = 0;
@@ -994,6 +1042,10 @@ function renderEventInfo(event) {
 
   if (liveSlideshowOpen) {
     liveSlideshowOpen.disabled = false;
+  }
+
+  if (eventArchiveOpen) {
+    eventArchiveOpen.disabled = false;
   }
 
   eventTitle.textContent = event.event_name || t("Untitled Event");
@@ -1739,6 +1791,7 @@ function renderMedia(mediaList) {
   currentRenderedMediaList = getFilteredMediaList();
 
   updateMemoryBookAvailability();
+  updateEventArchiveAvailability();
   updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
 
   renderActiveGuestMediaFilter();
@@ -1891,6 +1944,250 @@ async function downloadMemoryBook() {
     memoryBookDownload.disabled = false;
     memoryBookCancel.disabled = false;
     memoryBookClose.disabled = false;
+    buttonText.textContent = t("Try Again");
+  }
+}
+
+function getApprovedArchiveCounts() {
+  return allMediaItems.reduce(
+    (counts, media) => {
+      if (getMediaStatus(media) !== "approved") {
+        return counts;
+      }
+
+      const mediaKind = getMediaKind(media);
+
+      if (mediaKind === "image") counts.photos += 1;
+      if (mediaKind === "video") counts.videos += 1;
+      if (
+        mediaKind === "message" &&
+        String(media.message || "").trim()
+      ) {
+        counts.messages += 1;
+      }
+
+      return counts;
+    },
+    { photos: 0, videos: 0, messages: 0 },
+  );
+}
+
+function syncArchiveContentOption(input, count) {
+  if (!input) {
+    return;
+  }
+
+  const hadNoContent = input.disabled;
+  input.disabled = count === 0;
+
+  if (count === 0) {
+    input.checked = false;
+  } else if (hadNoContent) {
+    input.checked = true;
+  }
+}
+
+function updateEventArchiveAvailability() {
+  const counts = getApprovedArchiveCounts();
+  const approvedTotal = counts.photos + counts.videos + counts.messages;
+
+  if (eventArchivePhotoCount) {
+    eventArchivePhotoCount.textContent = String(counts.photos);
+  }
+
+  if (eventArchiveVideoCount) {
+    eventArchiveVideoCount.textContent = String(counts.videos);
+  }
+
+  if (eventArchiveMessageCount) {
+    eventArchiveMessageCount.textContent = String(counts.messages);
+  }
+
+  if (eventArchivePhotosMeta) {
+    eventArchivePhotosMeta.textContent = t("{count} approved", {
+      count: counts.photos,
+    });
+  }
+
+  if (eventArchiveVideosMeta) {
+    eventArchiveVideosMeta.textContent = t("{count} approved", {
+      count: counts.videos,
+    });
+  }
+
+  if (eventArchiveMessagesMeta) {
+    eventArchiveMessagesMeta.textContent = t("{count} approved", {
+      count: counts.messages,
+    });
+  }
+
+  if (eventArchiveButtonMeta) {
+    eventArchiveButtonMeta.textContent = approvedTotal
+      ? t("{count} approved items ready", { count: approvedTotal })
+      : t("Event information is ready to export");
+  }
+
+  syncArchiveContentOption(eventArchiveIncludePhotos, counts.photos);
+  syncArchiveContentOption(eventArchiveIncludeVideos, counts.videos);
+  syncArchiveContentOption(eventArchiveIncludeMessages, counts.messages);
+}
+
+function setEventArchiveStatus(message = "", type = "") {
+  if (!eventArchiveStatus) {
+    return;
+  }
+
+  eventArchiveStatus.textContent = message;
+  eventArchiveStatus.className = [
+    "event-archive-status",
+    message ? "active" : "",
+    type,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function openEventArchive() {
+  if (!currentEvent || !eventArchiveModal) {
+    return;
+  }
+
+  eventArchiveReturnTarget = document.activeElement;
+  eventArchiveScrollY = window.scrollY;
+  updateEventArchiveAvailability();
+  setEventArchiveStatus();
+  eventArchiveDownload.disabled = false;
+  eventArchiveCancel.disabled = false;
+  eventArchiveClose.disabled = false;
+  eventArchiveDownload.querySelector("span").textContent = t(
+    "Download ZIP Archive",
+  );
+
+  eventArchiveModal.classList.add("active");
+  eventArchiveModal.setAttribute("aria-hidden", "false");
+  document.body.style.top = `-${eventArchiveScrollY}px`;
+  document.body.classList.add("event-archive-open");
+  eventArchiveClose.focus();
+}
+
+function closeEventArchive() {
+  if (!eventArchiveModal || eventArchiveDownload.disabled) {
+    return;
+  }
+
+  eventArchiveModal.classList.remove("active");
+  eventArchiveModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-archive-open");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, eventArchiveScrollY);
+  setEventArchiveStatus();
+
+  if (eventArchiveReturnTarget instanceof HTMLElement) {
+    eventArchiveReturnTarget.focus();
+  }
+}
+
+function getEventArchiveOptions() {
+  const quality =
+    eventArchiveForm?.querySelector(
+      'input[name="eventArchiveQuality"]:checked',
+    )?.value || "optimized";
+
+  return {
+    quality,
+    include: {
+      photos: Boolean(eventArchiveIncludePhotos?.checked),
+      videos: Boolean(eventArchiveIncludeVideos?.checked),
+      messages: Boolean(eventArchiveIncludeMessages?.checked),
+      eventInfo: Boolean(eventArchiveIncludeInfo?.checked),
+    },
+  };
+}
+
+async function startEventArchiveDownload(event) {
+  event.preventDefault();
+
+  if (!eventId || !currentEvent || eventArchiveDownload.disabled) {
+    return;
+  }
+
+  const options = getEventArchiveOptions();
+
+  if (!Object.values(options.include).some(Boolean)) {
+    setEventArchiveStatus(
+      t("Select at least one archive content type."),
+      "error",
+    );
+    return;
+  }
+
+  const buttonText = eventArchiveDownload.querySelector("span");
+
+  try {
+    eventArchiveDownload.disabled = true;
+    eventArchiveCancel.disabled = true;
+    eventArchiveClose.disabled = true;
+    buttonText.textContent = t("Preparing archive...");
+    setEventArchiveStatus(
+      t("Creating a secure download link for your event archive..."),
+    );
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/detail/${eventId}/archive-ticket`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(options),
+      },
+    );
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok || !data.success || !data.ticket) {
+      throw createApiError(
+        response,
+        data,
+        "The event archive could not be prepared.",
+      );
+    }
+
+    const downloadUrl = `${API_BASE_URL}/api/events/detail/${encodeURIComponent(
+      eventId,
+    )}/archive?ticket=${encodeURIComponent(data.ticket)}`;
+
+    if (eventArchiveDownloadFrame) {
+      eventArchiveDownloadFrame.src = downloadUrl;
+    } else {
+      window.location.assign(downloadUrl);
+    }
+
+    setEventArchiveStatus(
+      t("Your archive is being prepared. The download has started."),
+      "success",
+    );
+    buttonText.textContent = t("Download Started");
+    eventArchiveDownload.disabled = false;
+    eventArchiveCancel.disabled = false;
+    eventArchiveClose.disabled = false;
+
+    window.setTimeout(() => {
+      if (eventArchiveModal?.classList.contains("active")) {
+        closeEventArchive();
+      }
+    }, 1700);
+  } catch (error) {
+    console.error("Event archive ticket error:", error);
+    setEventArchiveStatus(
+      t(error.message || "The event archive could not be prepared."),
+      "error",
+    );
+    eventArchiveDownload.disabled = false;
+    eventArchiveCancel.disabled = false;
+    eventArchiveClose.disabled = false;
     buttonText.textContent = t("Try Again");
   }
 }
@@ -3013,6 +3310,14 @@ memoryBookClose?.addEventListener("click", closeMemoryBook);
 memoryBookCancel?.addEventListener("click", closeMemoryBook);
 memoryBookModalBackdrop?.addEventListener("click", closeMemoryBook);
 memoryBookDownload?.addEventListener("click", downloadMemoryBook);
+eventArchiveOpen?.addEventListener("click", openEventArchive);
+eventArchiveClose?.addEventListener("click", closeEventArchive);
+eventArchiveCancel?.addEventListener("click", closeEventArchive);
+eventArchiveModalBackdrop?.addEventListener("click", closeEventArchive);
+eventArchiveForm?.addEventListener("submit", startEventArchiveDownload);
+eventArchiveForm?.addEventListener("change", () => {
+  setEventArchiveStatus();
+});
 
 eventLocationEditButton?.addEventListener("click", openLocationEditor);
 
@@ -3556,6 +3861,14 @@ window.addEventListener("keydown", (event) => {
   if (eventCoverEditor?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeEventCoverEditor();
+    }
+
+    return;
+  }
+
+  if (eventArchiveModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventArchive();
     }
 
     return;

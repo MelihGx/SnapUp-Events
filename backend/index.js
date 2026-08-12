@@ -87,6 +87,8 @@ app.use(
       "X-SnapUp-PDF-Design",
       "X-Memory-Book-Photos",
       "X-Memory-Book-Skipped",
+      "X-SnapUp-Archive-Quality",
+      "X-SnapUp-Archive-Assets",
     ],
     credentials: true,
   }),

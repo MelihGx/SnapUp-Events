@@ -88,6 +88,16 @@ const guestLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 20, name: "gues
 const uploadLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 12, name: "upload" });
 const likeLimiter = makeLimiter({ windowMs: 60_000, limit: 30, name: "like" });
 const pdfLimiter = makeLimiter({ windowMs: 60 * 60_000, limit: 3, name: "pdf" });
+const archiveTicketLimiter = makeLimiter({
+  windowMs: 60 * 60_000,
+  limit: 6,
+  name: "archive-ticket",
+});
+const archiveDownloadLimiter = makeLimiter({
+  windowMs: 60 * 60_000,
+  limit: 3,
+  name: "archive-download",
+});
 
 module.exports = {
   requestContext,
@@ -100,4 +110,6 @@ module.exports = {
   uploadLimiter,
   likeLimiter,
   pdfLimiter,
+  archiveTicketLimiter,
+  archiveDownloadLimiter,
 };

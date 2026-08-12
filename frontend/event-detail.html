@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=cover-copy-bottom-left-1"
+      href="css/event-detail.css?v=event-archive-1"
     />
     <link
       rel="stylesheet"
@@ -57,6 +57,7 @@
     <script src="js/location-i18n.js?v=location-map-2" defer></script>
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
     <script src="js/live-slideshow-i18n.js?v=live-slideshow-1" defer></script>
+    <script src="js/event-archive-i18n.js?v=event-archive-1" defer></script>
     <script src="js/i18n.js?v=only-users-3" defer></script>
   </head>
 
@@ -231,6 +232,27 @@
                 <span>
                   <strong>Prepare Memory Book</strong>
                   <small id="memoryBookButtonMeta">Waiting for approved photos</small>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                id="eventArchiveOpen"
+                class="event-archive-open"
+                disabled
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7.5h16v12H4z"></path>
+                  <path d="M3 4.5h18v3H3zM9 11.5h6"></path>
+                </svg>
+                <span>
+                  <span class="event-archive-title-row">
+                    <strong>Event Archive</strong>
+                    <em>PREMIUM</em>
+                  </span>
+                  <small id="eventArchiveButtonMeta">
+                    Download photos, videos and messages as ZIP
+                  </small>
                 </span>
               </button>
 
@@ -1754,6 +1776,200 @@
     </div>
 
     <div
+      class="event-archive-modal"
+      id="eventArchiveModal"
+      aria-hidden="true"
+    >
+      <div
+        class="event-archive-modal-backdrop"
+        id="eventArchiveModalBackdrop"
+      ></div>
+
+      <section
+        class="event-archive-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eventArchiveDialogTitle"
+        aria-describedby="eventArchiveDialogDescription"
+      >
+        <button
+          type="button"
+          class="event-archive-close"
+          id="eventArchiveClose"
+          aria-label="Close event archive"
+        >
+          ×
+        </button>
+
+        <header class="event-archive-dialog-header">
+          <div class="event-archive-dialog-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7.5h16v12H4z"></path>
+              <path d="M3 4.5h18v3H3zM9 11.5h6"></path>
+            </svg>
+          </div>
+          <div>
+            <span class="event-archive-kicker">
+              <em>PREMIUM</em>
+              Complete event export
+            </span>
+            <h2 id="eventArchiveDialogTitle">Create Event Archive</h2>
+            <p id="eventArchiveDialogDescription">
+              Download approved photos, videos, guest messages and event
+              information in one organised ZIP file.
+            </p>
+          </div>
+        </header>
+
+        <div class="event-archive-summary" aria-label="Archive summary">
+          <span>
+            <strong id="eventArchivePhotoCount">0</strong>
+            <small>Approved photos</small>
+          </span>
+          <span>
+            <strong id="eventArchiveVideoCount">0</strong>
+            <small>Approved videos</small>
+          </span>
+          <span>
+            <strong id="eventArchiveMessageCount">0</strong>
+            <small>Guest messages</small>
+          </span>
+        </div>
+
+        <form class="event-archive-form" id="eventArchiveForm">
+          <fieldset class="event-archive-fieldset">
+            <legend>Archive quality</legend>
+
+            <div class="event-archive-quality-grid">
+              <label class="event-archive-quality-option">
+                <input
+                  type="radio"
+                  name="eventArchiveQuality"
+                  value="optimized"
+                  checked
+                />
+                <span class="event-archive-radio-mark"></span>
+                <span>
+                  <strong>Optimized Archive</strong>
+                  <small>Smaller, faster download — recommended</small>
+                </span>
+              </label>
+
+              <label class="event-archive-quality-option">
+                <input
+                  type="radio"
+                  name="eventArchiveQuality"
+                  value="original"
+                />
+                <span class="event-archive-radio-mark"></span>
+                <span>
+                  <strong>Original Archive</strong>
+                  <small>Full-size files exactly as uploaded</small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="event-archive-fieldset">
+            <legend>Include in archive</legend>
+
+            <div class="event-archive-content-grid">
+              <label class="event-archive-content-option">
+                <input
+                  type="checkbox"
+                  id="eventArchiveIncludePhotos"
+                  checked
+                />
+                <span class="event-archive-check-mark"></span>
+                <span>
+                  <strong>Photos</strong>
+                  <small id="eventArchivePhotosMeta">0 approved</small>
+                </span>
+              </label>
+
+              <label class="event-archive-content-option">
+                <input
+                  type="checkbox"
+                  id="eventArchiveIncludeVideos"
+                  checked
+                />
+                <span class="event-archive-check-mark"></span>
+                <span>
+                  <strong>Videos</strong>
+                  <small id="eventArchiveVideosMeta">0 approved</small>
+                </span>
+              </label>
+
+              <label class="event-archive-content-option">
+                <input
+                  type="checkbox"
+                  id="eventArchiveIncludeMessages"
+                  checked
+                />
+                <span class="event-archive-check-mark"></span>
+                <span>
+                  <strong>Guest Messages</strong>
+                  <small id="eventArchiveMessagesMeta">0 approved</small>
+                </span>
+              </label>
+
+              <label class="event-archive-content-option">
+                <input
+                  type="checkbox"
+                  id="eventArchiveIncludeInfo"
+                  checked
+                />
+                <span class="event-archive-check-mark"></span>
+                <span>
+                  <strong>Event Information</strong>
+                  <small>Event-Info.pdf</small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <p class="event-archive-note">
+            Only approved content is included. Original files remain unchanged
+            in Cloudinary.
+          </p>
+
+          <p
+            class="event-archive-status"
+            id="eventArchiveStatus"
+            aria-live="polite"
+          ></p>
+
+          <div class="event-archive-dialog-actions">
+            <button
+              type="button"
+              class="event-archive-cancel"
+              id="eventArchiveCancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="event-archive-download"
+              id="eventArchiveDownload"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"></path>
+              </svg>
+              <span>Download ZIP Archive</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <iframe
+      id="eventArchiveDownloadFrame"
+      class="event-archive-download-frame"
+      title="Event archive download"
+      hidden
+    ></iframe>
+
+    <div
       class="location-editor-overlay"
       id="locationEditorModal"
       role="dialog"
@@ -2081,7 +2297,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=cloudinary-bandwidth-1"
+      src="js/event-detail.js?v=event-archive-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

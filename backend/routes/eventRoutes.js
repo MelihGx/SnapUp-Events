@@ -3,7 +3,12 @@ const multer = require("multer");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
-const { eventCodeLimiter, pdfLimiter } = require("../middlewares/security");
+const {
+  archiveDownloadLimiter,
+  archiveTicketLimiter,
+  eventCodeLimiter,
+  pdfLimiter,
+} = require("../middlewares/security");
 const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const {
   listEventInvitations,
@@ -27,6 +32,8 @@ const {
   deleteEvent,
   getEventGuests,
   getPublicEventGallery,
+  createEventArchiveTicket,
+  downloadEventArchive,
   downloadEventMemoryBookV3,
   downloadPublicMemoryBook,
 } = require("../controllers/eventController");
@@ -116,6 +123,17 @@ router.get(
   "/detail/:eventId/memory-book-v3",
   authMiddleware,
   downloadEventMemoryBookV3,
+);
+router.post(
+  "/detail/:eventId/archive-ticket",
+  archiveTicketLimiter,
+  authMiddleware,
+  createEventArchiveTicket,
+);
+router.get(
+  "/detail/:eventId/archive",
+  archiveDownloadLimiter,
+  downloadEventArchive,
 );
 
 router.put(
