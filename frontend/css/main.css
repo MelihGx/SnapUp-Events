@@ -8205,8 +8205,7 @@ html[data-theme="dark"] .event-types__cta:focus-visible {
   gap: 16px;
 }
 
-.event-type-card,
-html[data-theme="dark"] .event-type-card {
+.event-type-card {
   position: relative;
   isolation: isolate;
   min-width: 0;
@@ -8311,6 +8310,24 @@ html[data-theme="dark"] .event-type-card {
   background:
     linear-gradient(90deg, rgba(11, 9, 14, 0.96) 0%, rgba(11, 9, 14, 0.7) 47%, rgba(11, 9, 14, 0.1) 100%),
     linear-gradient(0deg, rgba(11, 9, 14, 0.6), transparent 70%);
+}
+
+/* Light theme keeps the photography vivid while retaining a local text scrim. */
+html[data-theme="light"] .event-type-card::before {
+  opacity: 1;
+  filter: brightness(1.14) saturate(1.06) contrast(0.98);
+}
+
+html[data-theme="light"] .event-type-card::after {
+  background:
+    linear-gradient(0deg, rgba(17, 11, 23, 0.8) 0%, rgba(17, 11, 23, 0.25) 47%, rgba(17, 11, 23, 0.025) 100%),
+    linear-gradient(90deg, rgba(18, 12, 24, 0.34), transparent 72%);
+}
+
+html[data-theme="light"] .event-type-card--birthday::after {
+  background:
+    linear-gradient(90deg, rgba(17, 11, 23, 0.78) 0%, rgba(17, 11, 23, 0.42) 42%, rgba(17, 11, 23, 0.025) 78%),
+    linear-gradient(0deg, rgba(17, 11, 23, 0.34), transparent 68%);
 }
 
 .event-type-card--graduation {
@@ -8425,8 +8442,7 @@ html[data-theme="dark"] .event-type-card:focus-visible {
   align-items: flex-start;
 }
 
-.event-type-card h3,
-html[data-theme="dark"] .event-type-card h3 {
+.event-type-card h3 {
   max-width: calc(100% - 20px);
   margin: 0;
   color: #ffffff;
