@@ -23,6 +23,10 @@ const {
   EventHighlightsError,
   loadEventHighlightsData,
 } = require("../services/eventHighlightsService");
+const {
+  EventStatisticsError,
+  loadEventStatisticsData,
+} = require("../services/eventStatisticsService");
 
 function cleanOptionalText(value, maxLength) {
   if (typeof value !== "string") {
@@ -1205,6 +1209,68 @@ async function getOwnedEventHighlights(req, res) {
   }
 }
 
+function handleEventStatisticsError(res, error) {
+  console.error("Event Statistics error:", {
+    code: error.code,
+    message: error.message,
+  });
+
+  const statusCode =
+    error instanceof EventStatisticsError ? error.statusCode : 500;
+
+  return res.status(statusCode).json({
+    success: false,
+    message:
+      statusCode < 500
+        ? error.message
+        : "Event statistics could not be loaded.",
+    code: error.code || "EVENT_STATISTICS_FAILED",
+  });
+}
+
+async function getOwnedEventStatistics(req, res) {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      throw new EventStatisticsError(
+        "Event ID is required.",
+        "EVENT_STATISTICS_EVENT_ID_REQUIRED",
+        400,
+      );
+    }
+
+    const { data: event, error } = await supabase
+      .from("event")
+      .select(EVENT_HIGHLIGHTS_SELECT)
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      throw new EventStatisticsError(
+        "Event ownership could not be checked.",
+        "EVENT_STATISTICS_EVENT_CHECK_FAILED",
+        500,
+      );
+    }
+
+    if (!event) {
+      throw new EventStatisticsError(
+        "Event not found or you do not have permission.",
+        "EVENT_STATISTICS_EVENT_NOT_FOUND",
+        404,
+      );
+    }
+
+    const statistics = await loadEventStatisticsData(supabase, event);
+    return res.status(200).json({ success: true, ...statistics });
+  } catch (error) {
+    return handleEventStatisticsError(res, error);
+  }
+}
+
 async function getPublicEventHighlights(req, res) {
   try {
     const eventCode = String(req.params.eventCode || "")
@@ -1887,6 +1953,7 @@ module.exports = {
   updateEventSettings,
   deleteEvent,
   getEventGuests,
+  getOwnedEventStatistics,
   getOwnedEventHighlights,
   getPublicEventHighlights,
   getPublicEventGallery,

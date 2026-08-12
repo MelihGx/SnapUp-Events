@@ -31,6 +31,7 @@ const {
   updateEventSettings,
   deleteEvent,
   getEventGuests,
+  getOwnedEventStatistics,
   getOwnedEventHighlights,
   getPublicEventHighlights,
   getPublicEventGallery,
@@ -89,6 +90,11 @@ router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, 
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
+router.get(
+  "/detail/:eventId/statistics",
+  authMiddleware,
+  getOwnedEventStatistics,
+);
 router.get(
   "/detail/:eventId/highlights",
   authMiddleware,

@@ -133,6 +133,57 @@ const eventCoverEditorStatus = document.getElementById(
 const eventCoverToast = document.getElementById("eventCoverToast");
 const eventTitle = document.getElementById("eventTitle");
 const eventDescription = document.getElementById("eventDescription");
+const eventStatisticsOpen = document.getElementById("eventStatisticsOpen");
+const eventStatisticsModal = document.getElementById("eventStatisticsModal");
+const eventStatisticsBackdrop = document.getElementById(
+  "eventStatisticsBackdrop",
+);
+const eventStatisticsClose = document.getElementById("eventStatisticsClose");
+const eventStatisticsEventName = document.getElementById(
+  "eventStatisticsEventName",
+);
+const eventStatisticsStatus = document.getElementById(
+  "eventStatisticsStatus",
+);
+const eventStatisticsParticipants = document.getElementById(
+  "eventStatisticsParticipants",
+);
+const eventStatisticsPhotos = document.getElementById(
+  "eventStatisticsPhotos",
+);
+const eventStatisticsVideos = document.getElementById(
+  "eventStatisticsVideos",
+);
+const eventStatisticsComments = document.getElementById(
+  "eventStatisticsComments",
+);
+const eventStatisticsTotalUploads = document.getElementById(
+  "eventStatisticsTotalUploads",
+);
+const eventStatisticsStorage = document.getElementById(
+  "eventStatisticsStorage",
+);
+const eventStatisticsUploaderAvatar = document.getElementById(
+  "eventStatisticsUploaderAvatar",
+);
+const eventStatisticsUploaderName = document.getElementById(
+  "eventStatisticsUploaderName",
+);
+const eventStatisticsUploaderCount = document.getElementById(
+  "eventStatisticsUploaderCount",
+);
+const eventStatisticsLikedPhoto = document.getElementById(
+  "eventStatisticsLikedPhoto",
+);
+const eventStatisticsLikedEmpty = document.getElementById(
+  "eventStatisticsLikedEmpty",
+);
+const eventStatisticsLikedGuest = document.getElementById(
+  "eventStatisticsLikedGuest",
+);
+const eventStatisticsLikedCount = document.getElementById(
+  "eventStatisticsLikedCount",
+);
 const eventCode = document.getElementById("eventCode");
 const qrBox = document.getElementById("qrBox");
 
@@ -378,6 +429,9 @@ let eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
 let eventCoverRemoveLastFocusedElement = null;
 let locationEditorPicker = null;
 let locationEditorLastFocusedElement = null;
+let currentEventStatistics = null;
+let eventStatisticsReturnTarget = null;
+let eventStatisticsScrollY = 0;
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -1039,6 +1093,253 @@ async function removeCurrentEventCover() {
   }
 
   return data.event;
+}
+
+function formatStatisticNumber(value) {
+  const number = Number(value || 0);
+
+  try {
+    return new Intl.NumberFormat(getCurrentLocale()).format(
+      Number.isFinite(number) ? number : 0,
+    );
+  } catch (_error) {
+    return String(Number.isFinite(number) ? number : 0);
+  }
+}
+
+function formatStorageBytes(value) {
+  const bytes = Math.max(0, Number(value || 0));
+  if (!Number.isFinite(bytes) || bytes === 0) return "0 B";
+
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const unitIndex = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1,
+  );
+  const amount = bytes / 1024 ** unitIndex;
+
+  try {
+    const formatted = new Intl.NumberFormat(getCurrentLocale(), {
+      maximumFractionDigits: amount >= 10 || unitIndex === 0 ? 0 : 1,
+    }).format(amount);
+    return `${formatted} ${units[unitIndex]}`;
+  } catch (_error) {
+    return `${amount.toFixed(amount >= 10 || unitIndex === 0 ? 0 : 1)} ${
+      units[unitIndex]
+    }`;
+  }
+}
+
+function getStatisticsInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return (
+    parts.map((part) => part.charAt(0).toLocaleUpperCase()).join("") || "?"
+  );
+}
+
+function renderEventStatistics(data) {
+  currentEventStatistics = data;
+
+  const summary = data?.summary || {};
+  const uploader = data?.top_photo_uploader || null;
+  const likedPhoto = data?.most_liked_photo || null;
+
+  if (eventStatisticsParticipants) {
+    eventStatisticsParticipants.textContent = formatStatisticNumber(
+      summary.participants_count,
+    );
+  }
+  if (eventStatisticsPhotos) {
+    eventStatisticsPhotos.textContent = formatStatisticNumber(
+      summary.photos_count,
+    );
+  }
+  if (eventStatisticsVideos) {
+    eventStatisticsVideos.textContent = formatStatisticNumber(
+      summary.videos_count,
+    );
+  }
+  if (eventStatisticsComments) {
+    eventStatisticsComments.textContent = formatStatisticNumber(
+      summary.comments_count,
+    );
+  }
+  if (eventStatisticsTotalUploads) {
+    eventStatisticsTotalUploads.textContent = formatStatisticNumber(
+      summary.total_uploads_count,
+    );
+  }
+  if (eventStatisticsStorage) {
+    eventStatisticsStorage.textContent = formatStorageBytes(
+      summary.used_storage_bytes,
+    );
+  }
+
+  if (eventStatisticsEventName) {
+    eventStatisticsEventName.textContent =
+      data?.event?.event_name || currentEvent?.event_name || t("Untitled Event");
+  }
+
+  if (uploader) {
+    const uploaderName = uploader.guest_name || t("Unknown Guest");
+    eventStatisticsUploaderAvatar.textContent =
+      getStatisticsInitials(uploaderName);
+    eventStatisticsUploaderName.textContent = uploaderName;
+    eventStatisticsUploaderCount.textContent = formatStatisticNumber(
+      uploader.photo_count,
+    );
+  } else {
+    eventStatisticsUploaderAvatar.textContent = "?";
+    eventStatisticsUploaderName.textContent = t("No uploader yet");
+    eventStatisticsUploaderCount.textContent = "0";
+  }
+
+  const likedPhotoUrl = likedPhoto
+    ? getImageDeliveryUrl(likedPhoto, "thumbnail")
+    : "";
+
+  if (likedPhoto && likedPhotoUrl) {
+    eventStatisticsLikedPhoto.src = likedPhotoUrl;
+    eventStatisticsLikedPhoto.alt = t("Most liked event photo");
+    eventStatisticsLikedPhoto.hidden = false;
+    eventStatisticsLikedEmpty.hidden = true;
+    eventStatisticsLikedGuest.textContent =
+      likedPhoto.guest_name || t("Unknown Guest");
+    eventStatisticsLikedCount.textContent = formatStatisticNumber(
+      likedPhoto.likes_count,
+    );
+    eventStatisticsLikedPhoto.onerror = () => {
+      eventStatisticsLikedPhoto.hidden = true;
+      eventStatisticsLikedEmpty.hidden = false;
+    };
+  } else {
+    eventStatisticsLikedPhoto.hidden = true;
+    eventStatisticsLikedPhoto.removeAttribute("src");
+    eventStatisticsLikedEmpty.hidden = false;
+    eventStatisticsLikedGuest.textContent = t("No liked photo yet");
+    eventStatisticsLikedCount.textContent = "0";
+  }
+
+  if (eventStatisticsStatus) {
+    eventStatisticsStatus.hidden = true;
+    eventStatisticsStatus.textContent = "";
+  }
+
+  if (eventStatisticsOpen) {
+    eventStatisticsOpen.disabled = false;
+  }
+}
+
+function renderEventStatisticsFallback(
+  mediaList = [],
+  { showError = true } = {},
+) {
+  const media = Array.isArray(mediaList) ? mediaList : [];
+  const photos = media.filter((item) => getMediaKind(item) === "image").length;
+  const videos = media.filter((item) => getMediaKind(item) === "video").length;
+  const comments = media.filter(
+    (item) => getMediaKind(item) === "message",
+  ).length;
+
+  renderEventStatistics({
+    event: currentEvent,
+    summary: {
+      participants_count: allGuests.length,
+      photos_count: photos,
+      videos_count: videos,
+      comments_count: comments,
+      total_uploads_count: photos + videos + comments,
+      used_storage_bytes: 0,
+    },
+    most_liked_photo: null,
+    top_photo_uploader: null,
+  });
+
+  if (eventStatisticsStatus) {
+    eventStatisticsStatus.hidden = !showError;
+    eventStatisticsStatus.textContent = showError
+      ? t("Event statistics could not be loaded.")
+      : "";
+  }
+
+  if (eventStatisticsStorage) {
+    eventStatisticsStorage.textContent = "—";
+  }
+
+  if (eventStatisticsOpen && !showError) {
+    eventStatisticsOpen.disabled = true;
+  }
+}
+
+async function loadEventStatistics() {
+  if (!eventId) return false;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/detail/${eventId}/statistics`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+      },
+    );
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      logout();
+      return false;
+    }
+
+    if (!response.ok || !data.success) {
+      throw createApiError(
+        response,
+        data,
+        "Event statistics could not be loaded.",
+      );
+    }
+
+    renderEventStatistics(data);
+    return true;
+  } catch (error) {
+    console.error("Event statistics error:", error);
+    return false;
+  }
+}
+
+function openEventStatistics() {
+  if (
+    !eventStatisticsModal ||
+    eventStatisticsOpen?.disabled ||
+    !currentEventStatistics
+  ) {
+    return;
+  }
+
+  eventStatisticsReturnTarget = document.activeElement;
+  eventStatisticsScrollY = window.scrollY;
+  eventStatisticsModal.classList.add("active");
+  eventStatisticsModal.setAttribute("aria-hidden", "false");
+  document.body.style.top = `-${eventStatisticsScrollY}px`;
+  document.body.classList.add("event-statistics-open");
+  eventStatisticsClose?.focus();
+}
+
+function closeEventStatistics() {
+  if (!eventStatisticsModal?.classList.contains("active")) return;
+
+  eventStatisticsModal.classList.remove("active");
+  eventStatisticsModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-statistics-open");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, eventStatisticsScrollY);
+
+  if (eventStatisticsReturnTarget instanceof HTMLElement) {
+    eventStatisticsReturnTarget.focus();
+  }
 }
 
 function renderEventInfo(event) {
@@ -2487,7 +2788,12 @@ async function loadEventDetail() {
     renderSettings(data.settings);
     renderMedia(data.media || []);
     await loadEventGuests();
+    renderEventStatisticsFallback(data.media || [], { showError: false });
     showContent();
+    const statisticsLoaded = await loadEventStatistics();
+    if (!statisticsLoaded) {
+      renderEventStatisticsFallback(data.media || []);
+    }
   } catch (error) {
     console.error("Event detail error:", error);
     showError("Backend connection error.");
@@ -3425,6 +3731,10 @@ if (eventHighlightsOpen) {
   });
 }
 
+eventStatisticsOpen?.addEventListener("click", openEventStatistics);
+eventStatisticsBackdrop?.addEventListener("click", closeEventStatistics);
+eventStatisticsClose?.addEventListener("click", closeEventStatistics);
+
 if (settingsModalClose) {
   settingsModalClose.addEventListener("click", closeSettingsModal);
 }
@@ -3896,6 +4206,14 @@ window.addEventListener("keydown", (event) => {
   if (eventCoverEditor?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeEventCoverEditor();
+    }
+
+    return;
+  }
+
+  if (eventStatisticsModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventStatistics();
     }
 
     return;
