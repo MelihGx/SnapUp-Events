@@ -2,35 +2,6 @@ const crypto = require("crypto");
 const { rateLimit } = require("express-rate-limit");
 const { signAssetUrls } = require("../services/cloudinaryDelivery");
 
-function getDeliveryProfile(req) {
-  const path = String(req.originalUrl || "").split("?")[0];
-
-  if (/\/slideshow\/?$/i.test(path)) {
-    return "slideshow";
-  }
-
-  if (/\/gallery\/?$/i.test(path)) {
-    return "gallery";
-  }
-
-  if (/\/highlights(?:\/[^/]+)?\/?$/i.test(path)) {
-    return "gallery";
-  }
-
-  if (/\/api\/users\/me\/events\/?$/i.test(path)) {
-    return "card";
-  }
-
-  if (
-    req.method === "GET" &&
-    /^\/api\/events\/[^/]+\/?$/i.test(path)
-  ) {
-    return "card";
-  }
-
-  return "detail";
-}
-
 function requestContext(req, res, next) {
   const requestId = String(req.get("x-request-id") || crypto.randomUUID()).slice(0, 128);
   req.requestId = requestId;
@@ -38,7 +9,7 @@ function requestContext(req, res, next) {
 
   const originalJson = res.json.bind(res);
   res.json = (body) => {
-    body = signAssetUrls(body, getDeliveryProfile(req));
+    body = signAssetUrls(body);
     if (process.env.NODE_ENV === "production" && body && typeof body === "object") {
       const safeBody = { ...body };
       delete safeBody.error;
@@ -92,16 +63,6 @@ const guestLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 20, name: "gues
 const uploadLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 12, name: "upload" });
 const likeLimiter = makeLimiter({ windowMs: 60_000, limit: 30, name: "like" });
 const pdfLimiter = makeLimiter({ windowMs: 60 * 60_000, limit: 3, name: "pdf" });
-const archiveTicketLimiter = makeLimiter({
-  windowMs: 60 * 60_000,
-  limit: 6,
-  name: "archive-ticket",
-});
-const archiveDownloadLimiter = makeLimiter({
-  windowMs: 60 * 60_000,
-  limit: 3,
-  name: "archive-download",
-});
 
 module.exports = {
   requestContext,
@@ -114,6 +75,4 @@ module.exports = {
   uploadLimiter,
   likeLimiter,
   pdfLimiter,
-  archiveTicketLimiter,
-  archiveDownloadLimiter,
 };

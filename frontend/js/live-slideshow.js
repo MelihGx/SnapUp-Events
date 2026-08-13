@@ -1,8 +1,4 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
-import {
-  getImageDeliveryUrl,
-  getSlideshowImageUrl,
-} from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const token = localStorage.getItem("snapup_token");
 const eventId = new URLSearchParams(window.location.search).get("event_id");
@@ -10,8 +6,6 @@ const API_BASE_URL = API_URL;
 const POLL_INTERVAL_MS = 4000;
 const MIN_SECONDS = 3;
 const MAX_SECONDS = 300;
-const THEME_STORAGE_KEY = "snapup_theme";
-const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 const DEFAULT_SETTINGS = {
   slideshow_mode: "latest",
@@ -37,8 +31,9 @@ const elements = {
   eventName: document.getElementById("slideshowEventName"),
   eventCode: document.getElementById("slideshowEventCode"),
   syncStatus: document.getElementById("slideshowSyncStatus"),
-  themeButton: document.getElementById("slideshowThemeButton"),
-  themeColor: document.getElementById("slideshowThemeColor"),
+  backLink: document.getElementById("slideshowBackLink"),
+  presentButton: document.getElementById("slideshowPresentButton"),
+  controlsButton: document.getElementById("slideshowControlsButton"),
   controls: document.getElementById("slideshowControls"),
   controlsClose: document.getElementById("slideshowControlsClose"),
   settingsForm: document.getElementById("slideshowSettingsForm"),
@@ -65,7 +60,6 @@ let approvedPhotos = [];
 let knownPhotoIds = new Set();
 let latestQueue = [];
 let currentPhotoId = null;
-let currentPhotoUrl = "";
 let currentShownAt = 0;
 let selectedMediaIdDraft = null;
 let activeLayerIndex = 0;
@@ -78,7 +72,6 @@ let pollTimer = null;
 let modeTimer = null;
 let latestQueueTimer = null;
 let toastTimer = null;
-let resolutionTimer = null;
 
 function t(value, replacements = {}) {
   const translated = window.SnapUpI18n?.t?.(value) || value;
@@ -88,50 +81,6 @@ function t(value, replacements = {}) {
       result.replaceAll(`{${key}}`, String(replacement)),
     translated,
   );
-}
-
-function storedTheme() {
-  try {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    return savedTheme === "light" || savedTheme === "dark" ? savedTheme : null;
-  } catch (_error) {
-    return null;
-  }
-}
-
-function preferredTheme() {
-  return storedTheme() || (colorSchemeQuery.matches ? "dark" : "light");
-}
-
-function applyTheme(theme, { persist = false } = {}) {
-  const nextTheme = theme === "dark" ? "dark" : "light";
-  const isDark = nextTheme === "dark";
-  const actionLabel = t(isDark ? "Switch to light mode" : "Switch to dark mode");
-  const modeLabel = t(isDark ? "Light mode" : "Dark mode");
-
-  document.documentElement.dataset.theme = nextTheme;
-  elements.themeButton?.setAttribute("aria-pressed", String(isDark));
-  elements.themeButton?.setAttribute("aria-label", actionLabel);
-  if (elements.themeButton) {
-    elements.themeButton.title = modeLabel;
-  }
-  if (elements.themeColor) {
-    elements.themeColor.content = isDark ? "#17122b" : "#f7f3ff";
-  }
-
-  if (persist) {
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    } catch (_error) {
-      // The visual theme still works when storage is unavailable.
-    }
-  }
-}
-
-function toggleTheme() {
-  const nextTheme =
-    document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(nextTheme, { persist: true });
 }
 
 function getLocale() {
@@ -256,6 +205,7 @@ async function apiRequest(path, options = {}) {
 function setControls(open) {
   elements.body.classList.toggle("controls-open", open);
   elements.body.classList.toggle("presentation-mode", !open);
+  elements.controlsButton.setAttribute("aria-expanded", String(open));
 
   if (open) {
     elements.controls.scrollTop = 0;
@@ -311,15 +261,8 @@ function renderPhotoGrid(force = false) {
       .forEach((button) => {
         const photo = photoById.get(button.dataset.mediaId);
         const image = button.querySelector("img");
-        const thumbnailUrl = photo
-          ? getImageDeliveryUrl(photo, "thumbnail")
-          : "";
-        if (
-          photo &&
-          image &&
-          image.getAttribute("src") !== thumbnailUrl
-        ) {
-          image.src = thumbnailUrl;
+        if (photo && image && image.src !== photo.media_url) {
+          image.src = photo.media_url;
         }
       });
     updateSelectedPhotoUi();
@@ -354,7 +297,7 @@ function renderPhotoGrid(force = false) {
           t("Select approved photo {number}", { number: index + 1 }),
         );
 
-        image.src = getImageDeliveryUrl(photo, "thumbnail");
+        image.src = photo.media_url;
         image.alt = photo.guest_name
           ? t("Photo uploaded by {name}", { name: photo.guest_name })
           : t("Approved event photo");
@@ -404,7 +347,6 @@ function showEmptyState(title, text) {
   elements.backdrop.classList.remove("has-image");
   elements.backdrop.style.removeProperty("background-image");
   currentPhotoId = null;
-  currentPhotoUrl = "";
   currentShownAt = 0;
 }
 
@@ -435,13 +377,7 @@ function showPhoto(photo, { force = false } = {}) {
     return;
   }
 
-  const displayUrl = getSlideshowImageUrl(photo);
-
-  if (
-    !force &&
-    currentPhotoId === photo.media_id &&
-    currentPhotoUrl === displayUrl
-  ) {
+  if (!force && currentPhotoId === photo.media_id) {
     updatePhotoMeta(photo);
     if (currentSettings.slideshow_mode === "random" && !modeTimer) {
       scheduleRandomPhoto();
@@ -464,7 +400,7 @@ function showPhoto(photo, { force = false } = {}) {
     const nextLayer = elements.imageLayers[nextLayerIndex];
     const previousLayer = elements.imageLayers[activeLayerIndex];
 
-    nextLayer.src = displayUrl;
+    nextLayer.src = photo.media_url;
     nextLayer.alt = photo.guest_name
       ? t("Photo uploaded by {name}", { name: photo.guest_name })
       : t("Approved event photo");
@@ -475,12 +411,11 @@ function showPhoto(photo, { force = false } = {}) {
     elements.loading.hidden = true;
     elements.empty.hidden = true;
     elements.canvas.hidden = false;
-    elements.backdrop.style.backgroundImage = `url("${displayUrl.replaceAll('"', "%22")}")`;
+    elements.backdrop.style.backgroundImage = `url("${photo.media_url.replaceAll('"', "%22")}")`;
     elements.backdrop.classList.add("has-image");
     updatePhotoMeta(photo);
 
     currentPhotoId = photo.media_id;
-    currentPhotoUrl = displayUrl;
     currentShownAt = Date.now();
 
     if (currentSettings.slideshow_mode === "latest" && latestQueue.length > 0) {
@@ -503,15 +438,6 @@ function showPhoto(photo, { force = false } = {}) {
     imageLoading = false;
     showToast(t("This photo could not be displayed."), "error");
 
-    if (!currentPhotoId) {
-      showEmptyState(
-        t("This photo could not be displayed."),
-        t("Please try again later."),
-      );
-    } else {
-      elements.loading.hidden = true;
-    }
-
     if (currentSettings.slideshow_mode === "latest") {
       latestQueueTimer = window.setTimeout(drainLatestQueue, 250);
     } else if (currentSettings.slideshow_mode === "random") {
@@ -519,7 +445,7 @@ function showPhoto(photo, { force = false } = {}) {
     }
   };
 
-  preloader.src = displayUrl;
+  preloader.src = photo.media_url;
 }
 
 function randomPhoto() {
@@ -626,6 +552,9 @@ function updateHeader() {
 
   elements.eventName.textContent = currentEvent.event_name || "SnapUp Events";
   elements.eventCode.textContent = `${t("EVENT CODE")} · ${currentEvent.event_code || "------"}`;
+  elements.backLink.href = `event-detail.html?event_id=${encodeURIComponent(
+    currentEvent.event_id,
+  )}`;
   document.title = `${currentEvent.event_name || "Live Slideshow"} — ${t("Live Slideshow")}`;
 }
 
@@ -667,6 +596,7 @@ function handleSnapshot(data, { initial = false } = {}) {
     drainLatestQueue();
   }
 
+  elements.loading.hidden = true;
   elements.syncStatus.textContent = t("Updated now");
   initialLoadComplete = true;
 }
@@ -766,8 +696,11 @@ async function startPresentation() {
 }
 
 function bindEvents() {
-  elements.themeButton?.addEventListener("click", toggleTheme);
+  elements.controlsButton.addEventListener("click", () => {
+    setControls(!elements.body.classList.contains("controls-open"));
+  });
   elements.controlsClose.addEventListener("click", () => setControls(false));
+  elements.presentButton.addEventListener("click", startPresentation);
   elements.startButton.addEventListener("click", startPresentation);
   elements.settingsForm.addEventListener("submit", saveSettings);
 
@@ -819,39 +752,9 @@ function bindEvents() {
       setControls(true);
     }
   });
-
-  window.addEventListener("resize", () => {
-    window.clearTimeout(resolutionTimer);
-    resolutionTimer = window.setTimeout(() => {
-      const currentPhoto = approvedPhotos.find(
-        (photo) => photo.media_id === currentPhotoId,
-      );
-
-      if (
-        currentPhoto &&
-        getSlideshowImageUrl(currentPhoto) !== currentPhotoUrl
-      ) {
-        showPhoto(currentPhoto, { force: true });
-      }
-    }, 250);
-  });
-
-  colorSchemeQuery.addEventListener?.("change", (event) => {
-    if (!storedTheme()) {
-      applyTheme(event.matches ? "dark" : "light");
-    }
-  });
-
-  window.addEventListener("storage", (event) => {
-    if (event.key === THEME_STORAGE_KEY) {
-      applyTheme(preferredTheme());
-    }
-  });
 }
 
 async function init() {
-  applyTheme(preferredTheme());
-
   if (!token) {
     redirectToLogin();
     return;
@@ -873,7 +776,6 @@ async function init() {
 
 window.addEventListener("beforeunload", () => {
   window.clearInterval(pollTimer);
-  window.clearTimeout(resolutionTimer);
   clearPlaybackTimers();
 });
 

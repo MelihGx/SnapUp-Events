@@ -1,87 +1,11 @@
 :root {
-  color-scheme: light;
-  --show-accent: #7c3aed;
-  --show-accent-dark: #ec4899;
-  --show-accent-soft: rgba(124, 58, 237, 0.1);
-  --show-turquoise: #22d3c5;
-  --show-panel: rgba(255, 253, 255, 0.97);
-  --show-line: rgba(45, 31, 69, 0.15);
-  --show-text: #201a35;
-  --show-muted: rgba(54, 43, 75, 0.68);
-  --show-canvas: #f7f3ff;
-  --show-glass: rgba(255, 255, 255, 0.76);
-  --show-glass-strong: rgba(255, 255, 255, 0.93);
-  --show-surface: rgba(69, 46, 105, 0.045);
-  --show-surface-hover: rgba(124, 58, 237, 0.09);
-  --show-icon: rgba(54, 43, 75, 0.76);
-  --show-legend: rgba(32, 26, 53, 0.76);
-  --show-input: rgba(255, 255, 255, 0.88);
-  --show-on-accent: #ffffff;
-  --show-message: rgba(32, 26, 53, 0.82);
-  --show-help: rgba(32, 26, 53, 0.58);
-  --show-success: #187a5b;
-  --show-error: #c93654;
-  --show-loader-track: rgba(124, 58, 237, 0.14);
-  --show-radio-line: rgba(45, 31, 69, 0.28);
-  --show-shadow: rgba(32, 18, 58, 0.2);
-  --show-image-shadow: rgba(28, 15, 57, 0.28);
-  --show-backdrop-filter: blur(45px) saturate(0.92) brightness(0.72);
-  --show-backdrop-opacity: 0.42;
-  --show-stage-background:
-    radial-gradient(circle at 25% 12%, rgba(124, 58, 237, 0.13), transparent 36%),
-    radial-gradient(circle at 78% 74%, rgba(236, 72, 153, 0.08), transparent 34%),
-    radial-gradient(circle at 92% 18%, rgba(34, 211, 197, 0.08), transparent 28%),
-    var(--show-canvas);
-  --show-vignette-background:
-    radial-gradient(circle at 22% 12%, rgba(124, 58, 237, 0.1), transparent 38%),
-    radial-gradient(circle at 82% 78%, rgba(236, 72, 153, 0.07), transparent 34%),
-    linear-gradient(180deg, rgba(247, 243, 255, 0.7), transparent 25%, transparent 65%, rgba(247, 243, 255, 0.82)),
-    radial-gradient(circle at center, transparent 28%, rgba(233, 226, 248, 0.5) 100%);
-  --show-panel-background:
-    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.11), transparent 33%),
-    radial-gradient(circle at 100% 30%, rgba(236, 72, 153, 0.06), transparent 32%),
-    var(--show-panel);
-}
-
-html[data-theme="dark"] {
   color-scheme: dark;
-  --show-accent-soft: rgba(124, 58, 237, 0.18);
-  --show-panel: rgba(23, 18, 43, 0.96);
-  --show-line: rgba(248, 245, 255, 0.14);
-  --show-text: #f8f5ff;
-  --show-muted: rgba(238, 231, 255, 0.66);
-  --show-canvas: #100a24;
-  --show-glass: rgba(23, 18, 43, 0.7);
-  --show-glass-strong: rgba(23, 18, 43, 0.96);
-  --show-surface: rgba(255, 255, 255, 0.045);
-  --show-surface-hover: rgba(255, 255, 255, 0.085);
-  --show-icon: rgba(255, 255, 255, 0.76);
-  --show-legend: rgba(255, 255, 255, 0.76);
-  --show-input: rgba(0, 0, 0, 0.22);
-  --show-message: rgba(248, 245, 255, 0.82);
-  --show-help: rgba(255, 255, 255, 0.5);
-  --show-success: #58e89a;
-  --show-error: #f0abfc;
-  --show-loader-track: rgba(255, 255, 255, 0.12);
-  --show-radio-line: rgba(255, 255, 255, 0.26);
-  --show-shadow: rgba(0, 0, 0, 0.38);
-  --show-image-shadow: rgba(0, 0, 0, 0.42);
-  --show-backdrop-filter: blur(45px) saturate(0.92) brightness(0.36);
-  --show-backdrop-opacity: 0.74;
-  --show-stage-background:
-    radial-gradient(circle at 25% 12%, rgba(124, 58, 237, 0.18), transparent 36%),
-    radial-gradient(circle at 78% 74%, rgba(236, 72, 153, 0.11), transparent 34%),
-    radial-gradient(circle at 92% 18%, rgba(34, 211, 197, 0.07), transparent 28%),
-    var(--show-canvas);
-  --show-vignette-background:
-    radial-gradient(circle at 22% 12%, rgba(124, 58, 237, 0.18), transparent 38%),
-    radial-gradient(circle at 82% 78%, rgba(236, 72, 153, 0.1), transparent 34%),
-    linear-gradient(180deg, rgba(16, 10, 36, 0.64), transparent 25%, transparent 65%, rgba(16, 10, 36, 0.8)),
-    radial-gradient(circle at center, transparent 25%, rgba(16, 10, 36, 0.52) 100%);
-  --show-panel-background:
-    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.17), transparent 33%),
-    radial-gradient(circle at 100% 30%, rgba(236, 72, 153, 0.08), transparent 32%),
-    var(--show-panel);
+  --show-accent: #ff5a36;
+  --show-accent-soft: rgba(255, 90, 54, 0.18);
+  --show-panel: rgba(16, 14, 21, 0.94);
+  --show-line: rgba(255, 255, 255, 0.11);
+  --show-text: #fffaf5;
+  --show-muted: rgba(255, 250, 245, 0.62);
 }
 
 * {
@@ -95,7 +19,7 @@ body {
   min-height: 100%;
   margin: 0;
   overflow: hidden;
-  background: var(--show-canvas);
+  background: #07070b;
 }
 
 body,
@@ -119,16 +43,6 @@ a {
   color: var(--show-text);
 }
 
-/*
- * The slideshow layers use grid/flex layouts. Those display declarations have
- * higher priority than the browser's default [hidden] rule, so a hidden loading
- * or empty layer could remain visible over the active photo. Keep the HTML
- * hidden state authoritative for every slideshow component.
- */
-.live-slideshow-page [hidden] {
-  display: none !important;
-}
-
 .slideshow-stage {
   position: fixed;
   inset: 0;
@@ -136,8 +50,9 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--show-stage-background);
-  transition: background 260ms ease;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(124, 58, 237, 0.16), transparent 34%),
+    #07070b;
 }
 
 .slide-backdrop,
@@ -151,20 +66,21 @@ a {
   z-index: -3;
   background-position: center;
   background-size: cover;
-  filter: var(--show-backdrop-filter);
+  filter: blur(45px) saturate(1.12) brightness(0.38);
   opacity: 0;
   transform: scale(1.14);
   transition: opacity 800ms ease, background-image 800ms ease;
 }
 
 .slide-backdrop.has-image {
-  opacity: var(--show-backdrop-opacity);
+  opacity: 0.74;
 }
 
 .slide-vignette {
   z-index: -2;
-  background: var(--show-vignette-background);
-  transition: background 260ms ease;
+  background:
+    linear-gradient(180deg, rgba(3, 3, 6, 0.64), transparent 25%, transparent 65%, rgba(3, 3, 6, 0.76)),
+    radial-gradient(circle at center, transparent 25%, rgba(3, 3, 6, 0.48) 100%);
 }
 
 .slide-canvas {
@@ -181,7 +97,7 @@ a {
   object-fit: contain;
   opacity: 0;
   transform: scale(1.015);
-  filter: drop-shadow(0 30px 70px var(--show-image-shadow));
+  filter: drop-shadow(0 30px 70px rgba(0, 0, 0, 0.42));
   transition: opacity 900ms ease, transform 1100ms ease;
   will-change: opacity, transform;
 }
@@ -221,7 +137,7 @@ a {
   width: 44px;
   height: 44px;
   margin-bottom: 8px;
-  border: 3px solid var(--show-loader-track);
+  border: 3px solid rgba(255, 255, 255, 0.12);
   border-top-color: var(--show-accent);
   border-radius: 50%;
   animation: slideshowSpin 800ms linear infinite;
@@ -235,8 +151,8 @@ a {
   margin-bottom: 8px;
   border: 1px solid var(--show-line);
   border-radius: 28px;
-  background: var(--show-surface);
-  box-shadow: 0 26px 70px var(--show-shadow);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
 }
 
 .slideshow-empty-icon svg {
@@ -302,7 +218,7 @@ a {
   padding: 8px 11px;
   border: 1px solid var(--show-line);
   border-radius: 999px;
-  background: var(--show-glass);
+  background: rgba(8, 8, 13, 0.56);
   backdrop-filter: blur(18px);
 }
 
@@ -311,13 +227,13 @@ a {
   height: 7px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--show-accent);
-  box-shadow: 0 0 14px rgba(236, 72, 153, 0.82);
+  background: #2ee882;
+  box-shadow: 0 0 14px rgba(46, 232, 130, 0.88);
   animation: livePulse 1.5s ease-in-out infinite;
 }
 
 .slideshow-live-status strong {
-  color: var(--show-accent);
+  color: #2ee882;
   font-size: 9px;
   letter-spacing: 0.12em;
 }
@@ -327,56 +243,48 @@ a {
   font-size: 9px;
 }
 
-.slideshow-theme-dock {
-  position: fixed;
-  right: 120px;
-  bottom: max(18px, env(safe-area-inset-bottom));
-  z-index: 55;
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 16px;
-  background: rgba(30, 20, 61, 0.9);
-  box-shadow:
-    0 14px 36px rgba(13, 7, 31, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px) saturate(145%);
-  -webkit-backdrop-filter: blur(18px) saturate(145%);
+.slideshow-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slideshow-top-actions button,
+.slideshow-top-actions a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--show-text);
+  border: 1px solid var(--show-line);
+  border-radius: 12px;
+  background: rgba(8, 8, 13, 0.58);
+  backdrop-filter: blur(18px);
   cursor: pointer;
-  transition:
-    opacity 240ms ease,
-    transform 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease;
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
-.slideshow-theme-dock:hover,
-.slideshow-theme-dock:focus-visible {
-  background: rgba(50, 31, 94, 0.96);
-  border-color: rgba(167, 139, 250, 0.62);
-  transform: translateY(-2px);
-  outline: none;
+.slideshow-top-actions button:hover,
+.slideshow-top-actions a:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(28, 25, 35, 0.84);
+  transform: translateY(-1px);
 }
 
-.slideshow-theme-button__sun {
-  display: none;
+.slideshow-top-actions button:first-child {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #ff5a36, #f43f5e);
 }
 
-html[data-theme="dark"] .slideshow-theme-button__moon {
-  display: none;
-}
-
-html[data-theme="dark"] .slideshow-theme-button__sun {
-  display: block;
-}
-
-.slideshow-theme-dock svg {
-  width: 18px;
-  height: 18px;
+.slideshow-top-actions svg {
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -397,7 +305,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 10px 14px;
   border: 1px solid var(--show-line);
   border-radius: 15px;
-  background: var(--show-glass);
+  background: rgba(8, 8, 13, 0.6);
   backdrop-filter: blur(20px);
   transition: opacity 240ms ease, transform 240ms ease;
 }
@@ -422,7 +330,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   margin: 0;
   padding-left: 14px;
   border-left: 1px solid var(--show-line);
-  color: var(--show-message);
+  color: rgba(255, 250, 245, 0.8);
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -440,7 +348,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 9px 13px;
   border: 1px solid var(--show-line);
   border-radius: 999px;
-  background: var(--show-glass);
+  background: rgba(8, 8, 13, 0.6);
   backdrop-filter: blur(20px);
   transition: opacity 240ms ease, transform 240ms ease;
 }
@@ -455,7 +363,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   top: 18px;
   left: 50%;
   padding: 8px 12px;
-  color: var(--show-help);
+  color: rgba(255, 255, 255, 0.5);
   border: 1px solid transparent;
   border-radius: 999px;
   opacity: 0;
@@ -468,8 +376,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 .presentation-mode .slideshow-topbar,
 .presentation-mode .slide-meta,
 .presentation-mode .slide-mode-badge,
-.presentation-mode .snapup-language,
-.presentation-mode .slideshow-theme-dock {
+.presentation-mode .snapup-language {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-12px);
@@ -503,8 +410,8 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 26px;
   color: var(--show-text);
   border-left: 1px solid var(--show-line);
-  background: var(--show-panel-background);
-  box-shadow: -34px 0 90px var(--show-shadow);
+  background: var(--show-panel);
+  box-shadow: -34px 0 90px rgba(0, 0, 0, 0.38);
   backdrop-filter: blur(28px);
   transform: translateX(102%);
   transition: transform 260ms cubic-bezier(0.22, 0.9, 0.32, 1);
@@ -555,7 +462,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   color: var(--show-text);
   border: 1px solid var(--show-line);
   border-radius: 12px;
-  background: var(--show-surface);
+  background: rgba(255, 255, 255, 0.045);
   cursor: pointer;
 }
 
@@ -577,7 +484,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 
 .slideshow-mode-list legend {
   margin-bottom: 10px;
-  color: var(--show-legend);
+  color: rgba(255, 255, 255, 0.76);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -593,19 +500,18 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 13px;
   border: 1px solid var(--show-line);
   border-radius: 16px;
-  background: var(--show-surface);
+  background: rgba(255, 255, 255, 0.035);
   cursor: pointer;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
 .slideshow-mode-card:hover {
-  border-color: rgba(124, 58, 237, 0.32);
-  background: var(--show-surface-hover);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
 }
 
 .slideshow-mode-card:has(input:checked) {
-  border-color: rgba(124, 58, 237, 0.68);
+  border-color: rgba(255, 90, 54, 0.62);
   background: var(--show-accent-soft);
 }
 
@@ -623,13 +529,13 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   display: grid;
   place-items: center;
   border-radius: 13px;
-  color: var(--show-icon);
-  background: var(--show-surface-hover);
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .slideshow-mode-card:has(input:checked) .mode-card-icon {
-  color: var(--show-on-accent);
-  background: linear-gradient(145deg, rgba(124, 58, 237, 0.78), rgba(236, 72, 153, 0.62));
+  color: #fff;
+  background: rgba(255, 90, 54, 0.3);
 }
 
 .mode-card-icon svg {
@@ -660,13 +566,13 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 .slideshow-mode-card > i {
   width: 14px;
   height: 14px;
-  border: 1px solid var(--show-radio-line);
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 50%;
 }
 
 .slideshow-mode-card:has(input:checked) > i {
   border: 4px solid var(--show-accent);
-  background: var(--show-on-accent);
+  background: #fff;
 }
 
 .slideshow-mode-settings,
@@ -675,7 +581,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 16px;
   border: 1px solid var(--show-line);
   border-radius: 17px;
-  background: var(--show-surface);
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .slideshow-mode-settings {
@@ -720,18 +626,18 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   width: 70px;
   height: 39px;
   padding: 7px;
-  color: var(--show-text);
+  color: #fff;
   border: 1px solid var(--show-line);
   border-radius: 11px;
   outline: none;
-  background: var(--show-input);
+  background: rgba(0, 0, 0, 0.22);
   font-weight: 800;
   text-align: center;
 }
 
 .duration-input input:focus {
   border-color: var(--show-accent);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
+  box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.14);
 }
 
 .duration-input span {
@@ -776,7 +682,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   padding: 0;
   border: 2px solid transparent;
   border-radius: 11px;
-  background: var(--show-surface-hover);
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
 }
 
@@ -794,7 +700,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 
 .slideshow-photo-option.is-selected {
   border-color: var(--show-accent);
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.24);
+  box-shadow: 0 0 0 2px rgba(255, 90, 54, 0.22);
 }
 
 .slideshow-photo-option::after {
@@ -805,7 +711,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   width: 16px;
   height: 16px;
   display: none;
-  border: 3px solid var(--show-on-accent);
+  border: 3px solid #fff;
   border-radius: 50%;
   background: var(--show-accent);
 }
@@ -827,13 +733,13 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 .slideshow-form-status {
   min-height: 18px;
   margin-top: 10px;
-  color: var(--show-error);
+  color: #ffb6a6;
   font-size: 10px;
   line-height: 1.45;
 }
 
 .slideshow-form-status.is-success {
-  color: var(--show-success);
+  color: #58e89a;
 }
 
 .slideshow-control-actions {
@@ -846,20 +752,19 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 .slideshow-control-actions button {
   min-height: 48px;
   padding: 10px 12px;
-  color: var(--show-text);
+  color: #fff;
   border: 1px solid var(--show-line);
   border-radius: 14px;
-  background: var(--show-surface);
+  background: rgba(255, 255, 255, 0.055);
   cursor: pointer;
   font-size: 10px;
   font-weight: 900;
 }
 
 .slideshow-control-actions button:first-child {
-  color: var(--show-on-accent);
   border-color: transparent;
-  background: linear-gradient(135deg, var(--show-accent), var(--show-accent-dark) 62%, var(--show-turquoise));
-  box-shadow: 0 15px 32px rgba(124, 58, 237, 0.28);
+  background: linear-gradient(135deg, #ff5a36, #f43f5e);
+  box-shadow: 0 15px 32px rgba(244, 63, 94, 0.2);
 }
 
 .slideshow-control-actions button:disabled {
@@ -895,10 +800,10 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   place-items: center;
   margin-right: 4px;
   padding: 3px 5px;
-  color: var(--show-message);
+  color: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--show-line);
   border-radius: 6px;
-  background: var(--show-surface-hover);
+  background: rgba(255, 255, 255, 0.06);
   font: 700 8px/1 Inter, sans-serif;
 }
 
@@ -909,11 +814,11 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
   bottom: 26px;
   max-width: min(420px, calc(100% - 32px));
   padding: 11px 15px;
-  color: var(--show-text);
+  color: #fff;
   border: 1px solid var(--show-line);
   border-radius: 12px;
-  background: var(--show-glass-strong);
-  box-shadow: 0 18px 45px var(--show-shadow);
+  background: rgba(15, 13, 20, 0.94);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.36);
   opacity: 0;
   transform: translate(-50%, 14px);
   font-size: 10px;
@@ -927,7 +832,7 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
 }
 
 .slideshow-toast.is-error {
-  border-color: rgba(236, 72, 153, 0.62);
+  border-color: rgba(255, 90, 54, 0.55);
 }
 
 .snapup-language {
@@ -958,6 +863,14 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
     margin-right: 0;
   }
 
+  .slideshow-top-actions {
+    width: 100%;
+  }
+
+  .slideshow-top-actions > * {
+    flex: 1;
+  }
+
   .slide-canvas {
     inset: 122px 18px 68px;
   }
@@ -979,16 +892,10 @@ html[data-theme="dark"] .slideshow-theme-button__sun {
     margin-left: auto;
   }
 
-  .slideshow-live-status small {
+  .slideshow-live-status small,
+  .slideshow-top-actions span,
+  .slideshow-top-actions a:last-child {
     display: none;
-  }
-
-  .slideshow-theme-dock {
-    right: 90px;
-    bottom: max(12px, env(safe-area-inset-bottom));
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
   }
 
   .slide-canvas {

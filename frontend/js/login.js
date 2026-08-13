@@ -1,4 +1,8 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import {
+  createTurnstileController,
+  getTurnstileErrorMessage,
+} from "./turnstile.js?v=turnstile-1";
 
 const loginForm = document.getElementById("loginForm");
 
@@ -13,6 +17,13 @@ const loginResult = document.getElementById("loginResult");
 const toggleLoginPassword = document.getElementById("toggleLoginPassword");
 
 const API_URL = `${API_BASE_URL}/api/auth/login`;
+const turnstileControllerPromise = createTurnstileController({
+  container: "#loginTurnstile",
+  action: "login",
+}).catch((error) => {
+  console.error("Turnstile initialization error:", error);
+  return null;
+});
 
 function clearLoginErrors() {
   loginMailError.textContent = "";
@@ -66,6 +77,23 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  const turnstileController = await turnstileControllerPromise;
+
+  if (!turnstileController) {
+    showLoginResult(
+      "Security verification could not be completed. Please try again.",
+      "error",
+    );
+    return;
+  }
+
+  const turnstileToken = turnstileController.getToken();
+
+  if (turnstileController.enabled && !turnstileToken) {
+    showLoginResult("Please complete the security verification.", "error");
+    return;
+  }
+
   try {
     loginSubmit.disabled = true;
     loginSubmit.textContent = "Logging in...";
@@ -78,13 +106,15 @@ loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         user_mail,
         password,
+        turnstile_token: turnstileToken,
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      showLoginResult(data.message || "Login failed.", "error");
+      turnstileController.reset();
+      showLoginResult(getTurnstileErrorMessage(data, "Login failed."), "error");
       return;
     }
 
@@ -107,6 +137,7 @@ loginForm.addEventListener("submit", async (event) => {
     }, 800);
   } catch (error) {
     console.error("Login error:", error);
+    turnstileController.reset();
     showLoginResult("Backend connection error.", "error");
   } finally {
     loginSubmit.disabled = false;

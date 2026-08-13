@@ -33,9 +33,10 @@
     </script>
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
-    <link rel="stylesheet" href="css/auth.css?v=hero-theme-audit-2" />
+    <link rel="stylesheet" href="css/auth.css?v=turnstile-1" />
     <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
+    <script src="js/turnstile-i18n.js?v=turnstile-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
   <body>
@@ -231,6 +232,12 @@
               <small class="auth-field-error" id="confirmPasswordError"></small>
             </div>
 
+            <div
+              class="auth-turnstile"
+              id="registerTurnstile"
+              aria-label="Security verification"
+            ></div>
+
             <button type="submit" class="auth-submit" id="registerSubmit">
               Create Account
             </button>
@@ -246,7 +253,7 @@
       </section>
     </main>
 
-    <script type="module" src="js/register.js?v=password-min-6-1"></script>
+    <script type="module" src="js/register.js?v=turnstile-1"></script>
       <script src="js/theme.js?v=dark-gallery-colors-1"></script>
   </body>
 </html>

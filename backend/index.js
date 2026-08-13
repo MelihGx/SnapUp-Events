@@ -8,6 +8,9 @@ const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 const { requestContext, globalLimiter } = require("./middlewares/security");
+const {
+  getPublicTurnstileConfig,
+} = require("./services/turnstileService");
 
 const app = express();
 app.disable("x-powered-by");
@@ -87,8 +90,6 @@ app.use(
       "X-SnapUp-PDF-Design",
       "X-Memory-Book-Photos",
       "X-Memory-Book-Skipped",
-      "X-SnapUp-Archive-Quality",
-      "X-SnapUp-Archive-Assets",
     ],
     credentials: true,
   }),
@@ -103,6 +104,26 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({ limit: "256kb", strict: true }));
+
+app.get("/api/security/turnstile-config", (_req, res) => {
+  const config = getPublicTurnstileConfig();
+
+  res.setHeader("Cache-Control", "no-store");
+
+  if (!config.ready) {
+    return res.status(503).json({
+      success: false,
+      message: "Security verification is not configured.",
+      code: "TURNSTILE_NOT_CONFIGURED",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    enabled: config.enabled,
+    site_key: config.siteKey,
+  });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

@@ -329,7 +329,6 @@ body.event-gallery-shell [hidden] {
 }
 
 .gallery-hero {
-  --gallery-hero-radius: 32px;
   position: relative;
   min-height: 430px;
   display: flex;
@@ -337,9 +336,6 @@ body.event-gallery-shell [hidden] {
   justify-content: space-between;
   gap: 32px;
   overflow: hidden;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  contain: paint;
   isolation: isolate;
   padding: 38px;
   color: #ffffff;
@@ -362,61 +358,41 @@ body.event-gallery-shell [hidden] {
     ),
     #171126;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--gallery-hero-radius);
+  border-radius: 32px;
   box-shadow: var(--gallery-shadow);
-}
-
-.gallery-hero-media {
-  position: absolute;
-  z-index: 0;
-  inset: 1px;
-  overflow: hidden;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  border-radius: calc(var(--gallery-hero-radius) - 2px);
-  clip-path: inset(0 round calc(var(--gallery-hero-radius) - 2px));
-  transform: translateZ(0);
-  pointer-events: none;
 }
 
 .gallery-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: -1;
   opacity: 0.42;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: linear-gradient(to bottom right, #000, transparent 72%);
-  pointer-events: none;
 }
 
 .gallery-hero.has-image {
-  background: #171126;
+  background-position: center;
+  background-size: cover;
 }
 
 .gallery-hero.has-image::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: -1;
   background:
     linear-gradient(
       90deg,
-      rgba(13, 8, 24, 0.46) 0%,
-      rgba(13, 8, 24, 0.16) 48%,
-      rgba(13, 8, 24, 0.03) 100%
+      rgba(14, 8, 29, 0.94) 0%,
+      rgba(24, 10, 40, 0.68) 54%,
+      rgba(14, 8, 29, 0.28) 100%
     ),
-    linear-gradient(
-      0deg,
-      rgba(13, 8, 24, 0.32) 0%,
-      rgba(13, 8, 24, 0.07) 58%,
-      rgba(13, 8, 24, 0.02) 100%
-    );
-  pointer-events: none;
+    linear-gradient(0deg, rgba(10, 5, 22, 0.72), transparent 58%);
 }
 
 .gallery-hero-copy {
@@ -1467,12 +1443,6 @@ html[data-theme="dark"] body.event-gallery-shell :where(
   border-color: var(--gallery-line);
 }
 
-html[data-theme="dark"] body.event-gallery-shell .gallery-header {
-  background: rgba(40, 31, 61, 0.92);
-  border-color: rgba(167, 139, 250, 0.2);
-  box-shadow: 0 16px 44px rgba(3, 1, 10, 0.22);
-}
-
 html[data-theme="dark"] body.event-gallery-shell :where(
     .gallery-loading,
     .gallery-error,
@@ -1598,12 +1568,11 @@ html[data-theme="dark"] body.event-gallery-shell .public-lightbox-backdrop {
   }
 
   .gallery-hero {
-    --gallery-hero-radius: 25px;
     min-height: 360px;
     align-items: stretch;
     gap: 24px;
     padding: 27px 22px;
-    border-radius: var(--gallery-hero-radius);
+    border-radius: 25px;
   }
 
   .gallery-hero h1 {

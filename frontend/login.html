@@ -29,9 +29,10 @@
     </script>
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
-    <link rel="stylesheet" href="css/auth.css?v=login-status-stable-1" />
+    <link rel="stylesheet" href="css/auth.css?v=turnstile-1" />
     <script src="js/password-reset-i18n.js?v=password-min-6-1" defer></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
+    <script src="js/turnstile-i18n.js?v=turnstile-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
   <body>
@@ -187,6 +188,12 @@
               <small class="auth-field-error" id="loginPasswordError"></small>
             </div>
 
+            <div
+              class="auth-turnstile"
+              id="loginTurnstile"
+              aria-label="Security verification"
+            ></div>
+
             <button type="submit" class="auth-submit" id="loginSubmit">
               Login
             </button>
@@ -202,7 +209,7 @@
       </section>
     </main>
 
-    <script type="module" src="js/login.js?v=login-status-stable-1"></script>
+    <script type="module" src="js/login.js?v=turnstile-1"></script>
       <script src="js/theme.js?v=dark-gallery-colors-1"></script>
   </body>
 </html>

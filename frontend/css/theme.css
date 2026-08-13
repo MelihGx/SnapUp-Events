@@ -573,6 +573,17 @@ html[data-theme="dark"] .join-remove-file-button:hover {
   background: rgba(236, 72, 153, 0.2);
 }
 
+html[data-theme="dark"] .join-turnstile {
+  color: var(--theme-text);
+  background: rgba(11, 9, 17, 0.78);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+html[data-theme="dark"] .join-turnstile.is-verified {
+  border-color: rgba(110, 231, 160, 0.42);
+  box-shadow: 0 0 0 3px rgba(110, 231, 160, 0.1);
+}
+
 html[data-theme="dark"] .join-upload-result.success {
   color: #6ee7a0;
 }
@@ -1196,13 +1207,11 @@ html[data-theme="dark"] .pricing .btn-glass:hover {
   border-color: rgba(167, 139, 250, 0.4);
 }
 
-/* Occasion showcase: deep purple in dark mode, paired with main.css light mode. */
+/* "Every event" remains a deliberate dark brand band in both themes. */
 html[data-theme="dark"] .event-types {
   color: #ffffff;
-  background:
-    radial-gradient(circle at 92% 0%, rgba(145, 70, 199, 0.12), transparent 28%),
-    radial-gradient(circle at 2% 100%, rgba(61, 200, 183, 0.07), transparent 25%),
-    #100d17;
+  background: #121016;
+  background-image: none;
 }
 
 html[data-theme="dark"] .event-types__intro h2,
@@ -1226,9 +1235,8 @@ html[data-theme="dark"] .event-type-card:hover {
 }
 
 html[data-theme="dark"] .event-types__cta {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.14);
-  background: linear-gradient(105deg, #8d35e8, #eb4c9b 57%, #5fcfe2);
+  color: #17122b;
+  background: #fff8ed;
 }
 
 /*

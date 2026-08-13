@@ -1,4 +1,8 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import {
+  createTurnstileController,
+  getTurnstileErrorMessage,
+} from "./turnstile.js?v=turnstile-1";
 
 const registerForm = document.getElementById("registerForm");
 
@@ -19,6 +23,13 @@ const registerResult = document.getElementById("registerResult");
 const togglePassword = document.getElementById("togglePassword");
 
 const API_URL = `${API_BASE_URL}/api/auth/register`;
+const turnstileControllerPromise = createTurnstileController({
+  container: "#registerTurnstile",
+  action: "register",
+}).catch((error) => {
+  console.error("Turnstile initialization error:", error);
+  return null;
+});
 
 function clearErrors() {
   userNameError.textContent = "";
@@ -30,7 +41,7 @@ function clearErrors() {
 }
 
 function showResult(message, type) {
-  registerResult.textContent = message;
+  registerResult.textContent = window.SnapUpI18n?.t?.(message) || message;
 
   if (type === "success") {
     registerResult.style.color = "#21c55d";
@@ -96,6 +107,23 @@ registerForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  const turnstileController = await turnstileControllerPromise;
+
+  if (!turnstileController) {
+    showResult(
+      "Security verification could not be completed. Please try again.",
+      "error",
+    );
+    return;
+  }
+
+  const turnstileToken = turnstileController.getToken();
+
+  if (turnstileController.enabled && !turnstileToken) {
+    showResult("Please complete the security verification.", "error");
+    return;
+  }
+
   try {
     registerSubmit.disabled = true;
     registerSubmit.textContent = "Creating account...";
@@ -111,12 +139,14 @@ registerForm.addEventListener("submit", async (event) => {
         user_phone,
         password,
         language_code: window.SnapUpI18n?.language || "en",
+        turnstile_token: turnstileToken,
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.success) {
+      turnstileController.reset();
       if (response.status === 409) {
         userMailError.textContent = "This email address is already registered.";
         showResult(
@@ -127,7 +157,7 @@ registerForm.addEventListener("submit", async (event) => {
         return;
       }
 
-      showResult(data.message || "Register failed.", "error");
+      showResult(getTurnstileErrorMessage(data, "Register failed."), "error");
       return;
     }
 
@@ -148,6 +178,7 @@ registerForm.addEventListener("submit", async (event) => {
     }, 900);
   } catch (error) {
     console.error("Register error:", error);
+    turnstileController.reset();
     showResult("Backend connection error.", "error");
   } finally {
     registerSubmit.disabled = false;

@@ -1,5 +1,4 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
-import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const FORMAT_DEFINITIONS = {
   mini_card: {
@@ -810,8 +809,7 @@ function getFormValues() {
     textColor: defaults.text,
     showCover: invitationShowCover?.checked !== false,
     showQr: invitationShowQr?.checked !== false,
-    photoSource:
-      customPhotoUrl || getEventCoverUrl(eventData, "display") || "",
+    photoSource: customPhotoUrl || eventData?.event_cover_url || "",
     hasCustomPhoto: Boolean(customPhotoUrl),
     backgroundSource: defaults.background,
     photoZoom: Math.max(1, Number(invitationPhotoZoom?.value || 100) / 100),
