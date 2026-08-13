@@ -111,7 +111,7 @@ function loadTurnstileScript() {
 
     const handleLoad = () => {
       if (window.turnstile) {
-        window.turnstile.ready(() => resolve(window.turnstile));
+        resolve(window.turnstile);
       } else {
         reject(new Error("Cloudflare Turnstile could not be initialized."));
       }
