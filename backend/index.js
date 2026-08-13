@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
+const feedbackRoutes = require("./routes/feedbackRoutes");
 const { requestContext, globalLimiter } = require("./middlewares/security");
 const {
   getPublicTurnstileConfig,
@@ -129,6 +130,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/media", mediaRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({
