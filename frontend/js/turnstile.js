@@ -199,7 +199,7 @@ export async function createTurnstileController({
       size:
         element.clientWidth > 0 && element.clientWidth < 300
           ? "compact"
-          : "flexible",
+          : "normal",
       appearance: "always",
       retry: "auto",
       "refresh-expired": "auto",
