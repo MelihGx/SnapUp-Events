@@ -37,10 +37,7 @@ html[data-theme="dark"] {
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
   cursor: pointer;
-  transition:
-    transform 180ms ease,
-    background 180ms ease,
-    border-color 180ms ease;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
 .theme-toggle:hover,
@@ -73,16 +70,8 @@ html[data-theme="dark"] .theme-toggle__sun {
 html[data-theme="dark"] body {
   color: #f7f3ff;
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(124, 58, 237, 0.18),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at bottom right,
-      rgba(236, 72, 153, 0.1),
-      transparent 36%
-    ),
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.1), transparent 36%),
     #0d0b14;
 }
 
@@ -91,90 +80,85 @@ html[data-theme="dark"] .policy-header {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-html[data-theme="dark"]
-  :is(
-    .features,
-    .pricing,
-    .feature-studio,
-    .policy-article,
-    .policy-next,
-    .policy-contact,
-    .policy-footer
-  ) {
+html[data-theme="dark"] :is(
+  .features,
+  .pricing,
+  .feature-studio,
+  .policy-article,
+  .policy-next,
+  .policy-contact,
+  .policy-footer
+) {
   background-color: #0d0b14;
 }
 
-html[data-theme="dark"]
-  :is(
-    .bento-card,
-    .pricing-card,
-    .package-card,
-    .auth-layout,
-    .auth-card,
-    .create-form-card,
-    .create-side-card,
-    .detail-card,
-    .detail-side-card,
-    .gallery-hero,
-    .gallery-admin-card,
-    .gallery-only-section,
-    .info-card,
-    .policy-identity-card,
-    .policy-section,
-    .policy-callout,
-    .policy-contact__card,
-    .policy-action-box,
-    .account-card,
-    .account-panel,
-    .account-summary-card
-  ) {
+html[data-theme="dark"] :is(
+  .bento-card,
+  .pricing-card,
+  .package-card,
+  .auth-layout,
+  .auth-card,
+  .create-form-card,
+  .create-side-card,
+  .detail-card,
+  .detail-side-card,
+  .gallery-hero,
+  .gallery-admin-card,
+  .gallery-only-section,
+  .info-card,
+  .policy-identity-card,
+  .policy-section,
+  .policy-callout,
+  .policy-contact__card,
+  .policy-action-box,
+  .account-card,
+  .account-panel,
+  .account-summary-card
+) {
   color: #f7f3ff;
   background: rgba(24, 20, 34, 0.94);
   border-color: rgba(255, 255, 255, 0.11);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
 }
 
-html[data-theme="dark"]
-  :is(
-    .pricing .section-head h2,
-    .pricing-card h3,
-    .package-card h3,
-    .auth-head h1,
-    .auth-card-brand,
-    .create-brand,
-    .create-hero h1,
-    .detail-brand,
-    .detail-hero h1,
-    .gallery-brand,
-    .gallery-hero h1,
-    .policy-article h2,
-    .policy-article h3,
-    .policy-contact h2,
-    label
-  ) {
+html[data-theme="dark"] :is(
+  .pricing .section-head h2,
+  .pricing-card h3,
+  .package-card h3,
+  .auth-head h1,
+  .auth-card-brand,
+  .create-brand,
+  .create-hero h1,
+  .detail-brand,
+  .detail-hero h1,
+  .gallery-brand,
+  .gallery-hero h1,
+  .policy-article h2,
+  .policy-article h3,
+  .policy-contact h2,
+  label
+) {
   color: #f7f3ff;
 }
 
-html[data-theme="dark"]
-  :is(
-    .pricing .section-head p,
-    .pricing-card p,
-    .package-card p,
-    .auth-head p,
-    .auth-bottom,
-    .create-hero p,
-    .detail-hero p,
-    .gallery-helper-text,
-    .policy-article p,
-    .policy-article li,
-    .policy-meta,
-    .account-muted
-  ) {
+html[data-theme="dark"] :is(
+  .pricing .section-head p,
+  .pricing-card p,
+  .package-card p,
+  .auth-head p,
+  .auth-bottom,
+  .create-hero p,
+  .detail-hero p,
+  .gallery-helper-text,
+  .policy-article p,
+  .policy-article li,
+  .policy-meta,
+  .account-muted
+) {
   color: rgba(247, 243, 255, 0.68);
 }
 
-html[data-theme="dark"]
-  :is(input, textarea, select, .drop-zone, .guest-search-box) {
+html[data-theme="dark"] :is(input, textarea, select, .drop-zone, .guest-search-box) {
   color: #f7f3ff;
   background: #100d18;
   border-color: rgba(255, 255, 255, 0.14);
@@ -220,41 +204,38 @@ html[data-theme="dark"] {
 
 html[data-theme="dark"],
 html[data-theme="dark"] body,
-html[data-theme="dark"]
-  :is(
-    .auth-page,
-    .create-page,
-    .event-detail-page,
-    .public-gallery-page,
-    .account-page,
-    .policy-page
-  ) {
+html[data-theme="dark"] :is(
+  .auth-page,
+  .create-page,
+  .event-detail-page,
+  .public-gallery-page,
+  .account-page,
+  .policy-page
+) {
   background-color: var(--theme-bg);
   color: var(--theme-text);
 }
 
 /* Navigation and fixed controls */
-html[data-theme="dark"]
-  :is(
-    .create-header,
-    .detail-header,
-    .gallery-header,
-    .account-topbar,
-    .policy-header
-  ) {
+html[data-theme="dark"] :is(
+  .create-header,
+  .detail-header,
+  .gallery-header,
+  .account-topbar,
+  .policy-header
+) {
   color: var(--theme-text);
   background: rgba(13, 11, 20, 0.88);
   border-color: var(--theme-border);
 }
 
-html[data-theme="dark"]
-  :is(
-    .create-header a,
-    .detail-header a,
-    .gallery-header a,
-    .account-topbar a,
-    .policy-header a
-  ) {
+html[data-theme="dark"] :is(
+  .create-header a,
+  .detail-header a,
+  .gallery-header a,
+  .account-topbar a,
+  .policy-header a
+) {
   color: var(--theme-text);
 }
 
@@ -272,15 +253,14 @@ html[data-theme="dark"] .language-option.active {
 }
 
 /* Home page: every light section and interactive surface */
-html[data-theme="dark"]
-  :is(
-    .product-flow,
-    .features,
-    .feature-studio,
-    .pricing,
-    .live-gallery,
-    .cta-section
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow,
+  .features,
+  .feature-studio,
+  .pricing,
+  .live-gallery,
+  .cta-section
+) {
   color: var(--theme-text);
   background-color: var(--theme-bg);
 }
@@ -289,46 +269,44 @@ html[data-theme="dark"] .product-flow {
   background: var(--flow-stage);
 }
 
-html[data-theme="dark"]
-  :is(
-    .product-flow__shell,
-    .product-flow__step,
-    .product-flow__browser,
-    .product-flow__browser-bar,
-    .product-flow__screen,
-    .flow-form,
-    .flow-code-box,
-    .flow-event-card,
-    .flow-upload,
-    .flow-share,
-    .flow-gallery,
-    .feature-card,
-    .bento-card,
-    .feature-hero-card,
-    .feature-metrics,
-    .join-event-preview,
-    .pricing-card,
-    .package-card,
-    .live-card,
-    .gallery-card,
-    .upload-demo,
-    .feature-studio__panel
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow__shell,
+  .product-flow__step,
+  .product-flow__browser,
+  .product-flow__browser-bar,
+  .product-flow__screen,
+  .flow-form,
+  .flow-code-box,
+  .flow-event-card,
+  .flow-upload,
+  .flow-share,
+  .flow-gallery,
+  .feature-card,
+  .bento-card,
+  .feature-hero-card,
+  .feature-metrics,
+  .join-event-preview,
+  .pricing-card,
+  .package-card,
+  .live-card,
+  .gallery-card,
+  .upload-demo,
+  .feature-studio__panel
+) {
   color: var(--theme-text);
   background: rgba(25, 21, 34, 0.92);
   border-color: var(--theme-border);
   box-shadow: var(--theme-shadow);
 }
 
-html[data-theme="dark"]
-  :is(
-    .flow-form-row,
-    .flow-form-checks,
-    .flow-gallery__top,
-    .flow-gallery__status,
-    .progress-box,
-    .message-box
-  ) {
+html[data-theme="dark"] :is(
+  .flow-form-row,
+  .flow-form-checks,
+  .flow-gallery__top,
+  .flow-gallery__status,
+  .progress-box,
+  .message-box
+) {
   color: var(--theme-muted);
   background: rgba(255, 255, 255, 0.055);
   border-color: var(--theme-border);
@@ -347,7 +325,11 @@ html[data-theme="dark"] .join-upload-backdrop {
 html[data-theme="dark"] .join-upload-panel {
   color: var(--theme-text);
   background:
-    radial-gradient(circle at 8% 0%, rgba(124, 58, 237, 0.2), transparent 34%),
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(124, 58, 237, 0.2),
+      transparent 34%
+    ),
     linear-gradient(155deg, #211b2d 0%, #18141f 62%, #15111c 100%);
   border-color: rgba(196, 181, 253, 0.2);
   box-shadow:
@@ -377,38 +359,45 @@ html[data-theme="dark"] .join-upload-close:focus-visible {
   outline: none;
 }
 
-html[data-theme="dark"] :is(.join-upload-head h2, .join-upload-form label) {
+html[data-theme="dark"] :is(
+  .join-upload-head h2,
+  .join-upload-form label
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(.join-upload-head p, .join-file-field span, .join-upload-result) {
+html[data-theme="dark"] :is(
+  .join-upload-head p,
+  .join-file-field span,
+  .join-upload-result
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(
-    .join-upload-form input,
-    .join-upload-form textarea,
-    .join-upload-form select
-  ) {
+html[data-theme="dark"] :is(
+  .join-upload-form input,
+  .join-upload-form textarea,
+  .join-upload-form select
+) {
   color: var(--theme-text);
   background: rgba(11, 9, 17, 0.78);
   border-color: rgba(255, 255, 255, 0.14);
 }
 
-html[data-theme="dark"]
-  :is(
-    .join-upload-form input,
-    .join-upload-form textarea,
-    .join-upload-form select
-  ):focus {
+html[data-theme="dark"] :is(
+  .join-upload-form input,
+  .join-upload-form textarea,
+  .join-upload-form select
+):focus {
   border-color: rgba(167, 139, 250, 0.72);
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
 }
 
-html[data-theme="dark"]
-  :is(.join-media-type, .join-message-field, .join-file-field) {
+html[data-theme="dark"] :is(
+  .join-media-type,
+  .join-message-field,
+  .join-file-field
+) {
   color: var(--theme-text);
   background: transparent;
   border-color: transparent;
@@ -457,12 +446,11 @@ html[data-theme="dark"] .join-upload-form .join-file-picker {
     0 14px 30px rgba(3, 2, 8, 0.24);
 }
 
-html[data-theme="dark"]
-  :is(
-    .join-upload-form .join-file-picker:hover,
-    .join-upload-form .join-file-picker:focus-within,
-    .join-upload-form .join-file-picker.is-dragover
-  ) {
+html[data-theme="dark"] :is(
+  .join-upload-form .join-file-picker:hover,
+  .join-upload-form .join-file-picker:focus-within,
+  .join-upload-form .join-file-picker.is-dragover
+) {
   border-color: rgba(196, 181, 253, 0.65);
   background:
     radial-gradient(
@@ -548,12 +536,11 @@ html[data-theme="dark"] .join-selected-file-info strong {
   color: #f7f3ff;
 }
 
-html[data-theme="dark"]
-  :is(
-    .join-selected-header span,
-    .join-selected-file-info span,
-    .join-file-helper-text
-  ) {
+html[data-theme="dark"] :is(
+  .join-selected-header span,
+  .join-selected-file-info span,
+  .join-file-helper-text
+) {
   color: #aaa2b9;
 }
 
@@ -584,17 +571,6 @@ html[data-theme="dark"] .join-remove-file-button {
 html[data-theme="dark"] .join-remove-file-button:hover {
   color: #ffffff;
   background: rgba(236, 72, 153, 0.2);
-}
-
-html[data-theme="dark"] .join-turnstile {
-  color: var(--theme-text);
-  background: rgba(11, 9, 17, 0.78);
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-html[data-theme="dark"] .join-turnstile.is-verified {
-  border-color: rgba(110, 231, 160, 0.42);
-  box-shadow: 0 0 0 3px rgba(110, 231, 160, 0.1);
 }
 
 html[data-theme="dark"] .join-upload-result.success {
@@ -654,50 +630,47 @@ html[data-theme="dark"] .join-upload-success__button:focus-visible {
   background: linear-gradient(135deg, #8b5cf6, #c43b9a);
 }
 
-html[data-theme="dark"]
-  :is(
-    .product-flow h2,
-    .product-flow h3,
-    .features h2,
-    .features h3,
-    .feature-studio h2,
-    .feature-studio h3,
-    .pricing h2,
-    .pricing h3,
-    .live-gallery h2,
-    .live-gallery h3,
-    .cta-section h2,
-    .product-flow__step-title,
-    .product-flow__preview-title,
-    .pricing-card .price
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow h2,
+  .product-flow h3,
+  .features h2,
+  .features h3,
+  .feature-studio h2,
+  .feature-studio h3,
+  .pricing h2,
+  .pricing h3,
+  .live-gallery h2,
+  .live-gallery h3,
+  .cta-section h2,
+  .product-flow__step-title,
+  .product-flow__preview-title,
+  .pricing-card .price
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(
-    .product-flow p,
-    .features p,
-    .feature-studio p,
-    .pricing p,
-    .live-gallery p,
-    .cta-section p,
-    .product-flow__step-copy,
-    .product-flow__preview-copy,
-    .pricing-card li
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow p,
+  .features p,
+  .feature-studio p,
+  .pricing p,
+  .live-gallery p,
+  .cta-section p,
+  .product-flow__step-copy,
+  .product-flow__preview-copy,
+  .pricing-card li
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(
-    .product-flow__preview,
-    .product-flow__screen,
-    .browser-frame,
-    .demo-window,
-    .feature-preview,
-    .live-gallery__frame
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow__preview,
+  .product-flow__screen,
+  .browser-frame,
+  .demo-window,
+  .feature-preview,
+  .live-gallery__frame
+) {
   background: var(--flow-stage);
   border-color: var(--theme-border);
 }
@@ -746,18 +719,17 @@ html[data-theme="dark"] .product-flow__browser-bar > b {
  * still be raised, but the shell must never look patched together at rounded
  * corners or around the browser mock-up.
  */
-html[data-theme="dark"]
-  :is(
-    .product-flow__shell,
-    .product-flow__steps,
-    .product-flow__demo,
-    .product-flow__browser,
-    .product-flow__screen,
-    .flow-create,
-    .flow-share,
-    .flow-upload,
-    .flow-gallery
-  ) {
+html[data-theme="dark"] :is(
+  .product-flow__shell,
+  .product-flow__steps,
+  .product-flow__demo,
+  .product-flow__browser,
+  .product-flow__screen,
+  .flow-create,
+  .flow-share,
+  .flow-upload,
+  .flow-gallery
+) {
   background-color: var(--flow-stage);
   background-image: none;
 }
@@ -786,8 +758,12 @@ html[data-theme="dark"] .auth-card {
   background: var(--theme-surface);
 }
 
-html[data-theme="dark"]
-  :is(.auth-card-top, .auth-back, .auth-password-row button, .auth-bottom) {
+html[data-theme="dark"] :is(
+  .auth-card-top,
+  .auth-back,
+  .auth-password-row button,
+  .auth-bottom
+) {
   color: var(--theme-muted);
 }
 
@@ -810,167 +786,165 @@ html[data-theme="dark"] .auth-result.is-error {
 }
 
 /* Create event, payment and success dialogs */
-html[data-theme="dark"]
-  :is(
-    .create-form-card,
-    .create-side-card,
-    .form-section,
-    .setting-card,
-    .package-card,
-    .payment-popup,
-    .payment-summary-card,
-    .payment-method-card,
-    .payment-live-form,
-    .payment-success-popup
-  ) {
+html[data-theme="dark"] :is(
+  .create-form-card,
+  .create-side-card,
+  .form-section,
+  .setting-card,
+  .package-card,
+  .payment-popup,
+  .payment-summary-card,
+  .payment-method-card,
+  .payment-live-form,
+  .payment-success-popup
+) {
   color: var(--theme-text);
   background: var(--theme-surface);
   border-color: var(--theme-border);
   box-shadow: var(--theme-shadow);
 }
 
-html[data-theme="dark"]
-  :is(
-    .create-hero h1,
-    .form-section h2,
-    .setting-card strong,
-    .package-card h3,
-    .payment-popup h2,
-    .payment-popup h3,
-    .payment-success-popup h2,
-    .payment-live-form label
-  ) {
+html[data-theme="dark"] :is(
+  .create-hero h1,
+  .form-section h2,
+  .setting-card strong,
+  .package-card h3,
+  .payment-popup h2,
+  .payment-popup h3,
+  .payment-success-popup h2,
+  .payment-live-form label
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(
-    .create-hero p,
-    .form-section p,
-    .setting-card span,
-    .package-card p,
-    .package-card li,
-    .payment-popup p,
-    .payment-demo-note,
-    .payment-summary-card span
-  ) {
+html[data-theme="dark"] :is(
+  .create-hero p,
+  .form-section p,
+  .setting-card span,
+  .package-card p,
+  .package-card li,
+  .payment-popup p,
+  .payment-demo-note,
+  .payment-summary-card span
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(
-    .create-form-card input,
-    .create-form-card textarea,
-    .create-form-card select,
-    .payment-popup input,
-    .payment-popup select
-  ) {
+html[data-theme="dark"] :is(
+  .create-form-card input,
+  .create-form-card textarea,
+  .create-form-card select,
+  .payment-popup input,
+  .payment-popup select
+) {
   color: var(--theme-text);
   background: #100d18;
   border-color: var(--theme-border);
 }
 
-html[data-theme="dark"]
-  :is(
-    .payment-popup-close,
-    .settings-modal-close,
-    .gallery-lightbox-close,
-    .public-lightbox-close
-  ) {
+html[data-theme="dark"] :is(
+  .payment-popup-close,
+  .settings-modal-close,
+  .gallery-lightbox-close,
+  .public-lightbox-close
+) {
   color: var(--theme-text);
   background: rgba(255, 255, 255, 0.09);
 }
 
 /* Event detail and public gallery */
-html[data-theme="dark"]
-  :is(
-    .detail-side-card,
-    .info-card,
-    .upload-panel,
-    .detail-card,
-    .gallery-only-section,
-    .participants-panel,
-    .approved-gallery-panel,
-    .participant-card,
-    .guest-item,
-    .media-card,
-    .approved-gallery-card,
-    .settings-modal
-  ) {
+html[data-theme="dark"] :is(
+  .detail-side-card,
+  .info-card,
+  .upload-panel,
+  .detail-card,
+  .gallery-only-section,
+  .participants-panel,
+  .approved-gallery-panel,
+  .participant-card,
+  .guest-item,
+  .media-card,
+  .approved-gallery-card,
+  .settings-modal
+) {
   color: var(--theme-text);
   background: var(--theme-surface);
   border-color: var(--theme-border);
   box-shadow: var(--theme-shadow);
 }
 
-html[data-theme="dark"] :is(.gallery-lightbox-frame, .public-lightbox-frame) {
+html[data-theme="dark"] :is(
+  .gallery-lightbox-frame,
+  .public-lightbox-frame
+) {
   color: var(--theme-text);
   background: #0a0810;
   border-color: var(--theme-border);
 }
 
-html[data-theme="dark"] :is(.gallery-lightbox-arrow, .public-lightbox-arrow) {
+html[data-theme="dark"] :is(
+  .gallery-lightbox-arrow,
+  .public-lightbox-arrow
+) {
   color: var(--theme-text);
   background: rgba(25, 21, 34, 0.88);
   border-color: var(--theme-border);
 }
 
-html[data-theme="dark"]
-  :is(.gallery-lightbox-backdrop, .public-lightbox-backdrop) {
+html[data-theme="dark"] :is(
+  .gallery-lightbox-backdrop,
+  .public-lightbox-backdrop
+) {
   background: rgba(3, 2, 8, 0.9);
 }
 
-html[data-theme="dark"]
-  :is(
-    .detail-content h1,
-    .detail-content h2,
-    .detail-content h3,
-    .gallery-content h1,
-    .gallery-content h2,
-    .gallery-content h3,
-    .info-card strong,
-    .guest-item strong,
-    .participant-card strong,
-    .settings-modal h2,
-    .settings-switch-row strong
-  ) {
+html[data-theme="dark"] :is(
+  .detail-content h1,
+  .detail-content h2,
+  .detail-content h3,
+  .gallery-content h1,
+  .gallery-content h2,
+  .gallery-content h3,
+  .info-card strong,
+  .guest-item strong,
+  .participant-card strong,
+  .settings-modal h2,
+  .settings-switch-row strong
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(
-    .detail-content p,
-    .gallery-content p,
-    .info-card span,
-    .guest-item span,
-    .participant-card span,
-    .guest-result-count,
-    .guest-empty,
-    .settings-switch-row span
-  ) {
+html[data-theme="dark"] :is(
+  .detail-content p,
+  .gallery-content p,
+  .info-card span,
+  .guest-item span,
+  .participant-card span,
+  .guest-result-count,
+  .guest-empty,
+  .settings-switch-row span
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(
-    .media-filter-bar,
-    .guest-search-box,
-    .photo-preview-box,
-    .event-code-box,
-    .qr-box,
-    .settings-number-grid input
-  ) {
+html[data-theme="dark"] :is(
+  .media-filter-bar,
+  .guest-search-box,
+  .photo-preview-box,
+  .event-code-box,
+  .qr-box,
+  .settings-number-grid input
+) {
   color: var(--theme-text);
   background: #100d18;
   border-color: var(--theme-border);
 }
 
-html[data-theme="dark"]
-  :is(
-    .settings-modal-overlay,
-    .payment-popup-overlay,
-    .payment-success-overlay
-  ) {
+html[data-theme="dark"] :is(
+  .settings-modal-overlay,
+  .payment-popup-overlay,
+  .payment-success-overlay
+) {
   background: rgba(3, 2, 8, 0.78);
 }
 
@@ -980,83 +954,85 @@ html[data-theme="dark"] :is(.account-content, .account-panel) {
   background: transparent;
 }
 
-html[data-theme="dark"]
-  :is(
-    .account-card,
-    .account-summary-card,
-    .event-card,
-    .event-count-box,
-    .details-grid > *,
-    .password-section
-  ) {
+html[data-theme="dark"] :is(
+  .account-card,
+  .account-summary-card,
+  .event-card,
+  .event-count-box,
+  .details-grid > *,
+  .password-section
+) {
   color: var(--theme-text);
   background: var(--theme-surface);
   border-color: var(--theme-border);
   box-shadow: var(--theme-shadow);
 }
 
-html[data-theme="dark"]
-  :is(
-    .account-content h1,
-    .account-content h2,
-    .account-content h3,
-    .event-card h3,
-    .summary-item strong
-  ) {
+html[data-theme="dark"] :is(
+  .account-content h1,
+  .account-content h2,
+  .account-content h3,
+  .event-card h3,
+  .summary-item strong
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(.account-muted, .account-content p, .event-card p, .summary-item span) {
+html[data-theme="dark"] :is(
+  .account-muted,
+  .account-content p,
+  .event-card p,
+  .summary-item span
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(.account-form input, .account-form textarea, .account-form select) {
+html[data-theme="dark"] :is(
+  .account-form input,
+  .account-form textarea,
+  .account-form select
+) {
   color: var(--theme-text);
   background: #100d18;
   border-color: var(--theme-border);
 }
 
 /* Privacy policy */
-html[data-theme="dark"]
-  :is(
-    .policy-toc,
-    .policy-section,
-    .policy-summary-card,
-    .policy-identity-card,
-    .policy-callout,
-    .policy-provider-card,
-    .policy-action-box,
-    .policy-contact__card,
-    .policy-next,
-    .policy-table-wrap
-  ) {
+html[data-theme="dark"] :is(
+  .policy-toc,
+  .policy-section,
+  .policy-summary-card,
+  .policy-identity-card,
+  .policy-callout,
+  .policy-provider-card,
+  .policy-action-box,
+  .policy-contact__card,
+  .policy-next,
+  .policy-table-wrap
+) {
   color: var(--theme-text);
   background: var(--theme-surface);
   border-color: var(--theme-border);
   box-shadow: var(--theme-shadow);
 }
 
-html[data-theme="dark"]
-  :is(
-    .policy-section h2,
-    .policy-section h3,
-    .policy-section strong,
-    .policy-table-wrap th,
-    .policy-table-wrap td,
-    .policy-toc a
-  ) {
+html[data-theme="dark"] :is(
+  .policy-section h2,
+  .policy-section h3,
+  .policy-section strong,
+  .policy-table-wrap th,
+  .policy-table-wrap td,
+  .policy-toc a
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  :is(
-    .policy-section p,
-    .policy-section li,
-    .policy-small,
-    .policy-provider-card p
-  ) {
+html[data-theme="dark"] :is(
+  .policy-section p,
+  .policy-section li,
+  .policy-small,
+  .policy-provider-card p
+) {
   color: var(--theme-muted);
 }
 
@@ -1069,15 +1045,14 @@ html[data-theme="dark"] .policy-table-wrap th {
   background: rgba(124, 58, 237, 0.14);
 }
 
-html[data-theme="dark"]
-  :is(
-    .policy-toc,
-    .policy-summary-grid > div,
-    .policy-purpose-list > div,
-    .policy-provider-grid article,
-    .policy-table-wrap,
-    .policy-next a
-  ) {
+html[data-theme="dark"] :is(
+  .policy-toc,
+  .policy-summary-grid > div,
+  .policy-purpose-list > div,
+  .policy-provider-grid article,
+  .policy-table-wrap,
+  .policy-next a
+) {
   color: var(--theme-text);
   background: #17141f;
   border-color: var(--theme-border);
@@ -1094,26 +1069,24 @@ html[data-theme="dark"] .policy-contact__card > div {
   background: #17141f;
 }
 
-html[data-theme="dark"]
-  :is(
-    .policy-summary-grid > div p,
-    .policy-purpose-list > div p,
-    .policy-provider-grid article p,
-    .policy-contact__card span,
-    .policy-next span,
-    .policy-toc p
-  ) {
+html[data-theme="dark"] :is(
+  .policy-summary-grid > div p,
+  .policy-purpose-list > div p,
+  .policy-provider-grid article p,
+  .policy-contact__card span,
+  .policy-next span,
+  .policy-toc p
+) {
   color: var(--theme-muted);
 }
 
-html[data-theme="dark"]
-  :is(
-    .policy-summary-grid > div h3,
-    .policy-purpose-list > div h3,
-    .policy-provider-grid article h3,
-    .policy-contact__card strong,
-    .policy-next strong
-  ) {
+html[data-theme="dark"] :is(
+  .policy-summary-grid > div h3,
+  .policy-purpose-list > div h3,
+  .policy-provider-grid article h3,
+  .policy-contact__card strong,
+  .policy-next strong
+) {
   color: var(--theme-text);
 }
 
@@ -1181,16 +1154,8 @@ html[data-theme="dark"] :is(.site-header, .hero) {
  */
 html[data-theme="dark"] .pricing {
   background:
-    radial-gradient(
-      circle at 8% 12%,
-      rgba(124, 58, 237, 0.15),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 92% 84%,
-      rgba(236, 72, 153, 0.09),
-      transparent 30%
-    ),
+    radial-gradient(circle at 8% 12%, rgba(124, 58, 237, 0.15), transparent 28%),
+    radial-gradient(circle at 92% 84%, rgba(236, 72, 153, 0.09), transparent 30%),
     var(--theme-bg);
 }
 
@@ -1199,20 +1164,20 @@ html[data-theme="dark"] .pricing-card-featured {
   background: rgba(25, 21, 34, 0.96);
 }
 
-html[data-theme="dark"]
-  .pricing
-  :is(.section-head h2, .pricing-card h3, .pricing-price strong) {
+html[data-theme="dark"] .pricing :is(
+  .section-head h2,
+  .pricing-card h3,
+  .pricing-price strong
+) {
   color: var(--theme-text);
 }
 
-html[data-theme="dark"]
-  .pricing
-  :is(
-    .section-head p,
-    .pricing-card p,
-    .pricing-price span,
-    .pricing-features li
-  ) {
+html[data-theme="dark"] .pricing :is(
+  .section-head p,
+  .pricing-card p,
+  .pricing-price span,
+  .pricing-features li
+) {
   color: var(--theme-muted);
 }
 
@@ -1235,16 +1200,8 @@ html[data-theme="dark"] .pricing .btn-glass:hover {
 html[data-theme="dark"] .event-types {
   color: #ffffff;
   background:
-    radial-gradient(
-      circle at 92% 0%,
-      rgba(145, 70, 199, 0.12),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 2% 100%,
-      rgba(61, 200, 183, 0.07),
-      transparent 25%
-    ),
+    radial-gradient(circle at 92% 0%, rgba(145, 70, 199, 0.12), transparent 28%),
+    radial-gradient(circle at 2% 100%, rgba(61, 200, 183, 0.07), transparent 25%),
     #100d17;
 }
 
@@ -1326,17 +1283,16 @@ html[data-theme="dark"] .flow-gallery__grid .memory-five {
  * the end of the theme sheet so older generic surface rules cannot repaint
  * the share, upload or gallery panels.
  */
-html[data-theme="dark"]
-  :is(
-    #flow-panel-create,
-    #flow-panel-share,
-    #flow-panel-upload,
-    #flow-panel-gallery,
-    #flow-panel-create .flow-create,
-    #flow-panel-share .flow-share,
-    #flow-panel-upload .flow-upload,
-    #flow-panel-gallery .flow-gallery
-  ) {
+html[data-theme="dark"] :is(
+  #flow-panel-create,
+  #flow-panel-share,
+  #flow-panel-upload,
+  #flow-panel-gallery,
+  #flow-panel-create .flow-create,
+  #flow-panel-share .flow-share,
+  #flow-panel-upload .flow-upload,
+  #flow-panel-gallery .flow-gallery
+) {
   background: var(--flow-stage);
   background-image: none;
   box-shadow: none;

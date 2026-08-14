@@ -2,21 +2,44 @@ const crypto = require("crypto");
 const { rateLimit } = require("express-rate-limit");
 const { signAssetUrls } = require("../services/cloudinaryDelivery");
 
+function getDeliveryProfile(req) {
+  const path = String(req.originalUrl || "").split("?")[0];
+
+  if (/\/slideshow\/?$/i.test(path)) {
+    return "slideshow";
+  }
+
+  if (/\/gallery\/?$/i.test(path)) {
+    return "gallery";
+  }
+
+  if (/\/highlights(?:\/[^/]+)?\/?$/i.test(path)) {
+    return "gallery";
+  }
+
+  if (/\/api\/users\/me\/events\/?$/i.test(path)) {
+    return "card";
+  }
+
+  if (
+    req.method === "GET" &&
+    /^\/api\/events\/[^/]+\/?$/i.test(path)
+  ) {
+    return "card";
+  }
+
+  return "detail";
+}
+
 function requestContext(req, res, next) {
-  const requestId = String(
-    req.get("x-request-id") || crypto.randomUUID(),
-  ).slice(0, 128);
+  const requestId = String(req.get("x-request-id") || crypto.randomUUID()).slice(0, 128);
   req.requestId = requestId;
   res.setHeader("X-Request-Id", requestId);
 
   const originalJson = res.json.bind(res);
   res.json = (body) => {
-    body = signAssetUrls(body);
-    if (
-      process.env.NODE_ENV === "production" &&
-      body &&
-      typeof body === "object"
-    ) {
+    body = signAssetUrls(body, getDeliveryProfile(req));
+    if (process.env.NODE_ENV === "production" && body && typeof body === "object") {
       const safeBody = { ...body };
       delete safeBody.error;
       delete safeBody.details;
@@ -31,17 +54,15 @@ function requestContext(req, res, next) {
 }
 
 function securityEvent(name, req, details = {}) {
-  console.warn(
-    JSON.stringify({
-      level: "security",
-      event: name,
-      request_id: req.requestId,
-      method: req.method,
-      path: req.originalUrl?.split("?")[0],
-      ip: req.ip,
-      ...details,
-    }),
-  );
+  console.warn(JSON.stringify({
+    level: "security",
+    event: name,
+    request_id: req.requestId,
+    method: req.method,
+    path: req.originalUrl?.split("?")[0],
+    ip: req.ip,
+    ...details,
+  }));
 }
 
 function makeLimiter({ windowMs, limit, keyGenerator, name }) {
@@ -63,46 +84,23 @@ function makeLimiter({ windowMs, limit, keyGenerator, name }) {
   });
 }
 
-const globalLimiter = makeLimiter({
-  windowMs: 60_000,
-  limit: 180,
-  name: "global",
-});
-const authLimiter = makeLimiter({
-  windowMs: 15 * 60_000,
-  limit: 10,
-  name: "auth",
-});
-const emailLimiter = makeLimiter({
-  windowMs: 60 * 60_000,
-  limit: 5,
-  name: "email",
-});
-const eventCodeLimiter = makeLimiter({
-  windowMs: 10 * 60_000,
-  limit: 30,
-  name: "event-code",
-});
-const guestLimiter = makeLimiter({
-  windowMs: 10 * 60_000,
-  limit: 20,
-  name: "guest",
-});
-const uploadLimiter = makeLimiter({
-  windowMs: 10 * 60_000,
-  limit: 12,
-  name: "upload",
-});
+const globalLimiter = makeLimiter({ windowMs: 60_000, limit: 180, name: "global" });
+const authLimiter = makeLimiter({ windowMs: 15 * 60_000, limit: 10, name: "auth" });
+const emailLimiter = makeLimiter({ windowMs: 60 * 60_000, limit: 5, name: "email" });
+const eventCodeLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 30, name: "event-code" });
+const guestLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 20, name: "guest" });
+const uploadLimiter = makeLimiter({ windowMs: 10 * 60_000, limit: 12, name: "upload" });
 const likeLimiter = makeLimiter({ windowMs: 60_000, limit: 30, name: "like" });
-const pdfLimiter = makeLimiter({
+const pdfLimiter = makeLimiter({ windowMs: 60 * 60_000, limit: 3, name: "pdf" });
+const archiveTicketLimiter = makeLimiter({
+  windowMs: 60 * 60_000,
+  limit: 6,
+  name: "archive-ticket",
+});
+const archiveDownloadLimiter = makeLimiter({
   windowMs: 60 * 60_000,
   limit: 3,
-  name: "pdf",
-});
-const feedbackLimiter = makeLimiter({
-  windowMs: 30 * 60_000,
-  limit: 5,
-  name: "feedback",
+  name: "archive-download",
 });
 
 module.exports = {
@@ -116,5 +114,6 @@ module.exports = {
   uploadLimiter,
   likeLimiter,
   pdfLimiter,
-  feedbackLimiter,
+  archiveTicketLimiter,
+  archiveDownloadLimiter,
 };

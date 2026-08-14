@@ -1,4 +1,5 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const token = localStorage.getItem("snapup_token");
 
@@ -442,7 +443,7 @@ function renderEvents(events) {
       const statusClass = event.is_event_active ? "active" : "passive";
       let eventCoverUrl = "";
       try {
-        const candidate = new URL(event.event_cover_url || "");
+        const candidate = new URL(getEventCoverUrl(event, "card") || "");
         if (candidate.protocol === "https:" && candidate.hostname === "res.cloudinary.com") {
           eventCoverUrl = candidate.href;
         }

@@ -8,13 +8,29 @@
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="icon/snapup-favicon.svg" />
     <link rel="apple-touch-icon" href="icon/apple-touch-icon.png" />
-    <meta name="theme-color" content="#08080d" />
+    <meta name="theme-color" id="slideshowThemeColor" content="#17122b" />
+
+    <script>
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem("snapup_theme");
+          document.documentElement.dataset.theme =
+            savedTheme === "light" || savedTheme === "dark"
+              ? savedTheme
+              : matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (_error) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
 
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
-    <link rel="stylesheet" href="css/live-slideshow.css?v=live-slideshow-1" />
+    <link rel="stylesheet" href="css/live-slideshow.css?v=live-slideshow-theme-spacing-1" />
     <script src="js/event-detail-i18n.js?v=join-upload-modern-2" defer></script>
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
-    <script src="js/live-slideshow-i18n.js?v=live-slideshow-1" defer></script>
+    <script src="js/live-slideshow-i18n.js?v=live-slideshow-panel-languages-2" defer></script>
     <script src="js/i18n.js?v=only-users-3" defer></script>
   </head>
 
@@ -68,24 +84,6 @@
           <small id="slideshowSyncStatus">Connecting...</small>
         </div>
 
-        <div class="slideshow-top-actions">
-          <button type="button" id="slideshowPresentButton">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
-            </svg>
-            <span>Start Full Screen</span>
-          </button>
-          <button type="button" id="slideshowControlsButton" aria-expanded="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path>
-              <path d="m19.4 13.4 1.85 1.45-2 3.45-2.2-.9a8 8 0 0 1-2.45 1.32L14.25 21h-4.5l-.35-2.28a8 8 0 0 1-2.45-1.32l-2.2.9-2-3.45L4.6 13.4a10 10 0 0 1 0-2.8L2.75 9.15l2-3.45 2.2.9A8 8 0 0 1 9.4 5.28L9.75 3h4.5l.35 2.28a8 8 0 0 1 2.45 1.32l2.2-.9 2 3.45-1.85 1.45a10 10 0 0 1 0 2.8Z"></path>
-            </svg>
-            <span>Controls</span>
-          </button>
-          <a id="slideshowBackLink" href="event-detail.html">
-            <span>Back to Event</span>
-          </a>
-        </div>
       </header>
 
       <footer class="slide-meta" id="slideMeta" hidden>
@@ -198,7 +196,7 @@
           <div class="photo-selection-head">
             <span>
               <strong>Choose a photo</strong>
-              <small id="slideshowPhotoCount">0 approved photos</small>
+              <small id="slideshowPhotoCount"></small>
             </span>
             <em id="slideshowSelectedStatus">No photo selected</em>
           </div>
@@ -223,8 +221,25 @@
       </div>
     </aside>
 
+    <button
+      type="button"
+      class="slideshow-theme-dock"
+      id="slideshowThemeButton"
+      aria-pressed="false"
+      aria-label="Switch to dark mode"
+      title="Dark mode"
+    >
+      <svg class="slideshow-theme-button__moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path>
+      </svg>
+      <svg class="slideshow-theme-button__sun" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.8"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+      </svg>
+    </button>
+
     <div class="slideshow-toast" id="slideshowToast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="js/live-slideshow.js?v=live-slideshow-1"></script>
+    <script type="module" src="js/live-slideshow.js?v=cloudinary-bandwidth-1"></script>
   </body>
 </html>

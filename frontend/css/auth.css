@@ -646,42 +646,6 @@ a {
   font-weight: 700;
 }
 
-.auth-turnstile {
-  position: relative;
-  width: 100%;
-  min-height: 65px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-}
-
-.auth-turnstile[hidden] {
-  display: none;
-}
-
-.auth-turnstile.is-verified {
-  background: transparent;
-}
-
-.auth-turnstile > div {
-  position: relative;
-  z-index: 1;
-  max-width: 100%;
-  overflow: visible;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.auth-turnstile iframe {
-  display: block;
-  max-width: 100%;
-  border-radius: 0;
-}
-
 .auth-submit {
   width: 100%;
   min-height: 55px;
@@ -856,15 +820,6 @@ html[data-theme="dark"] .auth-password-row {
 html[data-theme="dark"] .auth-password-row input {
   color: var(--auth-ink) !important;
   background: transparent !important;
-}
-
-html[data-theme="dark"] .auth-turnstile {
-  color: var(--auth-ink);
-  background: transparent;
-}
-
-html[data-theme="dark"] .auth-turnstile > div {
-  box-shadow: none;
 }
 
 /*
@@ -1094,11 +1049,6 @@ html[data-theme="dark"] .auth-turnstile > div {
   .auth-password-row,
   .auth-submit {
     min-height: 52px;
-  }
-
-  .auth-turnstile {
-    min-height: 65px;
-    padding: 0;
   }
 
   .auth-bottom {

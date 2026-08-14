@@ -3,7 +3,12 @@ const multer = require("multer");
 const router = express.Router();
 
 const authMiddleware = require("../middlewares/authMiddleware");
-const { eventCodeLimiter, pdfLimiter } = require("../middlewares/security");
+const {
+  archiveDownloadLimiter,
+  archiveTicketLimiter,
+  eventCodeLimiter,
+  pdfLimiter,
+} = require("../middlewares/security");
 const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const {
   listEventInvitations,
@@ -26,7 +31,12 @@ const {
   updateEventSettings,
   deleteEvent,
   getEventGuests,
+  getOwnedEventStatistics,
+  getOwnedEventHighlights,
+  getPublicEventHighlights,
   getPublicEventGallery,
+  createEventArchiveTicket,
+  downloadEventArchive,
   downloadEventMemoryBookV3,
   downloadPublicMemoryBook,
 } = require("../controllers/eventController");
@@ -81,6 +91,16 @@ router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
 router.get(
+  "/detail/:eventId/statistics",
+  authMiddleware,
+  getOwnedEventStatistics,
+);
+router.get(
+  "/detail/:eventId/highlights",
+  authMiddleware,
+  getOwnedEventHighlights,
+);
+router.get(
   "/detail/:eventId/slideshow",
   authMiddleware,
   getLiveSlideshow,
@@ -117,6 +137,17 @@ router.get(
   authMiddleware,
   downloadEventMemoryBookV3,
 );
+router.post(
+  "/detail/:eventId/archive-ticket",
+  archiveTicketLimiter,
+  authMiddleware,
+  createEventArchiveTicket,
+);
+router.get(
+  "/detail/:eventId/archive",
+  archiveDownloadLimiter,
+  downloadEventArchive,
+);
 
 router.put(
   "/detail/:eventId/cover",
@@ -140,6 +171,12 @@ router.put(
 router.put("/detail/:eventId/settings", authMiddleware, updateEventSettings);
 
 router.delete("/detail/:eventId", authMiddleware, deleteEvent);
+
+router.get(
+  "/highlights/:eventCode",
+  eventCodeLimiter,
+  getPublicEventHighlights,
+);
 
 router.get("/:eventCode/memory-book", eventCodeLimiter, pdfLimiter, downloadPublicMemoryBook);
 

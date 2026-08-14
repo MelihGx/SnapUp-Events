@@ -1,9 +1,6 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
-import {
-  createTurnstileController,
-  getTurnstileErrorMessage,
-} from "./turnstile.js?v=turnstile-1";
+import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const API_BASE_URL = API_URL;
 const MAX_MEDIA_FILES = 15;
@@ -17,21 +14,6 @@ let selectedEvent = null;
 let selectedFiles = [];
 let selectedFilePreviewUrls = [];
 let successPopupHideTimer = null;
-let joinTurnstilePromise = null;
-
-function ensureJoinTurnstile() {
-  if (!joinTurnstilePromise) {
-    joinTurnstilePromise = createTurnstileController({
-      container: "#joinTurnstile",
-      action: "guest_join",
-    }).catch((error) => {
-      console.error("Turnstile initialization error:", error);
-      return null;
-    });
-  }
-
-  return joinTurnstilePromise;
-}
 
 function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
@@ -47,9 +29,7 @@ function getUserAuthHeaders() {
 }
 
 function createApiError(response, data, fallbackMessage) {
-  const error = new Error(
-    getTurnstileErrorMessage(data, data.error || fallbackMessage),
-  );
+  const error = new Error(data.message || data.error || fallbackMessage);
   error.code = data.code || "";
   error.status = response.status;
   return error;
@@ -219,15 +199,6 @@ function openModal() {
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("join-upload-open");
-
-  ensureJoinTurnstile().then((controller) => {
-    if (!controller) {
-      setResult(
-        "Security verification could not be completed. Please try again.",
-        "error",
-      );
-    }
-  });
 
   setTimeout(() => {
     document.getElementById("joinEventCode")?.focus();
@@ -583,7 +554,9 @@ function renderEventPreview(event) {
 
   name.textContent = event.event_name || "Untitled Event";
 
-  if (event.event_cover_url) {
+  const eventCoverUrl = getEventCoverUrl(event, "card");
+
+  if (eventCoverUrl) {
     coverImage.onload = () => {
       cover.classList.add("has-image");
       coverImage.hidden = false;
@@ -595,7 +568,7 @@ function renderEventPreview(event) {
       coverPlaceholder.hidden = false;
     };
     coverImage.alt = event.event_name || "Event";
-    coverImage.src = event.event_cover_url;
+    coverImage.src = eventCoverUrl;
   } else {
     cover.classList.remove("has-image");
     coverImage.hidden = true;
@@ -655,7 +628,7 @@ async function findEventByCode(eventCode) {
   return data.event;
 }
 
-async function createGuest(eventId, guestName, turnstileToken) {
+async function createGuest(eventId, guestName) {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
   let cached = null;
 
@@ -675,7 +648,6 @@ async function createGuest(eventId, guestName, turnstileToken) {
     body: JSON.stringify({
       event_id: eventId,
       guest_name: guestName,
-      turnstile_token: turnstileToken,
     }),
   });
 
@@ -890,7 +862,6 @@ function initFormSubmit() {
     const messageText =
       document.getElementById("joinMessageText")?.value.trim() || "";
     const submissionMediaType = selectedMediaType;
-    let turnstileController = null;
 
     try {
       if (!eventCode) {
@@ -931,23 +902,6 @@ function initFormSubmit() {
         return;
       }
 
-      turnstileController = await ensureJoinTurnstile();
-
-      if (!turnstileController) {
-        setResult(
-          "Security verification could not be completed. Please try again.",
-          "error",
-        );
-        return;
-      }
-
-      const turnstileToken = turnstileController.getToken();
-
-      if (turnstileController.enabled && !turnstileToken) {
-        setResult("Please complete the security verification.", "error");
-        return;
-      }
-
       setLoading(true);
 
       if (submissionMediaType === "message") {
@@ -956,11 +910,7 @@ function initFormSubmit() {
         setResult(`Uploading ${selectedFiles.length} file(s)...`, "info");
       }
 
-      const guest = await createGuest(
-        eventData.event_id,
-        guestName,
-        turnstileToken,
-      );
+      const guest = await createGuest(eventData.event_id, guestName);
 
       if (submissionMediaType === "message") {
         await sendMessage(eventData.event_id, guest.guest_id, guest.guest_access_token, messageText);
@@ -991,7 +941,6 @@ function initFormSubmit() {
       if (handleRegisteredOnlyError(error, eventCode)) return;
       setResult(error.message || "Upload failed.", "error");
     } finally {
-      turnstileController?.reset();
       setLoading(false);
     }
   });

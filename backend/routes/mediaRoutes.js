@@ -8,7 +8,6 @@ const cloudinary = require("../config/cloudinary");
 const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
 const optionalAuth = require("../middlewares/optionalAuth");
-const requireTurnstile = require("../middlewares/turnstile");
 const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
 const { cleanText } = require("../utils/validation");
@@ -401,12 +400,7 @@ async function getOwnedMedia(mediaId, userId) {
   return media;
 }
 
-router.post(
-  "/guests",
-  guestLimiter,
-  optionalAuth,
-  requireTurnstile("guest_join"),
-  async (req, res) => {
+router.post("/guests", guestLimiter, optionalAuth, async (req, res) => {
   try {
     const { event_id, guest_name } = req.body;
 
@@ -536,8 +530,7 @@ router.post(
       error: error.message,
     });
   }
-  },
-);
+});
 
 router.post(
   "/upload",

@@ -1,11 +1,87 @@
 :root {
+  color-scheme: light;
+  --show-accent: #7c3aed;
+  --show-accent-dark: #ec4899;
+  --show-accent-soft: rgba(124, 58, 237, 0.1);
+  --show-turquoise: #22d3c5;
+  --show-panel: rgba(255, 253, 255, 0.97);
+  --show-line: rgba(45, 31, 69, 0.15);
+  --show-text: #201a35;
+  --show-muted: rgba(54, 43, 75, 0.68);
+  --show-canvas: #f7f3ff;
+  --show-glass: rgba(255, 255, 255, 0.76);
+  --show-glass-strong: rgba(255, 255, 255, 0.93);
+  --show-surface: rgba(69, 46, 105, 0.045);
+  --show-surface-hover: rgba(124, 58, 237, 0.09);
+  --show-icon: rgba(54, 43, 75, 0.76);
+  --show-legend: rgba(32, 26, 53, 0.76);
+  --show-input: rgba(255, 255, 255, 0.88);
+  --show-on-accent: #ffffff;
+  --show-message: rgba(32, 26, 53, 0.82);
+  --show-help: rgba(32, 26, 53, 0.58);
+  --show-success: #187a5b;
+  --show-error: #c93654;
+  --show-loader-track: rgba(124, 58, 237, 0.14);
+  --show-radio-line: rgba(45, 31, 69, 0.28);
+  --show-shadow: rgba(32, 18, 58, 0.2);
+  --show-image-shadow: rgba(28, 15, 57, 0.28);
+  --show-backdrop-filter: blur(45px) saturate(0.92) brightness(0.72);
+  --show-backdrop-opacity: 0.42;
+  --show-stage-background:
+    radial-gradient(circle at 25% 12%, rgba(124, 58, 237, 0.13), transparent 36%),
+    radial-gradient(circle at 78% 74%, rgba(236, 72, 153, 0.08), transparent 34%),
+    radial-gradient(circle at 92% 18%, rgba(34, 211, 197, 0.08), transparent 28%),
+    var(--show-canvas);
+  --show-vignette-background:
+    radial-gradient(circle at 22% 12%, rgba(124, 58, 237, 0.1), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(236, 72, 153, 0.07), transparent 34%),
+    linear-gradient(180deg, rgba(247, 243, 255, 0.7), transparent 25%, transparent 65%, rgba(247, 243, 255, 0.82)),
+    radial-gradient(circle at center, transparent 28%, rgba(233, 226, 248, 0.5) 100%);
+  --show-panel-background:
+    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.11), transparent 33%),
+    radial-gradient(circle at 100% 30%, rgba(236, 72, 153, 0.06), transparent 32%),
+    var(--show-panel);
+}
+
+html[data-theme="dark"] {
   color-scheme: dark;
-  --show-accent: #ff5a36;
-  --show-accent-soft: rgba(255, 90, 54, 0.18);
-  --show-panel: rgba(16, 14, 21, 0.94);
-  --show-line: rgba(255, 255, 255, 0.11);
-  --show-text: #fffaf5;
-  --show-muted: rgba(255, 250, 245, 0.62);
+  --show-accent-soft: rgba(124, 58, 237, 0.18);
+  --show-panel: rgba(23, 18, 43, 0.96);
+  --show-line: rgba(248, 245, 255, 0.14);
+  --show-text: #f8f5ff;
+  --show-muted: rgba(238, 231, 255, 0.66);
+  --show-canvas: #100a24;
+  --show-glass: rgba(23, 18, 43, 0.7);
+  --show-glass-strong: rgba(23, 18, 43, 0.96);
+  --show-surface: rgba(255, 255, 255, 0.045);
+  --show-surface-hover: rgba(255, 255, 255, 0.085);
+  --show-icon: rgba(255, 255, 255, 0.76);
+  --show-legend: rgba(255, 255, 255, 0.76);
+  --show-input: rgba(0, 0, 0, 0.22);
+  --show-message: rgba(248, 245, 255, 0.82);
+  --show-help: rgba(255, 255, 255, 0.5);
+  --show-success: #58e89a;
+  --show-error: #f0abfc;
+  --show-loader-track: rgba(255, 255, 255, 0.12);
+  --show-radio-line: rgba(255, 255, 255, 0.26);
+  --show-shadow: rgba(0, 0, 0, 0.38);
+  --show-image-shadow: rgba(0, 0, 0, 0.42);
+  --show-backdrop-filter: blur(45px) saturate(0.92) brightness(0.36);
+  --show-backdrop-opacity: 0.74;
+  --show-stage-background:
+    radial-gradient(circle at 25% 12%, rgba(124, 58, 237, 0.18), transparent 36%),
+    radial-gradient(circle at 78% 74%, rgba(236, 72, 153, 0.11), transparent 34%),
+    radial-gradient(circle at 92% 18%, rgba(34, 211, 197, 0.07), transparent 28%),
+    var(--show-canvas);
+  --show-vignette-background:
+    radial-gradient(circle at 22% 12%, rgba(124, 58, 237, 0.18), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(236, 72, 153, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(16, 10, 36, 0.64), transparent 25%, transparent 65%, rgba(16, 10, 36, 0.8)),
+    radial-gradient(circle at center, transparent 25%, rgba(16, 10, 36, 0.52) 100%);
+  --show-panel-background:
+    radial-gradient(circle at 18% 0%, rgba(124, 58, 237, 0.17), transparent 33%),
+    radial-gradient(circle at 100% 30%, rgba(236, 72, 153, 0.08), transparent 32%),
+    var(--show-panel);
 }
 
 * {
@@ -19,7 +95,7 @@ body {
   min-height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #07070b;
+  background: var(--show-canvas);
 }
 
 body,
@@ -43,6 +119,16 @@ a {
   color: var(--show-text);
 }
 
+/*
+ * The slideshow layers use grid/flex layouts. Those display declarations have
+ * higher priority than the browser's default [hidden] rule, so a hidden loading
+ * or empty layer could remain visible over the active photo. Keep the HTML
+ * hidden state authoritative for every slideshow component.
+ */
+.live-slideshow-page [hidden] {
+  display: none !important;
+}
+
 .slideshow-stage {
   position: fixed;
   inset: 0;
@@ -50,9 +136,8 @@ a {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 30% 15%, rgba(124, 58, 237, 0.16), transparent 34%),
-    #07070b;
+  background: var(--show-stage-background);
+  transition: background 260ms ease;
 }
 
 .slide-backdrop,
@@ -66,21 +151,20 @@ a {
   z-index: -3;
   background-position: center;
   background-size: cover;
-  filter: blur(45px) saturate(1.12) brightness(0.38);
+  filter: var(--show-backdrop-filter);
   opacity: 0;
   transform: scale(1.14);
   transition: opacity 800ms ease, background-image 800ms ease;
 }
 
 .slide-backdrop.has-image {
-  opacity: 0.74;
+  opacity: var(--show-backdrop-opacity);
 }
 
 .slide-vignette {
   z-index: -2;
-  background:
-    linear-gradient(180deg, rgba(3, 3, 6, 0.64), transparent 25%, transparent 65%, rgba(3, 3, 6, 0.76)),
-    radial-gradient(circle at center, transparent 25%, rgba(3, 3, 6, 0.48) 100%);
+  background: var(--show-vignette-background);
+  transition: background 260ms ease;
 }
 
 .slide-canvas {
@@ -97,7 +181,7 @@ a {
   object-fit: contain;
   opacity: 0;
   transform: scale(1.015);
-  filter: drop-shadow(0 30px 70px rgba(0, 0, 0, 0.42));
+  filter: drop-shadow(0 30px 70px var(--show-image-shadow));
   transition: opacity 900ms ease, transform 1100ms ease;
   will-change: opacity, transform;
 }
@@ -137,7 +221,7 @@ a {
   width: 44px;
   height: 44px;
   margin-bottom: 8px;
-  border: 3px solid rgba(255, 255, 255, 0.12);
+  border: 3px solid var(--show-loader-track);
   border-top-color: var(--show-accent);
   border-radius: 50%;
   animation: slideshowSpin 800ms linear infinite;
@@ -151,8 +235,8 @@ a {
   margin-bottom: 8px;
   border: 1px solid var(--show-line);
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.055);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
+  background: var(--show-surface);
+  box-shadow: 0 26px 70px var(--show-shadow);
 }
 
 .slideshow-empty-icon svg {
@@ -218,7 +302,7 @@ a {
   padding: 8px 11px;
   border: 1px solid var(--show-line);
   border-radius: 999px;
-  background: rgba(8, 8, 13, 0.56);
+  background: var(--show-glass);
   backdrop-filter: blur(18px);
 }
 
@@ -227,13 +311,13 @@ a {
   height: 7px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #2ee882;
-  box-shadow: 0 0 14px rgba(46, 232, 130, 0.88);
+  background: var(--show-accent);
+  box-shadow: 0 0 14px rgba(236, 72, 153, 0.82);
   animation: livePulse 1.5s ease-in-out infinite;
 }
 
 .slideshow-live-status strong {
-  color: #2ee882;
+  color: var(--show-accent);
   font-size: 9px;
   letter-spacing: 0.12em;
 }
@@ -243,48 +327,56 @@ a {
   font-size: 9px;
 }
 
-.slideshow-top-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.slideshow-top-actions button,
-.slideshow-top-actions a {
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 12px;
-  color: var(--show-text);
-  border: 1px solid var(--show-line);
-  border-radius: 12px;
-  background: rgba(8, 8, 13, 0.58);
-  backdrop-filter: blur(18px);
+.slideshow-theme-dock {
+  position: fixed;
+  right: 120px;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 55;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  background: rgba(30, 20, 61, 0.9);
+  box-shadow:
+    0 14px 36px rgba(13, 7, 31, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  transition:
+    opacity 240ms ease,
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
 }
 
-.slideshow-top-actions button:hover,
-.slideshow-top-actions a:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(28, 25, 35, 0.84);
-  transform: translateY(-1px);
+.slideshow-theme-dock:hover,
+.slideshow-theme-dock:focus-visible {
+  background: rgba(50, 31, 94, 0.96);
+  border-color: rgba(167, 139, 250, 0.62);
+  transform: translateY(-2px);
+  outline: none;
 }
 
-.slideshow-top-actions button:first-child {
-  color: #fff;
-  border-color: transparent;
-  background: linear-gradient(135deg, #ff5a36, #f43f5e);
+.slideshow-theme-button__sun {
+  display: none;
 }
 
-.slideshow-top-actions svg {
-  width: 16px;
-  height: 16px;
+html[data-theme="dark"] .slideshow-theme-button__moon {
+  display: none;
+}
+
+html[data-theme="dark"] .slideshow-theme-button__sun {
+  display: block;
+}
+
+.slideshow-theme-dock svg {
+  width: 18px;
+  height: 18px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -305,7 +397,7 @@ a {
   padding: 10px 14px;
   border: 1px solid var(--show-line);
   border-radius: 15px;
-  background: rgba(8, 8, 13, 0.6);
+  background: var(--show-glass);
   backdrop-filter: blur(20px);
   transition: opacity 240ms ease, transform 240ms ease;
 }
@@ -330,7 +422,7 @@ a {
   margin: 0;
   padding-left: 14px;
   border-left: 1px solid var(--show-line);
-  color: rgba(255, 250, 245, 0.8);
+  color: var(--show-message);
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -348,7 +440,7 @@ a {
   padding: 9px 13px;
   border: 1px solid var(--show-line);
   border-radius: 999px;
-  background: rgba(8, 8, 13, 0.6);
+  background: var(--show-glass);
   backdrop-filter: blur(20px);
   transition: opacity 240ms ease, transform 240ms ease;
 }
@@ -363,7 +455,7 @@ a {
   top: 18px;
   left: 50%;
   padding: 8px 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--show-help);
   border: 1px solid transparent;
   border-radius: 999px;
   opacity: 0;
@@ -376,7 +468,8 @@ a {
 .presentation-mode .slideshow-topbar,
 .presentation-mode .slide-meta,
 .presentation-mode .slide-mode-badge,
-.presentation-mode .snapup-language {
+.presentation-mode .snapup-language,
+.presentation-mode .slideshow-theme-dock {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-12px);
@@ -410,8 +503,8 @@ a {
   padding: 26px;
   color: var(--show-text);
   border-left: 1px solid var(--show-line);
-  background: var(--show-panel);
-  box-shadow: -34px 0 90px rgba(0, 0, 0, 0.38);
+  background: var(--show-panel-background);
+  box-shadow: -34px 0 90px var(--show-shadow);
   backdrop-filter: blur(28px);
   transform: translateX(102%);
   transition: transform 260ms cubic-bezier(0.22, 0.9, 0.32, 1);
@@ -462,7 +555,7 @@ a {
   color: var(--show-text);
   border: 1px solid var(--show-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--show-surface);
   cursor: pointer;
 }
 
@@ -484,7 +577,7 @@ a {
 
 .slideshow-mode-list legend {
   margin-bottom: 10px;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--show-legend);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -500,18 +593,19 @@ a {
   padding: 13px;
   border: 1px solid var(--show-line);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--show-surface);
   cursor: pointer;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
 
 .slideshow-mode-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(124, 58, 237, 0.32);
+  background: var(--show-surface-hover);
   transform: translateY(-1px);
 }
 
 .slideshow-mode-card:has(input:checked) {
-  border-color: rgba(255, 90, 54, 0.62);
+  border-color: rgba(124, 58, 237, 0.68);
   background: var(--show-accent-soft);
 }
 
@@ -529,13 +623,13 @@ a {
   display: grid;
   place-items: center;
   border-radius: 13px;
-  color: rgba(255, 255, 255, 0.76);
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--show-icon);
+  background: var(--show-surface-hover);
 }
 
 .slideshow-mode-card:has(input:checked) .mode-card-icon {
-  color: #fff;
-  background: rgba(255, 90, 54, 0.3);
+  color: var(--show-on-accent);
+  background: linear-gradient(145deg, rgba(124, 58, 237, 0.78), rgba(236, 72, 153, 0.62));
 }
 
 .mode-card-icon svg {
@@ -566,13 +660,13 @@ a {
 .slideshow-mode-card > i {
   width: 14px;
   height: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.26);
+  border: 1px solid var(--show-radio-line);
   border-radius: 50%;
 }
 
 .slideshow-mode-card:has(input:checked) > i {
   border: 4px solid var(--show-accent);
-  background: #fff;
+  background: var(--show-on-accent);
 }
 
 .slideshow-mode-settings,
@@ -581,7 +675,7 @@ a {
   padding: 16px;
   border: 1px solid var(--show-line);
   border-radius: 17px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--show-surface);
 }
 
 .slideshow-mode-settings {
@@ -626,18 +720,18 @@ a {
   width: 70px;
   height: 39px;
   padding: 7px;
-  color: #fff;
+  color: var(--show-text);
   border: 1px solid var(--show-line);
   border-radius: 11px;
   outline: none;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--show-input);
   font-weight: 800;
   text-align: center;
 }
 
 .duration-input input:focus {
   border-color: var(--show-accent);
-  box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.14);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
 }
 
 .duration-input span {
@@ -682,7 +776,7 @@ a {
   padding: 0;
   border: 2px solid transparent;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--show-surface-hover);
   cursor: pointer;
 }
 
@@ -700,7 +794,7 @@ a {
 
 .slideshow-photo-option.is-selected {
   border-color: var(--show-accent);
-  box-shadow: 0 0 0 2px rgba(255, 90, 54, 0.22);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.24);
 }
 
 .slideshow-photo-option::after {
@@ -711,7 +805,7 @@ a {
   width: 16px;
   height: 16px;
   display: none;
-  border: 3px solid #fff;
+  border: 3px solid var(--show-on-accent);
   border-radius: 50%;
   background: var(--show-accent);
 }
@@ -733,13 +827,13 @@ a {
 .slideshow-form-status {
   min-height: 18px;
   margin-top: 10px;
-  color: #ffb6a6;
+  color: var(--show-error);
   font-size: 10px;
   line-height: 1.45;
 }
 
 .slideshow-form-status.is-success {
-  color: #58e89a;
+  color: var(--show-success);
 }
 
 .slideshow-control-actions {
@@ -752,19 +846,20 @@ a {
 .slideshow-control-actions button {
   min-height: 48px;
   padding: 10px 12px;
-  color: #fff;
+  color: var(--show-text);
   border: 1px solid var(--show-line);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--show-surface);
   cursor: pointer;
   font-size: 10px;
   font-weight: 900;
 }
 
 .slideshow-control-actions button:first-child {
+  color: var(--show-on-accent);
   border-color: transparent;
-  background: linear-gradient(135deg, #ff5a36, #f43f5e);
-  box-shadow: 0 15px 32px rgba(244, 63, 94, 0.2);
+  background: linear-gradient(135deg, var(--show-accent), var(--show-accent-dark) 62%, var(--show-turquoise));
+  box-shadow: 0 15px 32px rgba(124, 58, 237, 0.28);
 }
 
 .slideshow-control-actions button:disabled {
@@ -800,10 +895,10 @@ a {
   place-items: center;
   margin-right: 4px;
   padding: 3px 5px;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--show-message);
   border: 1px solid var(--show-line);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--show-surface-hover);
   font: 700 8px/1 Inter, sans-serif;
 }
 
@@ -814,11 +909,11 @@ a {
   bottom: 26px;
   max-width: min(420px, calc(100% - 32px));
   padding: 11px 15px;
-  color: #fff;
+  color: var(--show-text);
   border: 1px solid var(--show-line);
   border-radius: 12px;
-  background: rgba(15, 13, 20, 0.94);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.36);
+  background: var(--show-glass-strong);
+  box-shadow: 0 18px 45px var(--show-shadow);
   opacity: 0;
   transform: translate(-50%, 14px);
   font-size: 10px;
@@ -832,7 +927,7 @@ a {
 }
 
 .slideshow-toast.is-error {
-  border-color: rgba(255, 90, 54, 0.55);
+  border-color: rgba(236, 72, 153, 0.62);
 }
 
 .snapup-language {
@@ -863,14 +958,6 @@ a {
     margin-right: 0;
   }
 
-  .slideshow-top-actions {
-    width: 100%;
-  }
-
-  .slideshow-top-actions > * {
-    flex: 1;
-  }
-
   .slide-canvas {
     inset: 122px 18px 68px;
   }
@@ -892,10 +979,16 @@ a {
     margin-left: auto;
   }
 
-  .slideshow-live-status small,
-  .slideshow-top-actions span,
-  .slideshow-top-actions a:last-child {
+  .slideshow-live-status small {
     display: none;
+  }
+
+  .slideshow-theme-dock {
+    right: 90px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
   }
 
   .slide-canvas {

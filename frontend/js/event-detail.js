@@ -1,10 +1,17 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
-import { createMemoryBookPdf } from "./memory-book-pdf.js?v=location-details-1";
-import { setInvitationStudioEvent } from "./invitation-studio.js?v=location-details-1";
+import { createMemoryBookPdf } from "./memory-book-pdf.js?v=cloudinary-bandwidth-1";
+import { setInvitationStudioEvent } from "./invitation-studio.js?v=cloudinary-bandwidth-1";
 import {
   buildEventMapUrl,
   createLocationMapPicker,
 } from "./location-map-picker.js?v=location-map-2";
+import {
+  getEventCoverUrl,
+  getImageDeliveryUrl,
+  getImageSrcSet,
+  getVideoPlaybackUrl,
+  getVideoPosterUrl,
+} from "./media-delivery.js?v=cloudinary-bandwidth-1";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -67,6 +74,7 @@ const detailErrorText = document.getElementById("detailErrorText");
 const detailContent = document.getElementById("detailContent");
 
 const eventCover = document.getElementById("eventCover");
+const eventCoverMedia = document.getElementById("eventCoverMedia");
 const eventCoverChangeButton = document.getElementById(
   "eventCoverChangeButton",
 );
@@ -125,6 +133,57 @@ const eventCoverEditorStatus = document.getElementById(
 const eventCoverToast = document.getElementById("eventCoverToast");
 const eventTitle = document.getElementById("eventTitle");
 const eventDescription = document.getElementById("eventDescription");
+const eventStatisticsOpen = document.getElementById("eventStatisticsOpen");
+const eventStatisticsModal = document.getElementById("eventStatisticsModal");
+const eventStatisticsBackdrop = document.getElementById(
+  "eventStatisticsBackdrop",
+);
+const eventStatisticsClose = document.getElementById("eventStatisticsClose");
+const eventStatisticsEventName = document.getElementById(
+  "eventStatisticsEventName",
+);
+const eventStatisticsStatus = document.getElementById(
+  "eventStatisticsStatus",
+);
+const eventStatisticsParticipants = document.getElementById(
+  "eventStatisticsParticipants",
+);
+const eventStatisticsPhotos = document.getElementById(
+  "eventStatisticsPhotos",
+);
+const eventStatisticsVideos = document.getElementById(
+  "eventStatisticsVideos",
+);
+const eventStatisticsComments = document.getElementById(
+  "eventStatisticsComments",
+);
+const eventStatisticsTotalUploads = document.getElementById(
+  "eventStatisticsTotalUploads",
+);
+const eventStatisticsStorage = document.getElementById(
+  "eventStatisticsStorage",
+);
+const eventStatisticsUploaderAvatar = document.getElementById(
+  "eventStatisticsUploaderAvatar",
+);
+const eventStatisticsUploaderName = document.getElementById(
+  "eventStatisticsUploaderName",
+);
+const eventStatisticsUploaderCount = document.getElementById(
+  "eventStatisticsUploaderCount",
+);
+const eventStatisticsLikedPhoto = document.getElementById(
+  "eventStatisticsLikedPhoto",
+);
+const eventStatisticsLikedEmpty = document.getElementById(
+  "eventStatisticsLikedEmpty",
+);
+const eventStatisticsLikedGuest = document.getElementById(
+  "eventStatisticsLikedGuest",
+);
+const eventStatisticsLikedCount = document.getElementById(
+  "eventStatisticsLikedCount",
+);
 const eventCode = document.getElementById("eventCode");
 const qrBox = document.getElementById("qrBox");
 
@@ -169,6 +228,16 @@ const eventPrivacy = document.getElementById("eventPrivacy");
 
 const settingsList = document.getElementById("settingsList");
 const mediaGallery = document.getElementById("mediaGallery");
+const eventGallerySection = document.getElementById("eventGallerySection");
+const activeGuestMediaFilter = document.getElementById(
+  "activeGuestMediaFilter",
+);
+const activeGuestMediaFilterLabel = document.getElementById(
+  "activeGuestMediaFilterLabel",
+);
+const clearGuestMediaFilter = document.getElementById(
+  "clearGuestMediaFilter",
+);
 
 const guestList = document.getElementById("guestList");
 const guestSearchInput = document.getElementById("guestSearchInput");
@@ -209,6 +278,56 @@ const memoryBookPreviewTitle = document.getElementById(
   "memoryBookPreviewTitle",
 );
 const memoryBookPreviewMeta = document.getElementById("memoryBookPreviewMeta");
+const eventArchiveOpen = document.getElementById("eventArchiveOpen");
+const eventArchiveButtonMeta = document.getElementById(
+  "eventArchiveButtonMeta",
+);
+const eventHighlightsOpen = document.getElementById("eventHighlightsOpen");
+const eventHighlightsButtonMeta = document.getElementById(
+  "eventHighlightsButtonMeta",
+);
+const eventArchiveModal = document.getElementById("eventArchiveModal");
+const eventArchiveModalBackdrop = document.getElementById(
+  "eventArchiveModalBackdrop",
+);
+const eventArchiveClose = document.getElementById("eventArchiveClose");
+const eventArchiveCancel = document.getElementById("eventArchiveCancel");
+const eventArchiveForm = document.getElementById("eventArchiveForm");
+const eventArchiveDownload = document.getElementById("eventArchiveDownload");
+const eventArchiveStatus = document.getElementById("eventArchiveStatus");
+const eventArchivePhotoCount = document.getElementById(
+  "eventArchivePhotoCount",
+);
+const eventArchiveVideoCount = document.getElementById(
+  "eventArchiveVideoCount",
+);
+const eventArchiveMessageCount = document.getElementById(
+  "eventArchiveMessageCount",
+);
+const eventArchivePhotosMeta = document.getElementById(
+  "eventArchivePhotosMeta",
+);
+const eventArchiveVideosMeta = document.getElementById(
+  "eventArchiveVideosMeta",
+);
+const eventArchiveMessagesMeta = document.getElementById(
+  "eventArchiveMessagesMeta",
+);
+const eventArchiveIncludePhotos = document.getElementById(
+  "eventArchiveIncludePhotos",
+);
+const eventArchiveIncludeVideos = document.getElementById(
+  "eventArchiveIncludeVideos",
+);
+const eventArchiveIncludeMessages = document.getElementById(
+  "eventArchiveIncludeMessages",
+);
+const eventArchiveIncludeInfo = document.getElementById(
+  "eventArchiveIncludeInfo",
+);
+const eventArchiveDownloadFrame = document.getElementById(
+  "eventArchiveDownloadFrame",
+);
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
@@ -297,6 +416,8 @@ let currentRenderedMediaList = [];
 let approvedMemoryBookPhotos = [];
 let memoryBookReturnTarget = null;
 let memoryBookScrollY = 0;
+let eventArchiveReturnTarget = null;
+let eventArchiveScrollY = 0;
 let eventCoverEditorSourceFile = null;
 let eventCoverEditorObjectUrl = null;
 let eventCoverEditorImageWidth = 0;
@@ -308,6 +429,9 @@ let eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
 let eventCoverRemoveLastFocusedElement = null;
 let locationEditorPicker = null;
 let locationEditorLastFocusedElement = null;
+let currentEventStatistics = null;
+let eventStatisticsReturnTarget = null;
+let eventStatisticsScrollY = 0;
 
 let galleryLightboxItems = [];
 let activeGalleryIndex = 0;
@@ -317,6 +441,7 @@ let activeMediaFilter = "all";
 
 let allGuests = [];
 let guestSearchTerm = "";
+let selectedGuestMediaFilter = null;
 let activeUploadType = "photo";
 let queuedPhotoFiles = [];
 let queuedVideoFiles = [];
@@ -583,15 +708,25 @@ function showContent() {
   detailContent.hidden = false;
 }
 
-function setEventCoverBackground(coverUrl) {
+function setEventCoverBackground(eventOrUrl) {
+  const eventSource =
+    eventOrUrl && typeof eventOrUrl === "object"
+      ? eventOrUrl
+      : eventOrUrl
+        ? { ...currentEvent, event_cover_url: eventOrUrl }
+        : null;
+  const coverUrl = eventSource
+    ? getEventCoverUrl(eventSource, "display")
+    : "";
   const hasCover = Boolean(coverUrl);
 
   eventCover.classList.toggle("has-image", hasCover);
+  eventCover.style.removeProperty("background-image");
 
   if (hasCover) {
-    eventCover.style.backgroundImage = `url(${JSON.stringify(coverUrl)})`;
+    eventCoverMedia.style.backgroundImage = `url(${JSON.stringify(coverUrl)})`;
   } else {
-    eventCover.style.removeProperty("background-image");
+    eventCoverMedia.style.removeProperty("background-image");
   }
 
   if (eventCoverChangeLabel) {
@@ -960,11 +1095,273 @@ async function removeCurrentEventCover() {
   return data.event;
 }
 
+function formatStatisticNumber(value) {
+  const number = Number(value || 0);
+
+  try {
+    return new Intl.NumberFormat(getCurrentLocale()).format(
+      Number.isFinite(number) ? number : 0,
+    );
+  } catch (_error) {
+    return String(Number.isFinite(number) ? number : 0);
+  }
+}
+
+function formatStorageBytes(value) {
+  const bytes = Math.max(0, Number(value || 0));
+  if (!Number.isFinite(bytes) || bytes === 0) return "0 B";
+
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const unitIndex = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1,
+  );
+  const amount = bytes / 1024 ** unitIndex;
+
+  try {
+    const formatted = new Intl.NumberFormat(getCurrentLocale(), {
+      maximumFractionDigits: amount >= 10 || unitIndex === 0 ? 0 : 1,
+    }).format(amount);
+    return `${formatted} ${units[unitIndex]}`;
+  } catch (_error) {
+    return `${amount.toFixed(amount >= 10 || unitIndex === 0 ? 0 : 1)} ${
+      units[unitIndex]
+    }`;
+  }
+}
+
+function getStatisticsInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  return (
+    parts.map((part) => part.charAt(0).toLocaleUpperCase()).join("") || "?"
+  );
+}
+
+function renderEventStatistics(data) {
+  currentEventStatistics = data;
+
+  const summary = data?.summary || {};
+  const uploader = data?.top_photo_uploader || null;
+  const likedPhoto = data?.most_liked_photo || null;
+
+  if (eventStatisticsParticipants) {
+    eventStatisticsParticipants.textContent = formatStatisticNumber(
+      summary.participants_count,
+    );
+  }
+  if (eventStatisticsPhotos) {
+    eventStatisticsPhotos.textContent = formatStatisticNumber(
+      summary.photos_count,
+    );
+  }
+  if (eventStatisticsVideos) {
+    eventStatisticsVideos.textContent = formatStatisticNumber(
+      summary.videos_count,
+    );
+  }
+  if (eventStatisticsComments) {
+    eventStatisticsComments.textContent = formatStatisticNumber(
+      summary.comments_count,
+    );
+  }
+  if (eventStatisticsTotalUploads) {
+    eventStatisticsTotalUploads.textContent = formatStatisticNumber(
+      summary.total_uploads_count,
+    );
+  }
+  if (eventStatisticsStorage) {
+    eventStatisticsStorage.textContent = formatStorageBytes(
+      summary.used_storage_bytes,
+    );
+  }
+
+  if (eventStatisticsEventName) {
+    eventStatisticsEventName.textContent =
+      data?.event?.event_name || currentEvent?.event_name || t("Untitled Event");
+  }
+
+  if (uploader) {
+    const uploaderName = uploader.guest_name || t("Unknown Guest");
+    eventStatisticsUploaderAvatar.textContent =
+      getStatisticsInitials(uploaderName);
+    eventStatisticsUploaderName.textContent = uploaderName;
+    eventStatisticsUploaderCount.textContent = formatStatisticNumber(
+      uploader.photo_count,
+    );
+  } else {
+    eventStatisticsUploaderAvatar.textContent = "?";
+    eventStatisticsUploaderName.textContent = t("No uploader yet");
+    eventStatisticsUploaderCount.textContent = "0";
+  }
+
+  const likedPhotoUrl = likedPhoto
+    ? getImageDeliveryUrl(likedPhoto, "thumbnail")
+    : "";
+
+  if (likedPhoto && likedPhotoUrl) {
+    eventStatisticsLikedPhoto.src = likedPhotoUrl;
+    eventStatisticsLikedPhoto.alt = t("Most liked event photo");
+    eventStatisticsLikedPhoto.hidden = false;
+    eventStatisticsLikedEmpty.hidden = true;
+    eventStatisticsLikedGuest.textContent =
+      likedPhoto.guest_name || t("Unknown Guest");
+    eventStatisticsLikedCount.textContent = formatStatisticNumber(
+      likedPhoto.likes_count,
+    );
+    eventStatisticsLikedPhoto.onerror = () => {
+      eventStatisticsLikedPhoto.hidden = true;
+      eventStatisticsLikedEmpty.hidden = false;
+    };
+  } else {
+    eventStatisticsLikedPhoto.hidden = true;
+    eventStatisticsLikedPhoto.removeAttribute("src");
+    eventStatisticsLikedEmpty.hidden = false;
+    eventStatisticsLikedGuest.textContent = t("No liked photo yet");
+    eventStatisticsLikedCount.textContent = "0";
+  }
+
+  if (eventStatisticsStatus) {
+    eventStatisticsStatus.hidden = true;
+    eventStatisticsStatus.textContent = "";
+  }
+
+  if (eventStatisticsOpen) {
+    eventStatisticsOpen.disabled = false;
+  }
+}
+
+function renderEventStatisticsFallback(
+  mediaList = [],
+  { showError = true } = {},
+) {
+  const media = Array.isArray(mediaList) ? mediaList : [];
+  const photos = media.filter((item) => getMediaKind(item) === "image").length;
+  const videos = media.filter((item) => getMediaKind(item) === "video").length;
+  const comments = media.filter(
+    (item) => getMediaKind(item) === "message",
+  ).length;
+
+  renderEventStatistics({
+    event: currentEvent,
+    summary: {
+      participants_count: allGuests.length,
+      photos_count: photos,
+      videos_count: videos,
+      comments_count: comments,
+      total_uploads_count: photos + videos + comments,
+      used_storage_bytes: 0,
+    },
+    most_liked_photo: null,
+    top_photo_uploader: null,
+  });
+
+  if (eventStatisticsStatus) {
+    eventStatisticsStatus.hidden = !showError;
+    eventStatisticsStatus.textContent = showError
+      ? t("Event statistics could not be loaded.")
+      : "";
+  }
+
+  if (eventStatisticsStorage) {
+    eventStatisticsStorage.textContent = "—";
+  }
+
+  if (eventStatisticsOpen && !showError) {
+    eventStatisticsOpen.disabled = true;
+  }
+}
+
+async function loadEventStatistics() {
+  if (!eventId) return false;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/detail/${eventId}/statistics`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+      },
+    );
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      logout();
+      return false;
+    }
+
+    if (!response.ok || !data.success) {
+      throw createApiError(
+        response,
+        data,
+        "Event statistics could not be loaded.",
+      );
+    }
+
+    renderEventStatistics(data);
+    return true;
+  } catch (error) {
+    console.error("Event statistics error:", error);
+    return false;
+  }
+}
+
+function openEventStatistics() {
+  if (
+    !eventStatisticsModal ||
+    eventStatisticsOpen?.disabled ||
+    !currentEventStatistics
+  ) {
+    return;
+  }
+
+  eventStatisticsReturnTarget = document.activeElement;
+  eventStatisticsScrollY = window.scrollY;
+  eventStatisticsModal.classList.add("active");
+  eventStatisticsModal.setAttribute("aria-hidden", "false");
+  document.body.style.top = `-${eventStatisticsScrollY}px`;
+  document.body.classList.add("event-statistics-open");
+  eventStatisticsClose?.focus();
+}
+
+function closeEventStatistics() {
+  if (!eventStatisticsModal?.classList.contains("active")) return;
+
+  eventStatisticsModal.classList.remove("active");
+  eventStatisticsModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-statistics-open");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, eventStatisticsScrollY);
+
+  if (eventStatisticsReturnTarget instanceof HTMLElement) {
+    eventStatisticsReturnTarget.focus();
+  }
+}
+
 function renderEventInfo(event) {
   currentEvent = event;
 
   if (liveSlideshowOpen) {
     liveSlideshowOpen.disabled = false;
+  }
+
+  if (eventArchiveOpen) {
+    eventArchiveOpen.disabled = false;
+  }
+
+  if (eventHighlightsOpen) {
+    eventHighlightsOpen.disabled = false;
+  }
+
+  if (eventHighlightsButtonMeta) {
+    eventHighlightsButtonMeta.textContent =
+      event.is_event_active === false
+        ? t("Highlights are ready to share")
+        : t("Private preview until the event ends");
   }
 
   eventTitle.textContent = event.event_name || t("Untitled Event");
@@ -1002,7 +1399,7 @@ function renderEventInfo(event) {
   eventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
   eventPrivacy.textContent = t(event.is_event_private ? "Private" : "Public");
 
-  setEventCoverBackground(event.event_cover_url);
+  setEventCoverBackground(event);
 
   const joinUrl = getJoinUrl(event);
   const qrImageUrl = getQrImageUrl(event);
@@ -1056,8 +1453,8 @@ function updateMemoryBookPreview() {
   }
 
   const previewImageUrl =
-    currentEvent.event_cover_url ||
-    getMediaUrl(approvedMemoryBookPhotos[0] || {});
+    getEventCoverUrl(currentEvent, "display") ||
+    getImageDeliveryUrl(approvedMemoryBookPhotos[0] || {}, "display");
 
   if (memoryBookPreviewCover && previewImageUrl) {
     memoryBookPreviewCover.style.backgroundImage = `linear-gradient(
@@ -1214,6 +1611,10 @@ function shouldShowApproveAllImagesButton(mediaList) {
     return false;
   }
 
+  if (selectedGuestMediaFilter) {
+    return false;
+  }
+
   if (!mediaList || mediaList.length === 0) {
     return false;
   }
@@ -1254,32 +1655,170 @@ function getMediaKind(media) {
   return "message";
 }
 
-function getFilteredMediaList() {
-  if (activeMediaFilter === "all") {
+function normalizeGuestName(value) {
+  return String(value || "").trim().toLocaleLowerCase("tr-TR");
+}
+
+function getGuestFilterIds(guest) {
+  const ids = Array.isArray(guest?.duplicate_guest_ids)
+    ? guest.duplicate_guest_ids
+    : [];
+  const allIds = [guest?.guest_id, ...ids]
+    .filter(Boolean)
+    .map((id) => String(id));
+
+  return [...new Set(allIds)];
+}
+
+function isSameGuestFilter(guest, filter) {
+  if (!guest || !filter) {
+    return false;
+  }
+
+  const guestIds = getGuestFilterIds(guest);
+  const filterIds = getGuestFilterIds(filter);
+
+  if (guestIds.length && filterIds.length) {
+    return guestIds.some((id) => filterIds.includes(id));
+  }
+
+  return (
+    normalizeGuestName(guest.guest_name) ===
+    normalizeGuestName(filter.guest_name)
+  );
+}
+
+function mediaMatchesGuestFilter(media, guestFilter) {
+  if (!guestFilter) {
+    return true;
+  }
+
+  const mediaGuestId = media?.guest_id || media?.guestId;
+  const guestIds = getGuestFilterIds(guestFilter);
+
+  if (mediaGuestId && guestIds.length) {
+    return guestIds.includes(String(mediaGuestId));
+  }
+
+  const mediaGuestName =
+    media?.guest_name ||
+    media?.guestName ||
+    media?.user_name ||
+    media?.userName ||
+    "";
+
+  return (
+    normalizeGuestName(mediaGuestName) ===
+    normalizeGuestName(guestFilter.guest_name)
+  );
+}
+
+function getGuestScopedMediaItems() {
+  if (!selectedGuestMediaFilter) {
     return allMediaItems;
   }
 
-  if (activeMediaFilter === "pending") {
-    return allMediaItems.filter((media) => getMediaStatus(media) === "pending");
+  return allMediaItems.filter((media) =>
+    mediaMatchesGuestFilter(media, selectedGuestMediaFilter),
+  );
+}
+
+function getFilteredMediaList() {
+  const guestScopedMediaItems = getGuestScopedMediaItems();
+
+  if (activeMediaFilter === "all") {
+    return guestScopedMediaItems;
   }
 
-  return allMediaItems.filter(
+  if (activeMediaFilter === "pending") {
+    return guestScopedMediaItems.filter(
+      (media) => getMediaStatus(media) === "pending",
+    );
+  }
+
+  return guestScopedMediaItems.filter(
     (media) => getMediaKind(media) === activeMediaFilter,
   );
 }
 
 function getFilterCount(filterKey) {
+  const guestScopedMediaItems = getGuestScopedMediaItems();
+
   if (filterKey === "all") {
-    return allMediaItems.length;
+    return guestScopedMediaItems.length;
   }
 
   if (filterKey === "pending") {
-    return allMediaItems.filter((media) => getMediaStatus(media) === "pending")
-      .length;
+    return guestScopedMediaItems.filter(
+      (media) => getMediaStatus(media) === "pending",
+    ).length;
   }
 
-  return allMediaItems.filter((media) => getMediaKind(media) === filterKey)
-    .length;
+  return guestScopedMediaItems.filter(
+    (media) => getMediaKind(media) === filterKey,
+  ).length;
+}
+
+function renderActiveGuestMediaFilter() {
+  if (
+    !activeGuestMediaFilter ||
+    !activeGuestMediaFilterLabel ||
+    !clearGuestMediaFilter
+  ) {
+    return;
+  }
+
+  if (!selectedGuestMediaFilter) {
+    activeGuestMediaFilter.hidden = true;
+    return;
+  }
+
+  const guestName =
+    selectedGuestMediaFilter.guest_name || t("Unknown Guest");
+
+  activeGuestMediaFilter.querySelector("span").textContent = t("All");
+  activeGuestMediaFilterLabel.textContent = guestName;
+  clearGuestMediaFilter.textContent = t("All");
+  activeGuestMediaFilter.hidden = false;
+}
+
+function applyGuestMediaFilter(guest) {
+  if (!guest) {
+    return;
+  }
+
+  selectedGuestMediaFilter = {
+    guest_id: guest.guest_id,
+    duplicate_guest_ids: getGuestFilterIds(guest),
+    guest_name: guest.guest_name || t("Unknown Guest"),
+  };
+  activeMediaFilter = "all";
+
+  renderGuests();
+  renderActiveGuestMediaFilter();
+  renderMediaFilters();
+  renderMediaCards();
+
+  const reduceMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  eventGallerySection?.scrollIntoView({
+    behavior: reduceMotion ? "auto" : "smooth",
+    block: "start",
+  });
+}
+
+function clearSelectedGuestMediaFilter() {
+  if (!selectedGuestMediaFilter) {
+    return;
+  }
+
+  selectedGuestMediaFilter = null;
+  renderGuests();
+  renderActiveGuestMediaFilter();
+  renderMediaFilters();
+  renderMediaCards();
 }
 
 function ensureMediaFilterBar() {
@@ -1471,11 +2010,23 @@ function renderMediaCards() {
       `;
 
       if (mediaUrl && mediaKind === "video") {
+        const videoUrl = getVideoPlaybackUrl(media);
+        const posterUrl = getVideoPosterUrl(media);
+        const posterAttribute = posterUrl
+          ? `poster="${escapeHtml(posterUrl)}"`
+          : "";
+
         return `
           <article class="media-card admin-media-card">
             <div class="media-preview-wrap">
               ${badgeHtml}
-              <video src="${escapeHtml(mediaUrl)}" controls></video>
+              <video
+                src="${escapeHtml(videoUrl)}"
+                controls
+                playsinline
+                preload="none"
+                ${posterAttribute}
+              ></video>
             </div>
 
             <div class="media-card-body">
@@ -1489,9 +2040,15 @@ function renderMediaCards() {
 
       if (mediaUrl && mediaKind === "image") {
         const galleryIndex = galleryLightboxItems.length;
+        const feedUrl = getImageDeliveryUrl(media, "feed");
+        const displayUrl = getImageDeliveryUrl(media, "display");
+        const feedSrcSet = getImageSrcSet(media);
+        const srcSetAttribute = feedSrcSet
+          ? `srcset="${escapeHtml(feedSrcSet)}"`
+          : "";
 
         galleryLightboxItems.push({
-          url: mediaUrl,
+          url: displayUrl,
           guestName,
           uploadedAt,
           message: message || t("Photo memory"),
@@ -1509,9 +2066,14 @@ function renderMediaCards() {
                   t("Open photo uploaded by {name}", { name: guestName }),
                 )}"
               >
-                <img src="${escapeHtml(mediaUrl)}" alt="Uploaded by ${escapeHtml(
-                  guestName,
-                )}" />
+                <img
+                  src="${escapeHtml(feedUrl)}"
+                  ${srcSetAttribute}
+                  sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1180px) calc(50vw - 42px), 520px"
+                  alt="Uploaded by ${escapeHtml(guestName)}"
+                  loading="lazy"
+                  decoding="async"
+                />
               </button>
             </div>
 
@@ -1545,8 +2107,10 @@ function renderMedia(mediaList) {
   currentRenderedMediaList = getFilteredMediaList();
 
   updateMemoryBookAvailability();
+  updateEventArchiveAvailability();
   updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
 
+  renderActiveGuestMediaFilter();
   renderMediaFilters();
   renderMediaCards();
 }
@@ -1696,6 +2260,250 @@ async function downloadMemoryBook() {
     memoryBookDownload.disabled = false;
     memoryBookCancel.disabled = false;
     memoryBookClose.disabled = false;
+    buttonText.textContent = t("Try Again");
+  }
+}
+
+function getApprovedArchiveCounts() {
+  return allMediaItems.reduce(
+    (counts, media) => {
+      if (getMediaStatus(media) !== "approved") {
+        return counts;
+      }
+
+      const mediaKind = getMediaKind(media);
+
+      if (mediaKind === "image") counts.photos += 1;
+      if (mediaKind === "video") counts.videos += 1;
+      if (
+        mediaKind === "message" &&
+        String(media.message || "").trim()
+      ) {
+        counts.messages += 1;
+      }
+
+      return counts;
+    },
+    { photos: 0, videos: 0, messages: 0 },
+  );
+}
+
+function syncArchiveContentOption(input, count) {
+  if (!input) {
+    return;
+  }
+
+  const hadNoContent = input.disabled;
+  input.disabled = count === 0;
+
+  if (count === 0) {
+    input.checked = false;
+  } else if (hadNoContent) {
+    input.checked = true;
+  }
+}
+
+function updateEventArchiveAvailability() {
+  const counts = getApprovedArchiveCounts();
+  const approvedTotal = counts.photos + counts.videos + counts.messages;
+
+  if (eventArchivePhotoCount) {
+    eventArchivePhotoCount.textContent = String(counts.photos);
+  }
+
+  if (eventArchiveVideoCount) {
+    eventArchiveVideoCount.textContent = String(counts.videos);
+  }
+
+  if (eventArchiveMessageCount) {
+    eventArchiveMessageCount.textContent = String(counts.messages);
+  }
+
+  if (eventArchivePhotosMeta) {
+    eventArchivePhotosMeta.textContent = t("{count} approved", {
+      count: counts.photos,
+    });
+  }
+
+  if (eventArchiveVideosMeta) {
+    eventArchiveVideosMeta.textContent = t("{count} approved", {
+      count: counts.videos,
+    });
+  }
+
+  if (eventArchiveMessagesMeta) {
+    eventArchiveMessagesMeta.textContent = t("{count} approved", {
+      count: counts.messages,
+    });
+  }
+
+  if (eventArchiveButtonMeta) {
+    eventArchiveButtonMeta.textContent = approvedTotal
+      ? t("{count} approved items ready", { count: approvedTotal })
+      : t("Event information is ready to export");
+  }
+
+  syncArchiveContentOption(eventArchiveIncludePhotos, counts.photos);
+  syncArchiveContentOption(eventArchiveIncludeVideos, counts.videos);
+  syncArchiveContentOption(eventArchiveIncludeMessages, counts.messages);
+}
+
+function setEventArchiveStatus(message = "", type = "") {
+  if (!eventArchiveStatus) {
+    return;
+  }
+
+  eventArchiveStatus.textContent = message;
+  eventArchiveStatus.className = [
+    "event-archive-status",
+    message ? "active" : "",
+    type,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function openEventArchive() {
+  if (!currentEvent || !eventArchiveModal) {
+    return;
+  }
+
+  eventArchiveReturnTarget = document.activeElement;
+  eventArchiveScrollY = window.scrollY;
+  updateEventArchiveAvailability();
+  setEventArchiveStatus();
+  eventArchiveDownload.disabled = false;
+  eventArchiveCancel.disabled = false;
+  eventArchiveClose.disabled = false;
+  eventArchiveDownload.querySelector("span").textContent = t(
+    "Download ZIP Archive",
+  );
+
+  eventArchiveModal.classList.add("active");
+  eventArchiveModal.setAttribute("aria-hidden", "false");
+  document.body.style.top = `-${eventArchiveScrollY}px`;
+  document.body.classList.add("event-archive-open");
+  eventArchiveClose.focus();
+}
+
+function closeEventArchive() {
+  if (!eventArchiveModal || eventArchiveDownload.disabled) {
+    return;
+  }
+
+  eventArchiveModal.classList.remove("active");
+  eventArchiveModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-archive-open");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, eventArchiveScrollY);
+  setEventArchiveStatus();
+
+  if (eventArchiveReturnTarget instanceof HTMLElement) {
+    eventArchiveReturnTarget.focus();
+  }
+}
+
+function getEventArchiveOptions() {
+  const quality =
+    eventArchiveForm?.querySelector(
+      'input[name="eventArchiveQuality"]:checked',
+    )?.value || "optimized";
+
+  return {
+    quality,
+    include: {
+      photos: Boolean(eventArchiveIncludePhotos?.checked),
+      videos: Boolean(eventArchiveIncludeVideos?.checked),
+      messages: Boolean(eventArchiveIncludeMessages?.checked),
+      eventInfo: Boolean(eventArchiveIncludeInfo?.checked),
+    },
+  };
+}
+
+async function startEventArchiveDownload(event) {
+  event.preventDefault();
+
+  if (!eventId || !currentEvent || eventArchiveDownload.disabled) {
+    return;
+  }
+
+  const options = getEventArchiveOptions();
+
+  if (!Object.values(options.include).some(Boolean)) {
+    setEventArchiveStatus(
+      t("Select at least one archive content type."),
+      "error",
+    );
+    return;
+  }
+
+  const buttonText = eventArchiveDownload.querySelector("span");
+
+  try {
+    eventArchiveDownload.disabled = true;
+    eventArchiveCancel.disabled = true;
+    eventArchiveClose.disabled = true;
+    buttonText.textContent = t("Preparing archive...");
+    setEventArchiveStatus(
+      t("Creating a secure download link for your event archive..."),
+    );
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/detail/${eventId}/archive-ticket`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(options),
+      },
+    );
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok || !data.success || !data.ticket) {
+      throw createApiError(
+        response,
+        data,
+        "The event archive could not be prepared.",
+      );
+    }
+
+    const downloadUrl = `${API_BASE_URL}/api/events/detail/${encodeURIComponent(
+      eventId,
+    )}/archive?ticket=${encodeURIComponent(data.ticket)}`;
+
+    if (eventArchiveDownloadFrame) {
+      eventArchiveDownloadFrame.src = downloadUrl;
+    } else {
+      window.location.assign(downloadUrl);
+    }
+
+    setEventArchiveStatus(
+      t("Your archive is being prepared. The download has started."),
+      "success",
+    );
+    buttonText.textContent = t("Download Started");
+    eventArchiveDownload.disabled = false;
+    eventArchiveCancel.disabled = false;
+    eventArchiveClose.disabled = false;
+
+    window.setTimeout(() => {
+      if (eventArchiveModal?.classList.contains("active")) {
+        closeEventArchive();
+      }
+    }, 1700);
+  } catch (error) {
+    console.error("Event archive ticket error:", error);
+    setEventArchiveStatus(
+      t(error.message || "The event archive could not be prepared."),
+      "error",
+    );
+    eventArchiveDownload.disabled = false;
+    eventArchiveCancel.disabled = false;
+    eventArchiveClose.disabled = false;
     buttonText.textContent = t("Try Again");
   }
 }
@@ -1858,23 +2666,32 @@ function renderGuests() {
   guestList.innerHTML = filteredGuests
     .map((guest) => {
       const guestName = guest.guest_name || t("Unknown Guest");
+      const isSelected = isSameGuestFilter(
+        guest,
+        selectedGuestMediaFilter,
+      );
       const totalUploads = guest.total_uploads || 0;
       const pendingUploads = guest.pending_uploads || 0;
       const approvedUploads = guest.approved_uploads || 0;
       const rejectedUploads = guest.rejected_uploads || 0;
 
       return `
-        <article class="guest-card">
+        <article class="guest-card ${isSelected ? "is-selected" : ""}">
           <div class="guest-avatar">
             ${escapeHtml(guestName.charAt(0).toUpperCase())}
           </div>
 
-          <div class="guest-main">
+          <button
+            type="button"
+            class="guest-main guest-filter-button"
+            data-guest-filter-id="${escapeHtml(guest.guest_id || "")}"
+            aria-pressed="${isSelected ? "true" : "false"}"
+          >
             <strong>${escapeHtml(guestName)}</strong>
             <span>${escapeHtml(
               t("{count} uploads", { count: totalUploads }),
             )}</span>
-          </div>
+          </button>
 
           <div class="guest-stats">
             <span class="approved">${escapeHtml(
@@ -1971,7 +2788,12 @@ async function loadEventDetail() {
     renderSettings(data.settings);
     renderMedia(data.media || []);
     await loadEventGuests();
+    renderEventStatisticsFallback(data.media || [], { showError: false });
     showContent();
+    const statisticsLoaded = await loadEventStatistics();
+    if (!statisticsLoaded) {
+      renderEventStatisticsFallback(data.media || []);
+    }
   } catch (error) {
     console.error("Event detail error:", error);
     showError("Backend connection error.");
@@ -2809,6 +3631,14 @@ memoryBookClose?.addEventListener("click", closeMemoryBook);
 memoryBookCancel?.addEventListener("click", closeMemoryBook);
 memoryBookModalBackdrop?.addEventListener("click", closeMemoryBook);
 memoryBookDownload?.addEventListener("click", downloadMemoryBook);
+eventArchiveOpen?.addEventListener("click", openEventArchive);
+eventArchiveClose?.addEventListener("click", closeEventArchive);
+eventArchiveCancel?.addEventListener("click", closeEventArchive);
+eventArchiveModalBackdrop?.addEventListener("click", closeEventArchive);
+eventArchiveForm?.addEventListener("submit", startEventArchiveDownload);
+eventArchiveForm?.addEventListener("change", () => {
+  setEventArchiveStatus();
+});
 
 eventLocationEditButton?.addEventListener("click", openLocationEditor);
 
@@ -2888,6 +3718,23 @@ if (liveSlideshowOpen) {
   });
 }
 
+if (eventHighlightsOpen) {
+  eventHighlightsOpen.addEventListener("click", () => {
+    if (!eventId || !currentEvent?.event_code) {
+      return;
+    }
+
+    const highlightsUrl = new URL("event-highlights.html", window.location.href);
+    highlightsUrl.searchParams.set("event_id", eventId);
+    highlightsUrl.searchParams.set("code", currentEvent.event_code);
+    window.open(highlightsUrl.href, "_blank", "noopener,noreferrer");
+  });
+}
+
+eventStatisticsOpen?.addEventListener("click", openEventStatistics);
+eventStatisticsBackdrop?.addEventListener("click", closeEventStatistics);
+eventStatisticsClose?.addEventListener("click", closeEventStatistics);
+
 if (settingsModalClose) {
   settingsModalClose.addEventListener("click", closeSettingsModal);
 }
@@ -2919,6 +3766,13 @@ if (settingsForm) {
       }
 
       renderSettings(updatedSettings);
+
+      if (currentEvent) {
+        renderEventInfo({
+          ...currentEvent,
+          is_event_active: updatedSettings.is_event_active !== false,
+        });
+      }
 
       settingsResult.textContent = t("Settings updated successfully.");
       settingsResult.dataset.state = "success";
@@ -2998,6 +3852,30 @@ if (guestSearchInput) {
     guestSearchTerm = guestSearchInput.value || "";
     renderGuests();
   });
+}
+
+if (guestList) {
+  guestList.addEventListener("click", (event) => {
+    const guestButton = event.target.closest("[data-guest-filter-id]");
+
+    if (!guestButton) {
+      return;
+    }
+
+    const guestId = guestButton.dataset.guestFilterId;
+    const guest = allGuests.find((item) =>
+      getGuestFilterIds(item).includes(String(guestId)),
+    );
+
+    applyGuestMediaFilter(guest);
+  });
+}
+
+if (clearGuestMediaFilter) {
+  clearGuestMediaFilter.addEventListener(
+    "click",
+    clearSelectedGuestMediaFilter,
+  );
 }
 
 if (galleryLightboxClose) {
@@ -3262,7 +4140,7 @@ eventCoverEditorSave?.addEventListener("click", async () => {
     }
 
     currentEvent = { ...currentEvent, ...updatedEvent };
-    setEventCoverBackground(currentEvent.event_cover_url);
+    setEventCoverBackground(currentEvent);
     setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
     updateMemoryBookPreview();
     closeEventCoverEditor({ restoreFocus: false });
@@ -3328,6 +4206,22 @@ window.addEventListener("keydown", (event) => {
   if (eventCoverEditor?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeEventCoverEditor();
+    }
+
+    return;
+  }
+
+  if (eventStatisticsModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventStatistics();
+    }
+
+    return;
+  }
+
+  if (eventArchiveModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventArchive();
     }
 
     return;
