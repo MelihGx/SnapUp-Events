@@ -1,6 +1,7 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
 
 const API_BASE_URL = API_URL;
 const MAX_MEDIA_FILES = 15;
@@ -14,6 +15,7 @@ let selectedEvent = null;
 let selectedFiles = [];
 let selectedFilePreviewUrls = [];
 let successPopupHideTimer = null;
+let joinTurnstileControllerPromise = null;
 
 function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
@@ -628,7 +630,7 @@ async function findEventByCode(eventCode) {
   return data.event;
 }
 
-async function createGuest(eventId, guestName) {
+async function createGuest(eventId, guestName, turnstileToken) {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
   let cached = null;
 
@@ -648,6 +650,7 @@ async function createGuest(eventId, guestName) {
     body: JSON.stringify({
       event_id: eventId,
       guest_name: guestName,
+      turnstile_token: turnstileToken,
     }),
   });
 
@@ -862,6 +865,8 @@ function initFormSubmit() {
     const messageText =
       document.getElementById("joinMessageText")?.value.trim() || "";
     const submissionMediaType = selectedMediaType;
+    let turnstileController = null;
+    let turnstileTokenWasUsed = false;
 
     try {
       if (!eventCode) {
@@ -902,6 +907,10 @@ function initFormSubmit() {
         return;
       }
 
+      turnstileController = await joinTurnstileControllerPromise;
+      const turnstileToken = turnstileController.getToken();
+      turnstileTokenWasUsed = Boolean(turnstileToken);
+
       setLoading(true);
 
       if (submissionMediaType === "message") {
@@ -910,7 +919,11 @@ function initFormSubmit() {
         setResult(`Uploading ${selectedFiles.length} file(s)...`, "info");
       }
 
-      const guest = await createGuest(eventData.event_id, guestName);
+      const guest = await createGuest(
+        eventData.event_id,
+        guestName,
+        turnstileToken,
+      );
 
       if (submissionMediaType === "message") {
         await sendMessage(eventData.event_id, guest.guest_id, guest.guest_access_token, messageText);
@@ -941,6 +954,7 @@ function initFormSubmit() {
       if (handleRegisteredOnlyError(error, eventCode)) return;
       setResult(error.message || "Upload failed.", "error");
     } finally {
+      if (turnstileTokenWasUsed) turnstileController?.reset();
       setLoading(false);
     }
   });
@@ -980,6 +994,13 @@ function initUploadSuccessPopup() {
 }
 
 export function initJoinUploadModal() {
+  joinTurnstileControllerPromise = mountTurnstile({
+    fieldId: "joinTurnstileField",
+    widgetId: "joinTurnstileWidget",
+    messageId: "joinTurnstileMessage",
+    action: "guest_join",
+  });
+
   initOpenClose();
   initMediaTypeButtons();
   initFilePreview();

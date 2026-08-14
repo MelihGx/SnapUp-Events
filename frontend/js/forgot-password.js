@@ -1,4 +1,5 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
 
 const form = document.getElementById("forgotPasswordForm");
 const mailInput = document.getElementById("forgotPasswordMail");
@@ -7,6 +8,12 @@ const submitButton = document.getElementById("forgotPasswordSubmit");
 const resultBox = document.getElementById("forgotPasswordResult");
 
 const API_URL = `${API_BASE_URL}/api/auth/forgot-password`;
+const forgotPasswordTurnstile = mountTurnstile({
+  fieldId: "forgotPasswordTurnstileField",
+  widgetId: "forgotPasswordTurnstileWidget",
+  messageId: "forgotPasswordTurnstileMessage",
+  action: "forgot_password",
+});
 
 function t(value) {
   return window.SnapUpI18n?.t?.(value) || value;
@@ -35,7 +42,14 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  let turnstileController = null;
+  let turnstileTokenWasUsed = false;
+
   try {
+    turnstileController = await forgotPasswordTurnstile;
+    const turnstile_token = turnstileController.getToken();
+    turnstileTokenWasUsed = Boolean(turnstile_token);
+
     submitButton.disabled = true;
     submitButton.textContent = t("Sending reset link...");
 
@@ -47,6 +61,7 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         user_mail: userMail,
         language_code: window.SnapUpI18n?.language || "en",
+        turnstile_token,
       }),
     });
 
@@ -69,6 +84,7 @@ form.addEventListener("submit", async (event) => {
       "error",
     );
   } finally {
+    if (turnstileTokenWasUsed) turnstileController?.reset();
     submitButton.disabled = false;
     submitButton.textContent = t("Send reset link");
   }

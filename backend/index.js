@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
+const securityRoutes = require("./routes/securityRoutes");
 const { requestContext, globalLimiter } = require("./middlewares/security");
 
 const app = express();
@@ -80,7 +81,7 @@ app.use(
       return callback(corsError);
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id", "X-Turnstile-Token"],
     exposedHeaders: [
       "Content-Disposition",
       "X-SnapUp-PDF-Engine",
@@ -108,6 +109,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/media", mediaRoutes);
+app.use("/api/security", securityRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

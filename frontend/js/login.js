@@ -1,4 +1,5 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
 
 const loginForm = document.getElementById("loginForm");
 
@@ -13,6 +14,12 @@ const loginResult = document.getElementById("loginResult");
 const toggleLoginPassword = document.getElementById("toggleLoginPassword");
 
 const API_URL = `${API_BASE_URL}/api/auth/login`;
+const loginTurnstile = mountTurnstile({
+  fieldId: "loginTurnstileField",
+  widgetId: "loginTurnstileWidget",
+  messageId: "loginTurnstileMessage",
+  action: "login",
+});
 
 function clearLoginErrors() {
   loginMailError.textContent = "";
@@ -66,7 +73,14 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  let turnstileController = null;
+  let turnstileTokenWasUsed = false;
+
   try {
+    turnstileController = await loginTurnstile;
+    const turnstile_token = turnstileController.getToken();
+    turnstileTokenWasUsed = Boolean(turnstile_token);
+
     loginSubmit.disabled = true;
     loginSubmit.textContent = "Logging in...";
 
@@ -78,6 +92,7 @@ loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         user_mail,
         password,
+        turnstile_token,
       }),
     });
 
@@ -107,8 +122,9 @@ loginForm.addEventListener("submit", async (event) => {
     }, 800);
   } catch (error) {
     console.error("Login error:", error);
-    showLoginResult("Backend connection error.", "error");
+    showLoginResult(error.message || "Backend connection error.", "error");
   } finally {
+    if (turnstileTokenWasUsed) turnstileController?.reset();
     loginSubmit.disabled = false;
     loginSubmit.textContent = "Login";
   }

@@ -1,4 +1,5 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
 
 const registerForm = document.getElementById("registerForm");
 
@@ -19,6 +20,12 @@ const registerResult = document.getElementById("registerResult");
 const togglePassword = document.getElementById("togglePassword");
 
 const API_URL = `${API_BASE_URL}/api/auth/register`;
+const registerTurnstile = mountTurnstile({
+  fieldId: "registerTurnstileField",
+  widgetId: "registerTurnstileWidget",
+  messageId: "registerTurnstileMessage",
+  action: "register",
+});
 
 function clearErrors() {
   userNameError.textContent = "";
@@ -96,7 +103,14 @@ registerForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  let turnstileController = null;
+  let turnstileTokenWasUsed = false;
+
   try {
+    turnstileController = await registerTurnstile;
+    const turnstile_token = turnstileController.getToken();
+    turnstileTokenWasUsed = Boolean(turnstile_token);
+
     registerSubmit.disabled = true;
     registerSubmit.textContent = "Creating account...";
 
@@ -111,6 +125,7 @@ registerForm.addEventListener("submit", async (event) => {
         user_phone,
         password,
         language_code: window.SnapUpI18n?.language || "en",
+        turnstile_token,
       }),
     });
 
@@ -148,8 +163,9 @@ registerForm.addEventListener("submit", async (event) => {
     }, 900);
   } catch (error) {
     console.error("Register error:", error);
-    showResult("Backend connection error.", "error");
+    showResult(error.message || "Backend connection error.", "error");
   } finally {
+    if (turnstileTokenWasUsed) turnstileController?.reset();
     registerSubmit.disabled = false;
     registerSubmit.textContent = "Create Account";
   }
