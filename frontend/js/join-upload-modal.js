@@ -1,7 +1,7 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
-import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
 
 const API_BASE_URL = API_URL;
 const MAX_MEDIA_FILES = 15;

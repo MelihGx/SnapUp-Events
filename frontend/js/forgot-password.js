@@ -1,5 +1,5 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
-import { mountTurnstile } from "./turnstile.js?v=turnstile-1";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
 
 const form = document.getElementById("forgotPasswordForm");
 const mailInput = document.getElementById("forgotPasswordMail");
