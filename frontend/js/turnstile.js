@@ -10,12 +10,6 @@ function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
 }
 
-function isLocalhost() {
-  return ["localhost", "127.0.0.1", "::1"].includes(
-    window.location.hostname.toLowerCase(),
-  );
-}
-
 async function loadConfig() {
   if (!configPromise) {
     configPromise = fetch(`${API_URL}/api/security/turnstile`, {
@@ -164,7 +158,7 @@ export async function mountTurnstile({
       action,
       theme: "auto",
       size: "flexible",
-      appearance: isLocalhost() ? "always" : "interaction-only",
+      appearance: "always",
       callback(value) {
         token = value;
         field.classList.remove("is-loading", "is-error", "needs-attention");
