@@ -621,6 +621,18 @@ a {
   caret-color: var(--auth-brand);
 }
 
+/*
+ * Edge adds its own password reveal/clear controls to password inputs.
+ * SnapUp already provides a dedicated Show/Hide button, so hide the
+ * browser-native controls to avoid rendering two reveal buttons.
+ */
+.auth-password-row input::-ms-reveal,
+.auth-password-row input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .auth-password-row button {
   align-self: stretch;
   min-width: 72px;
