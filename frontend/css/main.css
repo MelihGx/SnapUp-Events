@@ -218,7 +218,7 @@ html[data-theme="dark"] .sfs-phone-art { background: #1c1726; }
   .snap-feature-showcase .sfs-intro { min-height: 0; margin: 0; padding-left: 16px; }
   .sfs-grid { display: flex; flex-direction: column; }
   .sfs-card { min-height: 240px; border-radius: 22px; }.sfs-hero { min-height: 570px; }.sfs-book { min-height: 260px; }
-  .sfs-card-copy { padding: 20px; }.sfs-card-copy > div { width: calc(100% - 138px); max-width: 210px; }.snap-feature-showcase .sfs-card-copy h3 { font-size: 19px; }.snap-feature-showcase .sfs-card-copy p { font-size: 11px; }
+  .sfs-card-copy { padding: 20px; justify-content: flex-start; gap: 14px; }.sfs-card-copy > div { width: calc(100% - 138px); max-width: 210px; }.snap-feature-showcase .sfs-card-copy h3 { font-size: 19px; }.snap-feature-showcase .sfs-card-copy p { font-size: 11px; }
   .sfs-book .sfs-card-copy { width: 100%; padding-right: 230px; }.sfs-book .sfs-card-copy > div { width: 100%; max-width: 290px; }
   .sfs-phone-art,.sfs-invite-art,.sfs-screen-art,.sfs-approval-art { transform: scale(0.9); transform-origin: bottom right; }.sfs-book-art { right: -5px; transform: scale(0.82) rotate(-2deg); transform-origin: bottom right; }
   .sfs-qr-art { width: 310px; height: 310px; right: -100px; bottom: -85px; }
