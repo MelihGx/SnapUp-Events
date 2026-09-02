@@ -6,6 +6,7 @@ const {
   videoDeliveryUrl,
 } = require("../services/cloudinaryDelivery");
 const { generateEventCode } = require("../utils/eventCode");
+const { normalizePackageKey } = require("../services/pricingService");
 const cloudinary = require("../config/cloudinary");
 const {
   MemoryBookPdfError,
@@ -125,13 +126,18 @@ async function generateUniqueEventCode() {
 }
 
 async function getPacketLevelId(packageName) {
+  const normalizedPackage = normalizePackageKey(packageName);
   let packetName = "Free";
 
-  if (packageName === "standard" || packageName === "plus") {
+  // The current database has Free / Plus / Premium packet levels.
+  // Mini and Plus remain separate commercial packages, but both map to the
+  // existing Plus capability level until package-specific quota enforcement
+  // is introduced in the database.
+  if (normalizedPackage === "mini" || normalizedPackage === "plus") {
     packetName = "Plus";
   }
 
-  if (packageName === "premium") {
+  if (normalizedPackage === "premium") {
     packetName = "Premium";
   }
 
@@ -307,7 +313,9 @@ const createEvent = async (req, res) => {
       });
     }
 
-    const selectedPackage = eventPackage || packageName || "starter";
+    const selectedPackage = normalizePackageKey(
+      eventPackage || packageName || "free",
+    );
     const packetLevelId = await getPacketLevelId(selectedPackage);
 
     const eventCode = await generateUniqueEventCode();

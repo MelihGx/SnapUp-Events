@@ -1147,21 +1147,13 @@ html[data-theme="dark"] :is(.site-header, .hero) {
   color-scheme: dark;
 }
 
-/*
- * Pricing has a full `background` gradient in the landing-page stylesheet.
- * Override the complete shorthand here (not only background-color), otherwise
- * the light gradient remains visible over the dark theme colors.
- */
 html[data-theme="dark"] .pricing {
-  background:
-    radial-gradient(circle at 8% 12%, rgba(124, 58, 237, 0.15), transparent 28%),
-    radial-gradient(circle at 92% 84%, rgba(236, 72, 153, 0.09), transparent 30%),
-    var(--theme-bg);
+  background: #100e1b;
 }
 
 html[data-theme="dark"] .pricing-card,
 html[data-theme="dark"] .pricing-card-featured {
-  background: rgba(25, 21, 34, 0.96);
+  background: #191627;
 }
 
 html[data-theme="dark"] .pricing :is(
@@ -1176,9 +1168,27 @@ html[data-theme="dark"] .pricing :is(
   .section-head p,
   .pricing-card p,
   .pricing-price span,
-  .pricing-features li
+  .pricing-features li,
+  .pricing-note
 ) {
   color: var(--theme-muted);
+}
+
+html[data-theme="dark"] .pricing-promises span {
+  color: var(--theme-muted);
+  background: transparent;
+}
+
+html[data-theme="dark"] .pricing-storage {
+  color: rgba(247, 243, 255, 0.54);
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .pricing-card .pricing-fit {
+  color: rgba(247, 243, 255, 0.72);
+  background: transparent;
+  border-color: var(--plan-color);
 }
 
 html[data-theme="dark"] .pricing-price {
@@ -1187,13 +1197,50 @@ html[data-theme="dark"] .pricing-price {
 
 html[data-theme="dark"] .pricing .btn-glass {
   color: var(--theme-text);
-  background: rgba(255, 255, 255, 0.065);
+  background: transparent;
   border-color: var(--theme-border);
 }
 
 html[data-theme="dark"] .pricing .btn-glass:hover {
-  background: rgba(124, 58, 237, 0.16);
+  background: rgba(255, 255, 255, 0.06);
   border-color: rgba(167, 139, 250, 0.4);
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus {
+  color: #1b1630;
+  background: #f7f5ff;
+  border-color: #f7f5ff;
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus :is(
+  h3,
+  .pricing-price strong
+) {
+  color: #1b1630;
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus :is(
+  p,
+  .pricing-price span,
+  .pricing-features li,
+  .pricing-fit
+) {
+  color: rgba(27, 22, 48, 0.68);
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus .pricing-storage {
+  color: rgba(27, 22, 48, 0.58);
+  border-color: rgba(27, 22, 48, 0.14);
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus .pricing-price {
+  border-bottom-color: rgba(27, 22, 48, 0.12);
+}
+
+html[data-theme="dark"] .pricing .pricing-card--plus .pricing-btn {
+  color: #ffffff;
+  background: #7c3aed;
+  border-color: #7c3aed;
 }
 
 /* Occasion showcase: deep purple in dark mode, paired with main.css light mode. */

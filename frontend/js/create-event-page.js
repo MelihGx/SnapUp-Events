@@ -1,5 +1,9 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { createLocationMapPicker } from "./location-map-picker.js?v=location-map-2";
+import {
+  getDisplayPrice,
+  initRegionalPricing,
+} from "./regional-pricing.js?v=regional-pricing-1";
 
 const token = localStorage.getItem("snapup_token");
 
@@ -95,6 +99,8 @@ const eventLocationPicker = createLocationMapPicker({
   statusElement: createEventLocationStatus,
   translate: t,
 });
+
+initRegionalPricing();
 
 if (!token) {
   const currentPage = `${window.location.pathname.split("/").pop() || "create-event.html"}${window.location.search}${window.location.hash}`;
@@ -433,42 +439,75 @@ function validateEventDateFields() {
 function getSelectedPackageInfo() {
   const selectedPackage =
     document.querySelector('input[name="eventPackage"]:checked')?.value ||
-    "starter";
+    "free";
 
   const packageMap = {
-    starter: {
-      nameKey: "Starter",
+    free: {
+      nameKey: "Free",
       priceKey: "Free",
       price: "Free",
       isFree: true,
     },
-    standard: {
-      nameKey: "Standard",
-      price: "₺149",
+    mini: {
+      nameKey: "Mini",
+      isFree: false,
+    },
+    plus: {
+      nameKey: "Plus",
       isFree: false,
     },
     premium: {
       nameKey: "Premium",
-      price: "₺299",
       isFree: false,
     },
   };
 
-  const selected = packageMap[selectedPackage] || packageMap.starter;
+  const selected = packageMap[selectedPackage] || packageMap.free;
 
   return {
     ...selected,
     name: t(selected.nameKey),
-    displayPrice: selected.priceKey ? t(selected.priceKey) : selected.price,
+    displayPrice: selected.priceKey
+      ? t(selected.priceKey)
+      : getDisplayPrice(selectedPackage),
   };
 }
 
 function getSelectedPackageValue() {
   return (
     document.querySelector('input[name="eventPackage"]:checked')?.value ||
-    "starter"
+    "free"
   );
 }
+
+function getBackendPackageValue() {
+  const selectedPackage = getSelectedPackageValue();
+  const allowedPackages = new Set(["free", "mini", "plus", "premium"]);
+
+  return allowedPackages.has(selectedPackage) ? selectedPackage : "free";
+}
+
+function selectPackageFromUrl() {
+  const requestedPackage = String(
+    new URLSearchParams(window.location.search).get("package") || "",
+  )
+    .trim()
+    .toLowerCase();
+  const packageAliases = {
+    starter: "free",
+    standard: "plus",
+  };
+  const packageValue = packageAliases[requestedPackage] || requestedPackage;
+  const packageInput = document.querySelector(
+    `input[name="eventPackage"][value="${CSS.escape(packageValue)}"]`,
+  );
+
+  if (packageInput) {
+    packageInput.checked = true;
+  }
+}
+
+selectPackageFromUrl();
 
 function formatCardNumber(value) {
   return value
@@ -537,7 +576,7 @@ function buildEventPayload() {
     event_finish_time: formatTimeForDatabase(eventFinishTimeInput.value),
     description:
       document.getElementById("eventDescription").value.trim() || null,
-    eventPackage: getSelectedPackageValue(),
+    eventPackage: getBackendPackageValue(),
     settings: {
       allow_upload: document.getElementById("allowUpload").checked,
       only_users: document.getElementById("onlyUsers").checked,

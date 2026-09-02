@@ -48,7 +48,7 @@
       })();
     </script>
 
-    <link rel="stylesheet" href="css/theme.css?v=event-cover-2" />
+    <link rel="stylesheet" href="css/theme.css?v=modern-pricing-2" />
     <link
       rel="stylesheet"
       href="css/vendor/leaflet.css?v=1.9.4"
@@ -59,7 +59,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/create-event-page.css?v=location-map-2"
+      href="css/create-event-page.css?v=modern-pricing-2"
     />
     <link
       rel="stylesheet"
@@ -72,7 +72,7 @@
     <script src="js/location-i18n.js?v=location-map-2" defer></script>
     <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
-    <script src="js/i18n.js?v=global-languages-3" defer></script>
+    <script src="js/i18n.js?v=four-packages-1" defer></script>
   </head>
 
   <body class="create-event-page">
@@ -390,30 +390,27 @@
                 <input
                   type="radio"
                   name="eventPackage"
-                  value="starter"
+                  value="free"
                   checked
                 />
                 <span class="package-card__radio" aria-hidden="true"></span>
 
                 <div class="package-card-content">
                   <div class="package-card-head">
-                    <strong>Starter</strong>
+                    <strong>Free</strong>
                   </div>
 
-                  <p>
-                    Best for small events, test usage, birthdays, and private
-                    gatherings.
-                  </p>
+                  <p>Try the shared album flow before your real event.</p>
 
                   <div class="package-meta">
-                    <span>50 guests</span>
-                    <span>500 MB storage</span>
+                    <span>Up to 25 guests</span>
+                    <span>100 MB storage</span>
                   </div>
 
                   <ul class="package-features">
-                    <li>Photo uploads</li>
-                    <li>Message uploads</li>
-                    <li>Basic event code</li>
+                    <li>7 days of uploads</li>
+                    <li>14-day album access</li>
+                    <li>Photos, messages, and one trial video</li>
                   </ul>
 
                   <div class="package-price-row">
@@ -423,35 +420,63 @@
                 </div>
               </label>
 
-              <label class="package-card recommended">
-                <input type="radio" name="eventPackage" value="standard" />
+              <label class="package-card">
+                <input type="radio" name="eventPackage" value="mini" />
                 <span class="package-card__radio" aria-hidden="true"></span>
-                <b>Recommended</b>
 
                 <div class="package-card-content">
                   <div class="package-card-head">
-                    <strong>Standard</strong>
+                    <strong>Mini</strong>
                   </div>
 
-                  <p>
-                    Ideal for graduations, engagements, birthdays, and
-                    medium-size events.
-                  </p>
+                  <p>For birthdays, graduations, and intimate celebrations.</p>
 
                   <div class="package-meta">
-                    <span>150 guests</span>
-                    <span>2 GB storage</span>
+                    <span>Ideal for 100 guests</span>
+                    <span>1 GB storage</span>
                   </div>
 
                   <ul class="package-features">
-                    <li>Photo and video uploads</li>
+                    <li>Unlimited guest participation</li>
+                    <li>30 days of uploads</li>
+                    <li>3-month album access</li>
                     <li>Approval mode</li>
-                    <li>Likes and comments</li>
                   </ul>
 
                   <div class="package-price-row">
                     <span>Package price</span>
-                    <strong>₺149</strong>
+                    <strong data-regional-price="mini">₺749</strong>
+                  </div>
+                </div>
+              </label>
+
+              <label class="package-card recommended">
+                <input type="radio" name="eventPackage" value="plus" />
+                <span class="package-card__radio" aria-hidden="true"></span>
+                <b>Most Popular</b>
+
+                <div class="package-card-content">
+                  <div class="package-card-head">
+                    <strong>Plus</strong>
+                  </div>
+
+                  <p>The complete shared album for weddings and celebrations.</p>
+
+                  <div class="package-meta">
+                    <span>Ideal for 500 guests</span>
+                    <span>5 GB storage</span>
+                  </div>
+
+                  <ul class="package-features">
+                    <li>Unlimited guest participation</li>
+                    <li>60 days of uploads</li>
+                    <li>12-month album access</li>
+                    <li>Live slideshow and PDF memory book</li>
+                  </ul>
+
+                  <div class="package-price-row">
+                    <span>Package price</span>
+                    <strong data-regional-price="plus">₺1.499</strong>
                   </div>
                 </div>
               </label>
@@ -465,25 +490,23 @@
                     <strong>Premium</strong>
                   </div>
 
-                  <p>
-                    Designed for weddings, corporate events, crowded
-                    celebrations, and live galleries.
-                  </p>
+                  <p>For large events that need more space and control.</p>
 
                   <div class="package-meta">
-                    <span>Unlimited guests</span>
+                    <span>Ideal for 1,000 guests</span>
                     <span>10 GB storage</span>
                   </div>
 
                   <ul class="package-features">
-                    <li>High-volume uploads</li>
-                    <li>Advanced moderation</li>
-                    <li>Live gallery ready</li>
+                    <li>Unlimited guest participation</li>
+                    <li>60 days of uploads</li>
+                    <li>12-month album access</li>
+                    <li>Brand-free album and advanced insights</li>
                   </ul>
 
                   <div class="package-price-row">
                     <span>Package price</span>
-                    <strong>₺299</strong>
+                    <strong data-regional-price="premium">₺2.499</strong>
                   </div>
                 </div>
               </label>
@@ -656,12 +679,12 @@
         <div class="payment-summary-card">
           <div>
             <span>Selected package</span>
-            <strong id="paymentPackageName">Standard</strong>
+            <strong id="paymentPackageName">Free</strong>
           </div>
 
           <div>
             <span>Package price</span>
-            <strong id="paymentPackagePrice">₺149</strong>
+            <strong id="paymentPackagePrice">Free</strong>
           </div>
         </div>
 
@@ -791,7 +814,7 @@
     <script src="js/vendor/leaflet.js?v=1.9.4"></script>
     <script
       type="module"
-      src="js/create-event-page.js?v=email-verification-1"
+      src="js/create-event-page.js?v=regional-pricing-1"
     ></script>
     <script src="js/theme.js?v=create-event-refresh-1"></script>
   </body>

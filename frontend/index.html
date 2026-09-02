@@ -25,8 +25,9 @@
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <script src="js/location-i18n.js?v=location-details-1" defer></script>
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
+    <script src="js/pricing-i18n.js?v=pricing-all-languages-1" defer></script>
     <script src="js/feature-showcase.js?v=50-languages-1" defer></script>
-    <script src="js/i18n.js?v=only-users-3" defer></script>
+    <script src="js/i18n.js?v=four-packages-3" defer></script>
       <script>
       (() => {
         const saved = localStorage.getItem("snapup_theme");
@@ -47,7 +48,8 @@
         } catch (_) {}
       })();
     </script>
-    <link rel="stylesheet" href="css/theme.css?v=occasion-photo-mosaic-1" />
+    <link rel="stylesheet" href="css/theme.css?v=modern-pricing-2" />
+    <link rel="stylesheet" href="css/pricing.css?v=modern-pricing-6" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-1" />
   </head>
   <body>
@@ -810,18 +812,26 @@
             <span class="section-kicker">Pricing & packages</span>
             <h2>Choose the right package for your event.</h2>
             <p>
-              Start small, scale when your guest count grows. Each package keeps
-              the same simple SnapUp flow: create event, share code, collect
-              memories.
+              Pay once for your event. Guests join without an app, and every
+              paid package includes unlimited guest participation.
             </p>
           </div>
 
+          <div class="pricing-promises reveal" aria-label="Package benefits">
+            <span>One-time payment</span>
+            <span>No app required</span>
+            <span>Unlimited guests on paid packages</span>
+          </div>
+
           <div class="pricing-grid">
-            <article class="pricing-card reveal">
+            <article class="pricing-card pricing-card--free reveal">
               <div class="pricing-card-head">
-                <span class="pricing-tag">Starter</span>
-                <h3>Small events</h3>
-                <p>For test events, small birthdays, and private gatherings.</p>
+                <div class="pricing-card-topline">
+                  <span class="pricing-tag">Free</span>
+                  <span class="pricing-storage">100 MB</span>
+                </div>
+                <h3>Try SnapUp</h3>
+                <p>See how your shared album works before the big day.</p>
               </div>
 
               <div class="pricing-price">
@@ -829,98 +839,166 @@
                 <span>/ event</span>
               </div>
 
+              <p class="pricing-fit">Ideal for trial events with up to 25 guests</p>
+
               <ul class="pricing-features">
-                <li>Up to 50 guests</li>
-                <li>500 MB event storage</li>
-                <li>Photo and message uploads</li>
-                <li>Basic QR and event code</li>
-                <li>Guest upload limits</li>
+                <li>Collect photos and messages for 7 days</li>
+                <li>Keep the album for 14 days</li>
+                <li>One short trial video</li>
+                <li>Private QR code and event code</li>
               </ul>
 
-              <button
-                type="button"
+              <a
+                href="create-event.html?package=free"
                 class="btn btn-glass pricing-btn"
-                onclick="
-                  window.location.href = 'create-event.html?package=starter'
-                "
-                data-package="starter"
+                data-package="free"
               >
-                Choose Starter
-              </button>
+                Create a free event
+              </a>
             </article>
 
-            <article class="pricing-card pricing-card-featured reveal delay-1">
-              <span class="pricing-popular">Recommended</span>
-
+            <article class="pricing-card pricing-card--mini reveal delay-1">
               <div class="pricing-card-head">
-                <span class="pricing-tag">Standard</span>
-                <h3>Most events</h3>
-                <p>
-                  Best for graduations, birthdays, engagement parties, and
-                  medium-size events.
-                </p>
+                <div class="pricing-card-topline">
+                  <span class="pricing-tag">Mini</span>
+                  <span class="pricing-storage">1 GB</span>
+                </div>
+                <h3>Small celebrations</h3>
+                <p>Perfect for birthdays, graduations, and intimate gatherings.</p>
               </div>
 
               <div class="pricing-price">
-                <strong>₺149</strong>
+                <strong data-regional-price="mini">₺749</strong>
                 <span>/ event</span>
               </div>
 
+              <p class="pricing-fit">Ideal for events with up to 100 guests</p>
+
               <ul class="pricing-features">
-                <li>Up to 150 guests</li>
-                <li>2 GB event storage</li>
-                <li>Photo, video, and message uploads</li>
-                <li>Approval mode for uploads</li>
-                <li>Gallery view and likes</li>
+                <li>Unlimited guest participation</li>
+                <li>Collect photos, videos, and messages for 30 days</li>
+                <li>Keep the album for 3 months</li>
+                <li>Control uploads with approval mode</li>
+                <li>Download every memory in one click</li>
               </ul>
 
-              <button
-                type="button"
+              <a
+                href="create-event.html?package=mini"
+                class="btn btn-glass pricing-btn"
+                data-package="mini"
+              >
+                Choose Mini
+              </a>
+            </article>
+
+            <div class="pricing-card-slot pricing-card-slot--featured">
+              <span class="pricing-popular">Most Popular</span>
+              <article class="pricing-card pricing-card--plus pricing-card-featured reveal delay-2">
+                <div class="pricing-card-head">
+                <div class="pricing-card-topline">
+                  <span class="pricing-tag">Plus</span>
+                  <span class="pricing-storage">5 GB</span>
+                </div>
+                <h3>The complete event album</h3>
+                <p>The best balance for weddings and memorable celebrations.</p>
+              </div>
+
+              <div class="pricing-price">
+                <strong data-regional-price="plus">₺1.499</strong>
+                <span>/ event</span>
+              </div>
+
+              <p class="pricing-fit">Ideal for events with up to 500 guests</p>
+
+              <ul class="pricing-features">
+                <li>Unlimited guest participation</li>
+                <li>Collect memories for 60 days</li>
+                <li>Keep the album for 12 months</li>
+                <li>Show memories live on the big screen</li>
+                <li>Create a PDF memory book and custom invitation</li>
+                <li>Download every memory in one click</li>
+              </ul>
+
+              <a
+                href="create-event.html?package=plus"
                 class="btn btn-hot pricing-btn"
-                onclick="
-                  window.location.href = 'create-event.html?package=standard'
-                "
-                data-package="standard"
+                data-package="plus"
               >
-                Choose Standard
-              </button>
-            </article>
+                Choose Plus
+              </a>
+              </article>
+            </div>
 
-            <article class="pricing-card reveal delay-2">
+            <article class="pricing-card pricing-card--premium reveal delay-3">
               <div class="pricing-card-head">
-                <span class="pricing-tag">Premium</span>
-                <h3>Large events</h3>
-                <p>
-                  For weddings, corporate events, crowded celebrations, and long
-                  galleries.
-                </p>
+                <div class="pricing-card-topline">
+                  <span class="pricing-tag">Premium</span>
+                  <span class="pricing-storage">10 GB</span>
+                </div>
+                <h3>Your event, fully yours</h3>
+                <p>For large events that need more space, control, and polish.</p>
               </div>
 
               <div class="pricing-price">
-                <strong>₺299</strong>
+                <strong data-regional-price="premium">₺2.499</strong>
                 <span>/ event</span>
               </div>
 
+              <p class="pricing-fit">Ideal for events with up to 1,000 guests</p>
+
               <ul class="pricing-features">
-                <li>Unlimited guests</li>
-                <li>10 GB event storage</li>
-                <li>High-volume video uploads</li>
-                <li>Advanced moderation settings</li>
-                <li>Best for live gallery screens</li>
+                <li>Unlimited guest participation</li>
+                <li>Collect memories for 60 days</li>
+                <li>Keep the album for 12 months</li>
+                <li>Everything in Plus</li>
+                <li>Brand-free album and custom event link</li>
+                <li>Advanced insights, 5 admins, and priority support</li>
               </ul>
 
-              <button
-                type="button"
+              <a
+                href="create-event.html?package=premium"
                 class="btn btn-glass pricing-btn"
-                onclick="
-                  window.location.href = 'create-event.html?package=premium'
-                "
                 data-package="premium"
               >
                 Choose Premium
-              </button>
+              </a>
             </article>
           </div>
+
+          <aside class="pricing-contact reveal" aria-label="Contact">
+            <div class="pricing-contact__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img">
+                <path d="M4 6.75A2.75 2.75 0 0 1 6.75 4h10.5A2.75 2.75 0 0 1 20 6.75v10.5A2.75 2.75 0 0 1 17.25 20H6.75A2.75 2.75 0 0 1 4 17.25V6.75Z"></path>
+                <path d="m5.2 7.1 5.25 4.08a2.5 2.5 0 0 0 3.1 0L18.8 7.1"></path>
+              </svg>
+            </div>
+
+            <div class="pricing-contact__copy">
+              <span class="pricing-contact__eyebrow">20 GB+</span>
+              <h3>
+                <a
+                  class="pricing-contact__email"
+                  href="mailto:snapupevents.suppport@gmail.com?subject=SnapUp%20Events%20Custom%20Package"
+                >snapupevents.suppport@gmail.com</a>
+              </h3>
+              <p>Need more? Contact us.</p>
+            </div>
+
+            <a
+              class="pricing-contact__button"
+              href="mailto:snapupevents.suppport@gmail.com?subject=SnapUp%20Events%20Custom%20Package"
+            >
+              <span>Contact</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M5 10h10M11 6l4 4-4 4"></path>
+              </svg>
+            </a>
+          </aside>
+
+          <p class="pricing-note reveal">
+            Guest counts show the recommended event size. Paid packages do not
+            limit how many guests can join; total uploads are limited by storage.
+          </p>
         </div>
       </section>
     </main>
@@ -964,7 +1042,7 @@
 
         <div class="site-footer__column">
           <h2>Contact</h2>
-          <a href="mailto:hello@snapupevents.com">hello@snapupevents.com</a>
+          <a href="mailto:snapupevents.suppport@gmail.com">snapupevents.suppport@gmail.com</a>
           <p>Questions or feedback? We would love to hear from you.</p>
         </div>
       </div>

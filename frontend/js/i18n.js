@@ -651,6 +651,176 @@
         "Küçük başla, misafir sayın arttığında büyüt. Her paket aynı basit SnapUp akışını korur: etkinlik oluştur, kodu paylaş, anıları topla.",
         "ابدأ ببساطة وتوسّع عندما يزيد عدد الضيوف. تحافظ كل باقة على مسار SnapUp نفسه: أنشئ فعالية وشارك الرمز واجمع الذكريات.",
       ),
+    "Pay once for your event. Guests join without an app, and every paid package includes unlimited guest participation.":
+      p(
+        "Etkinliğin için bir kez ödeme yap. Misafirler uygulama indirmeden katılır ve tüm ücretli paketlerde misafir katılımı sınırsızdır.",
+        "ادفع مرة واحدة لفعاليتك. ينضم الضيوف دون تطبيق، وتشمل كل باقة مدفوعة مشاركة غير محدودة للضيوف.",
+      ),
+    "Package benefits": p("Paket avantajları", "مزايا الباقات"),
+    "One-time payment": p("Tek seferlik ödeme", "دفعة واحدة"),
+    "No app required": p("Uygulama gerekmez", "لا حاجة إلى تطبيق"),
+    "Unlimited guests on paid packages": p(
+      "Ücretli paketlerde sınırsız misafir",
+      "ضيوف غير محدودين في الباقات المدفوعة",
+    ),
+    Mini: p("Mini", "ميني"),
+    Plus: p("Plus", "بلس"),
+    "Most Popular": p("En Çok Tercih Edilen", "الأكثر اختيارًا"),
+    "Try SnapUp": p("SnapUp'ı Dene", "جرّب SnapUp"),
+    "See how your shared album works before the big day.": p(
+      "Büyük günden önce ortak albümün nasıl çalıştığını gör.",
+      "اكتشف كيف يعمل ألبومك المشترك قبل اليوم الكبير.",
+    ),
+    "Ideal for trial events with up to 25 guests": p(
+      "25 kişiye kadar deneme etkinlikleri için ideal",
+      "مثالية للفعاليات التجريبية حتى 25 ضيفًا",
+    ),
+    "Collect photos and messages for 7 days": p(
+      "Fotoğraf ve mesajları 7 gün boyunca topla",
+      "اجمع الصور والرسائل لمدة 7 أيام",
+    ),
+    "Keep the album for 14 days": p(
+      "Albümü 14 gün boyunca sakla",
+      "احتفظ بالألبوم لمدة 14 يومًا",
+    ),
+    "One short trial video": p(
+      "Bir kısa deneme videosu",
+      "فيديو تجريبي قصير واحد",
+    ),
+    "Private QR code and event code": p(
+      "Özel QR kodu ve etkinlik kodu",
+      "رمز QR خاص ورمز للفعالية",
+    ),
+    "Create a free event": p(
+      "Ücretsiz etkinlik oluştur",
+      "أنشئ فعالية مجانية",
+    ),
+    "Small celebrations": p("Küçük kutlamalar", "الاحتفالات الصغيرة"),
+    "Perfect for birthdays, graduations, and intimate gatherings.": p(
+      "Doğum günleri, mezuniyetler ve samimi buluşmalar için ideal.",
+      "مثالية لأعياد الميلاد وحفلات التخرج والتجمعات الحميمة.",
+    ),
+    "Ideal for events with up to 100 guests": p(
+      "100 kişiye kadar etkinlikler için ideal",
+      "مثالية للفعاليات حتى 100 ضيف",
+    ),
+    "Unlimited guest participation": p(
+      "Sınırsız misafir katılımı",
+      "مشاركة غير محدودة للضيوف",
+    ),
+    "Collect photos, videos, and messages for 30 days": p(
+      "Fotoğraf, video ve mesajları 30 gün boyunca topla",
+      "اجمع الصور والفيديوهات والرسائل لمدة 30 يومًا",
+    ),
+    "Keep the album for 3 months": p(
+      "Albümü 3 ay boyunca sakla",
+      "احتفظ بالألبوم لمدة 3 أشهر",
+    ),
+    "Control uploads with approval mode": p(
+      "Yüklemeleri onay moduyla kontrol et",
+      "تحكم في الملفات عبر وضع الموافقة",
+    ),
+    "Download every memory in one click": p(
+      "Tüm anıları tek tıkla indir",
+      "نزّل كل الذكريات بنقرة واحدة",
+    ),
+    "Choose Mini": p("Mini'yi Seç", "اختر ميني"),
+    "The complete event album": p(
+      "Eksiksiz etkinlik albümü",
+      "ألبوم الفعالية المتكامل",
+    ),
+    "The best balance for weddings and memorable celebrations.": p(
+      "Düğünler ve unutulmaz kutlamalar için en iyi denge.",
+      "أفضل توازن لحفلات الزفاف والاحتفالات التي لا تُنسى.",
+    ),
+    "Ideal for events with up to 500 guests": p(
+      "500 kişiye kadar etkinlikler için ideal",
+      "مثالية للفعاليات حتى 500 ضيف",
+    ),
+    "Collect memories for 60 days": p(
+      "Anıları 60 gün boyunca topla",
+      "اجمع الذكريات لمدة 60 يومًا",
+    ),
+    "Keep the album for 12 months": p(
+      "Albümü 12 ay boyunca sakla",
+      "احتفظ بالألبوم لمدة 12 شهرًا",
+    ),
+    "Show memories live on the big screen": p(
+      "Anıları büyük ekranda canlı göster",
+      "اعرض الذكريات مباشرة على الشاشة الكبيرة",
+    ),
+    "Create a PDF memory book and custom invitation": p(
+      "PDF hatıra kitabı ve özel davetiye oluştur",
+      "أنشئ كتاب ذكريات PDF ودعوة مخصصة",
+    ),
+    "Choose Plus": p("Plus'ı Seç", "اختر بلس"),
+    "Your event, fully yours": p(
+      "Etkinliğin tamamen sana özel",
+      "فعاليتك ملكك بالكامل",
+    ),
+    "For large events that need more space, control, and polish.": p(
+      "Daha fazla alan, kontrol ve profesyonellik isteyen büyük etkinlikler için.",
+      "للفعاليات الكبيرة التي تحتاج إلى مساحة وتحكم واحترافية أكبر.",
+    ),
+    "Ideal for events with up to 1,000 guests": p(
+      "1.000 kişiye kadar etkinlikler için ideal",
+      "مثالية للفعاليات حتى 1,000 ضيف",
+    ),
+    "Everything in Plus": p("Plus'taki her şey", "كل ما في باقة بلس"),
+    "Brand-free album and custom event link": p(
+      "Markasız albüm ve özel etkinlik bağlantısı",
+      "ألبوم دون علامة تجارية ورابط فعالية مخصص",
+    ),
+    "Advanced insights, 5 admins, and priority support": p(
+      "Gelişmiş analizler, 5 yönetici ve öncelikli destek",
+      "تحليلات متقدمة و5 مديرين ودعم ذو أولوية",
+    ),
+    "Guest counts show the recommended event size. Paid packages do not limit how many guests can join; total uploads are limited by storage.":
+      p(
+        "Kişi sayıları önerilen etkinlik büyüklüğünü gösterir. Ücretli paketlerde katılabilecek misafir sayısı sınırlandırılmaz; toplam yükleme depolama alanıyla sınırlıdır.",
+        "توضح أعداد الضيوف حجم الفعالية المقترح. لا تحد الباقات المدفوعة عدد الضيوف المنضمين؛ ويقتصر إجمالي الرفع على مساحة التخزين.",
+      ),
+    "Try the shared album flow before your real event.": p(
+      "Gerçek etkinliğinden önce ortak albüm akışını dene.",
+      "جرّب الألبوم المشترك قبل فعاليتك الحقيقية.",
+    ),
+    "Up to 25 guests": p("25 misafire kadar", "حتى 25 ضيفًا"),
+    "100 MB storage": p("100 MB depolama", "تخزين 100 ميغابايت"),
+    "7 days of uploads": p("7 gün yükleme", "رفع لمدة 7 أيام"),
+    "14-day album access": p("14 gün albüm erişimi", "وصول للألبوم لمدة 14 يومًا"),
+    "Photos, messages, and one trial video": p(
+      "Fotoğraflar, mesajlar ve bir deneme videosu",
+      "صور ورسائل وفيديو تجريبي واحد",
+    ),
+    "For birthdays, graduations, and intimate celebrations.": p(
+      "Doğum günleri, mezuniyetler ve samimi kutlamalar için.",
+      "لأعياد الميلاد وحفلات التخرج والاحتفالات الحميمة.",
+    ),
+    "Ideal for 100 guests": p("100 kişi için ideal", "مثالية لـ100 ضيف"),
+    "1 GB storage": p("1 GB depolama", "تخزين 1 غيغابايت"),
+    "30 days of uploads": p("30 gün yükleme", "رفع لمدة 30 يومًا"),
+    "3-month album access": p("3 ay albüm erişimi", "وصول للألبوم لمدة 3 أشهر"),
+    "The complete shared album for weddings and celebrations.": p(
+      "Düğünler ve kutlamalar için eksiksiz ortak albüm.",
+      "الألبوم المشترك المتكامل لحفلات الزفاف والاحتفالات.",
+    ),
+    "Ideal for 500 guests": p("500 kişi için ideal", "مثالية لـ500 ضيف"),
+    "5 GB storage": p("5 GB depolama", "تخزين 5 غيغابايت"),
+    "60 days of uploads": p("60 gün yükleme", "رفع لمدة 60 يومًا"),
+    "12-month album access": p("12 ay albüm erişimi", "وصول للألبوم لمدة 12 شهرًا"),
+    "Live slideshow and PDF memory book": p(
+      "Canlı slayt gösterisi ve PDF hatıra kitabı",
+      "عرض شرائح مباشر وكتاب ذكريات PDF",
+    ),
+    "For large events that need more space and control.": p(
+      "Daha fazla alan ve kontrol isteyen büyük etkinlikler için.",
+      "للفعاليات الكبيرة التي تحتاج إلى مساحة وتحكم أكبر.",
+    ),
+    "Ideal for 1,000 guests": p("1.000 kişi için ideal", "مثالية لـ1,000 ضيف"),
+    "Brand-free album and advanced insights": p(
+      "Markasız albüm ve gelişmiş analizler",
+      "ألبوم دون علامة تجارية وتحليلات متقدمة",
+    ),
     "/ event": p("/ etkinlik", "/ فعالية"),
     "Up to 50 guests": p("50 misafire kadar", "حتى 50 ضيفًا"),
     "Up to 150 guests": p("150 misafire kadar", "حتى 150 ضيفًا"),
@@ -962,6 +1132,10 @@
     "Changes to this Privacy Policy": p(
       "Bu Gizlilik Politikasındaki değişiklikler",
       "التغييرات على سياسة الخصوصية",
+    ),
+    "Need more? Contact us.": p(
+      "Daha fazlası için bizimle iletişime geçin.",
+      "هل تحتاج إلى المزيد؟ تواصل معنا.",
     ),
     "Contact us or submit a request": p(
       "Bizimle iletişime geç veya talep gönder",
@@ -5721,7 +5895,22 @@
       "Pyetje ose sugjerime? Do të na pëlqente të të dëgjonim.",
       "Прашања или повратни информации? Со задоволство ќе те слушнеме.",
     ],
-    "© 2026 SnapUp Events. All rights reserved.": [
+
+    "Need more? Contact us.": [
+      "Mehr benötigt? Kontaktiere uns.",
+      "Besoin de plus ? Contactez-nous.",
+      "¿Necesitas más? Contáctanos.",
+      "Hai bisogno di altro? Contattaci.",
+      "Meer nodig? Neem contact met ons op.",
+      "Нужно ти е повече? Свържи се с нас.",
+      "Ai nevoie de mai mult? Contactează-ne.",
+      "Χρειάζεσαι περισσότερα; Επικοινώνησε μαζί μας.",
+      "Treba ti više? Kontaktiraj nas.",
+      "Treba vam više? Kontaktirajte nas.",
+      "Treba vam više? Kontaktirajte nas.",
+      "Të duhet më shumë? Na kontakto.",
+      "Ти треба повеќе? Контактирај нè.",
+    ],    "© 2026 SnapUp Events. All rights reserved.": [
       "© 2026 SnapUp Events. Alle Rechte vorbehalten.",
       "© 2026 SnapUp Events. Tous droits réservés.",
       "© 2026 SnapUp Events. Todos los derechos reservados.",

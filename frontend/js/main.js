@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 import { initNav } from "./navbar.js";
 import { initReveal } from "./reveal.js";
@@ -9,6 +9,7 @@ import { initUploadSimulation } from "./upload-simulation.js";
 import { testBackendConnection } from "./events-api.js";
 import { initJoinUploadModal } from "./join-upload-modal.js?v=turnstile-visible-2";
 import { API_URL } from "./config.js?v=runtime-api-2";
+import { initRegionalPricing } from "./regional-pricing.js?v=regional-pricing-1";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -103,6 +104,7 @@ function initAuthNavbar() {
 
 function initApp() {
   initAuthNavbar();
+  initRegionalPricing();
 
   initNav();
   initReveal();

@@ -20,6 +20,7 @@ const {
   getLiveSlideshow,
   updateLiveSlideshow,
 } = require("../controllers/liveSlideshowController");
+const { getRegionalPricing } = require("../controllers/pricingController");
 
 const {
   createEvent,
@@ -85,6 +86,8 @@ function handleEventCoverUpload(req, res, next) {
     });
   });
 }
+
+router.get("/pricing", getRegionalPricing);
 
 router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, createEvent);
 
