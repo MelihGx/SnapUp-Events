@@ -279,6 +279,23 @@
   min-height: 168px;
 }
 
+/*
+ * Keep the price row on one fixed horizontal baseline on desktop.
+ * Package titles and descriptions vary considerably across the 50 locales,
+ * so the copy area gets a language-independent height instead of pushing
+ * the price down when a translation wraps onto extra lines.
+ */
+@media (min-width: 901px) {
+  .pricing-card-head {
+    height: 250px;
+    min-height: 250px;
+  }
+
+  .pricing-price {
+    margin-top: 0;
+  }
+}
+
 .pricing-card-featured .pricing-card-head {
   padding-top: 0;
 }

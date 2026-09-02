@@ -313,6 +313,7 @@
     "500 MB storage": p("500 MB depolama", "تخزين 500 ميغابايت"),
     "2 GB storage": p("2 GB depolama", "تخزين 2 غيغابايت"),
     "10 GB storage": p("10 GB depolama", "تخزين 10 غيغابايت"),
+    "20 GB storage": p("20 GB depolama", "تخزين 20 غيغابايت"),
     "Photo uploads": p("Fotoğraf yüklemeleri", "رفع الصور"),
     "Message uploads": p("Mesaj yüklemeleri", "رفع الرسائل"),
     "Photo and video uploads": p(
@@ -788,6 +789,7 @@
     "100 MB storage": p("100 MB depolama", "تخزين 100 ميغابايت"),
     "7 days of uploads": p("7 gün yükleme", "رفع لمدة 7 أيام"),
     "14-day album access": p("14 gün albüm erişimi", "وصول للألبوم لمدة 14 يومًا"),
+    "30-day album access": p("30 gün albüm erişimi", "وصول للألبوم لمدة 30 يومًا"),
     "Photos, messages, and one trial video": p(
       "Fotoğraflar, mesajlar ve bir deneme videosu",
       "صور ورسائل وفيديو تجريبي واحد",
@@ -808,6 +810,9 @@
     "5 GB storage": p("5 GB depolama", "تخزين 5 غيغابايت"),
     "60 days of uploads": p("60 gün yükleme", "رفع لمدة 60 يومًا"),
     "12-month album access": p("12 ay albüm erişimi", "وصول للألبوم لمدة 12 شهرًا"),
+    "Approval mode, likes, and comments": p("Onay modu, beğeniler ve yorumlar", "وضع الموافقة والإعجابات والتعليقات"),
+    "Live slideshow, PDF memory book, and invitation tools": p("Canlı slayt gösterisi, PDF hatıra kitabı ve davetiye araçları", "عرض شرائح مباشر وكتاب ذكريات PDF وأدوات الدعوات"),
+    "One-click memory download": p("Tüm anıları tek tıkla indir", "تنزيل كل الذكريات بنقرة واحدة"),
     "Live slideshow and PDF memory book": p(
       "Canlı slayt gösterisi ve PDF hatıra kitabı",
       "عرض شرائح مباشر وكتاب ذكريات PDF",

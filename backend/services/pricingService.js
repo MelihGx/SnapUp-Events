@@ -6,10 +6,10 @@ const PACKAGE_PRICING = Object.freeze({
     currency: "TRY",
     locale: "tr-TR",
     packages: Object.freeze({
-      free: Object.freeze({ amount: 0, minorAmount: 0 }),
-      mini: Object.freeze({ amount: 749, minorAmount: 74_900 }),
-      plus: Object.freeze({ amount: 1_499, minorAmount: 149_900 }),
-      premium: Object.freeze({ amount: 2_499, minorAmount: 249_900 }),
+      free: Object.freeze({ amount: 0, minorAmount: 0, storageMb: 100, allFeatures: false, uploadDays: 7, albumDays: 30, unlimitedGuests: false }),
+      mini: Object.freeze({ amount: 749, minorAmount: 74_900, storageMb: 5_120, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
+      plus: Object.freeze({ amount: 1_499, minorAmount: 149_900, storageMb: 10_240, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
+      premium: Object.freeze({ amount: 2_499, minorAmount: 249_900, storageMb: 20_480, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
     }),
   }),
   GLOBAL: Object.freeze({
@@ -17,10 +17,10 @@ const PACKAGE_PRICING = Object.freeze({
     currency: "USD",
     locale: "en-US",
     packages: Object.freeze({
-      free: Object.freeze({ amount: 0, minorAmount: 0 }),
-      mini: Object.freeze({ amount: 29, minorAmount: 2_900 }),
-      plus: Object.freeze({ amount: 49, minorAmount: 4_900 }),
-      premium: Object.freeze({ amount: 79, minorAmount: 7_900 }),
+      free: Object.freeze({ amount: 0, minorAmount: 0, storageMb: 100, allFeatures: false, uploadDays: 7, albumDays: 30, unlimitedGuests: false }),
+      mini: Object.freeze({ amount: 29, minorAmount: 2_900, storageMb: 5_120, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
+      plus: Object.freeze({ amount: 49, minorAmount: 4_900, storageMb: 10_240, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
+      premium: Object.freeze({ amount: 79, minorAmount: 7_900, storageMb: 20_480, allFeatures: true, uploadDays: 30, albumDays: 365, unlimitedGuests: true }),
     }),
   }),
 });
@@ -115,6 +115,11 @@ function buildPricingPayload(req, countryHint = null) {
       minor_amount: value.minorAmount,
       currency: pricing.currency,
       display: formatPrice(value.amount, pricing.currency, pricing.locale),
+      storage_mb: value.storageMb,
+      all_features: value.allFeatures,
+      upload_days: value.uploadDays,
+      album_days: value.albumDays,
+      unlimited_guests: value.unlimitedGuests,
     };
   }
 
