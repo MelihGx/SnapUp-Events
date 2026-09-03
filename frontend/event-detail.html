@@ -36,9 +36,10 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=extra-storage-2"
+      href="css/event-detail.css?v=media-delete-confirm-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
+    <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
     <link
       rel="stylesheet"
       href="css/invitation-studio.css?v=invitation-studio-8"
@@ -48,7 +49,7 @@
       href="css/i18n.css?v=global-languages-3"
     />
     <script
-      src="js/event-detail-i18n.js?v=join-upload-modern-2"
+      src="js/event-detail-i18n.js?v=media-delete-confirm-1"
       defer
     ></script>
     <script
@@ -301,6 +302,13 @@
                 Copy Join Link
               </button>
               <button type="button" id="downloadQrButton">Download QR</button>
+              <button
+                type="button"
+                id="viewGalleryButton"
+                class="view-gallery-button"
+              >
+                View Gallery
+              </button>
 
               <button
                 type="button"
@@ -750,6 +758,22 @@
                   <span>Maximum 1000 characters</span>
                   <strong id="memoryMessageCount">0 / 1000</strong>
                 </div>
+              </div>
+
+              <div
+                class="turnstile-field"
+                id="eventDetailTurnstileField"
+                hidden
+              >
+                <div
+                  class="turnstile-widget"
+                  id="eventDetailTurnstileWidget"
+                ></div>
+                <span
+                  class="turnstile-message"
+                  id="eventDetailTurnstileMessage"
+                  aria-live="polite"
+                ></span>
               </div>
 
               <button type="button" id="uploadMediaBtn">Upload Photo</button>
@@ -1811,6 +1835,79 @@
     ></div>
 
     <div
+      class="media-delete-confirm-overlay"
+      id="mediaDeleteConfirmModal"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="media-delete-confirm-backdrop"
+        id="mediaDeleteConfirmBackdrop"
+        aria-label="Cancel"
+        tabindex="-1"
+      ></button>
+
+      <section
+        class="media-delete-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="mediaDeleteConfirmTitle"
+        aria-describedby="mediaDeleteConfirmDescription"
+      >
+        <button
+          type="button"
+          class="media-delete-confirm-close"
+          id="mediaDeleteConfirmClose"
+          aria-label="Cancel"
+        >
+          ×
+        </button>
+
+        <span class="media-delete-confirm-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7h16"></path>
+            <path d="M9 7V4h6v3"></path>
+            <path d="m7 7 1 13h8l1-13"></path>
+            <path d="M10 11v5M14 11v5"></path>
+          </svg>
+        </span>
+
+        <span class="media-delete-confirm-kicker">MEMORY</span>
+        <h2 id="mediaDeleteConfirmTitle">Delete memory?</h2>
+        <p id="mediaDeleteConfirmDescription">
+          This uploaded memory will be deleted. Are you sure?
+        </p>
+
+        <label class="media-delete-confirm-option">
+          <input type="checkbox" id="mediaDeleteDontAskAgain" />
+          <span class="media-delete-confirm-checkbox" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="m6.5 12.5 3.4 3.4 7.8-8.1"></path>
+            </svg>
+          </span>
+          <span>Don't ask again</span>
+        </label>
+
+        <div class="media-delete-confirm-actions">
+          <button
+            type="button"
+            class="media-delete-confirm-cancel"
+            id="mediaDeleteConfirmCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="media-delete-confirm-delete"
+            id="mediaDeleteConfirmDelete"
+          >
+            Delete
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div
       class="memory-book-modal"
       id="memoryBookModal"
       aria-hidden="true"
@@ -2520,7 +2617,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=extra-storage-2"
+      src="js/event-detail.js?v=media-delete-confirm-2"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

@@ -106,3 +106,31 @@ html[data-theme="dark"] .turnstile-message.error {
     animation: none;
   }
 }
+
+
+/* Event Detail / mobile: once Turnstile is verified, collapse the large
+   Cloudflare surface and keep only SnapUp's small success status. If the
+   token expires or needs attention, .is-verified is removed and the full
+   widget becomes visible again automatically. */
+@media (max-width: 640px) {
+  #eventDetailTurnstileField {
+    margin: 0 0 5px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  #eventDetailTurnstileField.is-verified {
+    padding: 7px 10px;
+  }
+
+  #eventDetailTurnstileField.is-verified #eventDetailTurnstileWidget {
+    display: none;
+  }
+
+  #eventDetailTurnstileField.is-verified #eventDetailTurnstileMessage {
+    min-height: 0;
+    margin-top: 0;
+    font-size: 9px;
+    line-height: 1.25;
+  }
+}

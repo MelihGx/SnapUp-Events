@@ -935,50 +935,6 @@ input:focus-visible {
 }
 
 
-.sweet-extra-storage-btn {
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  color: #ffffff;
-  background: var(--account-purple);
-  border: 1px solid color-mix(in srgb, var(--account-purple) 82%, #ffffff);
-  border-radius: 11px;
-  box-shadow:
-    0 7px 16px color-mix(in srgb, var(--account-purple) 20%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.17);
-  cursor: pointer;
-  font: inherit;
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  white-space: nowrap;
-  transition:
-    transform 160ms ease,
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.sweet-extra-storage-btn:hover {
-  transform: translateY(-2px);
-  background: color-mix(in srgb, var(--account-purple) 88%, #24103f);
-  border-color: color-mix(in srgb, var(--account-purple) 70%, #ffffff);
-  box-shadow:
-    0 10px 22px color-mix(in srgb, var(--account-purple) 27%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.sweet-extra-storage-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.sweet-extra-storage-btn:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--account-purple) 24%, transparent);
-  outline-offset: 2px;
-}
 
 .sweet-status,
 .sweet-gallery-btn {
@@ -1849,14 +1805,9 @@ html[data-theme="dark"] .account-delete-dialog {
     order: 1;
   }
 
-  .sweet-extra-storage-btn {
-    width: fit-content;
-    order: 3;
-  }
-
   .sweet-gallery-btn {
     justify-content: center;
-    order: 4;
+    order: 3;
   }
 
   .account-card {

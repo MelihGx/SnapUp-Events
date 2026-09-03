@@ -146,6 +146,8 @@
       Approve: "Onayla",
       Reject: "Reddet",
       Delete: "Sil",
+      "Delete memory?": "Anı silinsin mi?",
+      "Don't ask again": "Bir daha sorma",
       "No media found.": "Medya bulunamadı.",
       "There are no uploaded memories for this filter yet.":
         "Bu filtre için henüz yüklenmiş anı yok.",

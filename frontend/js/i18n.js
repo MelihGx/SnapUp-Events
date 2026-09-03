@@ -419,6 +419,7 @@
     "Approve All Photos": p("Tüm Fotoğrafları Onayla", "الموافقة على كل الصور"),
     "Uploaded by Guest": p("Misafir tarafından yüklendi", "رفعه ضيف"),
     "Manage this event": p("Bu etkinliği yönet", "إدارة هذه الفعالية"),
+    "Manage Event": p("Etkinliği Yönet", "إدارة الفعالية"),
     "Update guest permissions or delete this event permanently.": p(
       "Misafir izinlerini güncelle veya bu etkinliği kalıcı olarak sil.",
       "حدّث صلاحيات الضيوف أو احذف هذه الفعالية نهائيًا.",

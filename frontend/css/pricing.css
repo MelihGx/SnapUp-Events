@@ -339,15 +339,6 @@
   text-transform: uppercase;
 }
 
-.pricing-card--plus .pricing-tag {
-  color: #ffffff;
-  background: linear-gradient(135deg, #8a3ffc 0%, #cf3dbb 56%, #7cc8d7 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    0 10px 22px rgba(138, 63, 252, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
 .pricing-storage {
   color: #665e73;
   background: #f7f5fa;

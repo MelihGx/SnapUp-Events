@@ -13,6 +13,7 @@ import {
   getVideoPosterUrl,
 } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 import { openExtraStorage } from "./extra-storage.js?v=extra-storage-2";
+import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -132,6 +133,24 @@ const eventCoverEditorStatus = document.getElementById(
   "eventCoverEditorStatus",
 );
 const eventCoverToast = document.getElementById("eventCoverToast");
+const mediaDeleteConfirmModal = document.getElementById(
+  "mediaDeleteConfirmModal",
+);
+const mediaDeleteConfirmBackdrop = document.getElementById(
+  "mediaDeleteConfirmBackdrop",
+);
+const mediaDeleteConfirmClose = document.getElementById(
+  "mediaDeleteConfirmClose",
+);
+const mediaDeleteConfirmCancel = document.getElementById(
+  "mediaDeleteConfirmCancel",
+);
+const mediaDeleteConfirmDelete = document.getElementById(
+  "mediaDeleteConfirmDelete",
+);
+const mediaDeleteDontAskAgain = document.getElementById(
+  "mediaDeleteDontAskAgain",
+);
 const eventTitle = document.getElementById("eventTitle");
 const eventDescription = document.getElementById("eventDescription");
 const eventStatisticsOpen = document.getElementById("eventStatisticsOpen");
@@ -195,6 +214,7 @@ const eventStatisticsLikedCount = document.getElementById(
 );
 const eventCode = document.getElementById("eventCode");
 const qrBox = document.getElementById("qrBox");
+const viewGalleryButton = document.getElementById("viewGalleryButton");
 
 const eventLocation = document.getElementById("eventLocation");
 const eventAddress = document.getElementById("eventAddress");
@@ -436,6 +456,9 @@ let eventCoverEditorLastFocusedElement = null;
 let eventCoverEditorDrag = null;
 let eventCoverEditorCrop = { focalX: 0.5, focalY: 0.5, zoom: 1 };
 let eventCoverRemoveLastFocusedElement = null;
+let mediaDeleteSkipConfirmForThisPage = false;
+let mediaDeleteConfirmResolver = null;
+let mediaDeleteConfirmLastFocusedElement = null;
 let locationEditorPicker = null;
 let locationEditorLastFocusedElement = null;
 let currentEventStatistics = null;
@@ -1435,7 +1458,20 @@ function closeEventStatistics() {
 function renderEventInfo(event) {
   currentEvent = event;
 
-  if (liveSlideshowOpen) {
+  
+if (viewGalleryButton) {
+  viewGalleryButton.addEventListener("click", () => {
+    if (!currentEvent?.event_code) {
+      return;
+    }
+
+    const galleryUrl = new URL("event-gallery.html", window.location.href);
+    galleryUrl.searchParams.set("code", currentEvent.event_code);
+    window.location.href = galleryUrl.href;
+  });
+}
+
+if (liveSlideshowOpen) {
     liveSlideshowOpen.disabled = false;
   }
 
@@ -3457,7 +3493,14 @@ function validateUploadFiles(files, allowedTypes, invalidTypeMessage) {
   });
 }
 
-async function createGuestForUpload(guestName) {
+const eventDetailTurnstileControllerPromise = mountTurnstile({
+  fieldId: "eventDetailTurnstileField",
+  widgetId: "eventDetailTurnstileWidget",
+  messageId: "eventDetailTurnstileMessage",
+  action: "guest_join",
+});
+
+async function createGuestForUpload(guestName, turnstileToken = "") {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
   let cached = null;
 
@@ -3476,6 +3519,7 @@ async function createGuestForUpload(guestName) {
     body: JSON.stringify({
       event_id: eventId,
       guest_name: guestName,
+      turnstile_token: turnstileToken,
     }),
   });
 
@@ -3592,6 +3636,71 @@ async function updateMediaStatus(mediaId, status) {
   return data.media;
 }
 
+function shouldSkipMediaDeleteConfirmation() {
+  return mediaDeleteSkipConfirmForThisPage;
+}
+
+function rememberMediaDeleteConfirmationPreference() {
+  if (mediaDeleteDontAskAgain?.checked) {
+    mediaDeleteSkipConfirmForThisPage = true;
+  }
+}
+
+function closeMediaDeleteConfirmDialog(confirmed = false, { restoreFocus = true } = {}) {
+  if (!mediaDeleteConfirmModal?.classList.contains("active")) {
+    return;
+  }
+
+  mediaDeleteConfirmModal.classList.remove("active");
+  mediaDeleteConfirmModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("media-delete-confirm-open");
+
+  const resolver = mediaDeleteConfirmResolver;
+  mediaDeleteConfirmResolver = null;
+
+  if (mediaDeleteDontAskAgain) {
+    mediaDeleteDontAskAgain.checked = false;
+  }
+
+  if (restoreFocus && mediaDeleteConfirmLastFocusedElement?.focus) {
+    mediaDeleteConfirmLastFocusedElement.focus();
+  }
+
+  mediaDeleteConfirmLastFocusedElement = null;
+  resolver?.(confirmed);
+}
+
+function requestMediaDeleteConfirmation() {
+  if (shouldSkipMediaDeleteConfirmation()) {
+    return Promise.resolve(true);
+  }
+
+  if (!mediaDeleteConfirmModal) {
+    return Promise.resolve(
+      confirm(t("This uploaded memory will be deleted. Are you sure?")),
+    );
+  }
+
+  if (mediaDeleteConfirmResolver) {
+    closeMediaDeleteConfirmDialog(false, { restoreFocus: false });
+  }
+
+  mediaDeleteConfirmLastFocusedElement = document.activeElement;
+  if (mediaDeleteDontAskAgain) {
+    mediaDeleteDontAskAgain.checked = false;
+  }
+
+  mediaDeleteConfirmModal.classList.add("active");
+  mediaDeleteConfirmModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("media-delete-confirm-open");
+
+  window.requestAnimationFrame(() => mediaDeleteConfirmCancel?.focus());
+
+  return new Promise((resolve) => {
+    mediaDeleteConfirmResolver = resolve;
+  });
+}
+
 async function deleteMediaItem(mediaId) {
   const response = await fetch(`${API_BASE_URL}/api/media/${mediaId}`, {
     method: "DELETE",
@@ -3619,9 +3728,7 @@ async function handleMediaAdminAction(action, mediaId) {
 
   try {
     if (action === "delete") {
-      const confirmDelete = confirm(
-        t("This uploaded memory will be deleted. Are you sure?"),
-      );
+      const confirmDelete = await requestMediaDeleteConfirmation();
 
       if (!confirmDelete) {
         return;
@@ -3647,6 +3754,23 @@ async function handleMediaAdminAction(action, mediaId) {
     alert(t(error.message || "Media action failed."));
   }
 }
+
+mediaDeleteConfirmBackdrop?.addEventListener("click", () => {
+  closeMediaDeleteConfirmDialog(false);
+});
+
+mediaDeleteConfirmClose?.addEventListener("click", () => {
+  closeMediaDeleteConfirmDialog(false);
+});
+
+mediaDeleteConfirmCancel?.addEventListener("click", () => {
+  closeMediaDeleteConfirmDialog(false);
+});
+
+mediaDeleteConfirmDelete?.addEventListener("click", () => {
+  rememberMediaDeleteConfirmationPreference();
+  closeMediaDeleteConfirmDialog(true);
+});
 
 if (eventCode) {
   eventCode.addEventListener("click", async () => {
@@ -4286,6 +4410,14 @@ window.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (mediaDeleteConfirmModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeMediaDeleteConfirmDialog(false);
+    }
+
+    return;
+  }
+
   if (locationEditorModal?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeLocationEditor();
@@ -4492,6 +4624,8 @@ uploadSuccessBackdrop?.addEventListener("click", () => {
 if (uploadMediaBtn) {
   uploadMediaBtn.addEventListener("click", async () => {
     const selectedType = activeUploadType;
+    let turnstileController = null;
+    let turnstileTokenWasUsed = false;
 
     try {
       const guestName = guestNameInput?.value.trim();
@@ -4527,6 +4661,10 @@ if (uploadMediaBtn) {
         return;
       }
 
+      turnstileController = await eventDetailTurnstileControllerPromise;
+      const turnstileToken = turnstileController.getToken();
+      turnstileTokenWasUsed = Boolean(turnstileToken);
+
       uploadMediaBtn.disabled = true;
       uploadMediaBtn.textContent = t(
         selectedType === "message" ? "Sending..." : "Uploading...",
@@ -4541,7 +4679,7 @@ if (uploadMediaBtn) {
         "info",
       );
 
-      const guest = await createGuestForUpload(guestName);
+      const guest = await createGuestForUpload(guestName, turnstileToken);
 
       if (!guest) {
         return;
@@ -4606,6 +4744,9 @@ if (uploadMediaBtn) {
         "error",
       );
     } finally {
+      if (turnstileTokenWasUsed) {
+        turnstileController?.reset();
+      }
       uploadMediaBtn.disabled = false;
       uploadMediaBtn.textContent = getUploadButtonLabel(selectedType);
     }
