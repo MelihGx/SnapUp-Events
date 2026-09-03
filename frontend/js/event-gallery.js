@@ -300,7 +300,7 @@ function getMessageCardHtml(item) {
 
 function getPhotoCardHtml(item, photoIndex) {
   const guestName = item.guest_name || t("Unknown Guest");
-  const message = item.message || t("Approved photo");
+  const message = String(item.message || "").trim();
   const uploadedAt = item.media_created_at
     ? formatDateTime(item.media_created_at)
     : "";
@@ -383,8 +383,11 @@ function getPhotoCardHtml(item, photoIndex) {
         </div>
 
         <p class="approved-card-caption">
-          <strong>${escapeHtml(guestName)}</strong>
-          <span>${escapeHtml(message)}</span>
+          ${
+            message
+              ? `<strong>${escapeHtml(guestName)}</strong><span>${escapeHtml(message)}</span>`
+              : `<span>${escapeHtml(uploadedBy)}</span>`
+          }
         </p>
       </div>
     </article>
