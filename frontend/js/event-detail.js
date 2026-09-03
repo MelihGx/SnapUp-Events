@@ -12,6 +12,7 @@ import {
   getVideoPlaybackUrl,
   getVideoPosterUrl,
 } from "./media-delivery.js?v=cloudinary-bandwidth-1";
+import { openExtraStorage } from "./extra-storage.js?v=extra-storage-2";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -165,6 +166,7 @@ const eventStatisticsStorage = document.getElementById(
 );
 const eventStorageQuick = document.getElementById("eventStorageQuick");
 const eventStoragePackage = document.getElementById("eventStoragePackage");
+const eventStorageAdd = document.getElementById("eventStorageAdd");
 const eventStorageUsed = document.getElementById("eventStorageUsed");
 const eventStorageLimit = document.getElementById("eventStorageLimit");
 const eventStoragePercent = document.getElementById("eventStoragePercent");
@@ -1168,6 +1170,13 @@ function renderEventStorageUsage(storage = null) {
     );
   }
   if (eventStoragePackage) eventStoragePackage.textContent = packageLabel;
+  if (eventStorageAdd) {
+    const packageKey = String(storage?.package_key || "free").trim().toLowerCase();
+    eventStorageAdd.hidden = packageKey === "free";
+    eventStorageAdd.dataset.currentPackage = packageKey;
+    eventStorageAdd.dataset.limitBytes = String(limitBytes);
+    eventStorageAdd.dataset.usedBytes = String(usedBytes);
+  }
   if (eventStorageUsed) eventStorageUsed.textContent = formatStorageBytes(usedBytes);
   if (eventStorageLimit) {
     eventStorageLimit.textContent = limitBytes > 0 ? formatStorageBytes(limitBytes) : "—";
@@ -1186,6 +1195,13 @@ function resetEventStorageUsage() {
   }
   if (eventStoragePackage) {
     eventStoragePackage.textContent = getStoragePackageLabel(currentEvent?.package_key);
+  }
+  if (eventStorageAdd) {
+    const packageKey = String(currentEvent?.package_key || "free").trim().toLowerCase();
+    eventStorageAdd.hidden = packageKey === "free";
+    eventStorageAdd.dataset.currentPackage = packageKey;
+    eventStorageAdd.dataset.limitBytes = "0";
+    eventStorageAdd.dataset.usedBytes = "0";
   }
   if (eventStorageUsed) eventStorageUsed.textContent = "—";
   if (eventStorageLimit) eventStorageLimit.textContent = "—";
@@ -3804,6 +3820,15 @@ if (eventHighlightsOpen) {
     window.open(highlightsUrl.href, "_blank", "noopener,noreferrer");
   });
 }
+
+eventStorageAdd?.addEventListener("click", async () => {
+  await openExtraStorage({
+    packageKey: eventStorageAdd.dataset.currentPackage || currentEvent?.package_key || "free",
+    limitBytes: Number(eventStorageAdd.dataset.limitBytes) || 0,
+    usedBytes: Number(eventStorageAdd.dataset.usedBytes) || 0,
+    eventName: currentEvent?.event_name || currentEvent?.name || "",
+  });
+});
 
 eventStatisticsOpen?.addEventListener("click", openEventStatistics);
 eventStatisticsBackdrop?.addEventListener("click", closeEventStatistics);

@@ -794,6 +794,62 @@ body.event-detail-shell [hidden] {
   border-radius: 12px;
 }
 
+
+.event-storage-quick__plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.event-storage-add {
+  min-height: 27px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  color: #ffffff;
+  background: #7c3aed;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  box-shadow:
+    0 6px 14px rgba(124, 58, 237, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.event-storage-add:hover {
+  transform: translateY(-2px);
+  background: #6d28d9;
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow:
+    0 9px 18px rgba(124, 58, 237, 0.27),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.event-storage-add:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.event-storage-add:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.2);
+  outline-offset: 2px;
+}
+
+.event-storage-add[hidden] {
+  display: none !important;
+}
+
 .event-storage-quick__meta {
   display: flex;
   align-items: baseline;
@@ -832,10 +888,21 @@ body.event-detail-shell [hidden] {
 }
 
 .event-storage-quick__meta b {
-  margin-left: 4px;
-  color: var(--detail-cover-panel-muted);
-  font-size: 8px;
-  font-weight: 900;
+  margin-left: 8px;
+  display: inline-flex;
+  min-width: 34px;
+  min-height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: var(--detail-cover-panel-text);
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
 }
 
 .event-storage-quick__track {
@@ -5425,6 +5492,18 @@ html[data-theme="dark"] body.event-detail-shell :is(
     border-radius: 10px;
   }
 
+
+  .event-storage-quick__plan {
+    gap: 5px;
+  }
+
+  .event-storage-add {
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 8px;
+    font-size: 7px;
+  }
+
   .event-storage-quick__meta {
     margin-bottom: 5px;
     font-size: 8px;
@@ -5435,7 +5514,10 @@ html[data-theme="dark"] body.event-detail-shell :is(
   }
 
   .event-storage-quick__meta b {
-    font-size: 7px;
+    min-width: 32px;
+    min-height: 17px;
+    padding: 0 6px;
+    font-size: 9px;
   }
 
   .event-storage-quick__track {

@@ -36,8 +36,9 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=storage-usage-1"
+      href="css/event-detail.css?v=extra-storage-2"
     />
+    <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link
       rel="stylesheet"
       href="css/invitation-studio.css?v=invitation-studio-8"
@@ -244,7 +245,16 @@
                     aria-label="Event storage usage"
                   >
                     <div class="event-storage-quick__meta">
-                      <span id="eventStoragePackage">Free</span>
+                      <span class="event-storage-quick__plan">
+                        <span id="eventStoragePackage">Free</span>
+                        <button
+                          type="button"
+                          class="event-storage-add"
+                          id="eventStorageAdd"
+                        >
+                          +5 GB Ekle
+                        </button>
+                      </span>
                       <strong>
                         <span id="eventStorageUsed">—</span>
                         <i>/</i>
@@ -2510,7 +2520,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=storage-usage-1"
+      src="js/event-detail.js?v=extra-storage-2"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

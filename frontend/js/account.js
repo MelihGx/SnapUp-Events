@@ -1,5 +1,6 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
+import { openExtraStorage } from "./extra-storage.js?v=extra-storage-2";
 
 const token = localStorage.getItem("snapup_token");
 
@@ -169,6 +170,7 @@ function getStorageUsageView(storage = {}) {
     limitBytes,
     percentage,
     state,
+    packageKey,
     packageLabel,
     usedLabel: formatStorageBytes(usedBytes),
     limitLabel: formatStorageBytes(limitBytes),
@@ -661,6 +663,23 @@ function renderEvents(events) {
                 </div>
               </div>
 
+              ${
+                storageUsage.packageKey !== "free"
+                  ? `<button
+                      type="button"
+                      class="sweet-extra-storage-btn"
+                      data-extra-storage-event-id="${escapeHtml(event.event_id)}"
+                      data-extra-storage-package="${escapeHtml(storageUsage.packageKey)}"
+                      data-extra-storage-limit="${escapeHtml(event.storage?.limit_bytes || 0)}"
+                      data-extra-storage-used="${escapeHtml(event.storage?.used_bytes || 0)}"
+                      data-extra-storage-event-name="${escapeHtml(eventName)}"
+                      aria-label="${escapeHtml(t("+5 GB Ekle"))}: ${eventName}"
+                    >
+                      +5 GB Ekle
+                    </button>`
+                  : ""
+              }
+
               <span class="sweet-gallery-btn">
                 View Gallery
                 <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
@@ -695,6 +714,21 @@ function renderEvents(events) {
       );
     });
 }
+
+eventsList?.addEventListener("click", async (event) => {
+  const storageButton = event.target.closest("[data-extra-storage-event-id]");
+  if (!storageButton) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  await openExtraStorage({
+    packageKey: storageButton.dataset.extraStoragePackage,
+    limitBytes: Number(storageButton.dataset.extraStorageLimit) || 0,
+    usedBytes: Number(storageButton.dataset.extraStorageUsed) || 0,
+    eventName: storageButton.dataset.extraStorageEventName || "",
+  });
+});
 
 async function loadEvents() {
   try {
