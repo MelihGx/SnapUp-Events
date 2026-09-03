@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-statistics-mobile-1"
+      href="css/event-detail.css?v=storage-usage-1"
     />
     <link
       rel="stylesheet"
@@ -235,6 +235,33 @@
                       <span>Comments</span>
                       <strong id="eventStatisticsComments">—</strong>
                     </article>
+                  </div>
+
+                  <div
+                    class="event-storage-quick"
+                    id="eventStorageQuick"
+                    data-state="normal"
+                    aria-label="Event storage usage"
+                  >
+                    <div class="event-storage-quick__meta">
+                      <span id="eventStoragePackage">Free</span>
+                      <strong>
+                        <span id="eventStorageUsed">—</span>
+                        <i>/</i>
+                        <span id="eventStorageLimit">—</span>
+                        <b id="eventStoragePercent">0%</b>
+                      </strong>
+                    </div>
+                    <div
+                      class="event-storage-quick__track"
+                      id="eventStorageProgress"
+                      role="progressbar"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-valuenow="0"
+                    >
+                      <span id="eventStorageFill"></span>
+                    </div>
                   </div>
                 </section>
               </div>
@@ -2483,7 +2510,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-statistics-1"
+      src="js/event-detail.js?v=storage-usage-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

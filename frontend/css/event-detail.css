@@ -781,6 +781,98 @@ body.event-detail-shell [hidden] {
   line-height: 1;
 }
 
+/* Storage usage bar inside the quick statistics panel. */
+.event-storage-quick {
+  margin-top: 9px;
+  padding: 9px 11px 10px;
+  background: color-mix(
+    in srgb,
+    var(--detail-cover-panel-card) 82%,
+    transparent
+  );
+  border: 1px solid var(--detail-cover-panel-border-soft);
+  border-radius: 12px;
+}
+
+.event-storage-quick__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--detail-cover-panel-muted);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.event-storage-quick__meta > span {
+  flex: 0 0 auto;
+  color: var(--detail-cover-panel-kicker);
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.event-storage-quick__meta strong {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--detail-cover-panel-text);
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.event-storage-quick__meta i {
+  color: var(--detail-cover-panel-muted);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.event-storage-quick__meta b {
+  margin-left: 4px;
+  color: var(--detail-cover-panel-muted);
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.event-storage-quick__track {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  background: color-mix(
+    in srgb,
+    var(--detail-cover-panel-icon) 11%,
+    var(--detail-cover-panel-card)
+  );
+  border: 1px solid color-mix(
+    in srgb,
+    var(--detail-cover-panel-icon) 14%,
+    transparent
+  );
+  border-radius: 999px;
+}
+
+.event-storage-quick__track > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  max-width: 100%;
+  background: var(--detail-cover-panel-icon);
+  border-radius: inherit;
+  transition: width 320ms ease;
+}
+
+.event-storage-quick[data-state="warning"] .event-storage-quick__track > span {
+  background: #d97706;
+}
+
+.event-storage-quick[data-state="critical"] .event-storage-quick__track > span {
+  background: #ec4899;
+}
+
 body.event-statistics-open {
   position: fixed;
   width: 100%;
@@ -5325,6 +5417,29 @@ html[data-theme="dark"] body.event-detail-shell :is(
 
   .event-statistics-quick-grid {
     gap: 5px;
+  }
+
+  .event-storage-quick {
+    margin-top: 6px;
+    padding: 7px 8px 8px;
+    border-radius: 10px;
+  }
+
+  .event-storage-quick__meta {
+    margin-bottom: 5px;
+    font-size: 8px;
+  }
+
+  .event-storage-quick__meta strong {
+    font-size: 8px;
+  }
+
+  .event-storage-quick__meta b {
+    font-size: 7px;
+  }
+
+  .event-storage-quick__track {
+    height: 6px;
   }
 
   .event-statistics-quick-grid article {

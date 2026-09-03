@@ -113,6 +113,68 @@ function t(value) {
   return window.SnapUpI18n?.t?.(value) || value;
 }
 
+
+function getCurrentLocale() {
+  const language = window.SnapUpI18n?.language || "en";
+  return localeByLanguage[language] || "en-US";
+}
+
+
+function formatStorageBytes(bytes) {
+  const value = Math.max(0, Number(bytes) || 0);
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let amount = value;
+  let unitIndex = 0;
+
+  while (amount >= 1024 && unitIndex < units.length - 1) {
+    amount /= 1024;
+    unitIndex += 1;
+  }
+
+  const maximumFractionDigits =
+    unitIndex >= 3 ? (amount >= 10 ? 1 : 2) : amount >= 10 ? 0 : 1;
+
+  try {
+    return `${new Intl.NumberFormat(getCurrentLocale(), {
+      maximumFractionDigits,
+    }).format(amount)} ${units[unitIndex]}`;
+  } catch (_error) {
+    return `${amount.toFixed(maximumFractionDigits)} ${units[unitIndex]}`;
+  }
+}
+
+function getStorageUsageView(storage = {}) {
+  const usedBytes = Math.max(0, Number(storage.used_bytes) || 0);
+  const limitBytes = Math.max(0, Number(storage.limit_bytes) || 0);
+  const rawPercentage =
+    Number.isFinite(Number(storage.percentage)) && Number(storage.percentage) >= 0
+      ? Number(storage.percentage)
+      : limitBytes > 0
+        ? (usedBytes / limitBytes) * 100
+        : 0;
+  const percentage = Math.min(100, Math.max(0, rawPercentage));
+  const state = percentage >= 90 ? "critical" : percentage >= 75 ? "warning" : "normal";
+  const packageKey = String(storage.package_key || "free").toLowerCase();
+  const packageLabel =
+    packageKey === "premium"
+      ? "Premium"
+      : packageKey === "plus"
+        ? "Plus"
+        : packageKey === "mini"
+          ? "Mini"
+          : "Free";
+
+  return {
+    usedBytes,
+    limitBytes,
+    percentage,
+    state,
+    packageLabel,
+    usedLabel: formatStorageBytes(usedBytes),
+    limitLabel: formatStorageBytes(limitBytes),
+  };
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -441,6 +503,8 @@ function renderEvents(events) {
       const eventCode = escapeHtml(event.event_code || "------");
       const eventStatus = escapeHtml(t(event.is_event_active ? "Active" : "Passive"));
       const statusClass = event.is_event_active ? "active" : "passive";
+      const storageUsage = getStorageUsageView(event.storage || {});
+      const storagePercentageLabel = `${Math.round(storageUsage.percentage)}%`;
       let eventCoverUrl = "";
       try {
         const candidate = new URL(getEventCoverUrl(event, "card") || "");
@@ -571,6 +635,31 @@ function renderEvents(events) {
               <span class="sweet-status ${statusClass}">
                 ${eventStatus}
               </span>
+
+              <div
+                class="sweet-storage-usage"
+                data-state="${storageUsage.state}"
+                aria-label="${escapeHtml(`${storageUsage.packageLabel}: ${storageUsage.usedLabel} / ${storageUsage.limitLabel}`)}"
+              >
+                <div class="sweet-storage-usage__meta">
+                  <span>${escapeHtml(storageUsage.packageLabel)}</span>
+                  <strong>
+                    ${escapeHtml(storageUsage.usedLabel)}
+                    <i>/</i>
+                    ${escapeHtml(storageUsage.limitLabel)}
+                    <b>${escapeHtml(storagePercentageLabel)}</b>
+                  </strong>
+                </div>
+                <div
+                  class="sweet-storage-usage__track"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="${Math.round(storageUsage.percentage)}"
+                >
+                  <span style="width: ${storageUsage.percentage.toFixed(2)}%"></span>
+                </div>
+              </div>
 
               <span class="sweet-gallery-btn">
                 View Gallery

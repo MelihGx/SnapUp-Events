@@ -145,10 +145,38 @@ function getPackagePricing(req, packageName, countryHint = null) {
   };
 }
 
+
+function getPackageStorageLimitBytes(packageName) {
+  const packageKey = normalizePackageKey(packageName);
+  const storageMb = Number(PACKAGE_PRICING.TR.packages[packageKey]?.storageMb || 0);
+  return Math.max(0, Math.round(storageMb * 1024 * 1024));
+}
+
+function buildStorageUsage(packageName, usedBytes = 0) {
+  const packageKey = normalizePackageKey(packageName);
+  const limitBytes = getPackageStorageLimitBytes(packageKey);
+  const normalizedUsedBytes = Math.max(0, Number(usedBytes) || 0);
+  const remainingBytes = Math.max(0, limitBytes - normalizedUsedBytes);
+  const percentage =
+    limitBytes > 0
+      ? Math.min(100, Math.max(0, (normalizedUsedBytes / limitBytes) * 100))
+      : 0;
+
+  return {
+    package_key: packageKey,
+    used_bytes: Math.round(normalizedUsedBytes),
+    limit_bytes: limitBytes,
+    remaining_bytes: Math.round(remainingBytes),
+    percentage: Number(percentage.toFixed(2)),
+  };
+}
+
 module.exports = {
   PACKAGE_PRICING,
   buildPricingPayload,
+  buildStorageUsage,
   getPackagePricing,
+  getPackageStorageLimitBytes,
   normalizeCountryCode,
   normalizePackageKey,
   resolveMarket,

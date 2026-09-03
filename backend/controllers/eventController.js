@@ -342,6 +342,7 @@ const createEvent = async (req, res) => {
           event_longitude: coordinates.longitude,
           user_id: userId,
           packet_level_id: packetLevelId,
+          package_key: selectedPackage,
           event_date: event_date || null,
           event_start_time: event_start_time || null,
           event_finish_time: event_finish_time || null,
@@ -354,7 +355,7 @@ const createEvent = async (req, res) => {
         },
       ])
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
       )
       .single();
 
@@ -505,7 +506,7 @@ const getEventDetail = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, user_id",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, user_id",
       )
       .eq("event_id", eventId)
       .eq("user_id", userId)
@@ -1134,6 +1135,7 @@ const EVENT_HIGHLIGHTS_SELECT = `
   event_finish_time,
   event_code,
   event_cover_url,
+  package_key,
   is_event_active
 `;
 

@@ -5,6 +5,7 @@ const {
   normalizeGuestName,
   uniqueParticipantCount,
 } = require("./eventHighlightsService");
+const { buildStorageUsage } = require("./pricingService");
 
 const PAGE_SIZE = 500;
 const LIKE_MEDIA_CHUNK_SIZE = 75;
@@ -84,6 +85,7 @@ function buildEventStatistics({
     const bytes = Number(row?.bytes || 0);
     return total + (Number.isFinite(bytes) && bytes > 0 ? bytes : 0);
   }, 0);
+  const storage = buildStorageUsage(event?.package_key || "free", usedStorageBytes);
 
   return {
     event,
@@ -97,8 +99,12 @@ function buildEventStatistics({
         (item) => item.media_type === "message",
       ).length,
       total_uploads_count: eventMedia.length,
-      used_storage_bytes: usedStorageBytes,
+      used_storage_bytes: storage.used_bytes,
+      storage_limit_bytes: storage.limit_bytes,
+      storage_remaining_bytes: storage.remaining_bytes,
+      storage_percentage: storage.percentage,
     },
+    storage,
     most_liked_photo: findMostLikedPhoto(approvedMedia, likes),
     top_photo_uploader: findTopPhotoUploader(eventMedia),
   };

@@ -163,6 +163,13 @@ const eventStatisticsTotalUploads = document.getElementById(
 const eventStatisticsStorage = document.getElementById(
   "eventStatisticsStorage",
 );
+const eventStorageQuick = document.getElementById("eventStorageQuick");
+const eventStoragePackage = document.getElementById("eventStoragePackage");
+const eventStorageUsed = document.getElementById("eventStorageUsed");
+const eventStorageLimit = document.getElementById("eventStorageLimit");
+const eventStoragePercent = document.getElementById("eventStoragePercent");
+const eventStorageProgress = document.getElementById("eventStorageProgress");
+const eventStorageFill = document.getElementById("eventStorageFill");
 const eventStatisticsUploaderAvatar = document.getElementById(
   "eventStatisticsUploaderAvatar",
 );
@@ -1130,6 +1137,63 @@ function formatStorageBytes(value) {
   }
 }
 
+function getStoragePackageLabel(packageKey) {
+  const normalized = String(packageKey || "free").trim().toLowerCase();
+
+  if (normalized === "premium") return "Premium";
+  if (normalized === "plus") return "Plus";
+  if (normalized === "mini") return "Mini";
+  return "Free";
+}
+
+function renderEventStorageUsage(storage = null) {
+  const usedBytes = Math.max(0, Number(storage?.used_bytes) || 0);
+  const limitBytes = Math.max(0, Number(storage?.limit_bytes) || 0);
+  const rawPercentage = Number(storage?.percentage);
+  const percentage = Number.isFinite(rawPercentage)
+    ? Math.min(100, Math.max(0, rawPercentage))
+    : limitBytes > 0
+      ? Math.min(100, Math.max(0, (usedBytes / limitBytes) * 100))
+      : 0;
+  const state =
+    percentage >= 90 ? "critical" : percentage >= 75 ? "warning" : "normal";
+  const packageLabel = getStoragePackageLabel(storage?.package_key);
+  const roundedPercentage = Math.round(percentage);
+
+  if (eventStorageQuick) {
+    eventStorageQuick.dataset.state = state;
+    eventStorageQuick.setAttribute(
+      "aria-label",
+      `${packageLabel}: ${formatStorageBytes(usedBytes)} / ${formatStorageBytes(limitBytes)}`,
+    );
+  }
+  if (eventStoragePackage) eventStoragePackage.textContent = packageLabel;
+  if (eventStorageUsed) eventStorageUsed.textContent = formatStorageBytes(usedBytes);
+  if (eventStorageLimit) {
+    eventStorageLimit.textContent = limitBytes > 0 ? formatStorageBytes(limitBytes) : "—";
+  }
+  if (eventStoragePercent) eventStoragePercent.textContent = `${roundedPercentage}%`;
+  if (eventStorageProgress) {
+    eventStorageProgress.setAttribute("aria-valuenow", String(roundedPercentage));
+  }
+  if (eventStorageFill) eventStorageFill.style.width = `${percentage.toFixed(2)}%`;
+}
+
+function resetEventStorageUsage() {
+  if (eventStorageQuick) {
+    eventStorageQuick.dataset.state = "normal";
+    eventStorageQuick.setAttribute("aria-label", "Event storage usage");
+  }
+  if (eventStoragePackage) {
+    eventStoragePackage.textContent = getStoragePackageLabel(currentEvent?.package_key);
+  }
+  if (eventStorageUsed) eventStorageUsed.textContent = "—";
+  if (eventStorageLimit) eventStorageLimit.textContent = "—";
+  if (eventStoragePercent) eventStoragePercent.textContent = "—";
+  if (eventStorageProgress) eventStorageProgress.setAttribute("aria-valuenow", "0");
+  if (eventStorageFill) eventStorageFill.style.width = "0%";
+}
+
 function getStatisticsInitials(name) {
   const parts = String(name || "")
     .trim()
@@ -1148,6 +1212,14 @@ function renderEventStatistics(data) {
   const summary = data?.summary || {};
   const uploader = data?.top_photo_uploader || null;
   const likedPhoto = data?.most_liked_photo || null;
+  const storage = data?.storage || {
+    package_key: data?.event?.package_key || currentEvent?.package_key || "free",
+    used_bytes: summary.used_storage_bytes,
+    limit_bytes: summary.storage_limit_bytes,
+    percentage: summary.storage_percentage,
+  };
+
+  renderEventStorageUsage(storage);
 
   if (eventStatisticsParticipants) {
     eventStatisticsParticipants.textContent = formatStatisticNumber(
@@ -1270,6 +1342,8 @@ function renderEventStatisticsFallback(
   if (eventStatisticsStorage) {
     eventStatisticsStorage.textContent = "—";
   }
+
+  resetEventStorageUsage();
 
   if (eventStatisticsOpen && !showError) {
     eventStatisticsOpen.disabled = true;

@@ -841,10 +841,85 @@ input:focus-visible {
 }
 
 .sweet-event-bottom {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(210px, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 14px;
+}
+
+.sweet-storage-usage {
+  min-width: 0;
+  width: min(100%, 360px);
+  justify-self: start;
+  padding: 2px 0;
+}
+
+.sweet-storage-usage__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: var(--account-text-soft);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.sweet-storage-usage__meta > span {
+  flex: 0 0 auto;
+  color: var(--account-purple);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sweet-storage-usage__meta strong {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--account-text);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.sweet-storage-usage__meta i {
+  color: var(--account-text-soft);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.sweet-storage-usage__meta b {
+  margin-left: 4px;
+  color: var(--account-text-soft);
+  font-size: 9px;
+}
+
+.sweet-storage-usage__track {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--account-purple) 10%, var(--account-surface));
+  border: 1px solid color-mix(in srgb, var(--account-purple) 13%, transparent);
+  border-radius: 999px;
+}
+
+.sweet-storage-usage__track > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 0;
+  max-width: 100%;
+  background: var(--account-purple);
+  border-radius: inherit;
+  transition: width 320ms ease;
+}
+
+.sweet-storage-usage[data-state="warning"] .sweet-storage-usage__track > span {
+  background: #d97706;
+}
+
+.sweet-storage-usage[data-state="critical"] .sweet-storage-usage__track > span {
+  background: var(--account-pink);
 }
 
 .sweet-status,
@@ -1701,12 +1776,24 @@ html[data-theme="dark"] .account-delete-dialog {
   }
 
   .sweet-event-bottom {
+    grid-template-columns: 1fr;
     align-items: stretch;
-    flex-direction: column;
+  }
+
+  .sweet-storage-usage {
+    width: 100%;
+    justify-self: stretch;
+    order: 2;
+  }
+
+  .sweet-status {
+    width: fit-content;
+    order: 1;
   }
 
   .sweet-gallery-btn {
     justify-content: center;
+    order: 3;
   }
 
   .account-card {

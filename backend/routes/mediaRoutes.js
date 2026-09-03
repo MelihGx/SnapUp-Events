@@ -12,6 +12,7 @@ const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
 const { verifyTurnstile } = require("../middlewares/turnstile");
 const { cleanText } = require("../utils/validation");
+const { getPackageStorageLimitBytes, normalizePackageKey } = require("../services/pricingService");
 const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
 const {
   assertRegisteredUserAccess,
@@ -154,7 +155,7 @@ function createHttpError(message, statusCode = 500, code = null) {
 async function getUploadStatusForEvent(eventId) {
   const { data: event, error: eventError } = await supabase
     .from("event")
-    .select("event_id, is_event_active")
+    .select("event_id, is_event_active, package_key")
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -184,11 +185,15 @@ async function getUploadStatusForEvent(eventId) {
     throw createHttpError("Uploads are disabled for this event.", 403);
   }
 
+  const packageKey = normalizePackageKey(event.package_key || "free");
+
   return {
     mediaStatus: settings?.require_approval ? "pending" : "approved",
     maxUploadPerGuest: Number(settings?.max_upload_per_guest) || 20,
     maxStoragePerGuest: Math.min(Number(settings?.max_storage_per_guest) || 250, 2048),
     onlyUsers: settings?.only_users === true,
+    packageKey,
+    eventStorageLimitBytes: getPackageStorageLimitBytes(packageKey),
   };
 }
 
@@ -605,7 +610,13 @@ router.post(
       return res.status(401).json({ success: false, message: "Guest session has been revoked.", code: "GUEST_SESSION_REVOKED" });
     }
 
-    const { mediaStatus, maxStoragePerGuest, onlyUsers } = await getUploadStatusForEvent(event_id);
+    const {
+      mediaStatus,
+      maxStoragePerGuest,
+      onlyUsers,
+      packageKey,
+      eventStorageLimitBytes,
+    } = await getUploadStatusForEvent(event_id);
     assertRegisteredUserAccess({
       onlyUsers,
       currentUser: req.user,
@@ -613,12 +624,41 @@ router.post(
       guestClaims,
     });
     await checkGuestUploadLimit(event_id, guest_id, files.length);
-    const { data: usageRows, error: usageError } = await supabase.from("media")
-      .select("bytes").eq("event_id", event_id).eq("guest_id", guest_id);
-    if (usageError) throw createHttpError("Storage usage could not be checked.", 500);
-    const usedBytes = (usageRows || []).reduce((sum, row) => sum + Number(row.bytes || 0), 0);
-    if (usedBytes + incomingBytes > maxStoragePerGuest * 1024 * 1024) {
-      return res.status(413).json({ success: false, message: "Guest storage quota exceeded.", code: "GUEST_STORAGE_QUOTA_EXCEEDED" });
+    const { data: usageRows, error: usageError } = await supabase
+      .from("media")
+      .select("guest_id, bytes")
+      .eq("event_id", event_id);
+
+    if (usageError) {
+      throw createHttpError("Storage usage could not be checked.", 500);
+    }
+
+    const eventUsedBytes = (usageRows || []).reduce(
+      (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
+      0,
+    );
+    const guestUsedBytes = (usageRows || [])
+      .filter((row) => String(row?.guest_id) === String(guest_id))
+      .reduce((sum, row) => sum + Math.max(0, Number(row?.bytes) || 0), 0);
+
+    if (eventUsedBytes + incomingBytes > eventStorageLimitBytes) {
+      return res.status(413).json({
+        success: false,
+        message: "Event storage quota exceeded.",
+        code: "EVENT_STORAGE_QUOTA_EXCEEDED",
+        package: packageKey,
+        used_bytes: eventUsedBytes,
+        limit_bytes: eventStorageLimitBytes,
+        remaining_bytes: Math.max(0, eventStorageLimitBytes - eventUsedBytes),
+      });
+    }
+
+    if (guestUsedBytes + incomingBytes > maxStoragePerGuest * 1024 * 1024) {
+      return res.status(413).json({
+        success: false,
+        message: "Guest storage quota exceeded.",
+        code: "GUEST_STORAGE_QUOTA_EXCEEDED",
+      });
     }
 
     const cleanMessage =
