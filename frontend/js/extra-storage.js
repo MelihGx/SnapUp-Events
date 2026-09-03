@@ -156,7 +156,7 @@ function ensureModal() {
           ${escapeHtml(t("Cancel"))}
         </button>
         <button type="button" class="snapup-extra-storage-modal__continue" data-extra-storage-continue>
-          ${escapeHtml(t("+5 GB Ekle"))}
+          ${escapeHtml(t("Add 5 GB"))}
         </button>
       </div>
     </section>
@@ -219,7 +219,7 @@ export async function openExtraStorage({
   result.textContent = "";
   delete result.dataset.state;
   continueButton.disabled = false;
-  continueButton.textContent = t("+5 GB Ekle");
+  continueButton.textContent = t("Add 5 GB");
 
   lastFocusedElement = document.activeElement;
   modal.hidden = false;

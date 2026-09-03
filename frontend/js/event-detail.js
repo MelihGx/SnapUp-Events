@@ -1214,7 +1214,7 @@ function renderEventStorageUsage(storage = null) {
 function resetEventStorageUsage() {
   if (eventStorageQuick) {
     eventStorageQuick.dataset.state = "normal";
-    eventStorageQuick.setAttribute("aria-label", "Event storage usage");
+    eventStorageQuick.setAttribute("aria-label", t("Event storage usage"));
   }
   if (eventStoragePackage) {
     eventStoragePackage.textContent = getStoragePackageLabel(currentEvent?.package_key);
