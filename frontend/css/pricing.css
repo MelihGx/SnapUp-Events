@@ -636,15 +636,15 @@
 
 /* Dark theme */
 html[data-theme="dark"] .pricing {
-  --pricing-bg: #100d18;
-  --pricing-surface: #191523;
-  --pricing-surface-hover: #1d1828;
-  --pricing-text: #f7f3ff;
-  --pricing-muted: rgba(247, 243, 255, 0.63);
-  --pricing-border: rgba(255, 255, 255, 0.095);
-  --pricing-soft: #231d30;
-  --pricing-shadow: 0 18px 50px rgba(0, 0, 0, 0.15);
-  --pricing-shadow-hover: 0 24px 65px rgba(0, 0, 0, 0.24);
+  --pricing-bg: #110e1c;
+  --pricing-surface: #262033;
+  --pricing-surface-hover: #2c253b;
+  --pricing-text: #fbf9ff;
+  --pricing-muted: rgba(247, 243, 255, 0.72);
+  --pricing-border: rgba(219, 209, 238, 0.14);
+  --pricing-soft: #302943;
+  --pricing-shadow: 0 18px 50px rgba(0, 0, 0, 0.17);
+  --pricing-shadow-hover: 0 24px 65px rgba(0, 0, 0, 0.22);
   color: var(--pricing-text);
   background: var(--pricing-bg);
 }
@@ -742,8 +742,9 @@ html[data-theme="dark"] .pricing .pricing-card--plus {
 
 html[data-theme="dark"] .pricing-card-featured,
 html[data-theme="dark"] .pricing .pricing-card--plus {
-  border-color: rgba(139, 92, 246, 0.36);
-  box-shadow: 0 24px 68px rgba(0, 0, 0, 0.27);
+  background: #2b2340;
+  border-color: rgba(167, 139, 250, 0.46);
+  box-shadow: 0 24px 68px rgba(76, 45, 128, 0.2);
 }
 
 html[data-theme="dark"] .pricing-storage,
