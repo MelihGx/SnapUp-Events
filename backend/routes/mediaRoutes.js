@@ -155,7 +155,7 @@ function createHttpError(message, statusCode = 500, code = null) {
 async function getUploadStatusForEvent(eventId) {
   const { data: event, error: eventError } = await supabase
     .from("event")
-    .select("event_id, is_event_active, package_key")
+    .select("event_id, is_event_active, package_key, storage_consumed_bytes")
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -194,6 +194,7 @@ async function getUploadStatusForEvent(eventId) {
     onlyUsers: settings?.only_users === true,
     packageKey,
     eventStorageLimitBytes: getPackageStorageLimitBytes(packageKey),
+    eventStorageUsedBytes: Math.max(0, Number(event.storage_consumed_bytes) || 0),
   };
 }
 
@@ -616,6 +617,7 @@ router.post(
       onlyUsers,
       packageKey,
       eventStorageLimitBytes,
+      eventStorageUsedBytes,
     } = await getUploadStatusForEvent(event_id);
     assertRegisteredUserAccess({
       onlyUsers,
@@ -624,22 +626,22 @@ router.post(
       guestClaims,
     });
     await checkGuestUploadLimit(event_id, guest_id, files.length);
-    const { data: usageRows, error: usageError } = await supabase
+    const { data: guestUsageRows, error: usageError } = await supabase
       .from("media")
-      .select("guest_id, bytes")
-      .eq("event_id", event_id);
+      .select("bytes")
+      .eq("event_id", event_id)
+      .eq("guest_id", guest_id);
 
     if (usageError) {
       throw createHttpError("Storage usage could not be checked.", 500);
     }
 
-    const eventUsedBytes = (usageRows || []).reduce(
+    // Event quota is cumulative: deleting media does not return event storage quota.
+    const eventUsedBytes = eventStorageUsedBytes;
+    const guestUsedBytes = (guestUsageRows || []).reduce(
       (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
       0,
     );
-    const guestUsedBytes = (usageRows || [])
-      .filter((row) => String(row?.guest_id) === String(guest_id))
-      .reduce((sum, row) => sum + Math.max(0, Number(row?.bytes) || 0), 0);
 
     if (eventUsedBytes + incomingBytes > eventStorageLimitBytes) {
       return res.status(413).json({
@@ -740,6 +742,41 @@ router.post(
         uploaded_cloudinary: uploadedItems.map((item) => item.cloudinary),
         error: error.message,
       });
+    }
+
+    const consumedBytes = (data || []).reduce(
+      (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
+      0,
+    );
+
+    if (consumedBytes > 0) {
+      const { error: storageCounterError } = await supabase.rpc(
+        "increment_event_storage_consumed",
+        {
+          p_event_id: event_id,
+          p_bytes: Math.round(consumedBytes),
+        },
+      );
+
+      if (storageCounterError) {
+        const insertedMediaIds = (data || []).map((row) => row.media_id).filter(Boolean);
+        if (insertedMediaIds.length > 0) {
+          const { error: rollbackError } = await supabase
+            .from("media")
+            .delete()
+            .in("media_id", insertedMediaIds);
+
+          if (rollbackError) {
+            console.error("Media rollback error after storage counter failure:", rollbackError.message);
+          }
+        }
+
+        throw createHttpError(
+          "Event storage usage could not be recorded.",
+          500,
+          "EVENT_STORAGE_COUNTER_FAILED",
+        );
+      }
     }
 
     return res.status(201).json({

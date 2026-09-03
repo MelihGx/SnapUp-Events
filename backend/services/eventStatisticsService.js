@@ -73,7 +73,6 @@ function buildEventStatistics({
   guests = [],
   media = [],
   likes = [],
-  storageRows = [],
 }) {
   const eventMedia = media.filter((item) =>
     ["image", "video", "message"].includes(item?.media_type),
@@ -81,10 +80,11 @@ function buildEventStatistics({
   const approvedMedia = eventMedia.filter(
     (item) => item?.media_status === "approved",
   );
-  const usedStorageBytes = storageRows.reduce((total, row) => {
-    const bytes = Number(row?.bytes || 0);
-    return total + (Number.isFinite(bytes) && bytes > 0 ? bytes : 0);
-  }, 0);
+  // Storage usage is cumulative. Deleting media does not return event quota.
+  const usedStorageBytes = Math.max(
+    0,
+    Number(event?.storage_consumed_bytes) || 0,
+  );
   const storage = buildStorageUsage(event?.package_key || "free", usedStorageBytes);
 
   return {
@@ -131,7 +131,7 @@ async function loadPagedRows(createQuery, errorMessage, errorCode) {
 }
 
 async function loadEventStatisticsData(supabase, event) {
-  const [guests, media, storageRows] = await Promise.all([
+  const [guests, media] = await Promise.all([
     loadPagedRows(
       () =>
         supabase
@@ -154,16 +154,6 @@ async function loadEventStatisticsData(supabase, event) {
           .order("media_created_at", { ascending: false }),
       "Event uploads could not be loaded.",
       "EVENT_STATISTICS_MEDIA_QUERY_FAILED",
-    ),
-    loadPagedRows(
-      () =>
-        supabase
-          .from("media")
-          .select("media_id, bytes")
-          .eq("event_id", event.event_id)
-          .order("media_id", { ascending: true }),
-      "Event storage usage could not be loaded.",
-      "EVENT_STATISTICS_STORAGE_QUERY_FAILED",
     ),
   ]);
 
@@ -201,7 +191,7 @@ async function loadEventStatisticsData(supabase, event) {
     likes.push(...chunkLikes);
   }
 
-  return buildEventStatistics({ event, guests, media, likes, storageRows });
+  return buildEventStatistics({ event, guests, media, likes });
 }
 
 module.exports = {

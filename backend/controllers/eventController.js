@@ -1136,6 +1136,7 @@ const EVENT_HIGHLIGHTS_SELECT = `
   event_code,
   event_cover_url,
   package_key,
+  storage_consumed_bytes,
   is_event_active
 `;
 

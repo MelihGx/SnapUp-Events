@@ -234,7 +234,7 @@ const getMyEvents = async (req, res) => {
     const { data: events, error } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
+        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, storage_consumed_bytes",
       )
       .eq("user_id", userId)
       .order("event_created_at", { ascending: false });
@@ -248,37 +248,11 @@ const getMyEvents = async (req, res) => {
     }
 
     const eventItems = Array.isArray(events) ? events : [];
-    const eventIds = eventItems.map((event) => event.event_id).filter(Boolean);
-    const storageByEventId = new Map();
-
-    if (eventIds.length > 0) {
-      const { data: mediaRows, error: mediaError } = await supabase
-        .from("media")
-        .select("event_id, bytes")
-        .in("event_id", eventIds);
-
-      if (mediaError) {
-        return res.status(500).json({
-          success: false,
-          message: "Event storage usage could not be loaded.",
-          error: mediaError.message,
-        });
-      }
-
-      (mediaRows || []).forEach((row) => {
-        const bytes = Math.max(0, Number(row?.bytes) || 0);
-        storageByEventId.set(
-          row.event_id,
-          (storageByEventId.get(row.event_id) || 0) + bytes,
-        );
-      });
-    }
-
     const eventsWithStorage = eventItems.map((event) => ({
       ...event,
       storage: buildStorageUsage(
         event.package_key || "free",
-        storageByEventId.get(event.event_id) || 0,
+        Math.max(0, Number(event.storage_consumed_bytes) || 0),
       ),
     }));
 
