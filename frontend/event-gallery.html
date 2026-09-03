@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="css/theme.css?v=gallery-without-book-2" />
     <link
       rel="stylesheet"
-      href="css/event-gallery.css?v=gallery-cover-inner-light-nav-1"
+      href="css/event-gallery.css?v=gallery-custom-combobox-1"
     />
     <link
       rel="stylesheet"
@@ -39,7 +39,7 @@
       defer
     ></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
-    <script src="js/ui-additions-i18n.js?v=ui-additions-50-languages-1" defer></script>
+    <script src="js/ui-additions-i18n.js?v=ui-additions-gallery-filters-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
 
@@ -96,6 +96,65 @@
       </section>
 
       <section class="gallery-content" id="galleryContent" hidden>
+        <aside
+          class="gallery-mobile-sticky-toolbar"
+          id="galleryMobileStickyToolbar"
+          aria-hidden="true"
+        >
+          <div class="gallery-mobile-sticky-toolbar__head">
+            <strong id="galleryStickyEventTitle">Event name</strong>
+            <span id="galleryStickyCount">0 memories</span>
+          </div>
+
+          <div class="gallery-mobile-sticky-toolbar__controls">
+            <label class="gallery-mobile-sticky-control">
+              <span>Show</span>
+              <div class="gallery-mobile-sticky-select-wrap gallery-custom-combobox" data-select-id="galleryStickyFilterSelect">
+                <select id="galleryStickyFilterSelect" class="gallery-native-select-proxy" aria-label="Show" tabindex="-1">
+                  <option value="all">All</option>
+                  <option value="image">Photos</option>
+                  <option value="video">Videos</option>
+                  <option value="message">Messages</option>
+                </select>
+                <button type="button" class="gallery-custom-combobox__trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="gallery-custom-combobox__value">All</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M6.5 8 10 11.5 13.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div class="gallery-custom-combobox__menu" role="listbox">
+                  <button type="button" class="gallery-custom-combobox__option is-selected" role="option" aria-selected="true" data-value="all">All</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="image">Photos</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="video">Videos</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="message">Messages</button>
+                </div>
+              </div>
+            </label>
+
+            <label class="gallery-mobile-sticky-control">
+              <span>Sort by</span>
+              <div class="gallery-mobile-sticky-select-wrap gallery-custom-combobox" data-select-id="galleryStickySortSelect">
+                <select id="galleryStickySortSelect" class="gallery-native-select-proxy" aria-label="Sort by" tabindex="-1">
+                  <option value="newest">Latest uploaded</option>
+                  <option value="oldest">First uploaded</option>
+                  <option value="liked">Most liked</option>
+                </select>
+                <button type="button" class="gallery-custom-combobox__trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="gallery-custom-combobox__value">Latest uploaded</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M6.5 8 10 11.5 13.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div class="gallery-custom-combobox__menu" role="listbox">
+                  <button type="button" class="gallery-custom-combobox__option is-selected" role="option" aria-selected="true" data-value="newest">Latest uploaded</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="oldest">First uploaded</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="liked">Most liked</button>
+                </div>
+              </div>
+            </label>
+          </div>
+        </aside>
+
         <section class="gallery-hero" id="galleryHero">
           <div
             class="gallery-hero-media"
@@ -134,10 +193,69 @@
           <div class="gallery-panel-head">
             <div class="section-head">
               <span class="section-kicker">Memories</span>
-              <h2>Approved memories</h2>
-              <p>Approved photos, videos and guest messages are shown together from newest to oldest.</p>
+              <h2>Shared memories</h2>
+              <p>Photos, videos and guest messages shared by guests come together here.</p>
             </div>
             <span class="gallery-count-badge" id="memoryCountBadge">0 memories</span>
+          </div>
+
+          <div class="gallery-feed-controls" aria-label="Gallery controls">
+            <div class="gallery-control-set">
+              <label class="gallery-control-label" for="galleryFilterSelect">Show</label>
+              <div class="gallery-control-buttons" role="group" aria-label="Show">
+                <button type="button" class="gallery-control-btn active" data-gallery-filter="all" aria-pressed="true">All</button>
+                <button type="button" class="gallery-control-btn" data-gallery-filter="image" aria-pressed="false">Photos</button>
+                <button type="button" class="gallery-control-btn" data-gallery-filter="video" aria-pressed="false">Videos</button>
+                <button type="button" class="gallery-control-btn" data-gallery-filter="message" aria-pressed="false">Messages</button>
+              </div>
+              <div class="gallery-control-select-wrap gallery-custom-combobox" data-select-id="galleryFilterSelect">
+                <select id="galleryFilterSelect" class="gallery-control-select gallery-native-select-proxy" aria-label="Show" tabindex="-1">
+                  <option value="all">All</option>
+                  <option value="image">Photos</option>
+                  <option value="video">Videos</option>
+                  <option value="message">Messages</option>
+                </select>
+                <button type="button" class="gallery-custom-combobox__trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="gallery-custom-combobox__value">All</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M6.5 8 10 11.5 13.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div class="gallery-custom-combobox__menu" role="listbox">
+                  <button type="button" class="gallery-custom-combobox__option is-selected" role="option" aria-selected="true" data-value="all">All</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="image">Photos</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="video">Videos</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="message">Messages</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="gallery-control-set gallery-control-set--sort">
+              <label class="gallery-control-label" for="gallerySortSelect">Sort by</label>
+              <div class="gallery-control-buttons" role="group" aria-label="Sort by">
+                <button type="button" class="gallery-control-btn active" data-gallery-sort="newest" aria-pressed="true">Latest uploaded</button>
+                <button type="button" class="gallery-control-btn" data-gallery-sort="oldest" aria-pressed="false">First uploaded</button>
+                <button type="button" class="gallery-control-btn" data-gallery-sort="liked" aria-pressed="false">Most liked</button>
+              </div>
+              <div class="gallery-control-select-wrap gallery-custom-combobox" data-select-id="gallerySortSelect">
+                <select id="gallerySortSelect" class="gallery-control-select gallery-native-select-proxy" aria-label="Sort by" tabindex="-1">
+                  <option value="newest">Latest uploaded</option>
+                  <option value="oldest">First uploaded</option>
+                  <option value="liked">Most liked</option>
+                </select>
+                <button type="button" class="gallery-custom-combobox__trigger" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="gallery-custom-combobox__value">Latest uploaded</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M6.5 8 10 11.5 13.5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <div class="gallery-custom-combobox__menu" role="listbox">
+                  <button type="button" class="gallery-custom-combobox__option is-selected" role="option" aria-selected="true" data-value="newest">Latest uploaded</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="oldest">First uploaded</button>
+                  <button type="button" class="gallery-custom-combobox__option" role="option" aria-selected="false" data-value="liked">Most liked</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
@@ -193,7 +311,7 @@
 
     <script
       type="module"
-      src="js/event-gallery.js?v=uploaded-by-1"
+      src="js/event-gallery.js?v=gallery-custom-combobox-1"
     ></script>
     <script src="js/theme.js?v=gallery-without-book-2"></script>
   </body>

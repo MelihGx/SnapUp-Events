@@ -25,6 +25,109 @@ const guestCountTitle = document.getElementById("guestCountTitle");
 const participantList = document.getElementById("participantList");
 const memoryCountBadge = document.getElementById("memoryCountBadge");
 const approvedGalleryGrid = document.getElementById("approvedGalleryGrid");
+const galleryFilterButtons = Array.from(
+  document.querySelectorAll("[data-gallery-filter]"),
+);
+const gallerySortButtons = Array.from(
+  document.querySelectorAll("[data-gallery-sort]"),
+);
+const galleryFilterSelect = document.getElementById("galleryFilterSelect");
+const gallerySortSelect = document.getElementById("gallerySortSelect");
+const galleryFeedControls = document.querySelector(".gallery-feed-controls");
+const galleryMobileStickyToolbar = document.getElementById(
+  "galleryMobileStickyToolbar",
+);
+const galleryStickyEventTitle = document.getElementById(
+  "galleryStickyEventTitle",
+);
+const galleryStickyCount = document.getElementById("galleryStickyCount");
+const galleryStickyFilterSelect = document.getElementById(
+  "galleryStickyFilterSelect",
+);
+const galleryStickySortSelect = document.getElementById(
+  "galleryStickySortSelect",
+);
+const galleryCustomComboboxes = Array.from(
+  document.querySelectorAll(".gallery-custom-combobox"),
+);
+
+function closeGalleryCustomComboboxes(except = null) {
+  galleryCustomComboboxes.forEach((combobox) => {
+    if (combobox === except) return;
+    combobox.classList.remove("is-open");
+    combobox
+      .querySelector(".gallery-custom-combobox__trigger")
+      ?.setAttribute("aria-expanded", "false");
+  });
+}
+
+function syncGalleryCustomComboboxes() {
+  galleryCustomComboboxes.forEach((combobox) => {
+    const selectId = combobox.dataset.selectId;
+    const select = selectId ? document.getElementById(selectId) : null;
+    if (!select) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    const valueNode = combobox.querySelector(".gallery-custom-combobox__value");
+    if (valueNode && selectedOption) {
+      valueNode.textContent = selectedOption.textContent.trim();
+    }
+
+    combobox
+      .querySelectorAll(".gallery-custom-combobox__option")
+      .forEach((optionButton) => {
+        const active = optionButton.dataset.value === select.value;
+        optionButton.classList.toggle("is-selected", active);
+        optionButton.setAttribute("aria-selected", active ? "true" : "false");
+
+        const proxyOption = Array.from(select.options).find(
+          (option) => option.value === optionButton.dataset.value,
+        );
+        optionButton.hidden = Boolean(proxyOption?.hidden || proxyOption?.disabled);
+      });
+  });
+}
+
+function initGalleryCustomComboboxes() {
+  galleryCustomComboboxes.forEach((combobox) => {
+    const trigger = combobox.querySelector(".gallery-custom-combobox__trigger");
+    const selectId = combobox.dataset.selectId;
+    const select = selectId ? document.getElementById(selectId) : null;
+    if (!trigger || !select) return;
+
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = !combobox.classList.contains("is-open");
+      closeGalleryCustomComboboxes(combobox);
+      combobox.classList.toggle("is-open", willOpen);
+      trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+
+    combobox
+      .querySelectorAll(".gallery-custom-combobox__option")
+      .forEach((optionButton) => {
+        optionButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (optionButton.hidden) return;
+          select.value = optionButton.dataset.value || select.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          combobox.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+          syncGalleryCustomComboboxes();
+        });
+      });
+  });
+
+  document.addEventListener("click", () => closeGalleryCustomComboboxes());
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    closeGalleryCustomComboboxes();
+  });
+
+  syncGalleryCustomComboboxes();
+}
+
+initGalleryCustomComboboxes();
 
 const publicLightbox = document.getElementById("publicLightbox");
 const publicLightboxBackdrop = document.getElementById(
@@ -71,6 +174,9 @@ const localeByLanguage = {
 };
 
 let approvedPhotos = [];
+let approvedFeedItems = [];
+let activeGalleryFilter = "all";
+let activeGallerySort = "newest";
 let activePhotoIndex = 0;
 let lightboxReturnTarget = null;
 let touchStartX = null;
@@ -171,10 +277,13 @@ function showContent() {
   galleryLoading.setAttribute("aria-busy", "false");
   galleryError.hidden = true;
   galleryContent.hidden = false;
+  scheduleMobileStickyToolbarUpdate();
 }
 
 function renderEvent(event) {
-  galleryEventTitle.textContent = event.event_name || t("Untitled Event");
+  const eventTitle = event.event_name || t("Untitled Event");
+  galleryEventTitle.textContent = eventTitle;
+  if (galleryStickyEventTitle) galleryStickyEventTitle.textContent = eventTitle;
 
   const locationText = [event.event_location, event.event_address]
     .map((value) => String(value || "").trim())
@@ -464,18 +573,191 @@ function getVideoCardHtml(item) {
   `;
 }
 
+function getSortedGalleryFeed(items) {
+  return [...items].sort((a, b) => {
+    if (activeGallerySort === "oldest") {
+      return getCreatedAtTime(a) - getCreatedAtTime(b);
+    }
+
+    if (activeGallerySort === "liked") {
+      const likesDifference =
+        Number(b.likes_count || 0) - Number(a.likes_count || 0);
+
+      if (likesDifference !== 0) {
+        return likesDifference;
+      }
+    }
+
+    return getCreatedAtTime(b) - getCreatedAtTime(a);
+  });
+}
+
+function getVisibleGalleryFeed() {
+  const filtered =
+    activeGalleryFilter === "all"
+      ? approvedFeedItems
+      : approvedFeedItems.filter(
+          (item) => item.feed_type === activeGalleryFilter,
+        );
+
+  return getSortedGalleryFeed(filtered);
+}
+
+function setGalleryFilter(nextFilter) {
+  if (!nextFilter || nextFilter === activeGalleryFilter) {
+    syncGalleryControlState();
+    return;
+  }
+
+  activeGalleryFilter = nextFilter;
+  renderGalleryFeedView();
+}
+
+function setGallerySort(nextSort) {
+  if (
+    !nextSort ||
+    nextSort === activeGallerySort ||
+    (nextSort === "liked" && !gallerySettings.allow_likes)
+  ) {
+    syncGalleryControlState();
+    return;
+  }
+
+  activeGallerySort = nextSort;
+  renderGalleryFeedView();
+}
+
+function updateMobileStickyToolbar() {
+  if (!galleryMobileStickyToolbar || !galleryFeedControls) return;
+
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const controlsRect = galleryFeedControls.getBoundingClientRect();
+  const shouldShow =
+    isMobile &&
+    !galleryContent.hidden &&
+    controlsRect.bottom <= 12 &&
+    window.scrollY > 0;
+
+  galleryMobileStickyToolbar.classList.toggle("is-visible", shouldShow);
+  if (!shouldShow) closeGalleryCustomComboboxes();
+  galleryMobileStickyToolbar.setAttribute(
+    "aria-hidden",
+    shouldShow ? "false" : "true",
+  );
+}
+
+let stickyToolbarFrame = null;
+function scheduleMobileStickyToolbarUpdate() {
+  if (stickyToolbarFrame !== null) return;
+
+  stickyToolbarFrame = window.requestAnimationFrame(() => {
+    stickyToolbarFrame = null;
+    updateMobileStickyToolbar();
+  });
+}
+
+function syncGalleryControlState() {
+  galleryFilterButtons.forEach((button) => {
+    const active = button.dataset.galleryFilter === activeGalleryFilter;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  gallerySortButtons.forEach((button) => {
+    const active = button.dataset.gallerySort === activeGallerySort;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  if (galleryFilterSelect) {
+    galleryFilterSelect.value = activeGalleryFilter;
+  }
+
+  if (galleryStickyFilterSelect) {
+    galleryStickyFilterSelect.value = activeGalleryFilter;
+  }
+
+  if (gallerySortSelect) {
+    gallerySortSelect.value = activeGallerySort;
+  }
+
+  if (galleryStickySortSelect) {
+    galleryStickySortSelect.value = activeGallerySort;
+  }
+
+  const mostLikedButton = gallerySortButtons.find(
+    (button) => button.dataset.gallerySort === "liked",
+  );
+
+  if (mostLikedButton) {
+    mostLikedButton.hidden = !gallerySettings.allow_likes;
+  }
+
+  const mostLikedOptions = [gallerySortSelect, galleryStickySortSelect]
+    .map((select) => select?.querySelector('option[value="liked"]'))
+    .filter(Boolean);
+
+  mostLikedOptions.forEach((option) => {
+    option.hidden = !gallerySettings.allow_likes;
+    option.disabled = !gallerySettings.allow_likes;
+  });
+
+  syncGalleryCustomComboboxes();
+
+  if (!gallerySettings.allow_likes && activeGallerySort === "liked") {
+    activeGallerySort = "newest";
+    syncGalleryControlState();
+  }
+}
+
+function renderGalleryFeedView() {
+  syncGalleryControlState();
+
+  const visibleFeed = getVisibleGalleryFeed();
+  approvedPhotos = visibleFeed.filter((item) => item.feed_type === "image");
+
+  const photoIndexById = new Map(
+    approvedPhotos.map((item, index) => [String(item.media_id), index]),
+  );
+
+  const countLabel = t(
+    visibleFeed.length === 1 ? "{count} memory" : "{count} memories",
+    { count: visibleFeed.length },
+  );
+  memoryCountBadge.textContent = countLabel;
+  if (galleryStickyCount) galleryStickyCount.textContent = countLabel;
+
+  if (visibleFeed.length === 0) {
+    approvedGalleryGrid.innerHTML = `
+      <div class="empty-box">
+        ${escapeHtml(t("No memories match these filters."))}
+      </div>
+    `;
+    return;
+  }
+
+  approvedGalleryGrid.innerHTML = visibleFeed
+    .map((item) => {
+      if (item.feed_type === "message") {
+        return getMessageCardHtml(item);
+      }
+
+      if (item.feed_type === "video") {
+        return getVideoCardHtml(item);
+      }
+
+      return getPhotoCardHtml(
+        item,
+        photoIndexById.get(String(item.media_id)) ?? 0,
+      );
+    })
+    .join("");
+}
+
 function renderApprovedFeed(media, messages) {
   const approvedVisualMedia = (media || []).filter(
     (item) =>
       ["image", "video"].includes(item.media_type) && Boolean(item.media_url),
-  );
-
-  approvedPhotos = approvedVisualMedia.filter(
-    (item) => item.media_type === "image",
-  );
-
-  const photoIndexById = new Map(
-    approvedPhotos.map((item, index) => [String(item.media_id), index]),
   );
 
   const messageItems = [];
@@ -499,20 +781,17 @@ function renderApprovedFeed(media, messages) {
       }
     });
 
-  const approvedFeed = [
+  approvedFeedItems = [
     ...approvedVisualMedia.map((item) => ({
       ...item,
       feed_type: item.media_type,
     })),
     ...messageItems.map((item) => ({ ...item, feed_type: "message" })),
-  ].sort((a, b) => getCreatedAtTime(b) - getCreatedAtTime(a));
+  ];
 
-  memoryCountBadge.textContent = t(
-    approvedFeed.length === 1 ? "{count} memory" : "{count} memories",
-    { count: approvedFeed.length },
-  );
-
-  if (approvedFeed.length === 0) {
+  if (approvedFeedItems.length === 0) {
+    memoryCountBadge.textContent = t("{count} memories", { count: 0 });
+    approvedPhotos = [];
     approvedGalleryGrid.innerHTML = `
       <div class="empty-box">
         ${escapeHtml(
@@ -525,22 +804,7 @@ function renderApprovedFeed(media, messages) {
     return;
   }
 
-  approvedGalleryGrid.innerHTML = approvedFeed
-    .map((item) => {
-      if (item.feed_type === "message") {
-        return getMessageCardHtml(item);
-      }
-
-      if (item.feed_type === "video") {
-        return getVideoCardHtml(item);
-      }
-
-      return getPhotoCardHtml(
-        item,
-        photoIndexById.get(String(item.media_id)) ?? 0,
-      );
-    })
-    .join("");
+  renderGalleryFeedView();
 }
 
 function showLightboxItem(index) {
@@ -651,6 +915,18 @@ async function handleLikeClick(button) {
       throw new Error(data.error || data.message || "Like action failed.");
     }
 
+    approvedFeedItems = approvedFeedItems.map((item) => {
+      if (String(item.media_id) !== String(mediaId)) {
+        return item;
+      }
+
+      return {
+        ...item,
+        likes_count: data.likes_count,
+        user_liked: data.liked,
+      };
+    });
+
     approvedPhotos = approvedPhotos.map((item) => {
       if (String(item.media_id) !== String(mediaId)) {
         return item;
@@ -663,7 +939,11 @@ async function handleLikeClick(button) {
       };
     });
 
-    updateLikeButtons(mediaId, data.liked, data.likes_count);
+    if (activeGallerySort === "liked") {
+      renderGalleryFeedView();
+    } else {
+      updateLikeButtons(mediaId, data.liked, data.likes_count);
+    }
 
     if (
       publicLightbox.classList.contains("active") &&
@@ -678,6 +958,40 @@ async function handleLikeClick(button) {
     button.disabled = false;
   }
 }
+
+galleryFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setGalleryFilter(button.dataset.galleryFilter);
+  });
+});
+
+gallerySortButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.hidden) return;
+    setGallerySort(button.dataset.gallerySort);
+  });
+});
+
+galleryFilterSelect?.addEventListener("change", () => {
+  setGalleryFilter(galleryFilterSelect.value);
+});
+
+gallerySortSelect?.addEventListener("change", () => {
+  setGallerySort(gallerySortSelect.value);
+});
+
+galleryStickyFilterSelect?.addEventListener("change", () => {
+  setGalleryFilter(galleryStickyFilterSelect.value);
+});
+
+galleryStickySortSelect?.addEventListener("change", () => {
+  setGallerySort(galleryStickySortSelect.value);
+});
+
+window.addEventListener("scroll", scheduleMobileStickyToolbarUpdate, {
+  passive: true,
+});
+window.addEventListener("resize", scheduleMobileStickyToolbarUpdate);
 
 async function loadGallery() {
   if (!eventCode) {
