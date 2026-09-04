@@ -3,6 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        const base = document.createElement("base");
+        base.href = window.location.pathname.includes("/frontend/")
+          ? "/frontend/"
+          : "/";
+        document.head.appendChild(base);
+      })();
+    </script>
     <title>Event Gallery — SnapUp Events</title>
 
     <link rel="icon" href="icon/favicon.ico" sizes="any" />
@@ -311,7 +320,7 @@
 
     <script
       type="module"
-      src="js/event-gallery.js?v=gallery-custom-combobox-1"
+      src="js/event-gallery.js?v=event-slug-2"
     ></script>
     <script src="js/theme.js?v=gallery-without-book-2"></script>
   </body>

@@ -7,7 +7,7 @@ import { initQRPreview } from "./qr-preview.js";
 import { initCopyCode } from "./copy-code.js";
 import { initUploadSimulation } from "./upload-simulation.js";
 import { testBackendConnection } from "./events-api.js";
-import { initJoinUploadModal } from "./join-upload-modal.js?v=turnstile-visible-2";
+import { initJoinUploadModal } from "./join-upload-modal.js?v=event-slug-1";
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { initRegionalPricing } from "./regional-pricing.js?v=regional-pricing-1";
 

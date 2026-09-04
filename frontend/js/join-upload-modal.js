@@ -1,4 +1,5 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import { buildEventGalleryUrl } from "./event-url.js?v=event-slug-1";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
@@ -223,14 +224,11 @@ function finishUploadSuccessFlow() {
 }
 
 function getEventGalleryUrl(event) {
-  if (!event?.event_code) {
+  if (!event?.event_slug && !event?.event_code) {
     return "#";
   }
 
-  const galleryUrl = new URL("event-gallery.html", window.location.href);
-  galleryUrl.searchParams.set("code", event.event_code);
-
-  return galleryUrl.toString();
+  return buildEventGalleryUrl(event);
 }
 
 function getEventLocationParts(event) {

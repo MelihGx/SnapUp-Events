@@ -6,6 +6,7 @@ const {
   videoDeliveryUrl,
 } = require("../services/cloudinaryDelivery");
 const { generateEventCode } = require("../utils/eventCode");
+const { generateUniqueEventSlug } = require("../utils/eventSlug");
 const { normalizePackageKey } = require("../services/pricingService");
 const cloudinary = require("../config/cloudinary");
 const {
@@ -319,6 +320,7 @@ const createEvent = async (req, res) => {
     const packetLevelId = await getPacketLevelId(selectedPackage);
 
     const eventCode = await generateUniqueEventCode();
+    const eventSlug = await generateUniqueEventSlug(finalEventName);
     const qrCodeUrl = await createQrCodeUrl(eventCode);
     let eventCoverUrl = null;
 
@@ -336,6 +338,7 @@ const createEvent = async (req, res) => {
       .insert([
         {
           event_name: finalEventName.trim(),
+          event_slug: eventSlug,
           event_location: cleanOptionalText(event_location, 160),
           event_address: cleanOptionalText(event_address, 500),
           event_latitude: coordinates.latitude,
@@ -355,7 +358,7 @@ const createEvent = async (req, res) => {
         },
       ])
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
+        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
       )
       .single();
 
@@ -436,7 +439,7 @@ const getEventByCode = async (req, res) => {
     const { data: event, error } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
+        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .eq("event_code", eventCode)
       .eq("is_event_active", true)
@@ -506,7 +509,7 @@ const getEventDetail = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, user_id",
+        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, user_id",
       )
       .eq("event_id", eventId)
       .eq("user_id", userId)
@@ -1351,6 +1354,7 @@ async function getPublicEventGallery(req, res) {
         `
         event_id,
         event_name,
+        event_slug,
         event_location,
         event_address,
         event_latitude,
@@ -1663,6 +1667,7 @@ async function downloadEventArchive(req, res) {
         `
         event_id,
         event_name,
+        event_slug,
         event_location,
         event_address,
         event_date,
@@ -1812,6 +1817,7 @@ async function downloadEventMemoryBookV3(req, res) {
         `
         event_id,
         event_name,
+        event_slug,
         event_location,
         event_address,
         event_latitude,
@@ -1878,6 +1884,7 @@ async function downloadPublicMemoryBook(req, res) {
         `
         event_id,
         event_name,
+        event_slug,
         event_location,
         event_address,
         event_latitude,
@@ -1954,6 +1961,51 @@ async function downloadPublicMemoryBook(req, res) {
   }
 }
 
+async function getPublicEventGalleryBySlug(req, res) {
+  try {
+    const eventSlug = String(req.params.eventSlug || "")
+      .trim()
+      .toLowerCase();
+
+    if (!eventSlug || eventSlug.length > 120) {
+      return res.status(400).json({
+        success: false,
+        message: "Event address is invalid.",
+      });
+    }
+
+    const { data: event, error } = await supabase
+      .from("event")
+      .select("event_code")
+      .eq("event_slug", eventSlug)
+      .maybeSingle();
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Event could not be loaded.",
+        error: error.message,
+      });
+    }
+
+    if (!event?.event_code) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found.",
+      });
+    }
+
+    req.params.eventCode = event.event_code;
+    return getPublicEventGallery(req, res);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error.",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   createEvent,
   getEventByCode,
@@ -1968,6 +2020,7 @@ module.exports = {
   getOwnedEventHighlights,
   getPublicEventHighlights,
   getPublicEventGallery,
+  getPublicEventGalleryBySlug,
   createEventArchiveTicket,
   downloadEventArchive,
   downloadEventMemoryBookV3,

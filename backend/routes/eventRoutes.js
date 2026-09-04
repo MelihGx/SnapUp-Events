@@ -36,6 +36,7 @@ const {
   getOwnedEventHighlights,
   getPublicEventHighlights,
   getPublicEventGallery,
+  getPublicEventGalleryBySlug,
   createEventArchiveTicket,
   downloadEventArchive,
   downloadEventMemoryBookV3,
@@ -182,6 +183,12 @@ router.get(
 );
 
 router.get("/:eventCode/memory-book", eventCodeLimiter, pdfLimiter, downloadPublicMemoryBook);
+
+router.get(
+  "/slug/:eventSlug/gallery",
+  eventCodeLimiter,
+  getPublicEventGalleryBySlug,
+);
 
 router.get("/:eventCode/gallery", eventCodeLimiter, getPublicEventGallery);
 

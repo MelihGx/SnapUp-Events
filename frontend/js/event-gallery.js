@@ -6,6 +6,10 @@ import {
   getVideoPlaybackUrl,
   getVideoPosterUrl,
 } from "./media-delivery.js?v=cloudinary-bandwidth-1";
+import {
+  canonicalizeEventGalleryAddress,
+  readEventGalleryIdentifier,
+} from "./event-url.js?v=event-slug-1";
 
 const API_BASE_URL = API_URL;
 
@@ -140,8 +144,7 @@ const publicLightboxImage = document.getElementById("publicLightboxImage");
 const publicLightboxTitle = document.getElementById("publicLightboxTitle");
 const publicLightboxMeta = document.getElementById("publicLightboxMeta");
 
-const params = new URLSearchParams(window.location.search);
-const eventCode = params.get("code");
+const { eventCode, eventSlug } = readEventGalleryIdentifier();
 
 const localeByLanguage = {
   en: "en-US",
@@ -282,6 +285,7 @@ function showContent() {
 
 function renderEvent(event) {
   const eventTitle = event.event_name || t("Untitled Event");
+  document.title = `${eventTitle} — SnapUp Events`;
   galleryEventTitle.textContent = eventTitle;
   if (galleryStickyEventTitle) galleryStickyEventTitle.textContent = eventTitle;
 
@@ -994,15 +998,16 @@ window.addEventListener("scroll", scheduleMobileStickyToolbarUpdate, {
 window.addEventListener("resize", scheduleMobileStickyToolbarUpdate);
 
 async function loadGallery() {
-  if (!eventCode) {
-    showError("Event code not found.");
+  if (!eventCode && !eventSlug) {
+    showError("Event address not found.");
     return;
   }
 
   try {
-    const galleryUrl = new URL(
-      `${API_BASE_URL}/api/events/${encodeURIComponent(eventCode)}/gallery`,
-    );
+    const galleryEndpoint = eventSlug
+      ? `${API_BASE_URL}/api/events/slug/${encodeURIComponent(eventSlug)}/gallery`
+      : `${API_BASE_URL}/api/events/${encodeURIComponent(eventCode)}/gallery`;
+    const galleryUrl = new URL(galleryEndpoint);
 
     galleryUrl.searchParams.set("like_key", getLikeKey());
 
@@ -1018,6 +1023,7 @@ async function loadGallery() {
       allow_likes: data.settings?.allow_likes !== false,
     };
 
+    canonicalizeEventGalleryAddress(data.event || {});
     renderEvent(data.event || {});
     renderGuests(data.guests || []);
     renderApprovedFeed(data.media || [], data.messages || []);
