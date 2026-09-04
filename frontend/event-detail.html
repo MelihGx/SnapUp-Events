@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=media-delete-confirm-1"
+      href="css/event-detail.css?v=event-delete-confirm-2"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -49,7 +49,7 @@
       href="css/i18n.css?v=global-languages-3"
     />
     <script
-      src="js/event-detail-i18n.js?v=media-delete-confirm-1"
+      src="js/event-detail-i18n.js?v=event-delete-confirm-2"
       defer
     ></script>
     <script
@@ -1909,6 +1909,77 @@
     </div>
 
     <div
+      class="media-delete-confirm-overlay event-delete-confirm-overlay"
+      id="eventDeleteConfirmModal"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="media-delete-confirm-backdrop"
+        id="eventDeleteConfirmBackdrop"
+        aria-label="Cancel"
+        tabindex="-1"
+      ></button>
+
+      <section
+        class="media-delete-confirm-dialog event-delete-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="eventDeleteConfirmTitle"
+        aria-describedby="eventDeleteConfirmDescription"
+      >
+        <button
+          type="button"
+          class="media-delete-confirm-close"
+          id="eventDeleteConfirmClose"
+          aria-label="Cancel"
+        >
+          ×
+        </button>
+
+        <span
+          class="media-delete-confirm-icon event-delete-confirm-icon"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7h16"></path>
+            <path d="M9 7V4h6v3"></path>
+            <path d="m7 7 1 13h8l1-13"></path>
+            <path d="M10 11v5M14 11v5"></path>
+          </svg>
+        </span>
+
+        <h2 id="eventDeleteConfirmTitle">Delete Event</h2>
+        <p id="eventDeleteConfirmDescription">
+          This event will be permanently deleted. Are you sure?
+        </p>
+
+        <div
+          class="event-delete-confirm-name"
+          id="eventDeleteConfirmName"
+          aria-live="polite"
+        ></div>
+
+        <div class="media-delete-confirm-actions event-delete-confirm-actions">
+          <button
+            type="button"
+            class="media-delete-confirm-cancel"
+            id="eventDeleteConfirmCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="media-delete-confirm-delete"
+            id="eventDeleteConfirmDelete"
+          >
+            Delete Event
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div
       class="memory-book-modal"
       id="memoryBookModal"
       aria-hidden="true"
@@ -2618,7 +2689,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-slug-1"
+      src="js/event-detail.js?v=event-delete-confirm-2"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

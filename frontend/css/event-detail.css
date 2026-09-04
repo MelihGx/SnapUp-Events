@@ -6427,3 +6427,67 @@ body.media-delete-confirm-open {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* =========================================================
+   Event delete confirmation
+   ========================================================= */
+.event-delete-confirm-dialog {
+  width: min(470px, calc(100vw - 32px));
+}
+
+.event-delete-confirm-icon {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 19px;
+  border-radius: 22px;
+}
+
+.event-delete-confirm-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.event-delete-confirm-dialog h2 {
+  margin-top: 2px;
+}
+
+.event-delete-confirm-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 20px;
+  padding: 10px 16px;
+  color: var(--detail-text);
+  background: color-mix(in srgb, var(--detail-danger) 6%, var(--detail-surface-raised));
+  border: 1px solid color-mix(in srgb, var(--detail-danger) 18%, var(--detail-line));
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.event-delete-confirm-actions {
+  margin-top: 14px;
+}
+
+.event-delete-confirm-actions .media-delete-confirm-delete {
+  background: linear-gradient(135deg, #bd2d55 0%, #ef4778 100%);
+  box-shadow: 0 13px 29px rgba(189, 45, 85, 0.27);
+}
+
+.event-delete-confirm-actions .media-delete-confirm-delete:hover {
+  box-shadow: 0 17px 36px rgba(189, 45, 85, 0.34);
+}
+
+@media (max-width: 560px) {
+  .event-delete-confirm-dialog {
+    width: min(100%, 430px);
+  }
+
+  .event-delete-confirm-name {
+    margin-top: 18px;
+  }
+}

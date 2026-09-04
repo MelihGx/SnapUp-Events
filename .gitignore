@@ -11,3 +11,7 @@ Thumbs.db
 
 # ZIP archives
 *.zip
+
+# ini archives
+desktop.ini
+Thumbs.db

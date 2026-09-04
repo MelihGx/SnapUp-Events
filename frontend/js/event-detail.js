@@ -152,6 +152,24 @@ const mediaDeleteConfirmDelete = document.getElementById(
 const mediaDeleteDontAskAgain = document.getElementById(
   "mediaDeleteDontAskAgain",
 );
+const eventDeleteConfirmModal = document.getElementById(
+  "eventDeleteConfirmModal",
+);
+const eventDeleteConfirmBackdrop = document.getElementById(
+  "eventDeleteConfirmBackdrop",
+);
+const eventDeleteConfirmClose = document.getElementById(
+  "eventDeleteConfirmClose",
+);
+const eventDeleteConfirmCancel = document.getElementById(
+  "eventDeleteConfirmCancel",
+);
+const eventDeleteConfirmDelete = document.getElementById(
+  "eventDeleteConfirmDelete",
+);
+const eventDeleteConfirmName = document.getElementById(
+  "eventDeleteConfirmName",
+);
 const eventTitle = document.getElementById("eventTitle");
 const eventDescription = document.getElementById("eventDescription");
 const eventStatisticsOpen = document.getElementById("eventStatisticsOpen");
@@ -460,6 +478,8 @@ let eventCoverRemoveLastFocusedElement = null;
 let mediaDeleteSkipConfirmForThisPage = false;
 let mediaDeleteConfirmResolver = null;
 let mediaDeleteConfirmLastFocusedElement = null;
+let eventDeleteConfirmResolver = null;
+let eventDeleteConfirmLastFocusedElement = null;
 let locationEditorPicker = null;
 let locationEditorLastFocusedElement = null;
 let currentEventStatistics = null;
@@ -3700,6 +3720,58 @@ function requestMediaDeleteConfirmation() {
   });
 }
 
+function closeEventDeleteConfirmDialog(
+  confirmed = false,
+  { restoreFocus = true } = {},
+) {
+  if (!eventDeleteConfirmModal?.classList.contains("active")) {
+    return;
+  }
+
+  eventDeleteConfirmModal.classList.remove("active");
+  eventDeleteConfirmModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("media-delete-confirm-open");
+
+  const resolver = eventDeleteConfirmResolver;
+  eventDeleteConfirmResolver = null;
+
+  if (restoreFocus && eventDeleteConfirmLastFocusedElement?.focus) {
+    eventDeleteConfirmLastFocusedElement.focus();
+  }
+
+  eventDeleteConfirmLastFocusedElement = null;
+  resolver?.(confirmed);
+}
+
+function requestEventDeleteConfirmation() {
+  if (!eventDeleteConfirmModal) {
+    return Promise.resolve(
+      confirm(t("This event will be permanently deleted. Are you sure?")),
+    );
+  }
+
+  if (eventDeleteConfirmResolver) {
+    closeEventDeleteConfirmDialog(false, { restoreFocus: false });
+  }
+
+  eventDeleteConfirmLastFocusedElement = document.activeElement;
+
+  if (eventDeleteConfirmName) {
+    eventDeleteConfirmName.textContent =
+      currentEvent?.event_name || currentEvent?.name || t("Untitled Event");
+  }
+
+  eventDeleteConfirmModal.classList.add("active");
+  eventDeleteConfirmModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("media-delete-confirm-open");
+
+  window.requestAnimationFrame(() => eventDeleteConfirmCancel?.focus());
+
+  return new Promise((resolve) => {
+    eventDeleteConfirmResolver = resolve;
+  });
+}
+
 async function deleteMediaItem(mediaId) {
   const response = await fetch(`${API_BASE_URL}/api/media/${mediaId}`, {
     method: "DELETE",
@@ -3769,6 +3841,22 @@ mediaDeleteConfirmCancel?.addEventListener("click", () => {
 mediaDeleteConfirmDelete?.addEventListener("click", () => {
   rememberMediaDeleteConfirmationPreference();
   closeMediaDeleteConfirmDialog(true);
+});
+
+eventDeleteConfirmBackdrop?.addEventListener("click", () => {
+  closeEventDeleteConfirmDialog(false);
+});
+
+eventDeleteConfirmClose?.addEventListener("click", () => {
+  closeEventDeleteConfirmDialog(false);
+});
+
+eventDeleteConfirmCancel?.addEventListener("click", () => {
+  closeEventDeleteConfirmDialog(false);
+});
+
+eventDeleteConfirmDelete?.addEventListener("click", () => {
+  closeEventDeleteConfirmDialog(true);
 });
 
 if (eventCode) {
@@ -4010,9 +4098,7 @@ if (settingsForm) {
 
 if (deleteEventButton) {
   deleteEventButton.addEventListener("click", async () => {
-    const confirmDelete = confirm(
-      t("This event will be permanently deleted. Are you sure?"),
-    );
+    const confirmDelete = await requestEventDeleteConfirmation();
 
     if (!confirmDelete) {
       return;
@@ -4404,6 +4490,14 @@ window.addEventListener("keydown", (event) => {
   if (eventDeleteSuccessModal?.classList.contains("active")) {
     if (event.key === "Escape" || event.key === "Enter") {
       returnToAccountAfterDelete();
+    }
+
+    return;
+  }
+
+  if (eventDeleteConfirmModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventDeleteConfirmDialog(false);
     }
 
     return;
