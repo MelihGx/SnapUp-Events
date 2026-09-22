@@ -118,7 +118,7 @@ const register = async (req, res) => {
       message: verificationEmailSent
         ? "Account created. Please verify your email."
         : "Account created, but the verification email could not be sent. You can resend it from your account.",
-      token: process.env.NODE_ENV === "production" ? "cookie" : token,
+      token,
       user: newUser,
       requires_email_verification: true,
       verification_email_sent: verificationEmailSent,
@@ -207,7 +207,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Login successful.",
-      token: process.env.NODE_ENV === "production" ? "cookie" : token,
+      token,
       user: safeUser,
     });
   } catch (error) {
