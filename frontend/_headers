@@ -17,3 +17,9 @@
 /live-slideshow.html
   Cache-Control: no-cache
   Referrer-Policy: no-referrer
+
+
+/admin.html
+  Cache-Control: no-store, max-age=0
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive

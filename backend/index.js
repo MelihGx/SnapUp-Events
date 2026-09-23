@@ -8,6 +8,7 @@ const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const mediaRoutes = require("./routes/mediaRoutes");
 const securityRoutes = require("./routes/securityRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const { requestContext, globalLimiter } = require("./middlewares/security");
 
 const app = express();
@@ -110,6 +111,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/security", securityRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({

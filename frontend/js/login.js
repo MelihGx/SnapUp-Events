@@ -117,8 +117,24 @@ loginForm.addEventListener("submit", async (event) => {
 
     sessionStorage.removeItem("snapup_after_login");
 
+    const role = String(data.user?.user_role || "user");
+    const isAdmin =
+      data.user?.is_email_verified === true &&
+      (role === "admin" || role === "super_admin");
+
+    const redirectPath = String(storedRedirect || "").split(/[?#]/)[0];
+    const requestedAdminPage = redirectPath === "admin.html";
+
+    const destination = isAdmin
+      ? "admin.html"
+      : requestedAdminPage
+        ? "account.html"
+        : isSafeRedirect
+          ? storedRedirect
+          : "account.html";
+
     setTimeout(() => {
-      window.location.replace(isSafeRedirect ? storedRedirect : "account.html");
+      window.location.replace(destination);
     }, 800);
   } catch (error) {
     console.error("Login error:", error);

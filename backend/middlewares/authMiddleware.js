@@ -25,7 +25,7 @@ const authMiddleware = async (req, res, next) => {
 
     const { data: user, error } = await supabase
       .from("users")
-      .select("user_id, user_mail, is_user_active, token_version")
+      .select("user_id, user_name, user_mail, is_user_active, is_email_verified, token_version, user_role")
       .eq("user_id", decoded.user_id)
       .maybeSingle();
 
@@ -36,7 +36,10 @@ const authMiddleware = async (req, res, next) => {
 
     req.user = {
       user_id: decoded.user_id,
+      user_name: user.user_name,
       user_mail: user.user_mail,
+      is_email_verified: Boolean(user.is_email_verified),
+      user_role: user.user_role || "user",
     };
 
     next();

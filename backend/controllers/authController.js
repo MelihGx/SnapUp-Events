@@ -80,10 +80,11 @@ const register = async (req, res) => {
           is_user_active: true,
           is_email_verified: false,
           email_verified_at: null,
+          user_role: "user",
         },
       ])
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at",
+        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
       )
       .single();
 
@@ -150,7 +151,7 @@ const login = async (req, res) => {
     const { data: user, error } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at, token_version",
+        "user_id, user_name, user_mail, user_phone, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at, token_version, user_role",
       )
       .eq("user_mail", normalizedMail)
       .maybeSingle();
@@ -199,6 +200,7 @@ const login = async (req, res) => {
       is_email_verified: user.is_email_verified,
       email_verified_at: user.email_verified_at,
       token_version: Number(user.token_version) || 0,
+      user_role: user.user_role || "user",
     };
 
     const token = createToken(safeUser);
@@ -226,7 +228,7 @@ const getMe = async (req, res) => {
     const { data: user, error } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at",
+        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
       )
       .eq("user_id", userId)
       .maybeSingle();
