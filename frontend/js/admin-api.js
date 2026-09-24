@@ -44,6 +44,18 @@ export async function getAdminDashboard() {
   return adminRequest("/dashboard");
 }
 
+export async function getAdminStorage() {
+  return adminRequest("/storage");
+}
+
+export async function getAdminAnalytics(days = 30) {
+  const normalizedDays = [7, 30, 90, 365].includes(Number(days))
+    ? Number(days)
+    : 30;
+
+  return adminRequest(`/analytics?days=${normalizedDays}`);
+}
+
 export async function getAdminUsers() {
   return adminRequest("/users");
 }
@@ -85,4 +97,37 @@ export async function deleteAdminUser(userId, payload) {
     method: "DELETE",
     body: JSON.stringify(payload),
   });
+}
+
+
+export async function setAdminUserActiveStatus(userId, payload) {
+  return adminRequest(`/users/${encodeURIComponent(userId)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+
+export async function setAdminEventSuspension(eventId, payload) {
+  return adminRequest(`/events/${encodeURIComponent(eventId)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function changeAdminEventPackage(eventId, payload) {
+  return adminRequest(`/events/${encodeURIComponent(eventId)}/package`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function setAdminEventStorageOverride(eventId, payload) {
+  return adminRequest(
+    `/events/${encodeURIComponent(eventId)}/storage-override`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
 }

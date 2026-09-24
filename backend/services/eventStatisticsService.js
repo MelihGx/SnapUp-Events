@@ -85,7 +85,11 @@ function buildEventStatistics({
     0,
     Number(event?.storage_consumed_bytes) || 0,
   );
-  const storage = buildStorageUsage(event?.package_key || "free", usedStorageBytes);
+  const storage = buildStorageUsage(
+    event?.package_key || "free",
+    usedStorageBytes,
+    event?.storage_limit_override_bytes,
+  );
 
   return {
     event,

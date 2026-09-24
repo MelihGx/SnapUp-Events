@@ -234,7 +234,7 @@ const getMyEvents = async (req, res) => {
     const { data: events, error } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, storage_consumed_bytes",
+        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, storage_consumed_bytes, storage_limit_override_bytes",
       )
       .eq("user_id", userId)
       .order("event_created_at", { ascending: false });
@@ -253,6 +253,7 @@ const getMyEvents = async (req, res) => {
       storage: buildStorageUsage(
         event.package_key || "free",
         Math.max(0, Number(event.storage_consumed_bytes) || 0),
+        event.storage_limit_override_bytes,
       ),
     }));
 

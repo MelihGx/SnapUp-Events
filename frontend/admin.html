@@ -31,7 +31,7 @@
         <button class="nav-item" data-view="analytics"><span class="icon">⌁</span><span>Analytics</span></button>
         <button class="nav-item" data-view="users"><span class="icon">◎</span><span>Users</span></button>
         <button class="nav-item" data-view="events"><span class="icon">◫</span><span>Events</span></button>
-        <button class="nav-item" data-view="storage" hidden><span class="icon">◉</span><span>Storage</span></button>
+        <button class="nav-item" data-view="storage"><span class="icon">◉</span><span>Storage</span></button>
         <button class="nav-item" data-view="logs"><span class="icon">≡</span><span>Admin Logs</span></button>
       </nav>
 
@@ -83,17 +83,6 @@
             <article class="stat-card"><span>Storage Used</span><strong id="statStorage">—</strong><small id="statStorageMeta">Live cumulative event usage</small></article>
             <article class="stat-card"><span>Total Media</span><strong id="statMedia">—</strong><small id="statMediaMeta">Photos, videos and messages</small></article>
           </div>
-</div>
-              <div class="bar-chart" id="mediaBarChart"></div>
-            </article>
-
-            <article class="panel chart-card">
-              <div class="panel-head"><div><h3>New users & events</h3><p>Last 8 weeks</p></div></div>
-              <div class="svg-chart compact" id="growthChart"></div>
-              <div class="inline-legend"><span><i class="legend-dot users"></i>Users</span><span><i class="legend-dot events"></i>Events</span></div>
-            </article>
-          </div>
-
 
           <div class="ops-strip">
             <div><span>New users today</span><strong id="opsNewUsers">—</strong></div>
@@ -143,17 +132,12 @@
               <h2 class="section-title">Analytics</h2>
               <p class="section-copy">Live growth, event, media and storage analytics from the SnapUp database.</p>
             </div>
-            <div class="analytics-live-controls">
-              <span class="analytics-live-status" id="analyticsLiveStatus">
-                Live database · waiting for data
-              </span>
-              <select class="select-input" id="analyticsPeriod">
-                <option value="7">Last 7 days</option>
-                <option value="30" selected>Last 30 days</option>
-                <option value="90">Last 90 days</option>
-                <option value="365">Last 365 days</option>
-              </select>
-            </div>
+            <select class="select-input" id="analyticsPeriod">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="365">Last 365 days</option>
+            </select>
           </div>
 
           <div class="analytics-kpis">
@@ -165,7 +149,7 @@
 
           <div class="chart-grid">
             <article class="panel chart-card chart-wide">
-              <div class="panel-head"><div><h3>User & event growth</h3><p id="analyticsGrowthSubtitle">New records created in the selected period</p></div></div>
+              <div class="panel-head"><div><h3>User & event growth</h3><p id="analyticsGrowthSubtitle">New records in the selected period</p></div></div>
               <div class="svg-chart tall" id="analyticsGrowthChart"></div>
             </article>
 
@@ -246,6 +230,7 @@
               <option value="all">All status</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
+              <option value="Suspended">Suspended</option>
             </select>
 
             <select id="eventSort" class="select-input">
@@ -276,7 +261,93 @@
             <div id="eventList" class="event-list"></div>
           </div>
         </section>
-<section class="view" id="logsView">
+
+        <section class="view" id="storageView">
+          <div class="section-actions">
+            <div>
+              <h2 class="section-title">Storage</h2>
+              <p class="section-copy">Live quota consumption and current media footprint from the SnapUp database.</p>
+            </div>
+            <span class="metric-chip" id="storageLiveStatus">Live database · waiting for data</span>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <span>Quota Consumed</span>
+              <strong id="storageConsumed">—</strong>
+              <small>Lifetime uploaded bytes counted against event quotas</small>
+            </article>
+            <article class="stat-card">
+              <span>Current Media</span>
+              <strong id="storageCurrentMedia">—</strong>
+              <small id="storageCurrentMediaMeta">Files currently represented by media rows</small>
+            </article>
+            <article class="stat-card">
+              <span>Allocated Capacity</span>
+              <strong id="storageAllocated">—</strong>
+              <small id="storageAllocatedMeta">Based on current event packages</small>
+            </article>
+            <article class="stat-card">
+              <span>Quota Utilization</span>
+              <strong id="storageUtilization">—</strong>
+              <small id="storageUtilizationMeta">Across all current events</small>
+            </article>
+          </div>
+
+          <div class="chart-grid">
+            <article class="panel chart-card">
+              <div class="panel-head">
+                <div>
+                  <h3>Current media by type</h3>
+                  <p>Actual bytes still present in the media table</p>
+                </div>
+              </div>
+              <div class="donut-layout">
+                <div class="donut-chart storage-donut" id="storagePageDonut">
+                  <div class="donut-center">
+                    <strong id="storageMediaTotal">—</strong>
+                    <span>current</span>
+                  </div>
+                </div>
+                <div class="chart-legend" id="storagePageLegend"></div>
+              </div>
+            </article>
+
+            <article class="panel chart-card">
+              <div class="panel-head">
+                <div>
+                  <h3>Package quota usage</h3>
+                  <p>Consumed quota versus package capacity</p>
+                </div>
+              </div>
+              <div class="horizontal-bars" id="storagePackageUsage"></div>
+            </article>
+          </div>
+
+          <div class="chart-grid secondary-charts">
+            <article class="panel storage-ranking-panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Top storage events</h3>
+                  <p>Events with the highest cumulative quota consumption</p>
+                </div>
+              </div>
+              <div class="rank-list" id="storageEventRanking"></div>
+            </article>
+
+            <article class="panel storage-ranking-panel">
+              <div class="panel-head">
+                <div>
+                  <h3>Top storage users</h3>
+                  <p>Accounts whose events consumed the most quota</p>
+                </div>
+              </div>
+              <div class="rank-list" id="storageRanking"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="logsView">
           <div class="section-actions">
             <div>
               <h2 class="section-title">Admin Audit Log</h2>
@@ -371,6 +442,14 @@
       <div><span>Joined</span><strong id="drawerJoined">-</strong></div>
     </div>
 
+    <div class="drawer-section" id="drawerSuspensionInfo" hidden>
+      <h3 id="drawerSuspensionTitle">Suspension reason</h3>
+      <div class="drawer-event">
+        <b id="drawerSuspensionReason">-</b>
+        <span id="drawerSuspensionMeta">-</span>
+      </div>
+    </div>
+
     <div class="drawer-section">
       <h3>Admin actions</h3>
       <div class="action-grid">
@@ -421,15 +500,25 @@
       <div><span>Location</span><strong id="eventDrawerLocation">-</strong></div>
       <div><span>Approval</span><strong id="eventDrawerApproval">Required</strong></div>
       <div><span>Video uploads</span><strong id="eventDrawerVideo">Allowed</strong></div>
+      <div><span>Effective storage limit</span><strong id="eventDrawerStorageLimit">-</strong></div>
+      <div><span>Storage override</span><strong id="eventDrawerStorageOverride">None</strong></div>
+    </div>
+
+    <div class="drawer-section" id="eventSuspensionInfo" hidden>
+      <h3 id="eventSuspensionTitle">Suspension reason</h3>
+      <div class="drawer-event">
+        <b id="eventSuspensionReason">-</b>
+        <span id="eventSuspensionMeta">-</span>
+      </div>
     </div>
 
     <div class="drawer-section">
       <h3>Event actions</h3>
       <div class="action-grid">
-        <button id="eventToggleStatus" disabled>Suspend Event</button>
-        <button id="eventChangePlan" disabled>Change Package</button>
+        <button id="eventToggleStatus">Suspend Event</button>
+        <button id="eventChangePlan">Change Package</button>
+        <button id="eventStorageOverride">Storage Override</button>
         <button id="eventExtendArchive" disabled>Extend Archive</button>
-        <button id="eventChangeOwner" disabled>Change Owner</button>
       </div>
     </div>
 
@@ -497,23 +586,140 @@
   </div>
 
 
+  <div class="modal small-modal" id="eventStatusModal">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow dark">Event status</span>
+        <h2 id="eventStatusModalTitle">Suspend Event</h2>
+      </div>
+      <button class="close-btn" data-close-modal>×</button>
+    </div>
+    <form id="eventStatusForm">
+      <div class="detail-list">
+        <div><span>Event</span><strong id="eventStatusName">-</strong></div>
+        <div><span>Code</span><strong id="eventStatusCode">-</strong></div>
+        <div><span>Current status</span><strong id="eventStatusCurrent">-</strong></div>
+      </div>
+      <div class="form-note" id="eventStatusNote">
+        Suspending blocks guest join and upload access until an admin reactivates the event.
+      </div>
+      <label>
+        <span>Reason</span>
+        <input required id="eventStatusReason" name="reason" minlength="3" maxlength="300" autocomplete="off" placeholder="Why is this event status changing?" />
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="ghost-light-btn" data-close-modal>Cancel</button>
+        <button type="submit" class="primary-btn" id="eventStatusSubmit">Suspend Event</button>
+      </div>
+    </form>
+  </div>
+
   <div class="modal small-modal" id="eventPlanModal">
-    <div class="modal-head"><div><span class="eyebrow dark">Event package</span><h2>Change Event Package</h2></div><button class="close-btn" data-close-modal>×</button></div>
+    <div class="modal-head">
+      <div><span class="eyebrow dark">Event package</span><h2>Change Event Package</h2></div>
+      <button class="close-btn" data-close-modal>×</button>
+    </div>
     <form id="eventPlanForm">
-      <label><span>Package</span><select id="eventPlanSelect"><option>Free</option><option>Mini</option><option>Plus</option><option>Premium</option></select></label>
-      <label><span>Storage limit</span><select id="eventPlanStorage"><option>250 MB</option><option>5 GB</option><option>10 GB</option><option>20 GB</option></select></label>
-      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn">Update Event</button></div>
+      <div class="detail-list">
+        <div><span>Current package</span><strong id="eventPlanCurrent">-</strong></div>
+        <div><span>Consumed storage</span><strong id="eventPlanConsumed">-</strong></div>
+        <div><span>Custom override</span><strong id="eventPlanOverride">None</strong></div>
+      </div>
+      <label>
+        <span>New package</span>
+        <select id="eventPlanSelect" required>
+          <option value="free">Free — 100 MB</option>
+          <option value="mini">Mini — 5 GB</option>
+          <option value="plus">Plus — 10 GB</option>
+          <option value="premium">Premium — 20 GB</option>
+        </select>
+      </label>
+      <label>
+        <span>Reason</span>
+        <input required id="eventPlanReason" minlength="3" maxlength="300" autocomplete="off" placeholder="Why is the package changing?" />
+      </label>
+      <div class="form-note">
+        If a custom storage override exists, it stays active after the package change.
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="ghost-light-btn" data-close-modal>Cancel</button>
+        <button type="submit" class="primary-btn" id="eventPlanSubmit">Update Package</button>
+      </div>
     </form>
   </div>
 
-  <div class="modal small-modal" id="eventOwnerModal">
-    <div class="modal-head"><div><span class="eyebrow dark">Ownership</span><h2>Change Event Owner</h2></div><button class="close-btn" data-close-modal>×</button></div>
-    <form id="eventOwnerForm">
-      <label><span>New owner</span><select id="eventOwnerChangeSelect"></select></label>
-      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn">Transfer Event</button></div>
+  <div class="modal small-modal" id="eventStorageOverrideModal">
+    <div class="modal-head">
+      <div><span class="eyebrow dark">Event storage</span><h2>Storage Override</h2></div>
+      <button class="close-btn" data-close-modal>×</button>
+    </div>
+    <form id="eventStorageOverrideForm">
+      <div class="detail-list">
+        <div><span>Package limit</span><strong id="eventStoragePackageLimit">-</strong></div>
+        <div><span>Current effective limit</span><strong id="eventStorageEffectiveLimit">-</strong></div>
+        <div><span>Consumed storage</span><strong id="eventStorageConsumed">-</strong></div>
+      </div>
+      <label>
+        <span>Custom limit (GB)</span>
+        <input id="eventStorageLimitGb" type="number" min="0.1" max="1024" step="0.1" placeholder="Example: 15" />
+      </label>
+      <label>
+        <span>Reason</span>
+        <input required id="eventStorageReason" minlength="3" maxlength="300" autocomplete="off" placeholder="Why is this custom limit needed?" />
+      </label>
+      <div class="form-note">
+        The custom limit cannot be lower than storage already consumed by this event.
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="ghost-light-btn" id="eventStorageClear">Remove Override</button>
+        <button type="submit" class="primary-btn" id="eventStorageSubmit">Apply Override</button>
+      </div>
     </form>
   </div>
 
+
+  <div class="modal small-modal" id="userStatusModal">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow dark" id="userStatusEyebrow">Account status</span>
+        <h2 id="userStatusModalTitle">Suspend User</h2>
+      </div>
+      <button class="close-btn" data-close-modal>×</button>
+    </div>
+
+    <form id="userStatusForm">
+      <div class="detail-list">
+        <div><span>User</span><strong id="userStatusName">-</strong></div>
+        <div><span>Email</span><strong id="userStatusEmail">-</strong></div>
+        <div><span>Current status</span><strong id="userStatusCurrent">-</strong></div>
+      </div>
+
+      <div class="form-note" id="userStatusNote">
+        Suspending a user immediately invalidates existing sessions and blocks new logins.
+      </div>
+
+      <label>
+        <span>Reason</span>
+        <input
+          required
+          type="text"
+          id="userStatusReason"
+          name="reason"
+          minlength="3"
+          maxlength="300"
+          autocomplete="off"
+          placeholder="Why is this account status changing?"
+        />
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-light-btn" data-close-modal>Cancel</button>
+        <button type="submit" class="primary-btn" id="userStatusSubmit">
+          Suspend User
+        </button>
+      </div>
+    </form>
+  </div>
 
   <div class="modal small-modal" id="deleteUserModal">
     <div class="modal-head">
@@ -594,9 +800,25 @@
       <span>Change summary</span>
       <p id="auditDetailChange">-</p>
     </div>
+
+    <div class="audit-detail-message" id="auditDetailReasonBlock" hidden>
+      <span>Reason</span>
+      <p id="auditDetailReason">-</p>
+    </div>
+
+    <div class="audit-detail-grid" id="auditDetailStatusBlock" hidden>
+      <div>
+        <span>Previous status</span>
+        <strong id="auditDetailPreviousStatus">-</strong>
+      </div>
+      <div>
+        <span>New status</span>
+        <strong id="auditDetailNewStatus">-</strong>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
-  <script type="module" src="js/admin.js?v=admin-live-clean-2"></script>
+  <script type="module" src="js/admin.js?v=admin-event-ops-1"></script>
 </body>
 </html>

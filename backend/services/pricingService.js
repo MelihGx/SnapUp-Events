@@ -152,9 +152,29 @@ function getPackageStorageLimitBytes(packageName) {
   return Math.max(0, Math.round(storageMb * 1024 * 1024));
 }
 
-function buildStorageUsage(packageName, usedBytes = 0) {
+function getEffectiveStorageLimitBytes(
+  packageName,
+  overrideBytes = null,
+) {
+  const parsedOverride = Number(overrideBytes);
+
+  if (Number.isFinite(parsedOverride) && parsedOverride > 0) {
+    return Math.round(parsedOverride);
+  }
+
+  return getPackageStorageLimitBytes(packageName);
+}
+
+function buildStorageUsage(
+  packageName,
+  usedBytes = 0,
+  overrideBytes = null,
+) {
   const packageKey = normalizePackageKey(packageName);
-  const limitBytes = getPackageStorageLimitBytes(packageKey);
+  const limitBytes = getEffectiveStorageLimitBytes(
+    packageKey,
+    overrideBytes,
+  );
   const normalizedUsedBytes = Math.max(0, Number(usedBytes) || 0);
   const remainingBytes = Math.max(0, limitBytes - normalizedUsedBytes);
   const percentage =
@@ -177,6 +197,7 @@ module.exports = {
   buildStorageUsage,
   getPackagePricing,
   getPackageStorageLimitBytes,
+  getEffectiveStorageLimitBytes,
   normalizeCountryCode,
   normalizePackageKey,
   resolveMarket,

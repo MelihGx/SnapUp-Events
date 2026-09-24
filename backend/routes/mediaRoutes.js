@@ -12,7 +12,10 @@ const { validateUploadedFiles } = require("../middlewares/fileValidation");
 const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
 const { verifyTurnstile } = require("../middlewares/turnstile");
 const { cleanText } = require("../utils/validation");
-const { getPackageStorageLimitBytes, normalizePackageKey } = require("../services/pricingService");
+const {
+  getEffectiveStorageLimitBytes,
+  normalizePackageKey,
+} = require("../services/pricingService");
 const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
 const {
   assertRegisteredUserAccess,
@@ -155,7 +158,9 @@ function createHttpError(message, statusCode = 500, code = null) {
 async function getUploadStatusForEvent(eventId) {
   const { data: event, error: eventError } = await supabase
     .from("event")
-    .select("event_id, is_event_active, package_key, storage_consumed_bytes")
+    .select(
+      "event_id, is_event_active, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+    )
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -193,7 +198,10 @@ async function getUploadStatusForEvent(eventId) {
     maxStoragePerGuest: Math.min(Number(settings?.max_storage_per_guest) || 250, 2048),
     onlyUsers: settings?.only_users === true,
     packageKey,
-    eventStorageLimitBytes: getPackageStorageLimitBytes(packageKey),
+    eventStorageLimitBytes: getEffectiveStorageLimitBytes(
+      packageKey,
+      event.storage_limit_override_bytes,
+    ),
     eventStorageUsedBytes: Math.max(0, Number(event.storage_consumed_bytes) || 0),
   };
 }

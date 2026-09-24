@@ -4,7 +4,11 @@ const supabase = require("../config/supabaseClient");
 const { cleanText, normalizeEmail, validatePassword } = require("../utils/validation");
 const { generateEventCode } = require("../utils/eventCode");
 const { generateUniqueEventSlug } = require("../utils/eventSlug");
-const { normalizePackageKey } = require("../services/pricingService");
+const {
+  normalizePackageKey,
+  getPackageStorageLimitBytes,
+  getEffectiveStorageLimitBytes,
+} = require("../services/pricingService");
 const { recordAdminAudit } = require("../services/adminAuditService");
 
 const PAGE_SIZE = 1000;
@@ -127,6 +131,13 @@ function auditActionTitle(action) {
     CREATE_USER: "Created user account",
     CREATE_EVENT_FOR_USER: "Created event for user",
     DELETE_USER_ACCOUNT: "Deleted user account",
+    SUSPEND_USER: "Suspended user account",
+    REACTIVATE_USER: "Reactivated user account",
+    SUSPEND_EVENT: "Suspended event",
+    REACTIVATE_EVENT: "Reactivated event",
+    CHANGE_EVENT_PACKAGE: "Changed event package",
+    SET_EVENT_STORAGE_OVERRIDE: "Set event storage override",
+    CLEAR_EVENT_STORAGE_OVERRIDE: "Cleared event storage override",
   };
 
   return titles[action] || String(action || "Admin action");
@@ -212,6 +223,7 @@ function userStatus(user) {
 }
 
 function eventStatus(event) {
+  if (event?.admin_suspended === true) return "Suspended";
   return event?.is_event_active === false ? "Inactive" : "Active";
 }
 
@@ -253,6 +265,33 @@ function buildEventView(event, owner, settings = null) {
     status: eventStatus(event),
     storage: formatBytes(event.storage_consumed_bytes),
     storage_bytes: Math.max(0, Number(event.storage_consumed_bytes) || 0),
+    admin_suspended: event.admin_suspended === true,
+    storage_limit_override_bytes:
+      event.storage_limit_override_bytes === null ||
+      event.storage_limit_override_bytes === undefined
+        ? null
+        : Math.max(0, Number(event.storage_limit_override_bytes) || 0),
+    storage_limit_override_display:
+      event.storage_limit_override_bytes === null ||
+      event.storage_limit_override_bytes === undefined
+        ? null
+        : formatBytes(event.storage_limit_override_bytes),
+    storage_limit_bytes: getEffectiveStorageLimitBytes(
+      event.package_key || "free",
+      event.storage_limit_override_bytes,
+    ),
+    storage_limit_display: formatBytes(
+      getEffectiveStorageLimitBytes(
+        event.package_key || "free",
+        event.storage_limit_override_bytes,
+      ),
+    ),
+    package_storage_limit_bytes: getPackageStorageLimitBytes(
+      event.package_key || "free",
+    ),
+    package_storage_limit_display: formatBytes(
+      getPackageStorageLimitBytes(event.package_key || "free"),
+    ),
     guests: null,
     photos: null,
     videos: null,
@@ -545,19 +584,51 @@ const getAdminUser = async (req, res) => {
       });
     }
 
-    const events = await loadAllRows(() =>
+    const [events, suspensionLogResult] = await Promise.all([
+      loadAllRows(() =>
+        supabase
+          .from("event")
+          .select(
+            "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+          )
+          .eq("user_id", userId)
+          .order("event_created_at", { ascending: false }),
+      ),
       supabase
-        .from("event")
+        .from("admin_audit_logs")
         .select(
-          "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, package_key, storage_consumed_bytes",
+          "audit_id, admin_user_id, details, created_at",
         )
-        .eq("user_id", userId)
-        .order("event_created_at", { ascending: false }),
-    );
+        .eq("action", "SUSPEND_USER")
+        .eq("target_type", "user")
+        .eq("target_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1),
+    ]);
+
+    if (suspensionLogResult.error) {
+      throw suspensionLogResult.error;
+    }
+
+    const latestSuspension = suspensionLogResult.data?.[0] || null;
+    const latestSuspensionDetails =
+      latestSuspension?.details &&
+      typeof latestSuspension.details === "object"
+        ? latestSuspension.details
+        : {};
+
+    const userView = buildUserView(user, events);
+
+    userView.last_suspension_reason =
+      typeof latestSuspensionDetails.reason === "string"
+        ? latestSuspensionDetails.reason
+        : null;
+    userView.last_suspension_at =
+      latestSuspension?.created_at || null;
 
     return res.status(200).json({
       success: true,
-      user: buildUserView(user, events),
+      user: userView,
       events: events.map((event) =>
         buildEventView(event, user, null),
       ),
@@ -580,7 +651,7 @@ const getAdminEvents = async (req, res) => {
         supabase
           .from("event")
           .select(
-            "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, package_key, storage_consumed_bytes",
+            "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
           )
           .order("event_created_at", { ascending: false }),
       ),
@@ -635,7 +706,7 @@ const getAdminEvent = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, package_key, storage_consumed_bytes",
+        "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
       )
       .eq("event_id", eventId)
       .maybeSingle();
@@ -659,6 +730,7 @@ const getAdminEvent = async (req, res) => {
       photosCount,
       videosCount,
       messagesCount,
+      suspensionLogResult,
     ] = await Promise.all([
       supabase
         .from("users")
@@ -680,6 +752,14 @@ const getAdminEvent = async (req, res) => {
       exactCount("media", (query) =>
         query.eq("event_id", eventId).eq("media_type", "message"),
       ),
+      supabase
+        .from("admin_audit_logs")
+        .select("audit_id, details, created_at")
+        .eq("action", "SUSPEND_EVENT")
+        .eq("target_type", "event")
+        .eq("target_id", eventId)
+        .order("created_at", { ascending: false })
+        .limit(1),
     ]);
 
     if (ownerResult.error) {
@@ -688,6 +768,10 @@ const getAdminEvent = async (req, res) => {
 
     if (settingsResult.error) {
       throw settingsResult.error;
+    }
+
+    if (suspensionLogResult.error) {
+      throw suspensionLogResult.error;
     }
 
     const result = buildEventView(
@@ -700,6 +784,19 @@ const getAdminEvent = async (req, res) => {
     result.photos = photosCount;
     result.videos = videosCount;
     result.messages = messagesCount;
+
+    const suspensionLog = suspensionLogResult.data?.[0] || null;
+    const suspensionDetails =
+      suspensionLog?.details &&
+      typeof suspensionLog.details === "object"
+        ? suspensionLog.details
+        : {};
+
+    result.last_suspension_reason =
+      typeof suspensionDetails.reason === "string"
+        ? suspensionDetails.reason
+        : null;
+    result.last_suspension_at = suspensionLog?.created_at || null;
 
     return res.status(200).json({
       success: true,
@@ -717,6 +814,253 @@ const getAdminEvent = async (req, res) => {
 };
 
 
+
+
+const getAdminStorage = async (req, res) => {
+  try {
+    const [events, media, users] = await Promise.all([
+      loadAllRows(() =>
+        supabase
+          .from("event")
+          .select(
+            "event_id, user_id, event_name, event_code, package_key, is_event_active, admin_suspended, storage_consumed_bytes, storage_limit_override_bytes, event_created_at",
+          )
+          .order("event_created_at", { ascending: false }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("media")
+          .select("media_id, event_id, media_type, bytes, media_created_at")
+          .order("media_created_at", { ascending: false }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("users")
+          .select("user_id, user_name, user_mail")
+          .order("user_created_at", { ascending: false }),
+      ),
+    ]);
+
+    const userById = new Map(
+      users.map((user) => [String(user.user_id), user]),
+    );
+
+    const mediaByType = {
+      image: { bytes: 0, count: 0 },
+      video: { bytes: 0, count: 0 },
+      message: { bytes: 0, count: 0 },
+      other: { bytes: 0, count: 0 },
+    };
+
+    let currentMediaBytes = 0;
+
+    media.forEach((item) => {
+      const bytes = Math.max(0, Number(item.bytes) || 0);
+      const type = String(item.media_type || "").toLowerCase();
+      const key = Object.prototype.hasOwnProperty.call(mediaByType, type)
+        ? type
+        : "other";
+
+      mediaByType[key].bytes += bytes;
+      mediaByType[key].count += 1;
+      currentMediaBytes += bytes;
+    });
+
+    const packageUsage = {
+      free: {
+        package_key: "free",
+        event_count: 0,
+        consumed_bytes: 0,
+        allocated_bytes: 0,
+      },
+      mini: {
+        package_key: "mini",
+        event_count: 0,
+        consumed_bytes: 0,
+        allocated_bytes: 0,
+      },
+      plus: {
+        package_key: "plus",
+        event_count: 0,
+        consumed_bytes: 0,
+        allocated_bytes: 0,
+      },
+      premium: {
+        package_key: "premium",
+        event_count: 0,
+        consumed_bytes: 0,
+        allocated_bytes: 0,
+      },
+    };
+
+    const usersUsage = new Map();
+
+    let totalConsumedBytes = 0;
+    let totalAllocatedBytes = 0;
+
+    events.forEach((event) => {
+      const packageKey = normalizePackageKey(event.package_key);
+      const consumedBytes = Math.max(
+        0,
+        Number(event.storage_consumed_bytes) || 0,
+      );
+      const allocatedBytes = getEffectiveStorageLimitBytes(
+        packageKey,
+        event.storage_limit_override_bytes,
+      );
+
+      totalConsumedBytes += consumedBytes;
+      totalAllocatedBytes += allocatedBytes;
+
+      const packageRow = packageUsage[packageKey];
+      packageRow.event_count += 1;
+      packageRow.consumed_bytes += consumedBytes;
+      packageRow.allocated_bytes += allocatedBytes;
+
+      const ownerId = String(event.user_id || "");
+      if (ownerId) {
+        const current = usersUsage.get(ownerId) || {
+          user_id: ownerId,
+          event_count: 0,
+          consumed_bytes: 0,
+        };
+
+        current.event_count += 1;
+        current.consumed_bytes += consumedBytes;
+        usersUsage.set(ownerId, current);
+      }
+    });
+
+    const utilization =
+      totalAllocatedBytes > 0
+        ? Number(
+            Math.min(
+              100,
+              Math.max(0, (totalConsumedBytes / totalAllocatedBytes) * 100),
+            ).toFixed(2),
+          )
+        : 0;
+
+    const quotaGapBytes = Math.max(
+      0,
+      totalConsumedBytes - currentMediaBytes,
+    );
+
+    const formattedMediaByType = Object.fromEntries(
+      Object.entries(mediaByType).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          display: formatBytes(value.bytes),
+        },
+      ]),
+    );
+
+    const formattedPackageUsage = Object.values(packageUsage).map((row) => {
+      const percentage =
+        row.allocated_bytes > 0
+          ? Number(
+              Math.min(
+                100,
+                Math.max(
+                  0,
+                  (row.consumed_bytes / row.allocated_bytes) * 100,
+                ),
+              ).toFixed(2),
+            )
+          : 0;
+
+      return {
+        ...row,
+        package_name: titleCase(row.package_key),
+        consumed_display: formatBytes(row.consumed_bytes),
+        allocated_display: formatBytes(row.allocated_bytes),
+        percentage,
+      };
+    });
+
+    const topEvents = [...events]
+      .sort(
+        (left, right) =>
+          (Number(right.storage_consumed_bytes) || 0) -
+          (Number(left.storage_consumed_bytes) || 0),
+      )
+      .slice(0, 10)
+      .map((event) => ({
+        event_id: event.event_id,
+        event_name: event.event_name || "Untitled event",
+        event_code: event.event_code || "",
+        package_key: normalizePackageKey(event.package_key),
+        is_event_active: event.is_event_active !== false,
+        consumed_bytes: Math.max(
+          0,
+          Number(event.storage_consumed_bytes) || 0,
+        ),
+        consumed_display: formatBytes(event.storage_consumed_bytes),
+        allocated_bytes: getEffectiveStorageLimitBytes(
+          event.package_key,
+          event.storage_limit_override_bytes,
+        ),
+        allocated_display: formatBytes(
+          getEffectiveStorageLimitBytes(
+            event.package_key,
+            event.storage_limit_override_bytes,
+          ),
+        ),
+        storage_limit_override_bytes:
+          event.storage_limit_override_bytes ?? null,
+        storage_limit_override_display:
+          event.storage_limit_override_bytes == null
+            ? null
+            : formatBytes(event.storage_limit_override_bytes),
+      }));
+
+    const topUsers = [...usersUsage.values()]
+      .sort((left, right) => right.consumed_bytes - left.consumed_bytes)
+      .slice(0, 10)
+      .map((item) => {
+        const owner = userById.get(String(item.user_id));
+
+        return {
+          ...item,
+          user_name: owner?.user_name || "Unknown user",
+          user_mail: owner?.user_mail || "",
+          consumed_display: formatBytes(item.consumed_bytes),
+        };
+      });
+
+    return res.status(200).json({
+      success: true,
+      storage: {
+        source: "live_database",
+        generated_at: new Date().toISOString(),
+        total_events: events.length,
+        total_media_records: media.length,
+        total_consumed_bytes: totalConsumedBytes,
+        total_consumed_display: formatBytes(totalConsumedBytes),
+        current_media_bytes: currentMediaBytes,
+        current_media_display: formatBytes(currentMediaBytes),
+        quota_gap_bytes: quotaGapBytes,
+        quota_gap_display: formatBytes(quotaGapBytes),
+        total_allocated_bytes: totalAllocatedBytes,
+        total_allocated_display: formatBytes(totalAllocatedBytes),
+        utilization_percentage: utilization,
+        media_by_type: formattedMediaByType,
+        package_usage: formattedPackageUsage,
+        top_events: topEvents,
+        top_users: topUsers,
+      },
+    });
+  } catch (error) {
+    console.error("Admin storage error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Storage data could not be loaded.",
+      code: "ADMIN_STORAGE_FAILED",
+    });
+  }
+};
 
 const getAdminAnalytics = async (req, res) => {
   try {
@@ -747,7 +1091,7 @@ const getAdminAnalytics = async (req, res) => {
       ),
       loadAllRows(() =>
         supabase
-          .from("media")
+          .from("events_media")
           .select(
             "media_id, event_id, media_type, media_status, media_created_at",
           )
@@ -836,7 +1180,6 @@ const getAdminAnalytics = async (req, res) => {
     return res.status(200).json({
       success: true,
       analytics: {
-        source: "live_database",
         period_days: days,
         period_start: startIso,
         generated_at: now.toISOString(),
@@ -1152,6 +1495,511 @@ const createAdminEventForUser = async (req, res) => {
 };
 
 
+
+
+const ADMIN_EVENT_PACKAGE_KEYS = new Set([
+  "free",
+  "mini",
+  "plus",
+  "premium",
+]);
+
+function adminRequestIp(req) {
+  return String(req.ip || req.socket?.remoteAddress || "")
+    .split(",")[0]
+    .trim()
+    .slice(0, 128);
+}
+
+function adminRequestId(req) {
+  return req.requestId ? String(req.requestId).slice(0, 128) : null;
+}
+
+function validateAdminReason(value) {
+  const reason = String(value || "").trim();
+
+  if (reason.length < 3 || reason.length > 300) {
+    const error = new Error(
+      "Reason must be between 3 and 300 characters.",
+    );
+    error.statusCode = 400;
+    error.code = "INVALID_ADMIN_REASON";
+    throw error;
+  }
+
+  return reason;
+}
+
+const setAdminEventSuspension = async (req, res) => {
+  try {
+    const adminUserId = String(req.user.user_id || "").trim();
+    const eventId = String(req.params.eventId || "").trim();
+    const suspended = req.body?.suspended;
+    const reason = validateAdminReason(req.body?.reason);
+
+    if (!UUID_RE.test(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid event is required.",
+        code: "INVALID_EVENT_ID",
+      });
+    }
+
+    if (typeof suspended !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid event suspension state is required.",
+        code: "INVALID_EVENT_STATUS",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select("event_id, admin_suspended")
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (eventError) throw eventError;
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found.",
+        code: "ADMIN_EVENT_NOT_FOUND",
+      });
+    }
+
+    if (Boolean(event.admin_suspended) === suspended) {
+      return res.status(409).json({
+        success: false,
+        message: suspended
+          ? "This event is already suspended by an admin."
+          : "This event is not admin-suspended.",
+        code: "EVENT_SUSPENSION_ALREADY_SET",
+      });
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_set_event_suspension",
+      {
+        p_admin_user_id: adminUserId,
+        p_event_id: eventId,
+        p_suspended: suspended,
+        p_reason: reason,
+        p_request_id: adminRequestId(req),
+        p_ip_address: adminRequestIp(req) || null,
+      },
+    );
+
+    if (error) {
+      console.error("Admin event suspension RPC error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Event suspension could not be changed safely.",
+        code: "ADMIN_EVENT_SUSPENSION_FAILED",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: suspended
+        ? "Event suspended. Join and upload access is now blocked."
+        : "Event admin suspension removed.",
+      event: data,
+    });
+  } catch (error) {
+    const statusCode = Number(error.statusCode) || 500;
+
+    console.error("Admin event suspension error:", error);
+
+    return res.status(statusCode).json({
+      success: false,
+      message:
+        statusCode === 400
+          ? error.message
+          : "Event suspension could not be changed.",
+      code: error.code || "ADMIN_EVENT_SUSPENSION_FAILED",
+    });
+  }
+};
+
+const changeAdminEventPackage = async (req, res) => {
+  try {
+    const adminUserId = String(req.user.user_id || "").trim();
+    const eventId = String(req.params.eventId || "").trim();
+    const rawPackage = String(req.body?.package_key || "")
+      .trim()
+      .toLowerCase();
+    const reason = validateAdminReason(req.body?.reason);
+
+    if (!UUID_RE.test(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid event is required.",
+        code: "INVALID_EVENT_ID",
+      });
+    }
+
+    if (!ADMIN_EVENT_PACKAGE_KEYS.has(rawPackage)) {
+      return res.status(400).json({
+        success: false,
+        message: "Package must be Free, Mini, Plus, or Premium.",
+        code: "INVALID_EVENT_PACKAGE",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select(
+        "event_id, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+      )
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (eventError) throw eventError;
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found.",
+        code: "ADMIN_EVENT_NOT_FOUND",
+      });
+    }
+
+    const currentPackage = normalizePackageKey(event.package_key);
+
+    if (currentPackage === rawPackage) {
+      return res.status(409).json({
+        success: false,
+        message: "This event already uses the selected package.",
+        code: "EVENT_PACKAGE_ALREADY_SET",
+      });
+    }
+
+    const consumedBytes = Math.max(
+      0,
+      Number(event.storage_consumed_bytes) || 0,
+    );
+    const overrideBytes =
+      event.storage_limit_override_bytes == null
+        ? null
+        : Math.max(0, Number(event.storage_limit_override_bytes) || 0);
+    const nextPackageLimit = getPackageStorageLimitBytes(rawPackage);
+
+    if (overrideBytes == null && consumedBytes > nextPackageLimit) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "This event has already consumed more storage than the selected package allows. Add a storage override or choose a larger package.",
+        code: "PACKAGE_LIMIT_BELOW_CONSUMED_STORAGE",
+      });
+    }
+
+    const packetLevelId = await getPacketLevelId(rawPackage);
+
+    const { data, error } = await supabase.rpc(
+      "admin_change_event_package",
+      {
+        p_admin_user_id: adminUserId,
+        p_event_id: eventId,
+        p_package_key: rawPackage,
+        p_packet_level_id: packetLevelId,
+        p_reason: reason,
+        p_request_id: adminRequestId(req),
+        p_ip_address: adminRequestIp(req) || null,
+      },
+    );
+
+    if (error) {
+      console.error("Admin event package RPC error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Event package could not be changed safely.",
+        code: "ADMIN_EVENT_PACKAGE_FAILED",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Event package updated.",
+      event: data,
+    });
+  } catch (error) {
+    const statusCode = Number(error.statusCode) || 500;
+
+    console.error("Admin event package error:", error);
+
+    return res.status(statusCode).json({
+      success: false,
+      message:
+        statusCode === 400
+          ? error.message
+          : "Event package could not be changed.",
+      code: error.code || "ADMIN_EVENT_PACKAGE_FAILED",
+    });
+  }
+};
+
+const setAdminEventStorageOverride = async (req, res) => {
+  try {
+    const adminUserId = String(req.user.user_id || "").trim();
+    const eventId = String(req.params.eventId || "").trim();
+    const reason = validateAdminReason(req.body?.reason);
+    const clearOverride =
+      req.body?.limit_gb === null ||
+      req.body?.limit_gb === undefined ||
+      req.body?.limit_gb === "";
+
+    if (!UUID_RE.test(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid event is required.",
+        code: "INVALID_EVENT_ID",
+      });
+    }
+
+    let limitBytes = null;
+
+    if (!clearOverride) {
+      const limitGb = Number(req.body.limit_gb);
+
+      if (!Number.isFinite(limitGb) || limitGb < 0.1 || limitGb > 1024) {
+        return res.status(400).json({
+          success: false,
+          message: "Custom storage must be between 0.1 GB and 1024 GB.",
+          code: "INVALID_STORAGE_OVERRIDE",
+        });
+      }
+
+      limitBytes = Math.round(limitGb * 1024 * 1024 * 1024);
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select(
+        "event_id, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+      )
+      .eq("event_id", eventId)
+      .maybeSingle();
+
+    if (eventError) throw eventError;
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found.",
+        code: "ADMIN_EVENT_NOT_FOUND",
+      });
+    }
+
+    const consumedBytes = Math.max(
+      0,
+      Number(event.storage_consumed_bytes) || 0,
+    );
+    const existingOverride =
+      event.storage_limit_override_bytes == null
+        ? null
+        : Math.max(0, Number(event.storage_limit_override_bytes) || 0);
+
+    if (limitBytes === null) {
+      if (existingOverride === null) {
+        return res.status(409).json({
+          success: false,
+          message: "This event does not currently have a storage override.",
+          code: "NO_STORAGE_OVERRIDE",
+        });
+      }
+
+      const packageLimit = getPackageStorageLimitBytes(event.package_key);
+
+      if (consumedBytes > packageLimit) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "The package limit is below the event's consumed storage. Change the package before removing the override.",
+          code: "PACKAGE_LIMIT_BELOW_CONSUMED_STORAGE",
+        });
+      }
+    } else if (limitBytes < consumedBytes) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "Custom storage cannot be lower than the event's already consumed storage.",
+        code: "OVERRIDE_BELOW_CONSUMED_STORAGE",
+      });
+    }
+
+    const { data, error } = await supabase.rpc(
+      "admin_set_event_storage_override",
+      {
+        p_admin_user_id: adminUserId,
+        p_event_id: eventId,
+        p_limit_bytes: limitBytes,
+        p_reason: reason,
+        p_request_id: adminRequestId(req),
+        p_ip_address: adminRequestIp(req) || null,
+      },
+    );
+
+    if (error) {
+      console.error("Admin event storage override RPC error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Event storage override could not be changed safely.",
+        code: "ADMIN_EVENT_STORAGE_OVERRIDE_FAILED",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        limitBytes === null
+          ? "Storage override removed. Package limit restored."
+          : "Custom event storage limit applied.",
+      event: data,
+    });
+  } catch (error) {
+    const statusCode = Number(error.statusCode) || 500;
+
+    console.error("Admin event storage override error:", error);
+
+    return res.status(statusCode).json({
+      success: false,
+      message:
+        statusCode === 400
+          ? error.message
+          : "Event storage override could not be changed.",
+      code: error.code || "ADMIN_EVENT_STORAGE_OVERRIDE_FAILED",
+    });
+  }
+};
+
+const setAdminUserActiveStatus = async (req, res) => {
+  try {
+    const adminUserId = String(req.user.user_id || "").trim();
+    const targetUserId = String(req.params.userId || "").trim();
+    const requestedActive = req.body?.active;
+    const reason = String(req.body?.reason || "").trim();
+
+    if (!UUID_RE.test(targetUserId)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid target user is required.",
+        code: "INVALID_TARGET_USER",
+      });
+    }
+
+    if (typeof requestedActive !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid account status is required.",
+        code: "INVALID_USER_STATUS",
+      });
+    }
+
+    if (reason.length < 3 || reason.length > 300) {
+      return res.status(400).json({
+        success: false,
+        message: "Reason must be between 3 and 300 characters.",
+        code: "INVALID_STATUS_REASON",
+      });
+    }
+
+    if (adminUserId === targetUserId) {
+      return res.status(409).json({
+        success: false,
+        message: "You cannot change your own admin account status here.",
+        code: "CANNOT_CHANGE_OWN_STATUS",
+      });
+    }
+
+    const { data: targetUser, error: targetError } = await supabase
+      .from("users")
+      .select(
+        "user_id, user_name, user_mail, user_role, is_user_active",
+      )
+      .eq("user_id", targetUserId)
+      .maybeSingle();
+
+    if (targetError) {
+      throw targetError;
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+        code: "ADMIN_USER_NOT_FOUND",
+      });
+    }
+
+    if (targetUser.user_role !== "user") {
+      return res.status(409).json({
+        success: false,
+        message: "Admin accounts cannot be managed from this customer status flow.",
+        code: "ADMIN_ACCOUNT_STATUS_BLOCKED",
+      });
+    }
+
+    if (Boolean(targetUser.is_user_active) === requestedActive) {
+      return res.status(409).json({
+        success: false,
+        message: requestedActive
+          ? "This user is already active."
+          : "This user is already suspended.",
+        code: "USER_STATUS_ALREADY_SET",
+      });
+    }
+
+    const ipAddress = String(
+      req.ip || req.socket?.remoteAddress || "",
+    )
+      .split(",")[0]
+      .trim()
+      .slice(0, 128);
+
+    const { data: result, error: rpcError } = await supabase.rpc(
+      "admin_set_user_active_status",
+      {
+        p_admin_user_id: adminUserId,
+        p_target_user_id: targetUserId,
+        p_active: requestedActive,
+        p_reason: reason,
+        p_request_id: req.requestId
+          ? String(req.requestId).slice(0, 128)
+          : null,
+        p_ip_address: ipAddress || null,
+      },
+    );
+
+    if (rpcError) {
+      console.error("Admin user status RPC error:", rpcError);
+
+      return res.status(500).json({
+        success: false,
+        message: "User account status could not be changed safely.",
+        code: "ADMIN_USER_STATUS_FAILED",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: requestedActive
+        ? "User account reactivated."
+        : "User account suspended. Existing sessions were invalidated.",
+      user: result,
+    });
+  } catch (error) {
+    console.error("Admin user status error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "User account status could not be changed.",
+      code: "ADMIN_USER_STATUS_FAILED",
+    });
+  }
+};
+
 const deleteAdminUser = async (req, res) => {
   try {
     const adminUserId = String(req.user.user_id || "").trim();
@@ -1343,7 +2191,10 @@ const getAdminLogs = async (req, res) => {
 
       return {
         id: log.audit_id,
-        type: log.category === "EVENT" ? "EVENT" : "USER",
+        type:
+          String(log.target_type || "").toLowerCase() === "event"
+            ? "EVENT"
+            : "USER",
         category: log.category,
         title: auditActionTitle(log.action),
         text: log.description,
@@ -1355,6 +2206,26 @@ const getAdminLogs = async (req, res) => {
         ip: log.ip_address || "-",
         requestId: log.request_id || "-",
         change: details.summary || log.description,
+        reason:
+          typeof details.reason === "string"
+            ? details.reason
+            : null,
+        previousStatus:
+          typeof details.previous_status === "string"
+            ? details.previous_status
+            : typeof details.previous_active === "boolean"
+              ? details.previous_active
+                ? "Active"
+                : "Suspended"
+              : null,
+        newStatus:
+          typeof details.new_status === "string"
+            ? details.new_status
+            : typeof details.new_active === "boolean"
+              ? details.new_active
+                ? "Active"
+                : "Suspended"
+              : null,
       };
     });
 
@@ -1376,6 +2247,7 @@ const getAdminLogs = async (req, res) => {
 module.exports = {
   getAdminMe,
   getAdminDashboard,
+  getAdminStorage,
   getAdminAnalytics,
   getAdminUsers,
   getAdminUser,
@@ -1383,6 +2255,10 @@ module.exports = {
   getAdminEvent,
   createAdminUser,
   createAdminEventForUser,
+  setAdminEventSuspension,
+  changeAdminEventPackage,
+  setAdminEventStorageOverride,
+  setAdminUserActiveStatus,
   deleteAdminUser,
   getAdminLogs,
 };

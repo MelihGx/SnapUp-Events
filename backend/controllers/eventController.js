@@ -838,7 +838,7 @@ const updateEventBasicInfo = async (req, res) => {
 
     const { data: event, error: eventError } = await supabase
       .from("event")
-      .select("event_id, user_id")
+      .select("event_id, user_id, is_event_active, admin_suspended")
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -1029,7 +1029,19 @@ const updateEventSettings = async (req, res) => {
       });
     }
 
-    const nextActiveState = is_event_active !== false;
+    if (event.admin_suspended === true && is_event_active === true) {
+      return res.status(423).json({
+        success: false,
+        message:
+          "This event is suspended by SnapUp administration and cannot be reactivated by the event owner.",
+        code: "EVENT_ADMIN_SUSPENDED",
+      });
+    }
+
+    const nextActiveState =
+      event.admin_suspended === true
+        ? false
+        : is_event_active !== false;
 
     const { error: activeStateError } = await supabase
       .from("event")
@@ -1283,7 +1295,9 @@ const EVENT_HIGHLIGHTS_SELECT = `
   event_cover_url,
   package_key,
   storage_consumed_bytes,
-  is_event_active
+  storage_limit_override_bytes,
+  is_event_active,
+  admin_suspended
 `;
 
 function handleEventHighlightsError(res, error) {
@@ -1461,6 +1475,14 @@ async function getPublicEventHighlights(req, res) {
         "Event not found.",
         "HIGHLIGHTS_EVENT_NOT_FOUND",
         404,
+      );
+    }
+
+    if (event.admin_suspended === true) {
+      throw new EventHighlightsError(
+        "This event is temporarily unavailable.",
+        "EVENT_ADMIN_SUSPENDED",
+        403,
       );
     }
 

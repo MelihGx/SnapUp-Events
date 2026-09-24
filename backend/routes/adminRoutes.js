@@ -11,6 +11,7 @@ const {
 const {
   getAdminMe,
   getAdminDashboard,
+  getAdminStorage,
   getAdminAnalytics,
   getAdminUsers,
   getAdminUser,
@@ -18,6 +19,10 @@ const {
   getAdminEvent,
   createAdminUser,
   createAdminEventForUser,
+  setAdminEventSuspension,
+  changeAdminEventPackage,
+  setAdminEventStorageOverride,
+  setAdminUserActiveStatus,
   deleteAdminUser,
   getAdminLogs,
 } = require("../controllers/adminController");
@@ -33,6 +38,7 @@ router.use(adminLimiter);
 
 router.get("/me", getAdminMe);
 router.get("/dashboard", getAdminDashboard);
+router.get("/storage", getAdminStorage);
 router.get("/analytics", getAdminAnalytics);
 router.get("/users", getAdminUsers);
 router.post("/users", adminWriteLimiter, createAdminUser);
@@ -42,6 +48,11 @@ router.post(
   adminWriteLimiter,
   createAdminEventForUser,
 );
+router.patch(
+  "/users/:userId/status",
+  adminWriteLimiter,
+  setAdminUserActiveStatus,
+);
 router.delete(
   "/users/:userId",
   superAdminMiddleware,
@@ -50,6 +61,21 @@ router.delete(
 );
 router.get("/events", getAdminEvents);
 router.get("/events/:eventId", getAdminEvent);
+router.patch(
+  "/events/:eventId/status",
+  adminWriteLimiter,
+  setAdminEventSuspension,
+);
+router.patch(
+  "/events/:eventId/package",
+  adminWriteLimiter,
+  changeAdminEventPackage,
+);
+router.patch(
+  "/events/:eventId/storage-override",
+  adminWriteLimiter,
+  setAdminEventStorageOverride,
+);
 router.get("/logs", getAdminLogs);
 
 module.exports = router;

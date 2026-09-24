@@ -2,14 +2,20 @@ import { API_URL } from "./config.js?v=runtime-api-2";
 import {
   getAdminDashboard,
   getAdminAnalytics,
+  getAdminStorage,
   getAdminUsers,
+  getAdminUser,
   getAdminEvents,
   getAdminEvent,
   createAdminUser,
   createAdminEventForUser,
   getAdminLogs,
   deleteAdminUser,
-} from "./admin-api.js?v=admin-live-clean-2";
+  setAdminUserActiveStatus,
+  setAdminEventSuspension,
+  changeAdminEventPackage,
+  setAdminEventStorageOverride,
+} from "./admin-api.js?v=admin-event-ops-1";
 
 const ADMIN_LOGIN_PAGE = "login.html";
 const ADMIN_ACCOUNT_PAGE = "account.html";
@@ -43,14 +49,24 @@ async function verifyAdminAccess() {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/admin/me`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    });
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 12000);
+
+    let response;
+
+    try {
+      response = await fetch(`${API_URL}/api/admin/me`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+        signal: controller.signal,
+      });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
 
     const data = await response.json().catch(() => ({}));
 
@@ -81,9 +97,15 @@ async function verifyAdminAccess() {
     return data.admin;
   } catch (error) {
     console.error("Admin access verification error:", error);
+
+    const isTimeout = error?.name === "AbortError";
+
     setGateError(
-      "The admin API could not be reached. Your admin panel remains locked until verification succeeds.",
+      isTimeout
+        ? "Admin verification timed out. Check the backend and try again."
+        : "The admin API could not be reached. Your admin panel remains locked until verification succeeds.",
     );
+
     return null;
   }
 }
@@ -127,6 +149,8 @@ const state = {
   analytics: null,
   analyticsDays: 30,
   analyticsLoading: false,
+  storage: null,
+  storageLoading: false,
   currentUserId: null,
   currentEventId: null,
   eventPeriod: "all",
@@ -138,6 +162,7 @@ const views = {
   analytics:["Analytics","Live growth, media, package and storage analytics."],
   users:["Users","Create and inspect live customer accounts."],
   events:["Events","Create and inspect events on behalf of customers."],
+  storage:["Storage","Track platform usage and custom limits."],
   logs:["Admin Logs","Review persisted privileged administrative actions."]
 };
 
@@ -155,6 +180,7 @@ function escapeHtml(value){
 function escapeAttr(value){ return escapeHtml(value); }
 function ownerName(id){ return state.users.find(u=>u.id===id)?.name || "Unknown"; }
 function ownerEmail(id){ return state.users.find(u=>u.id===id)?.email || "-"; }
+function randomCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 function todayLabel(){ return new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric"}).format(new Date()); }
 function formatJoined(value){
   const d=new Date(value);
@@ -167,6 +193,41 @@ function showToast(msg){
   clearTimeout(showToast.timer); showToast.timer=setTimeout(()=>t.classList.remove("show"),2200);
 }
 
+function inferAuditCategory(type,title=""){
+  const value=String(title).toLowerCase();
+  if(value.includes("storage")) return "STORAGE";
+  if(value.includes("suspend") || value.includes("reactivat")) return "SECURITY";
+  return type==="EVENT" ? "EVENT" : "USER";
+}
+
+function inferAuditTarget(text=""){
+  const code=String(text).match(/#\d{6}/)?.[0];
+  if(code) return code;
+  const email=String(text).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+  return email || "Platform";
+}
+
+function addLog(type,title,text){
+  const now=new Date();
+  state.logs.unshift({
+    id:`AUD-${now.getTime()}`,
+    type,
+    category:inferAuditCategory(type,title),
+    title,
+    text,
+    time:"Just now",
+    timestamp:now.toISOString(),
+    admin:currentAdmin.user_mail,
+    adminRole:currentAdmin.user_role === "super_admin" ? "Super Admin" : "Admin",
+    target:inferAuditTarget(text),
+    targetMeta:type==="EVENT" ? "Event" : "User account",
+    ip:"127.0.0.1",
+    requestId:`req_${Math.random().toString(16).slice(2,10)}`,
+    change:text
+  });
+  renderLogs();
+  renderRecent();
+}
 
 function switchView(name){
   $$(".view").forEach(v=>v.classList.remove("active"));
@@ -179,6 +240,10 @@ function switchView(name){
 
   if(name==="analytics"){
     loadAnalytics(state.analyticsDays);
+  }
+
+  if(name==="storage"){
+    loadStorage();
   }
 }
 
@@ -326,23 +391,6 @@ function renderRecent(){
     <div class="mini-row"><div class="mini-copy"><b>${escapeHtml(log.title)}</b><span>${escapeHtml(log.text)}</span></div><span class="audit-category ${String(log.category||"USER").toLowerCase()}">${escapeHtml(log.category||"USER")}</span></div>`).join("") : `<div class="mini-row"><div class="mini-copy"><b>No admin actions yet</b><span>Privileged actions will appear here.</span></div></div>`;
 }
 
-
-function initializeAuditDateRange(){
-  const from=$("#auditDateFrom");
-  const to=$("#auditDateTo");
-  if(!from || !to) return;
-
-  const now=new Date();
-  const start=new Date(now);
-  start.setDate(start.getDate()-30);
-
-  const toIso=now.toISOString().slice(0,10);
-  const fromIso=start.toISOString().slice(0,10);
-
-  if(!from.value) from.value=fromIso;
-  if(!to.value) to.value=toIso;
-}
-
 function auditNow(){
   return new Date();
 }
@@ -474,6 +522,22 @@ function openAuditDetail(id){
   $("#auditDetailText").textContent=log.text || "-";
   $("#auditDetailChange").textContent=log.change || log.text || "-";
 
+  const reasonBlock=$("#auditDetailReasonBlock");
+  const statusBlock=$("#auditDetailStatusBlock");
+
+  if(reasonBlock){
+    const hasReason=Boolean(String(log.reason||"").trim());
+    reasonBlock.hidden=!hasReason;
+    $("#auditDetailReason").textContent=hasReason ? log.reason : "-";
+  }
+
+  if(statusBlock){
+    const hasStatusChange=Boolean(log.previousStatus || log.newStatus);
+    statusBlock.hidden=!hasStatusChange;
+    $("#auditDetailPreviousStatus").textContent=log.previousStatus || "-";
+    $("#auditDetailNewStatus").textContent=log.newStatus || "-";
+  }
+
   showModal("#auditDetailModal");
 }
 
@@ -484,12 +548,13 @@ function csvEscape(value){
 
 function exportAuditCsv(){
   const rows=filteredAuditLogs();
-  const columns=["Timestamp","Administrator","Role","Category","Action","Target","Description","IP Address","Request ID","Change Summary"];
+  const columns=["Timestamp","Administrator","Role","Category","Action","Target","Description","Reason","Previous Status","New Status","IP Address","Request ID","Change Summary"];
   const csv=[
     columns.map(csvEscape).join(","),
     ...rows.map(log=>[
       log.timestamp,log.admin,log.adminRole,log.category,log.title,log.target,
-      log.text,log.ip,log.requestId,log.change
+      log.text,log.reason||"",log.previousStatus||"",log.newStatus||"",
+      log.ip,log.requestId,log.change
     ].map(csvEscape).join(","))
   ].join("\r\n");
 
@@ -505,6 +570,191 @@ function exportAuditCsv(){
   showToast(`${rows.length} audit records exported.`);
 }
 
+function formatLiveTime(value){
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return "Live database";
+
+  return `Live database · updated ${new Intl.DateTimeFormat("en-GB",{
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  }).format(date)}`;
+}
+
+function renderStorage(){
+  const storage=state.storage;
+  if(!storage) return;
+
+  $("#storageConsumed").textContent=storage.total_consumed_display || "0 B";
+  $("#storageCurrentMedia").textContent=storage.current_media_display || "0 B";
+  $("#storageAllocated").textContent=storage.total_allocated_display || "0 B";
+  $("#storageUtilization").textContent=
+    `${Number(storage.utilization_percentage||0).toFixed(2)}%`;
+
+  $("#storageCurrentMediaMeta").textContent=
+    `${storage.quota_gap_display || "0 B"} consumed quota is not present in current media rows`;
+  $("#storageAllocatedMeta").textContent=
+    `${Number(storage.total_events||0).toLocaleString()} current events`;
+  $("#storageUtilizationMeta").textContent=
+    `${storage.total_consumed_display || "0 B"} of ${storage.total_allocated_display || "0 B"}`;
+
+  const liveStatus=$("#storageLiveStatus");
+  if(liveStatus){
+    liveStatus.textContent=formatLiveTime(storage.generated_at);
+  }
+
+  const mediaValues=[
+    {
+      key:"image",
+      label:"Images",
+      bytes:Number(storage.media_by_type?.image?.bytes||0),
+      display:storage.media_by_type?.image?.display||"0 B",
+      count:Number(storage.media_by_type?.image?.count||0),
+      color:"#6d5dfc"
+    },
+    {
+      key:"video",
+      label:"Videos",
+      bytes:Number(storage.media_by_type?.video?.bytes||0),
+      display:storage.media_by_type?.video?.display||"0 B",
+      count:Number(storage.media_by_type?.video?.count||0),
+      color:"#2563eb"
+    },
+    {
+      key:"message",
+      label:"Messages",
+      bytes:Number(storage.media_by_type?.message?.bytes||0),
+      display:storage.media_by_type?.message?.display||"0 B",
+      count:Number(storage.media_by_type?.message?.count||0),
+      color:"#f59e0b"
+    },
+    {
+      key:"other",
+      label:"Other",
+      bytes:Number(storage.media_by_type?.other?.bytes||0),
+      display:storage.media_by_type?.other?.display||"0 B",
+      count:Number(storage.media_by_type?.other?.count||0),
+      color:"#94a3b8"
+    }
+  ];
+
+  const mediaTotal=mediaValues.reduce((sum,item)=>sum+item.bytes,0);
+  $("#storageMediaTotal").textContent=storage.current_media_display || "0 B";
+
+  const donut=$("#storagePageDonut");
+  const legend=$("#storagePageLegend");
+
+  if(donut && legend){
+    if(mediaTotal<=0){
+      donut.style.background="conic-gradient(#e5e7eb 0 100%)";
+      legend.innerHTML=`<div class="legend-row"><span>No media storage yet</span></div>`;
+    }else{
+      let cursor=0;
+      const stops=mediaValues.map(item=>{
+        const start=cursor;
+        cursor+=(item.bytes/mediaTotal)*100;
+        return `${item.color} ${start.toFixed(2)}% ${cursor.toFixed(2)}%`;
+      });
+
+      donut.style.background=`conic-gradient(${stops.join(",")})`;
+
+      legend.innerHTML=mediaValues.map(item=>{
+        const pct=mediaTotal>0 ? ((item.bytes/mediaTotal)*100).toFixed(1) : "0.0";
+        return `<div class="legend-row">
+          <i style="background:${item.color}"></i>
+          <span>${escapeHtml(item.label)}</span>
+          <b>${escapeHtml(item.display)} · ${pct}% · ${item.count} items</b>
+        </div>`;
+      }).join("");
+    }
+  }
+
+  const packageRoot=$("#storagePackageUsage");
+  const packages=Array.isArray(storage.package_usage)
+    ? storage.package_usage
+    : [];
+
+  if(packageRoot){
+    packageRoot.innerHTML=packages.length
+      ? packages.map(item=>`
+        <div class="hbar-row">
+          <span>${escapeHtml(item.package_name)} · ${Number(item.event_count||0)} events</span>
+          <div class="hbar-track">
+            <div class="hbar-fill" style="width:${Math.max(0,Math.min(100,Number(item.percentage||0)))}%"></div>
+          </div>
+          <b>${escapeHtml(item.consumed_display)} / ${escapeHtml(item.allocated_display)}</b>
+        </div>`).join("")
+      : `<div class="event-empty"><strong>No package storage yet</strong><span>Create an event to allocate storage.</span></div>`;
+  }
+
+  const eventRanking=$("#storageEventRanking");
+  const topEvents=Array.isArray(storage.top_events) ? storage.top_events : [];
+
+  if(eventRanking){
+    eventRanking.innerHTML=topEvents.length
+      ? topEvents.map((event,index)=>`
+        <div class="rank-row">
+          <span class="rank-num">${String(index+1).padStart(2,"0")}</span>
+          <div class="rank-copy">
+            <b>${escapeHtml(event.event_name)}</b>
+            <span>#${escapeHtml(event.event_code||"—")} · ${escapeHtml(String(event.package_key||"free").toUpperCase())}</span>
+          </div>
+          <strong>${escapeHtml(event.consumed_display||"0 B")}</strong>
+        </div>`).join("")
+      : `<div class="event-empty"><strong>No event storage yet</strong><span>No event has consumed quota.</span></div>`;
+  }
+
+  const userRanking=$("#storageRanking");
+  const topUsers=Array.isArray(storage.top_users) ? storage.top_users : [];
+
+  if(userRanking){
+    userRanking.innerHTML=topUsers.length
+      ? topUsers.map((user,index)=>`
+        <div class="rank-row">
+          <span class="rank-num">${String(index+1).padStart(2,"0")}</span>
+          <div class="rank-copy">
+            <b>${escapeHtml(user.user_name)}</b>
+            <span>${escapeHtml(user.user_mail)} · ${Number(user.event_count||0)} events</span>
+          </div>
+          <strong>${escapeHtml(user.consumed_display||"0 B")}</strong>
+        </div>`).join("")
+      : `<div class="event-empty"><strong>No user storage yet</strong><span>No user has consumed quota.</span></div>`;
+  }
+}
+
+async function loadStorage(){
+  if(state.storageLoading) return;
+  state.storageLoading=true;
+
+  const liveStatus=$("#storageLiveStatus");
+  if(liveStatus){
+    liveStatus.textContent="Live database · loading…";
+  }
+
+  try{
+    const response=await getAdminStorage();
+    state.storage=response.storage || null;
+    renderStorage();
+  }catch(error){
+    console.error("Admin storage load failed:",error);
+    state.storage=null;
+
+    if(liveStatus){
+      liveStatus.textContent="Live database · load failed";
+    }
+
+    ["storagePackageUsage","storageEventRanking","storageRanking"].forEach(id=>{
+      const root=document.getElementById(id);
+      if(root){
+        root.innerHTML=`<div class="event-empty"><strong>Storage data unavailable</strong><span>${escapeHtml(error.message||"Storage data could not be loaded.")}</span></div>`;
+      }
+    });
+
+    showToast(error.message || "Storage data could not be loaded.");
+  }finally{
+    state.storageLoading=false;
+  }
+}
 
 function refreshCounts(){
   const d=state.dashboard;
@@ -541,14 +791,43 @@ function populateOwnerSelect(selectedId=null){
   select.innerHTML=eligibleUsers.map(u=>`<option value="${escapeAttr(u.id)}" ${u.id===selectedId?"selected":""}>${escapeHtml(u.name)} — ${escapeHtml(u.email)}${u.verified?"":" · Unverified"}</option>`).join("");
 }
 
-function openUser(id){
+async function openUser(id){
   state.currentUserId=id;
-  const u=state.users.find(x=>x.id===id); if(!u) return;
-  $("#drawerUserName").textContent=u.name; $("#drawerUserEmail").textContent=u.email; $("#drawerAvatar").textContent=initials(u.name);
-  $("#drawerStatus").textContent=u.status; $("#drawerStatus").className=`badge ${statusClass(u.status)}`;
-  $("#drawerPlan").textContent=u.plan; $("#drawerPlan").className=`plan ${planClass(u.plan)}`;
-  $("#drawerEventsCount").textContent=u.events; $("#drawerStorage").textContent=u.storage; $("#drawerJoined").textContent=formatJoined(u.joined_at);
-  $("#drawerToggleStatus").textContent=u.status==="Suspended"?"Reactivate User":"Suspend User";
+  const u=state.users.find(x=>x.id===id);
+  if(!u) return;
+
+  $("#drawerUserName").textContent=u.name;
+  $("#drawerUserEmail").textContent=u.email;
+  $("#drawerAvatar").textContent=initials(u.name);
+  $("#drawerStatus").textContent=u.status;
+  $("#drawerStatus").className=`badge ${statusClass(u.status)}`;
+  $("#drawerPlan").textContent=u.plan;
+  $("#drawerPlan").className=`plan ${planClass(u.plan)}`;
+  $("#drawerEventsCount").textContent=u.events;
+  $("#drawerStorage").textContent=u.storage;
+  $("#drawerJoined").textContent=formatJoined(u.joined_at);
+
+  const suspensionInfo=$("#drawerSuspensionInfo");
+  if(suspensionInfo){
+    suspensionInfo.hidden=true;
+    $("#drawerSuspensionReason").textContent="-";
+    $("#drawerSuspensionMeta").textContent="-";
+  }
+
+  const statusButton=$("#drawerToggleStatus");
+  if(statusButton){
+    statusButton.textContent=u.status==="Suspended"?"Reactivate User":"Suspend User";
+
+    const canManageStatus=
+      u.role==="user" &&
+      u.id!==currentAdmin.user_id;
+
+    statusButton.disabled=!canManageStatus;
+    statusButton.title=canManageStatus
+      ? ""
+      : "Admin accounts cannot be managed from this customer status flow.";
+  }
+
   const deleteButton=$("#drawerDeleteAccount");
   if(deleteButton){
     deleteButton.hidden=!(
@@ -557,9 +836,47 @@ function openUser(id){
       u.id!==currentAdmin.user_id
     );
   }
+
   const events=state.events.filter(e=>e.ownerId===id);
-  $("#drawerEventsList").innerHTML=events.length?events.map(e=>`<div class="drawer-event"><b>${escapeHtml(e.name)}</b><span>#${e.code} · ${e.plan} · ${escapeHtml(e.status)}</span></div>`).join(""):`<div class="drawer-event"><span>No events yet.</span></div>`;
-  $("#userDrawer").classList.add("open"); $("#drawerBackdrop").classList.add("show");
+  $("#drawerEventsList").innerHTML=events.length
+    ? events.map(e=>`<div class="drawer-event"><b>${escapeHtml(e.name)}</b><span>#${escapeHtml(e.code)} · ${escapeHtml(e.plan)} · ${escapeHtml(e.status)}</span></div>`).join("")
+    : `<div class="drawer-event"><span>No events yet.</span></div>`;
+
+  $("#userDrawer").classList.add("open");
+  $("#drawerBackdrop").classList.add("show");
+
+  try{
+    const detailResponse=await getAdminUser(id);
+    const detailUser=detailResponse?.user;
+
+    if(
+      !detailUser ||
+      String(state.currentUserId)!==String(id)
+    ){
+      return;
+    }
+
+    const reason=String(detailUser.last_suspension_reason||"").trim();
+
+    if(reason && suspensionInfo){
+      $("#drawerSuspensionTitle").textContent=
+        detailUser.status==="Suspended"
+          ? "Suspension reason"
+          : "Last suspension reason";
+      $("#drawerSuspensionReason").textContent=reason;
+
+      const stamp=detailUser.last_suspension_at
+        ? formatAuditTimestamp(detailUser.last_suspension_at)
+        : null;
+
+      $("#drawerSuspensionMeta").textContent=stamp
+        ? `Suspended on ${stamp.date} at ${stamp.time}`
+        : "Previous suspension";
+      suspensionInfo.hidden=false;
+    }
+  }catch(error){
+    console.error("User suspension detail load failed:",error);
+  }
 }
 
 function closeDrawer(){ $("#userDrawer").classList.remove("open"); $("#drawerBackdrop").classList.remove("show"); }
@@ -603,8 +920,8 @@ async function loadLiveAdminData(){
 
 function lockRemainingActions(){
   const ids=[
-    "drawerChangePlan","drawerToggleStatus","drawerStorageOverride",
-    "eventToggleStatus","eventChangePlan","eventExtendArchive","eventChangeOwner"
+    "drawerChangePlan","drawerStorageOverride",
+    "eventExtendArchive"
   ];
 
   ids.forEach(id=>{
@@ -616,7 +933,7 @@ function lockRemainingActions(){
 }
 
 function rerenderAll(){
-  renderUsers(); renderEvents(); renderRecent(); renderLogs(); refreshCounts();
+  renderUsers(); renderEvents(); renderRecent(); renderLogs(); renderStorage(); refreshCounts();
 }
 
 $$(".nav-item").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
@@ -666,6 +983,34 @@ $("#drawerCreateEvent").onclick=()=>{
   openCreateEvent(ownerId);
 };
 
+$("#drawerToggleStatus").onclick=()=>{
+  const user=state.users.find(item=>item.id===state.currentUserId);
+  if(!user) return;
+
+  if(user.role!=="user" || user.id===currentAdmin.user_id){
+    showToast("Admin accounts cannot be managed from this customer status flow.");
+    return;
+  }
+
+  const willReactivate=user.status==="Suspended";
+
+  $("#userStatusForm").reset();
+  $("#userStatusName").textContent=user.name;
+  $("#userStatusEmail").textContent=user.email;
+  $("#userStatusCurrent").textContent=user.status;
+  $("#userStatusModalTitle").textContent=willReactivate
+    ? "Reactivate User"
+    : "Suspend User";
+  $("#userStatusSubmit").textContent=willReactivate
+    ? "Reactivate User"
+    : "Suspend User";
+  $("#userStatusNote").textContent=willReactivate
+    ? "Reactivating allows the user to sign in again. Previously issued sessions stay invalid, so the user must log in again."
+    : "Suspending immediately invalidates existing sessions and blocks new logins until the account is reactivated.";
+
+  showModal("#userStatusModal");
+};
+
 $("#drawerDeleteAccount").onclick=()=>{
   const user=state.users.find(item=>item.id===state.currentUserId);
   if(!user) return;
@@ -685,13 +1030,72 @@ $("#drawerDeleteAccount").onclick=()=>{
 
 
 [
-  "drawerChangePlan","drawerToggleStatus","drawerStorageOverride",
-  "eventToggleStatus","eventChangePlan","eventExtendArchive","eventChangeOwner"
+  "drawerChangePlan","drawerStorageOverride",
+  "eventExtendArchive"
 ].forEach(id=>{
   const element=document.getElementById(id);
   if(element) element.onclick=()=>showToast("This admin action will be connected in the next phase.");
 });
 
+
+$("#userStatusForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+
+  const user=state.users.find(item=>item.id===state.currentUserId);
+  if(!user){
+    showToast("Selected user could not be found.");
+    return;
+  }
+
+  if(user.role!=="user"){
+    showToast("Admin accounts cannot be managed from this customer status flow.");
+    return;
+  }
+
+  const form=event.currentTarget;
+  const fields=new FormData(form);
+  const reason=String(fields.get("reason")||"").trim();
+  const willReactivate=user.status==="Suspended";
+  const submit=$("#userStatusSubmit");
+
+  if(reason.length<3){
+    showToast("Enter a reason of at least 3 characters.");
+    return;
+  }
+
+  submit.disabled=true;
+  const originalText=submit.textContent;
+  submit.textContent=willReactivate ? "Reactivating…" : "Suspending…";
+
+  try{
+    await setAdminUserActiveStatus(user.id,{
+      active:willReactivate,
+      reason,
+    });
+
+    closeModals();
+
+    await loadLiveAdminData();
+    rerenderAll();
+
+    const updatedUser=state.users.find(item=>item.id===user.id);
+    if(updatedUser){
+      openUser(updatedUser.id);
+    }
+
+    showToast(
+      willReactivate
+        ? "User account reactivated. The user can sign in again."
+        : "User account suspended. Existing sessions were invalidated."
+    );
+  }catch(error){
+    console.error("Admin user status change failed:",error);
+    showToast(error.message || "User account status could not be changed.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=originalText;
+  }
+});
 
 $("#deleteUserForm").addEventListener("submit",async event=>{
   event.preventDefault();
@@ -855,7 +1259,6 @@ $("#logoutDemo").onclick=async()=>{
   }
 };
 
-initializeAuditDateRange();
 lockRemainingActions();
 await loadLiveAdminData();
 rerenderAll();
@@ -1014,29 +1417,12 @@ function analyticsTopStorage(events){
   }).join("");
 }
 
-
-function formatAnalyticsGeneratedAt(value){
-  const date=new Date(value);
-  if(Number.isNaN(date.getTime())) return "Live database";
-
-  return `Live database · updated ${new Intl.DateTimeFormat("en-GB",{
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit"
-  }).format(date)}`;
-}
-
 function renderAnalytics(){
   const analytics=state.analytics;
   if(!analytics) return;
 
   const kpis=analytics.kpis || {};
   const timeline=Array.isArray(analytics.timeline) ? analytics.timeline : [];
-
-  const liveStatus=$("#analyticsLiveStatus");
-  if(liveStatus){
-    liveStatus.textContent=formatAnalyticsGeneratedAt(analytics.generated_at);
-  }
 
   $("#analyticsNewUsers").textContent=analyticsNumber(kpis.new_users);
   $("#analyticsNewEvents").textContent=analyticsNumber(kpis.new_events);
@@ -1053,7 +1439,7 @@ function renderAnalytics(){
     `${kpis.total_storage_display || "0 B"} total consumed`;
 
   $("#analyticsGrowthSubtitle").textContent=
-    `New users and events created · last ${analytics.period_days} days`;
+    `New users and events · last ${analytics.period_days} days`;
   $("#analyticsMediaSubtitle").textContent=
     `Images, videos and messages · last ${analytics.period_days} days`;
   $("#analyticsPackageSubtitle").textContent=
@@ -1083,9 +1469,6 @@ async function loadAnalytics(days=30){
   if(state.analyticsLoading) return;
   state.analyticsLoading=true;
 
-  const liveStatus=$("#analyticsLiveStatus");
-  if(liveStatus) liveStatus.textContent="Live database · loading…";
-
   const select=$("#analyticsPeriod");
   if(select) select.value=String(normalized);
 
@@ -1101,8 +1484,6 @@ async function loadAnalytics(days=30){
   }catch(error){
     console.error("Admin analytics load failed:",error);
     state.analytics=null;
-    const liveStatus=$("#analyticsLiveStatus");
-    if(liveStatus) liveStatus.textContent="Live database · load failed";
     ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars"].forEach(id=>{
       chartEmpty(document.getElementById(id),"Analytics data could not be loaded.");
     });
@@ -1127,7 +1508,7 @@ async function openEvent(id){
     $("#eventDrawerName").textContent=e.name;
     $("#eventDrawerCode").textContent=`#${e.code}`;
     $("#eventDrawerStatus").textContent=e.status;
-    $("#eventDrawerStatus").className=`badge ${e.status==="Active"?"active":"unverified"}`;
+    $("#eventDrawerStatus").className=`badge ${statusClass(e.status)}`;
     $("#eventDrawerPlan").textContent=e.plan;
     $("#eventDrawerPlan").className=`plan ${planClass(e.plan)}`;
     $("#eventDrawerGuests").textContent=e.guests ?? "—";
@@ -1138,7 +1519,32 @@ async function openEvent(id){
     $("#eventDrawerLocation").textContent=e.location || "-";
     $("#eventDrawerApproval").textContent=e.approval || "-";
     $("#eventDrawerVideo").textContent=e.video || "Allowed";
-    $("#eventToggleStatus").textContent=e.status==="Inactive"?"Reactivate Event":"Deactivate Event";
+    $("#eventDrawerStorageLimit").textContent=e.storage_limit_display || "-";
+    $("#eventDrawerStorageOverride").textContent=
+      e.storage_limit_override_display || "None";
+    $("#eventToggleStatus").textContent=
+      e.status==="Suspended" ? "Reactivate Event" : "Suspend Event";
+
+    const suspensionInfo=$("#eventSuspensionInfo");
+    if(suspensionInfo){
+      const hasReason=Boolean(String(e.last_suspension_reason||"").trim());
+      suspensionInfo.hidden=!hasReason;
+      if(hasReason){
+        $("#eventSuspensionTitle").textContent=
+          e.status==="Suspended"
+            ? "Suspension reason"
+            : "Last suspension reason";
+        $("#eventSuspensionReason").textContent=e.last_suspension_reason;
+
+        const stamp=e.last_suspension_at
+          ? formatAuditTimestamp(e.last_suspension_at)
+          : null;
+
+        $("#eventSuspensionMeta").textContent=stamp
+          ? `Suspended on ${stamp.date} at ${stamp.time}`
+          : "Previous admin suspension";
+      }
+    }
 
     const activities=[
       `${e.photos ?? "—"} photos`,
@@ -1175,52 +1581,230 @@ $("#closeEventDrawer").onclick=closeEventDrawer;
 $("#eventDrawerBackdrop").onclick=closeEventDrawer;
 
 $("#eventToggleStatus").onclick=()=>{
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  const old=e.status;
-  e.status=e.status==="Suspended"?"Active":"Suspended";
-  addLog("EVENT",e.status==="Suspended"?"Suspended event":"Reactivated event",`${e.name} (#${e.code}) changed from ${old} to ${e.status}.`);
-  renderEvents(); renderRecent(); openEvent(e.id); showToast(`Event is now ${e.status}.`);
+  const event=state.events.find(item=>item.id===state.currentEventId);
+  if(!event) return;
+
+  const willReactivate=event.status==="Suspended";
+
+  $("#eventStatusForm").reset();
+  $("#eventStatusName").textContent=event.name;
+  $("#eventStatusCode").textContent=`#${event.code}`;
+  $("#eventStatusCurrent").textContent=event.status;
+  $("#eventStatusModalTitle").textContent=
+    willReactivate ? "Reactivate Event" : "Suspend Event";
+  $("#eventStatusSubmit").textContent=
+    willReactivate ? "Reactivate Event" : "Suspend Event";
+  $("#eventStatusNote").textContent=willReactivate
+    ? "Removing the admin suspension restores the event's previous active/inactive state."
+    : "Suspending blocks guest join and upload access. The event owner cannot reactivate an admin-suspended event.";
+
+  showModal("#eventStatusModal");
 };
 
+$("#eventStatusForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+
+  const target=state.events.find(item=>item.id===state.currentEventId);
+  if(!target) return;
+
+  const reason=String($("#eventStatusReason").value||"").trim();
+  if(reason.length<3){
+    showToast("Enter a reason of at least 3 characters.");
+    return;
+  }
+
+  const willReactivate=target.status==="Suspended";
+  const submit=$("#eventStatusSubmit");
+  submit.disabled=true;
+  const original=submit.textContent;
+  submit.textContent=willReactivate ? "Reactivating…" : "Suspending…";
+
+  try{
+    await setAdminEventSuspension(target.id,{
+      suspended:!willReactivate,
+      reason,
+    });
+
+    closeModals();
+    state.storage=null;
+    await loadLiveAdminData();
+    rerenderAll();
+    await openEvent(target.id);
+
+    showToast(
+      willReactivate
+        ? "Event admin suspension removed."
+        : "Event suspended. Join and uploads are blocked."
+    );
+  }catch(error){
+    console.error("Event suspension change failed:",error);
+    showToast(error.message || "Event suspension could not be changed.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=original;
+  }
+});
+
 $("#eventChangePlan").onclick=()=>{
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  $("#eventPlanSelect").value=e.plan;
+  const event=state.events.find(item=>item.id===state.currentEventId);
+  if(!event) return;
+
+  $("#eventPlanForm").reset();
+  $("#eventPlanCurrent").textContent=event.plan || "-";
+  $("#eventPlanConsumed").textContent=event.storage || "0 B";
+  $("#eventPlanOverride").textContent=
+    event.storage_limit_override_display || "None";
+  $("#eventPlanSelect").value=String(event.plan||"Free").toLowerCase();
+
   showModal("#eventPlanModal");
 };
 
-$("#eventPlanForm").addEventListener("submit",ev=>{
-  ev.preventDefault();
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  const old=e.plan, next=$("#eventPlanSelect").value;
-  e.plan=next;
-  addLog("EVENT","Changed event package",`${e.name} (#${e.code}) changed from ${old} to ${next}.`);
-  closeModals(); renderEvents(); renderRecent(); openEvent(e.id); showToast("Event package updated.");
+$("#eventPlanForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+
+  const target=state.events.find(item=>item.id===state.currentEventId);
+  if(!target) return;
+
+  const packageKey=String($("#eventPlanSelect").value||"").toLowerCase();
+  const reason=String($("#eventPlanReason").value||"").trim();
+  const submit=$("#eventPlanSubmit");
+
+  if(reason.length<3){
+    showToast("Enter a reason of at least 3 characters.");
+    return;
+  }
+
+  submit.disabled=true;
+  const original=submit.textContent;
+  submit.textContent="Updating…";
+
+  try{
+    await changeAdminEventPackage(target.id,{
+      package_key:packageKey,
+      reason,
+    });
+
+    closeModals();
+    state.storage=null;
+    await loadLiveAdminData();
+    rerenderAll();
+    await openEvent(target.id);
+
+    showToast("Event package updated.");
+  }catch(error){
+    console.error("Event package change failed:",error);
+    showToast(error.message || "Event package could not be changed.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=original;
+  }
 });
+
+$("#eventStorageOverride").onclick=()=>{
+  const event=state.events.find(item=>item.id===state.currentEventId);
+  if(!event) return;
+
+  $("#eventStorageOverrideForm").reset();
+  $("#eventStoragePackageLimit").textContent=
+    event.package_storage_limit_display || "-";
+  $("#eventStorageEffectiveLimit").textContent=
+    event.storage_limit_display || "-";
+  $("#eventStorageConsumed").textContent=event.storage || "0 B";
+
+  if(event.storage_limit_override_bytes){
+    $("#eventStorageLimitGb").value=
+      (Number(event.storage_limit_override_bytes)/(1024**3)).toFixed(2);
+  }
+
+  $("#eventStorageClear").disabled=!event.storage_limit_override_bytes;
+  showModal("#eventStorageOverrideModal");
+};
+
+$("#eventStorageOverrideForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+
+  const target=state.events.find(item=>item.id===state.currentEventId);
+  if(!target) return;
+
+  const limitGb=Number($("#eventStorageLimitGb").value);
+  const reason=String($("#eventStorageReason").value||"").trim();
+  const submit=$("#eventStorageSubmit");
+
+  if(!Number.isFinite(limitGb) || limitGb<0.1 || limitGb>1024){
+    showToast("Enter a custom limit between 0.1 GB and 1024 GB.");
+    return;
+  }
+
+  if(reason.length<3){
+    showToast("Enter a reason of at least 3 characters.");
+    return;
+  }
+
+  submit.disabled=true;
+  const original=submit.textContent;
+  submit.textContent="Applying…";
+
+  try{
+    await setAdminEventStorageOverride(target.id,{
+      limit_gb:limitGb,
+      reason,
+    });
+
+    closeModals();
+    state.storage=null;
+    await loadLiveAdminData();
+    rerenderAll();
+    await openEvent(target.id);
+
+    showToast("Custom event storage limit applied.");
+  }catch(error){
+    console.error("Event storage override failed:",error);
+    showToast(error.message || "Storage override could not be changed.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=original;
+  }
+});
+
+$("#eventStorageClear").onclick=async()=>{
+  const target=state.events.find(item=>item.id===state.currentEventId);
+  if(!target) return;
+
+  const reason=String($("#eventStorageReason").value||"").trim();
+
+  if(reason.length<3){
+    showToast("Enter a reason before removing the override.");
+    return;
+  }
+
+  const button=$("#eventStorageClear");
+  button.disabled=true;
+  const original=button.textContent;
+  button.textContent="Removing…";
+
+  try{
+    await setAdminEventStorageOverride(target.id,{
+      limit_gb:null,
+      reason,
+    });
+
+    closeModals();
+    state.storage=null;
+    await loadLiveAdminData();
+    rerenderAll();
+    await openEvent(target.id);
+
+    showToast("Storage override removed. Package limit restored.");
+  }catch(error){
+    console.error("Storage override removal failed:",error);
+    showToast(error.message || "Storage override could not be removed.");
+  }finally{
+    button.disabled=false;
+    button.textContent=original;
+  }
+};
 
 $("#eventExtendArchive").onclick=()=>{
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  e.archiveUntil="Extended +90 days";
-  addLog("EVENT","Extended event archive",`${e.name} (#${e.code}) archive was extended by 90 days.`);
-  openEvent(e.id); showToast("Archive extended by 90 days.");
+  showToast("Archive extension is not connected yet.");
 };
-
-$("#eventChangeOwner").onclick=()=>{
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  $("#eventOwnerChangeSelect").innerHTML=state.users.map(u=>`<option value="${u.id}" ${u.id===e.ownerId?"selected":""}>${u.name} — ${u.email}</option>`).join("");
-  showModal("#eventOwnerModal");
-};
-
-$("#eventOwnerForm").addEventListener("submit",ev=>{
-  ev.preventDefault();
-  const e=state.events.find(x=>x.id===state.currentEventId); if(!e)return;
-  const oldOwner=e.ownerId, newOwner=Number($("#eventOwnerChangeSelect").value);
-  if(oldOwner!==newOwner){
-    const oldUser=state.users.find(u=>u.id===oldOwner), newUser=state.users.find(u=>u.id===newOwner);
-    if(oldUser) oldUser.events=Math.max(0,oldUser.events-1);
-    if(newUser) newUser.events+=1;
-    e.ownerId=newOwner;
-    addLog("EVENT","Transferred event ownership",`${e.name} (#${e.code}) moved from ${ownerEmail(oldOwner)} to ${ownerEmail(newOwner)}.`);
-  }
-  closeModals(); rerenderAll(); openEvent(e.id); showToast("Event owner updated.");
-});
 
