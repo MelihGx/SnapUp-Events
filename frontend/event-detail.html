@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-delete-confirm-2"
+      href="css/event-detail.css?v=event-basic-edit-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -176,7 +176,21 @@
               <div class="detail-cover-dashboard">
                 <div class="detail-cover-copy">
                   <span class="rec-chip"><i></i> EVENT DETAIL</span>
-                  <h1 id="eventTitle">Event title</h1>
+                  <div class="event-title-row">
+                    <h1 id="eventTitle">Event title</h1>
+                    <button
+                      type="button"
+                      class="event-title-edit-button"
+                      id="eventNameEditButton"
+                      aria-label="Change event name"
+                      title="Change event name"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
+                        <path d="m13.8 7.2 3 3"></path>
+                      </svg>
+                    </button>
+                  </div>
                   <p id="eventDescription">Event description</p>
                 </div>
 
@@ -499,6 +513,18 @@
           <div class="info-card">
             <span>Date</span>
             <strong id="eventDate">-</strong>
+            <button
+              type="button"
+              class="event-location-edit-button event-date-edit-button"
+              id="eventDateEditButton"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3v3M17 3v3M4 9h16"></path>
+                <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+                <path d="m9 15 2 2 4-4"></path>
+              </svg>
+              <span>Change date</span>
+            </button>
           </div>
 
           <div class="info-card">
@@ -2262,6 +2288,79 @@
     ></iframe>
 
     <div
+      class="event-basic-editor-overlay"
+      id="eventBasicEditorModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="eventBasicEditorTitle"
+      aria-hidden="true"
+    >
+      <div class="location-editor-modal event-basic-editor-modal">
+        <button
+          type="button"
+          class="location-editor-close"
+          id="eventBasicEditorClose"
+          aria-label="Close event details editor"
+        >
+          ×
+        </button>
+
+        <div class="location-editor-head">
+          <span>Event details</span>
+          <h2 id="eventBasicEditorTitle">Edit event details</h2>
+          <p>Change the event name or date without changing its code or QR link.</p>
+        </div>
+
+        <form class="location-editor-form" id="eventBasicEditorForm">
+          <div class="event-basic-editor-fields">
+            <label>
+              <span>Event name</span>
+              <input
+                type="text"
+                id="eventBasicEditorName"
+                maxlength="160"
+                autocomplete="off"
+                required
+                placeholder="Event name"
+              />
+            </label>
+
+            <label>
+              <span>Event date</span>
+              <input
+                type="date"
+                id="eventBasicEditorDate"
+              />
+            </label>
+          </div>
+
+          <p
+            class="location-editor-result"
+            id="eventBasicEditorResult"
+            aria-live="polite"
+          ></p>
+
+          <div class="location-editor-actions">
+            <button
+              type="button"
+              class="location-editor-cancel"
+              id="eventBasicEditorCancel"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="location-editor-save"
+              id="eventBasicEditorSave"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
       class="location-editor-overlay"
       id="locationEditorModal"
       role="dialog"
@@ -2689,7 +2788,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-delete-confirm-2"
+      src="js/event-detail.js?v=event-basic-edit-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

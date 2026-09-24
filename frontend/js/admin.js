@@ -1,4 +1,14 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import {
+  getAdminDashboard,
+  getAdminUsers,
+  getAdminEvents,
+  getAdminEvent,
+  createAdminUser,
+  createAdminEventForUser,
+  getAdminLogs,
+  deleteAdminUser,
+} from "./admin-api.js?v=admin-delete-user-1";
 
 const ADMIN_LOGIN_PAGE = "login.html";
 const ADMIN_ACCOUNT_PAGE = "account.html";
@@ -109,45 +119,23 @@ if (adminAvatar) {
 
 
 const state = {
-  users: [
-    {id:1,name:"Melih Gülhan",email:"melih@example.com",phone:"+90 551 000 00 00",plan:"Premium",events:3,storage:"12.8 GB",status:"Active",joined:"22 Sep 2026",verified:true},
-    {id:2,name:"Ayşe Demir",email:"ayse@example.com",phone:"+90 532 000 00 00",plan:"Plus",events:2,storage:"6.4 GB",status:"Active",joined:"20 Sep 2026",verified:true},
-    {id:3,name:"Emre Kaya",email:"emre@example.com",phone:"+90 533 000 00 00",plan:"Free",events:1,storage:"182 MB",status:"Unverified",joined:"19 Sep 2026",verified:false},
-    {id:4,name:"Sude Aydın",email:"sude@example.com",phone:"+90 534 000 00 00",plan:"Mini",events:2,storage:"3.1 GB",status:"Suspended",joined:"14 Sep 2026",verified:true},
-    {id:5,name:"Mert Yılmaz",email:"mert@example.com",phone:"+90 535 000 00 00",plan:"Premium",events:2,storage:"17.6 GB",status:"Active",joined:"11 Sep 2026",verified:true},
-    {id:6,name:"Zeynep Arslan",email:"zeynep@example.com",phone:"+90 536 000 00 00",plan:"Plus",events:1,storage:"5.7 GB",status:"Active",joined:"09 Sep 2026",verified:true}
-  ],
-  events: [
-    {id:1,ownerId:1,name:"Melih & Elif Wedding",createdAt:"2026-09-22T17:42:00+03:00",code:"485291",plan:"Premium",date:"2026-10-12",location:"İstanbul",status:"Active",guests:142,photos:683,videos:37,messages:54,storage:"8.6 GB",approval:"Required",video:"Allowed",archiveUntil:"2027-01-12"},
-    {id:2,ownerId:2,name:"Graduation Party",createdAt:"2026-09-22T14:10:00+03:00",code:"932144",plan:"Plus",date:"2026-10-20",location:"Ankara",status:"Active",guests:86,photos:314,videos:18,messages:31,storage:"3.9 GB",approval:"Required",video:"Allowed",archiveUntil:"2027-01-20"},
-    {id:3,ownerId:3,name:"Birthday Night",createdAt:"2026-08-28T11:20:00+03:00",code:"681205",plan:"Free",date:"2026-09-01",location:"Bursa",status:"Expired",guests:51,photos:81,videos:2,messages:12,storage:"182 MB",approval:"Not required",video:"Disabled",archiveUntil:"2026-12-01"},
-    {id:4,ownerId:1,name:"Company Launch",createdAt:"2026-09-21T19:05:00+03:00",code:"370824",plan:"Plus",date:"2026-11-04",location:"Kütahya",status:"Active",guests:64,photos:205,videos:9,messages:18,storage:"2.4 GB",approval:"Required",video:"Allowed",archiveUntil:"2027-02-04"},
-    {id:5,ownerId:4,name:"Engagement Night",createdAt:"2026-09-18T09:30:00+03:00",code:"514308",plan:"Mini",date:"2026-10-03",location:"Eskişehir",status:"Suspended",guests:71,photos:188,videos:5,messages:22,storage:"1.8 GB",approval:"Required",video:"Allowed",archiveUntil:"2027-01-03"},
-    {id:6,ownerId:5,name:"Mert & Selin Wedding",createdAt:"2026-09-22T18:28:00+03:00",code:"843902",plan:"Premium",date:"2026-10-28",location:"İzmir",status:"Active",guests:211,photos:922,videos:63,messages:87,storage:"14.1 GB",approval:"Required",video:"Allowed",archiveUntil:"2027-01-28"},
-    {id:7,ownerId:6,name:"Design Team Offsite",createdAt:"2026-09-20T16:45:00+03:00",code:"220671",plan:"Plus",date:"2026-11-11",location:"Antalya",status:"Active",guests:46,photos:133,videos:11,messages:16,storage:"2.7 GB",approval:"Not required",video:"Allowed",archiveUntil:"2027-02-11"}
-  ],
-  logs: [
-    {id:"AUD-260922-1742",type:"USER",category:"USER",title:"Changed user package",text:"Ayşe Demir changed from Mini to Plus.",time:"Today, 17:42",timestamp:"2026-09-22T17:42:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"ayse@example.com",targetMeta:"User account",ip:"88.231.42.17",requestId:"req_7fa91c2e",change:"Plan: Mini → Plus"},
-    {id:"AUD-260922-1618",type:"EVENT",category:"EVENT",title:"Created event for user",text:"Company Launch was created for melih@example.com.",time:"Today, 16:18",timestamp:"2026-09-22T16:18:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"#370824",targetMeta:"Company Launch",ip:"88.231.42.17",requestId:"req_b271aa4c",change:"Event created · Owner: melih@example.com · Package: Plus"},
-    {id:"AUD-260922-1433",type:"EVENT",category:"SECURITY",title:"Suspended event",text:"Engagement Night (#514308) was suspended by admin.",time:"Today, 14:33",timestamp:"2026-09-22T14:33:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"#514308",targetMeta:"Engagement Night",ip:"88.231.42.17",requestId:"req_8c102d91",change:"Status: Active → Suspended"},
-    {id:"AUD-260922-1306",type:"USER",category:"STORAGE",title:"Applied storage override",text:"mert@example.com received a temporary 25 GB limit.",time:"Today, 13:06",timestamp:"2026-09-22T13:06:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"mert@example.com",targetMeta:"User account",ip:"88.231.42.17",requestId:"req_91e6a23b",change:"Storage override: 20 GB → 25 GB"},
-    {id:"AUD-260921-2103",type:"USER",category:"SECURITY",title:"User account reactivated",text:"sude@example.com was reactivated after review.",time:"Yesterday, 21:03",timestamp:"2026-09-21T21:03:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"sude@example.com",targetMeta:"User account",ip:"88.231.42.17",requestId:"req_34d11a8f",change:"Status: Suspended → Active"},
-    {id:"AUD-260918-1140",type:"EVENT",category:"EVENT",title:"Extended event archive",text:"Wedding Celebration archive duration was extended.",time:"18 Sep, 11:40",timestamp:"2026-09-18T11:40:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"#485291",targetMeta:"Melih & Elif Wedding",ip:"88.231.42.17",requestId:"req_bf21a4d7",change:"Archive: +90 days"},
-    {id:"AUD-260910-0935",type:"USER",category:"USER",title:"Created user account",text:"A new Plus user account was created manually.",time:"10 Sep, 09:35",timestamp:"2026-09-10T09:35:00+03:00",admin:"melih@snapupevents.com",adminRole:"Super Admin",target:"zeynep@example.com",targetMeta:"User account",ip:"88.231.42.17",requestId:"req_29c147af",change:"Account created · Plan: Plus"}
-  ],
-  currentUserId:null,
-  currentEventId:null,
-  eventPeriod:"all",
-  auditPeriod:"all"
+  users: [],
+  events: [],
+  logs: [],
+  dashboard: null,
+  currentUserId: null,
+  currentEventId: null,
+  eventPeriod: "all",
+  auditPeriod: "all",
 };
 
 const views = {
   dashboard:["Dashboard","Operate and monitor your SnapUp Events platform."],
   analytics:["Analytics","Visualize growth, revenue, storage and usage trends."],
-  users:["Users","Create, inspect and manage customer accounts."],
-  events:["Events","Create and operate events on behalf of customers."],
+  users:["Users","Create and inspect live customer accounts."],
+  events:["Events","Create and inspect events on behalf of customers."],
   storage:["Storage","Track platform usage and custom limits."],
-  logs:["Admin Logs","Review sensitive administrative actions."]
+  logs:["Admin Logs","Review persisted privileged administrative actions."]
 };
 
 const $ = s => document.querySelector(s);
@@ -155,11 +143,22 @@ const $$ = s => [...document.querySelectorAll(s)];
 
 function planClass(plan){ return String(plan).toLowerCase(); }
 function statusClass(status){ return String(status).toLowerCase(); }
-function initials(name){ return name.split(/\s+/).map(x=>x[0]).slice(0,2).join("").toUpperCase(); }
+function initials(name){ return String(name||"").split(/\s+/).filter(Boolean).map(x=>x[0]).slice(0,2).join("").toUpperCase() || "U"; }
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[character]);
+}
+function escapeAttr(value){ return escapeHtml(value); }
 function ownerName(id){ return state.users.find(u=>u.id===id)?.name || "Unknown"; }
 function ownerEmail(id){ return state.users.find(u=>u.id===id)?.email || "-"; }
 function randomCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 function todayLabel(){ return new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric"}).format(new Date()); }
+function formatJoined(value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return "-";
+  return new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric"}).format(d);
+}
 
 function showToast(msg){
   const t=$("#toast"); t.textContent=msg; t.classList.add("show");
@@ -220,16 +219,16 @@ function renderUsers(){
     const status=filter==="all" || u.status===filter;
     return matches && status;
   });
-  $("#usersTableBody").innerHTML=rows.map(u=>`
+  $("#usersTableBody").innerHTML=rows.length ? rows.map(u=>`
     <tr>
-      <td><div class="user-cell"><div class="avatar small">${initials(u.name)}</div><div><b>${u.name}</b><span>${u.email}</span></div></div></td>
-      <td><span class="plan ${planClass(u.plan)}">${u.plan}</span></td>
-      <td>${u.events}</td><td>${u.storage}</td>
-      <td><span class="badge ${statusClass(u.status)}">${u.status}</span></td>
-      <td>${u.joined}</td>
-      <td><button class="open-btn" data-open-user="${u.id}">Manage</button></td>
-    </tr>`).join("");
-  $$("[data-open-user]").forEach(b=>b.onclick=()=>openUser(Number(b.dataset.openUser)));
+      <td><div class="user-cell"><div class="avatar small">${escapeHtml(initials(u.name))}</div><div><b>${escapeHtml(u.name)}</b><span>${escapeHtml(u.email)}</span></div></div></td>
+      <td><span class="plan ${planClass(u.plan)}">${escapeHtml(u.plan)}</span></td>
+      <td>${u.events}</td><td>${escapeHtml(u.storage)}</td>
+      <td><span class="badge ${statusClass(u.status)}">${escapeHtml(u.status)}</span></td>
+      <td>${formatJoined(u.joined_at)}</td>
+      <td><button class="open-btn" data-open-user="${escapeAttr(u.id)}">Manage</button></td>
+    </tr>`).join("") : `<tr><td colspan="7"><div class="event-empty"><strong>No users found</strong><span>Try changing your search or status filter.</span></div></td></tr>`;
+  $$("[data-open-user]").forEach(b=>b.onclick=()=>openUser(b.dataset.openUser));
 }
 
 function parseStorageMb(value){
@@ -251,7 +250,7 @@ function startOfWeek(date){
 function matchesEventPeriod(event,period){
   if(period==="all") return true;
   const created=new Date(event.createdAt || event.date || Date.now());
-  const now=new Date("2026-09-22T19:03:00+03:00");
+  const now=new Date();
   if(period==="day"){
     return created.getFullYear()===now.getFullYear() &&
       created.getMonth()===now.getMonth() &&
@@ -313,48 +312,51 @@ function renderEvents(){
   }
 
   root.innerHTML=events.map((e,i)=>`
-    <div class="event-row" data-open-event="${e.id}">
+    <div class="event-row" data-open-event="${escapeAttr(e.id)}">
       <div class="event-main">
-        <div class="event-list-icon ${i%3===1?"alt1":i%3===2?"alt2":""}">${String(e.name||"E").charAt(0).toUpperCase()}</div>
+        <div class="event-list-icon ${i%3===1?"alt1":i%3===2?"alt2":""}">${escapeHtml(String(e.name||"E").charAt(0).toUpperCase())}</div>
         <div class="event-main-copy">
-          <b>${e.name}</b>
-          <span>#${e.code} · ${e.location || "No location"} · ${e.plan}</span>
+          <b>${escapeHtml(e.name)}</b>
+          <span>#${escapeHtml(e.code)} · ${escapeHtml(e.location || "No location")} · ${escapeHtml(e.plan)}</span>
         </div>
       </div>
       <div class="event-owner-cell">
-        <b>${ownerName(e.ownerId)}</b>
-        <span>${ownerEmail(e.ownerId)}</span>
+        <b>${escapeHtml(ownerName(e.ownerId))}</b>
+        <span>${escapeHtml(ownerEmail(e.ownerId))}</span>
       </div>
       <div class="event-date-cell">${formatCreatedAt(e.createdAt)}</div>
       <div class="event-date-cell">${formatEventDate(e.date)}</div>
       <div class="event-usage">
-        <span><b>${e.guests||0}</b>Guests</span>
-        <span><b>${(e.photos||0)+(e.videos||0)}</b>Media</span>
-        <span><b>${e.storage}</b>Storage</span>
+        <span><b>${e.guests ?? "—"}</b>Guests</span>
+        <span><b>${e.photos == null ? "—" : (e.photos||0)+(e.videos||0)+(e.messages||0)}</b>Media</span>
+        <span><b>${escapeHtml(e.storage)}</b>Storage</span>
       </div>
-      <div><span class="badge ${e.status==="Active"?"active":e.status==="Suspended"?"suspended":"unverified"}">${e.status}</span></div>
-      <div class="event-row-actions"><button class="event-manage-btn" data-event-button="${e.id}" aria-label="Manage event">›</button></div>
+      <div><span class="badge ${e.status==="Active"?"active":"unverified"}">${escapeHtml(e.status)}</span></div>
+      <div class="event-row-actions"><button class="event-manage-btn" data-event-button="${escapeAttr(e.id)}" aria-label="Manage event">›</button></div>
     </div>`).join("");
 
-  $$("[data-open-event]").forEach(row=>row.onclick=()=>openEvent(Number(row.dataset.openEvent)));
-  $$("[data-event-button]").forEach(btn=>btn.onclick=(ev)=>{ev.stopPropagation();openEvent(Number(btn.dataset.eventButton));});
+  $$("[data-open-event]").forEach(row=>row.onclick=()=>openEvent(row.dataset.openEvent));
+  $$("[data-event-button]").forEach(btn=>btn.onclick=(ev)=>{ev.stopPropagation();openEvent(btn.dataset.eventButton);});
 }
 
 function renderRecent(){
-  $("#recentUsers").innerHTML=state.users.slice(0,3).map(u=>`
-    <div class="mini-row"><div class="avatar small">${initials(u.name)}</div><div class="mini-copy"><b>${u.name}</b><span>${u.email} · ${u.plan}</span></div><button class="open-btn" data-recent-user="${u.id}">Manage</button></div>`).join("");
-  $$("[data-recent-user]").forEach(b=>b.onclick=()=>openUser(Number(b.dataset.recentUser)));
+  const recentUsers=state.users.slice(0,3);
+  $("#recentUsers").innerHTML=recentUsers.length ? recentUsers.map(u=>`
+    <div class="mini-row"><div class="avatar small">${escapeHtml(initials(u.name))}</div><div class="mini-copy"><b>${escapeHtml(u.name)}</b><span>${escapeHtml(u.email)} · ${escapeHtml(u.plan)}</span></div><button class="open-btn" data-recent-user="${escapeAttr(u.id)}">Manage</button></div>`).join("") : `<div class="mini-row"><div class="mini-copy"><b>No users yet</b><span>Live data is connected.</span></div></div>`;
+  $$("[data-recent-user]").forEach(b=>b.onclick=()=>openUser(b.dataset.recentUser));
 
-  $("#recentEvents").innerHTML=[...state.events].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,3).map(e=>`
-    <div class="mini-row"><div class="mini-copy"><b>${e.name}</b><span>#${e.code} · ${ownerName(e.ownerId)}</span></div><button class="open-btn" data-recent-event="${e.id}">Manage</button></div>`).join("");
-  $$("[data-recent-event]").forEach(b=>b.onclick=()=>openEvent(Number(b.dataset.recentEvent)));
+  const recentEvents=[...state.events].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,3);
+  $("#recentEvents").innerHTML=recentEvents.length ? recentEvents.map(e=>`
+    <div class="mini-row"><div class="mini-copy"><b>${escapeHtml(e.name)}</b><span>#${escapeHtml(e.code)} · ${escapeHtml(ownerName(e.ownerId))}</span></div><button class="open-btn" data-recent-event="${escapeAttr(e.id)}">Manage</button></div>`).join("") : `<div class="mini-row"><div class="mini-copy"><b>No events yet</b><span>Live data is connected.</span></div></div>`;
+  $$("[data-recent-event]").forEach(b=>b.onclick=()=>openEvent(b.dataset.recentEvent));
 
-  $("#recentLogs").innerHTML=state.logs.slice(0,3).map(l=>`
-    <div class="mini-row"><div class="mini-copy"><b>${l.title}</b><span>${l.time} · ${l.type}</span></div></div>`).join("");
+  const recentLogs=state.logs.slice(0,3);
+  $("#recentLogs").innerHTML=recentLogs.length ? recentLogs.map(log=>`
+    <div class="mini-row"><div class="mini-copy"><b>${escapeHtml(log.title)}</b><span>${escapeHtml(log.text)}</span></div><span class="audit-category ${String(log.category||"USER").toLowerCase()}">${escapeHtml(log.category||"USER")}</span></div>`).join("") : `<div class="mini-row"><div class="mini-copy"><b>No admin actions yet</b><span>Privileged actions will appear here.</span></div></div>`;
 }
 
 function auditNow(){
-  return new Date("2026-09-22T19:40:00+03:00");
+  return new Date();
 }
 
 function auditStartOfWeek(date){
@@ -454,12 +456,12 @@ function renderLogs(){
     return `
       <div class="audit-row">
         <div class="audit-time"><strong>${stamp.date}</strong><span>${stamp.time}</span></div>
-        <div class="audit-admin"><strong>${log.admin || "-"}</strong><span>${log.adminRole || "Admin"}</span></div>
-        <div class="audit-action"><strong>${log.title}</strong><span>${log.text}</span></div>
-        <div class="audit-target"><strong>${log.target || "-"}</strong><span>${log.targetMeta || "-"}</span></div>
-        <div><span class="audit-category ${String(log.category||"USER").toLowerCase()}">${log.category || "USER"}</span></div>
-        <div class="audit-ip">${log.ip || "-"}</div>
-        <div><button class="audit-view-btn" data-audit-id="${log.id}" aria-label="View audit details">›</button></div>
+        <div class="audit-admin"><strong>${escapeHtml(log.admin || "-")}</strong><span>${escapeHtml(log.adminRole || "Admin")}</span></div>
+        <div class="audit-action"><strong>${escapeHtml(log.title)}</strong><span>${escapeHtml(log.text)}</span></div>
+        <div class="audit-target"><strong>${escapeHtml(log.target || "-")}</strong><span>${escapeHtml(log.targetMeta || "-")}</span></div>
+        <div><span class="audit-category ${String(log.category||"USER").toLowerCase()}">${escapeHtml(log.category || "USER")}</span></div>
+        <div class="audit-ip">${escapeHtml(log.ip || "-")}</div>
+        <div><button class="audit-view-btn" data-audit-id="${escapeAttr(log.id)}" aria-label="View audit details">›</button></div>
       </div>`;
   }).join("");
 
@@ -516,18 +518,44 @@ function exportAuditCsv(){
 }
 
 function renderStorage(){
-  const sorted=[...state.users].sort((a,b)=>parseFloat(b.storage)-parseFloat(a.storage));
+  const sorted=[...state.users].sort((a,b)=>(b.storage_bytes||0)-(a.storage_bytes||0));
   $("#storageRanking").innerHTML=sorted.map((u,i)=>`
-    <div class="rank-row"><span class="rank-num">${String(i+1).padStart(2,"0")}</span><div class="rank-copy"><b>${u.name}</b><span>${u.plan} · ${u.events} events</span></div><strong>${u.storage}</strong></div>`).join("");
+    <div class="rank-row"><span class="rank-num">${String(i+1).padStart(2,"0")}</span><div class="rank-copy"><b>${escapeHtml(u.name)}</b><span>${escapeHtml(u.plan)} · ${u.events} events</span></div><strong>${escapeHtml(u.storage)}</strong></div>`).join("");
 }
 
 function refreshCounts(){
-  // Dashboard KPIs represent platform-wide demo totals.
-  // The tables intentionally show a smaller realistic sample dataset.
+  const d=state.dashboard;
+  if(!d) return;
+
+  $("#statUsers").textContent=Number(d.total_users||0).toLocaleString();
+  $("#statEvents").textContent=Number(d.total_events||0).toLocaleString();
+  $("#statStorage").textContent=d.storage_used_display || "0 B";
+  $("#statMedia").textContent=Number(d.total_media||0).toLocaleString();
+
+  $("#statUsersMeta").textContent=`${Number(d.new_users_today||0).toLocaleString()} new today`;
+  $("#statEventsMeta").textContent=`${Number(d.active_events||0).toLocaleString()} currently active`;
+  $("#statStorageMeta").textContent="Cumulative event storage usage";
+  $("#statMediaMeta").textContent=`${Number(d.pending_media||0).toLocaleString()} pending approval`;
+
+  $("#opsNewUsers").textContent=Number(d.new_users_today||0).toLocaleString();
+  $("#opsNewEvents").textContent=Number(d.events_created_today||0).toLocaleString();
+  $("#opsMediaToday").textContent=Number(d.media_uploaded_today||0).toLocaleString();
+  $("#opsPending").textContent=Number(d.pending_media||0).toLocaleString();
+  $("#opsActiveEvents").textContent=Number(d.active_events||0).toLocaleString();
 }
 
 function populateOwnerSelect(selectedId=null){
-  $("#eventOwnerSelect").innerHTML=state.users.map(u=>`<option value="${u.id}" ${u.id===selectedId?"selected":""}>${u.name} — ${u.email}</option>`).join("");
+  const eligibleUsers=state.users.filter(u=>u.active!==false);
+  const select=$("#eventOwnerSelect");
+
+  if(!eligibleUsers.length){
+    select.innerHTML=`<option value="">No active users available</option>`;
+    select.disabled=true;
+    return;
+  }
+
+  select.disabled=false;
+  select.innerHTML=eligibleUsers.map(u=>`<option value="${escapeAttr(u.id)}" ${u.id===selectedId?"selected":""}>${escapeHtml(u.name)} — ${escapeHtml(u.email)}${u.verified?"":" · Unverified"}</option>`).join("");
 }
 
 function openUser(id){
@@ -536,10 +564,18 @@ function openUser(id){
   $("#drawerUserName").textContent=u.name; $("#drawerUserEmail").textContent=u.email; $("#drawerAvatar").textContent=initials(u.name);
   $("#drawerStatus").textContent=u.status; $("#drawerStatus").className=`badge ${statusClass(u.status)}`;
   $("#drawerPlan").textContent=u.plan; $("#drawerPlan").className=`plan ${planClass(u.plan)}`;
-  $("#drawerEventsCount").textContent=u.events; $("#drawerStorage").textContent=u.storage; $("#drawerJoined").textContent=u.joined;
+  $("#drawerEventsCount").textContent=u.events; $("#drawerStorage").textContent=u.storage; $("#drawerJoined").textContent=formatJoined(u.joined_at);
   $("#drawerToggleStatus").textContent=u.status==="Suspended"?"Reactivate User":"Suspend User";
+  const deleteButton=$("#drawerDeleteAccount");
+  if(deleteButton){
+    deleteButton.hidden=!(
+      currentAdmin.user_role==="super_admin" &&
+      u.role==="user" &&
+      u.id!==currentAdmin.user_id
+    );
+  }
   const events=state.events.filter(e=>e.ownerId===id);
-  $("#drawerEventsList").innerHTML=events.length?events.map(e=>`<div class="drawer-event"><b>${e.name}</b><span>#${e.code} · ${e.plan} · ${e.status}</span></div>`).join(""):`<div class="drawer-event"><span>No events yet.</span></div>`;
+  $("#drawerEventsList").innerHTML=events.length?events.map(e=>`<div class="drawer-event"><b>${escapeHtml(e.name)}</b><span>#${e.code} · ${e.plan} · ${escapeHtml(e.status)}</span></div>`).join(""):`<div class="drawer-event"><span>No events yet.</span></div>`;
   $("#userDrawer").classList.add("open"); $("#drawerBackdrop").classList.add("show");
 }
 
@@ -556,6 +592,46 @@ function openCreateEvent(ownerId=null){
   showModal("#createEventModal");
 }
 
+
+async function loadLiveAdminData(){
+  const subtitle=$("#pageSubtitle");
+  if(subtitle) subtitle.textContent="Loading live SnapUp data…";
+
+  try{
+    const [dashboardResponse,usersResponse,eventsResponse,logsResponse]=await Promise.all([
+      getAdminDashboard(),
+      getAdminUsers(),
+      getAdminEvents(),
+      getAdminLogs(),
+    ]);
+
+    state.dashboard=dashboardResponse.dashboard || null;
+    state.users=Array.isArray(usersResponse.users) ? usersResponse.users : [];
+    state.events=Array.isArray(eventsResponse.events) ? eventsResponse.events : [];
+    state.logs=Array.isArray(logsResponse.logs) ? logsResponse.logs : [];
+
+    if(subtitle) subtitle.textContent="Live SnapUp platform data — secure admin operations enabled.";
+  }catch(error){
+    console.error("Live admin data load failed:",error);
+    if(subtitle) subtitle.textContent="Live admin data could not be loaded.";
+    showToast(error.message || "Admin data could not be loaded.");
+  }
+}
+
+function lockRemainingActions(){
+  const ids=[
+    "drawerChangePlan","drawerToggleStatus","drawerStorageOverride",
+    "eventToggleStatus","eventChangePlan","eventExtendArchive","eventChangeOwner"
+  ];
+
+  ids.forEach(id=>{
+    const element=document.getElementById(id);
+    if(!element) return;
+    element.disabled=true;
+    element.title="This admin action will be connected in the next phase.";
+  });
+}
+
 function rerenderAll(){
   renderUsers(); renderEvents(); renderRecent(); renderLogs(); renderStorage(); refreshCounts();
 }
@@ -567,8 +643,19 @@ $("#overlay").onclick=()=>{$("#sidebar").classList.remove("open");$("#overlay").
 $("#themeBtn").onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==="dark"?"light":"dark";localStorage.setItem("snapup-admin-theme",h.dataset.theme)};
 const savedTheme=localStorage.getItem("snapup-admin-theme"); if(savedTheme) document.documentElement.dataset.theme=savedTheme;
 
-["#quickCreateUser","#heroCreateUser","#opCreateUser","#createUserBtn"].forEach(s=>$(s).onclick=()=>showModal("#createUserModal"));
-["#quickCreateEvent","#heroCreateEvent","#opCreateEvent","#createEventBtn"].forEach(s=>$(s).onclick=()=>openCreateEvent());
+["#quickCreateUser","#heroCreateUser","#opCreateUser","#createUserBtn"].forEach(s=>{
+  const el=$(s);
+  if(el) el.onclick=()=>{
+    $("#createUserForm").reset();
+    showModal("#createUserModal");
+  };
+});
+
+["#quickCreateEvent","#heroCreateEvent","#opCreateEvent","#createEventBtn"].forEach(s=>{
+  const el=$(s);
+  if(el) el.onclick=()=>openCreateEvent();
+});
+
 $("#opFindUser").onclick=()=>switchView("users");
 
 $("#closeDrawer").onclick=closeDrawer; $("#drawerBackdrop").onclick=closeDrawer;
@@ -587,66 +674,183 @@ $$("[data-period]").forEach(button=>{
   });
 });
 
+$("#closeEventDrawer").onclick=closeEventDrawer;
+$("#eventDrawerBackdrop").onclick=closeEventDrawer;
 
-$("#auditSearch")?.addEventListener("input",renderLogs);
-$("#auditCategoryFilter")?.addEventListener("change",renderLogs);
-
-$$("[data-audit-period]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    state.auditPeriod=button.dataset.auditPeriod;
-    $$("[data-audit-period]").forEach(b=>b.classList.toggle("active",b===button));
-    $("#auditCustomRange").hidden=state.auditPeriod!=="custom";
-    if(state.auditPeriod!=="custom") renderLogs();
-  });
-});
-
-$("#applyAuditRange")?.addEventListener("click",renderLogs);
-
-
-$("#createUserForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const f=new FormData(e.currentTarget);
-  const user={id:Date.now(),name:f.get("name"),email:f.get("email"),phone:f.get("phone"),plan:f.get("plan"),events:0,storage:"0 MB",status:f.get("status"),joined:todayLabel()};
-  state.users.unshift(user);
-  addLog("USER","Created user account",`${user.name} (${user.email}) was created with ${user.plan} plan.`);
-  e.currentTarget.reset(); closeModals(); rerenderAll(); showToast("User created successfully.");
-  setTimeout(()=>openUser(user.id),250);
-});
-
-$("#createEventForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const f=new FormData(e.currentTarget), ownerId=Number(f.get("owner"));
-  const event={id:Date.now(),ownerId,name:f.get("name"),code:randomCode(),plan:f.get("plan"),date:f.get("date"),createdAt:new Date().toISOString(),location:f.get("location"),status:"Active",guests:0,photos:0,videos:0,messages:0,storage:"0 MB",approval:f.get("approval"),video:f.get("video"),archiveUntil:"3 months after event"};
-  state.events.unshift(event);
-  const u=state.users.find(x=>x.id===ownerId); if(u) u.events+=1;
-  addLog("EVENT","Created event for user",`${event.name} was created for ${ownerEmail(ownerId)} with ${event.plan} package.`);
-  e.currentTarget.reset(); closeModals(); rerenderAll(); showToast(`Event #${event.code} created.`);
-  if(state.currentUserId===ownerId) openUser(ownerId);
-});
-
-$("#drawerCreateEvent").onclick=()=>openCreateEvent(state.currentUserId);
-$("#drawerChangePlan").onclick=()=>{
-  const u=state.users.find(x=>x.id===state.currentUserId); if(!u)return;
-  $("#planSelect").value=u.plan; showModal("#planModal");
+$("#drawerCreateEvent").onclick=()=>{
+  const ownerId=state.currentUserId;
+  closeDrawer();
+  openCreateEvent(ownerId);
 };
-$("#planForm").addEventListener("submit",e=>{
-  e.preventDefault(); const u=state.users.find(x=>x.id===state.currentUserId); if(!u)return;
-  const old=u.plan, next=$("#planSelect").value; u.plan=next;
-  addLog("USER","Changed user package",`${u.email} changed from ${old} to ${next}.`);
-  closeModals(); rerenderAll(); openUser(u.id); showToast("User plan updated.");
-});
-$("#drawerToggleStatus").onclick=()=>{
-  const u=state.users.find(x=>x.id===state.currentUserId); if(!u)return;
-  const old=u.status; u.status=u.status==="Suspended"?"Active":"Suspended";
-  addLog("USER",u.status==="Suspended"?"Suspended user":"Reactivated user",`${u.email} changed from ${old} to ${u.status}.`);
-  rerenderAll(); openUser(u.id); showToast(`User is now ${u.status}.`);
+
+$("#drawerDeleteAccount").onclick=()=>{
+  const user=state.users.find(item=>item.id===state.currentUserId);
+  if(!user) return;
+
+  if(currentAdmin.user_role!=="super_admin" || user.role!=="user"){
+    showToast("Only a super admin can delete customer accounts.");
+    return;
+  }
+
+  $("#deleteUserForm").reset();
+  $("#deleteUserName").textContent=user.name;
+  $("#deleteUserEmail").textContent=user.email;
+  $("#deleteUserEvents").textContent=user.events;
+  $("#deleteUserStorage").textContent=user.storage;
+  showModal("#deleteUserModal");
 };
-$("#drawerStorageOverride").onclick=()=>showModal("#storageModal");
-$("#storageForm").addEventListener("submit",e=>{
-  e.preventDefault(); const u=state.users.find(x=>x.id===state.currentUserId); if(!u)return;
-  const value=$("#storageLimitInput").value, unit=$("#storageUnit").value;
-  addLog("USER","Applied storage override",`${u.email} received a custom storage limit of ${value} ${unit}.`);
-  closeModals(); renderLogs(); renderRecent(); showToast(`Custom storage limit: ${value} ${unit}.`);
+
+
+[
+  "drawerChangePlan","drawerToggleStatus","drawerStorageOverride",
+  "eventToggleStatus","eventChangePlan","eventExtendArchive","eventChangeOwner"
+].forEach(id=>{
+  const element=document.getElementById(id);
+  if(element) element.onclick=()=>showToast("This admin action will be connected in the next phase.");
+});
+
+
+$("#deleteUserForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+
+  const user=state.users.find(item=>item.id===state.currentUserId);
+  if(!user){
+    showToast("Selected user could not be found.");
+    return;
+  }
+
+  const form=event.currentTarget;
+  const fields=new FormData(form);
+  const confirmationEmail=String(fields.get("confirmation_email")||"").trim();
+  const currentPassword=String(fields.get("current_password")||"");
+  const submit=$("#deleteUserSubmit");
+
+  if(confirmationEmail.toLowerCase()!==String(user.email||"").trim().toLowerCase()){
+    showToast("The confirmation email does not match the selected user.");
+    return;
+  }
+
+  if(!currentPassword){
+    showToast("Enter your current super-admin password.");
+    return;
+  }
+
+  submit.disabled=true;
+  const originalText=submit.textContent;
+  submit.textContent="Deleting…";
+
+  try{
+    const result=await deleteAdminUser(user.id,{
+      confirmation_email:confirmationEmail,
+      current_password:currentPassword,
+    });
+
+    form.reset();
+    closeModals();
+    closeDrawer();
+
+    state.currentUserId=null;
+
+    await loadLiveAdminData();
+    rerenderAll();
+    switchView("users");
+
+    const deletedEvents=Number(result.deleted?.events||0);
+    showToast(`Account permanently deleted${deletedEvents ? ` · ${deletedEvents} event${deletedEvents===1?"":"s"} removed` : ""}.`);
+  }catch(error){
+    console.error("Delete admin user failed:",error);
+    showToast(error.message || "User account could not be deleted.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=originalText;
+  }
+});
+
+$("#createUserForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const form=event.currentTarget;
+  const submit=$("#createUserSubmit");
+  const fields=new FormData(form);
+
+  const password=String(fields.get("password")||"");
+  const confirmPassword=String(fields.get("confirm_password")||"");
+
+  if(password!==confirmPassword){
+    showToast("Passwords do not match.");
+    return;
+  }
+
+  if(password.length<6){
+    showToast("Password must be at least 6 characters.");
+    return;
+  }
+
+  submit.disabled=true;
+  const originalText=submit.textContent;
+  submit.textContent="Creating…";
+
+  try{
+    await createAdminUser({
+      name:String(fields.get("name")||"").trim(),
+      email:String(fields.get("email")||"").trim(),
+      phone:String(fields.get("phone")||"").trim() || null,
+      password,
+    });
+
+    closeModals();
+    form.reset();
+    await loadLiveAdminData();
+    rerenderAll();
+    switchView("users");
+
+    showToast("Verified user created successfully.");
+  }catch(error){
+    console.error("Create admin user failed:",error);
+    showToast(error.message || "User could not be created.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=originalText;
+  }
+});
+
+$("#createEventForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const form=event.currentTarget;
+  const submit=$("#createEventSubmit");
+  const fields=new FormData(form);
+  const ownerId=String(fields.get("owner")||"").trim();
+
+  if(!ownerId){
+    showToast("Select an event owner.");
+    return;
+  }
+
+  submit.disabled=true;
+  const originalText=submit.textContent;
+  submit.textContent="Creating…";
+
+  try{
+    await createAdminEventForUser(ownerId,{
+      name:String(fields.get("name")||"").trim(),
+      date:String(fields.get("date")||"").trim(),
+      location:String(fields.get("location")||"").trim() || null,
+      plan:String(fields.get("plan")||"Free").toLowerCase(),
+      approval:String(fields.get("approval")||"Required"),
+    });
+
+    closeModals();
+    form.reset();
+    await loadLiveAdminData();
+    rerenderAll();
+    switchView("events");
+    showToast("Event created for user.");
+  }catch(error){
+    console.error("Create admin event failed:",error);
+    showToast(error.message || "Event could not be created.");
+  }finally{
+    submit.disabled=false;
+    submit.textContent=originalText;
+  }
 });
 
 $("#exportLogsBtn").onclick=exportAuditCsv;
@@ -668,6 +872,8 @@ $("#logoutDemo").onclick=async()=>{
   }
 };
 
+lockRemainingActions();
+await loadLiveAdminData();
 rerenderAll();
 
 
@@ -747,36 +953,55 @@ function renderCharts(){
   renderEventTypes();
 }
 
-renderCharts();
+// Analytics charts stay disabled until the analytics API is connected.
 
 
-function openEvent(id){
+async function openEvent(id){
   state.currentEventId=id;
-  const e=state.events.find(x=>x.id===id); if(!e) return;
-  $("#eventDrawerName").textContent=e.name;
-  $("#eventDrawerCode").textContent=`#${e.code}`;
-  $("#eventDrawerStatus").textContent=e.status;
-  $("#eventDrawerStatus").className=`badge ${e.status==="Active"?"active":e.status==="Suspended"?"suspended":"unverified"}`;
-  $("#eventDrawerPlan").textContent=e.plan;
-  $("#eventDrawerPlan").className=`plan ${planClass(e.plan)}`;
-  $("#eventDrawerGuests").textContent=e.guests;
-  $("#eventDrawerMedia").textContent=(e.photos||0)+(e.videos||0)+(e.messages||0);
-  $("#eventDrawerStorage").textContent=e.storage;
-  $("#eventDrawerOwner").textContent=`${ownerName(e.ownerId)} (${ownerEmail(e.ownerId)})`;
-  $("#eventDrawerDate").textContent=e.date || "-";
-  $("#eventDrawerLocation").textContent=e.location || "-";
-  $("#eventDrawerApproval").textContent=e.approval || "Required";
-  $("#eventDrawerVideo").textContent=e.video || "Allowed";
-  $("#eventToggleStatus").textContent=e.status==="Suspended"?"Reactivate Event":"Suspend Event";
-  const activities=[
-    `${e.photos||0} photos uploaded`,
-    `${e.videos||0} videos uploaded`,
-    `${e.messages||0} guest messages`,
-    `Archive until: ${e.archiveUntil || "Not set"}`
-  ];
-  $("#eventActivityList").innerHTML=activities.map(a=>`<div class="drawer-event"><span>${a}</span></div>`).join("");
+  const cached=state.events.find(x=>x.id===id);
+  if(!cached) return;
+
+  const renderDrawer=(e)=>{
+    $("#eventDrawerName").textContent=e.name;
+    $("#eventDrawerCode").textContent=`#${e.code}`;
+    $("#eventDrawerStatus").textContent=e.status;
+    $("#eventDrawerStatus").className=`badge ${e.status==="Active"?"active":"unverified"}`;
+    $("#eventDrawerPlan").textContent=e.plan;
+    $("#eventDrawerPlan").className=`plan ${planClass(e.plan)}`;
+    $("#eventDrawerGuests").textContent=e.guests ?? "—";
+    $("#eventDrawerMedia").textContent=e.photos == null ? "—" : (e.photos||0)+(e.videos||0)+(e.messages||0);
+    $("#eventDrawerStorage").textContent=e.storage;
+    $("#eventDrawerOwner").textContent=`${e.ownerName || ownerName(e.ownerId)} (${e.ownerEmail || ownerEmail(e.ownerId)})`;
+    $("#eventDrawerDate").textContent=e.date || "-";
+    $("#eventDrawerLocation").textContent=e.location || "-";
+    $("#eventDrawerApproval").textContent=e.approval || "-";
+    $("#eventDrawerVideo").textContent=e.video || "Allowed";
+    $("#eventToggleStatus").textContent=e.status==="Inactive"?"Reactivate Event":"Deactivate Event";
+
+    const activities=[
+      `${e.photos ?? "—"} photos`,
+      `${e.videos ?? "—"} videos`,
+      `${e.messages ?? "—"} messages`,
+      `Created: ${formatCreatedAt(e.createdAt)}`
+    ];
+    $("#eventActivityList").innerHTML=activities.map(a=>`<div class="drawer-event"><span>${escapeHtml(a)}</span></div>`).join("");
+  };
+
+  renderDrawer(cached);
   $("#eventDrawer").classList.add("open");
   $("#eventDrawerBackdrop").classList.add("show");
+
+  try{
+    const data=await getAdminEvent(id);
+    const detail=data.event;
+    const index=state.events.findIndex(x=>x.id===id);
+    if(index>=0) state.events[index]={...state.events[index],...detail};
+    renderDrawer({...cached,...detail});
+    renderEvents();
+  }catch(error){
+    console.error("Admin event detail load failed:",error);
+    showToast("Event usage details could not be loaded.");
+  }
 }
 
 function closeEventDrawer(){

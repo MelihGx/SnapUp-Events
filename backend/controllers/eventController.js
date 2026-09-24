@@ -39,6 +39,36 @@ function cleanOptionalText(value, maxLength) {
   return cleaned ? cleaned.slice(0, maxLength) : null;
 }
 
+function normalizeEditableEventDate(value) {
+  if (value === null || value === undefined || value === "") {
+    return { value: null, error: null };
+  }
+
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return {
+      value: null,
+      error: "Event tarihi YYYY-MM-DD formatında olmalıdır.",
+    };
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return {
+      value: null,
+      error: "Event tarihi geçersiz.",
+    };
+  }
+
+  return { value, error: null };
+}
+
+
 function normalizeEventCoordinates(latitudeValue, longitudeValue) {
   const latitudeMissing =
     latitudeValue === null ||
@@ -750,6 +780,110 @@ const removeEventCover = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Etkinlik fotoğrafı kaldırılamadı.",
+      error: error.message,
+    });
+  }
+};
+
+
+const updateEventBasicInfo = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { eventId } = req.params;
+    const { event_name, eventName, event_date } = req.body || {};
+
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID zorunludur.",
+        code: "EVENT_ID_REQUIRED",
+      });
+    }
+
+    const rawName = event_name ?? eventName;
+    const finalEventName =
+      typeof rawName === "string" ? rawName.trim() : "";
+
+    if (!finalEventName) {
+      return res.status(400).json({
+        success: false,
+        message: "Event adı zorunludur.",
+        code: "EVENT_NAME_REQUIRED",
+      });
+    }
+
+    if (finalEventName.length > 160) {
+      return res.status(400).json({
+        success: false,
+        message: "Event adı en fazla 160 karakter olabilir.",
+        code: "EVENT_NAME_TOO_LONG",
+      });
+    }
+
+    const normalizedDate = normalizeEditableEventDate(event_date);
+
+    if (normalizedDate.error) {
+      return res.status(400).json({
+        success: false,
+        message: normalizedDate.error,
+        code: "INVALID_EVENT_DATE",
+      });
+    }
+
+    const { data: event, error: eventError } = await supabase
+      .from("event")
+      .select("event_id, user_id")
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (eventError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event kontrol edilirken hata oluştu.",
+        error: eventError.message,
+      });
+    }
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Event bulunamadı veya event bilgilerini değiştirme yetkin yok.",
+        code: "EVENT_NOT_FOUND_OR_FORBIDDEN",
+      });
+    }
+
+    // event_slug and event_code deliberately stay unchanged so current
+    // gallery links and QR codes keep working after a rename.
+    const { data: updatedEvent, error: updateError } = await supabase
+      .from("event")
+      .update({
+        event_name: finalEventName,
+        event_date: normalizedDate.value,
+      })
+      .eq("event_id", eventId)
+      .eq("user_id", userId)
+      .select("event_id, event_name, event_date, event_slug, event_code")
+      .single();
+
+    if (updateError || !updatedEvent) {
+      return res.status(500).json({
+        success: false,
+        message: "Event bilgileri güncellenemedi.",
+        error: updateError?.message || "Güncellenen event alınamadı.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Event bilgileri başarıyla güncellendi.",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Event bilgileri güncellenemedi.",
       error: error.message,
     });
   }
@@ -2012,6 +2146,7 @@ module.exports = {
   getEventDetail,
   updateEventCover,
   removeEventCover,
+  updateEventBasicInfo,
   updateEventLocation,
   updateEventSettings,
   deleteEvent,

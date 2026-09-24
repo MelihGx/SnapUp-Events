@@ -103,6 +103,12 @@ const adminLimiter = makeLimiter({
   name: "admin",
 });
 
+const adminWriteLimiter = makeLimiter({
+  windowMs: 15 * 60_000,
+  limit: 30,
+  name: "admin-write",
+});
+
 const archiveDownloadLimiter = makeLimiter({
   windowMs: 60 * 60_000,
   limit: 3,
@@ -123,4 +129,5 @@ module.exports = {
   archiveTicketLimiter,
   archiveDownloadLimiter,
   adminLimiter,
+  adminWriteLimiter,
 };

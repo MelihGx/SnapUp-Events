@@ -28,10 +28,10 @@
 
       <nav class="nav">
         <button class="nav-item active" data-view="dashboard"><span class="icon">⌂</span><span>Dashboard</span></button>
-        <button class="nav-item" data-view="analytics"><span class="icon">⌁</span><span>Analytics</span></button>
+        <button class="nav-item" data-view="analytics" hidden><span class="icon">⌁</span><span>Analytics</span></button>
         <button class="nav-item" data-view="users"><span class="icon">◎</span><span>Users</span></button>
         <button class="nav-item" data-view="events"><span class="icon">◫</span><span>Events</span></button>
-        <button class="nav-item" data-view="storage"><span class="icon">◉</span><span>Storage</span></button>
+        <button class="nav-item" data-view="storage" hidden><span class="icon">◉</span><span>Storage</span></button>
         <button class="nav-item" data-view="logs"><span class="icon">≡</span><span>Admin Logs</span></button>
       </nav>
 
@@ -78,13 +78,13 @@
           </div>
 
           <div class="stats-grid">
-            <article class="stat-card"><span>Total Users</span><strong id="statUsers">1,284</strong><small>+99 this month</small></article>
-            <article class="stat-card"><span>Total Events</span><strong id="statEvents">438</strong><small>76 currently active</small></article>
-            <article class="stat-card"><span>Storage Used</span><strong>184.7 GB</strong><small>68% of allocation</small></article>
-            <article class="stat-card"><span>Revenue</span><strong>₺248K</strong><small>Demo monthly gross</small></article>
+            <article class="stat-card"><span>Total Users</span><strong id="statUsers">—</strong><small id="statUsersMeta">Loading live data…</small></article>
+            <article class="stat-card"><span>Total Events</span><strong id="statEvents">—</strong><small id="statEventsMeta">Loading live data…</small></article>
+            <article class="stat-card"><span>Storage Used</span><strong id="statStorage">—</strong><small id="statStorageMeta">Live cumulative event usage</small></article>
+            <article class="stat-card"><span>Total Media</span><strong id="statMedia">—</strong><small id="statMediaMeta">Photos, videos and messages</small></article>
           </div>
 
-          <div class="chart-grid">
+          <div class="chart-grid" hidden>
             <article class="panel chart-card chart-wide">
               <div class="panel-head">
                 <div><h3>Revenue trend</h3><p>Illustrative monthly gross revenue</p></div>
@@ -103,7 +103,7 @@
             </article>
           </div>
 
-          <div class="chart-grid secondary-charts">
+          <div class="chart-grid secondary-charts" hidden>
             <article class="panel chart-card">
               <div class="panel-head"><div><h3>Daily media uploads</h3><p>Photos and videos uploaded this week</p></div></div>
               <div class="bar-chart" id="mediaBarChart"></div>
@@ -118,11 +118,11 @@
 
 
           <div class="ops-strip">
-            <div><span>New users today</span><strong>18</strong></div>
-            <div><span>Events created today</span><strong>7</strong></div>
-            <div><span>Media uploaded today</span><strong>2,184</strong></div>
-            <div><span>Pending approvals</span><strong>63</strong></div>
-            <div><span>Support actions</span><strong>12</strong></div>
+            <div><span>New users today</span><strong id="opsNewUsers">—</strong></div>
+            <div><span>Events created today</span><strong id="opsNewEvents">—</strong></div>
+            <div><span>Media uploaded today</span><strong id="opsMediaToday">—</strong></div>
+            <div><span>Pending approvals</span><strong id="opsPending">—</strong></div>
+            <div><span>Active events</span><strong id="opsActiveEvents">—</strong></div>
           </div>
 
           <div class="dashboard-grid">
@@ -205,7 +205,7 @@
           <div class="section-actions">
             <div>
               <h2 class="section-title">Users</h2>
-              <p class="section-copy">Create, inspect and manage customer accounts.</p>
+              <p class="section-copy">Live customer accounts from the SnapUp database. New customer creation is enabled.</p>
             </div>
             <button class="primary-btn" id="createUserBtn">+ Create User</button>
           </div>
@@ -222,7 +222,7 @@
             </div>
             <div class="table-scroll">
               <table>
-                <thead><tr><th>User</th><th>Plan</th><th>Events</th><th>Storage</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+                <thead><tr><th>User</th><th>Top Event Plan</th><th>Events</th><th>Storage</th><th>Status</th><th>Joined</th><th></th></tr></thead>
                 <tbody id="usersTableBody"></tbody>
               </table>
             </div>
@@ -233,7 +233,7 @@
           <div class="section-actions">
             <div>
               <h2 class="section-title">Events</h2>
-              <p class="section-copy">Create, filter and manage customer events from one compact list.</p>
+              <p class="section-copy">Live customer events from the SnapUp database. Admin-created customer events are enabled.</p>
             </div>
             <button class="primary-btn" id="createEventBtn">+ Create Event for User</button>
           </div>
@@ -253,8 +253,7 @@
             <select id="eventStatusFilter" class="select-input">
               <option value="all">All status</option>
               <option value="Active">Active</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Expired">Expired</option>
+              <option value="Inactive">Inactive</option>
             </select>
 
             <select id="eventSort" class="select-input">
@@ -411,9 +410,10 @@
       <h3>Admin actions</h3>
       <div class="action-grid">
         <button id="drawerCreateEvent">Create Event</button>
-        <button id="drawerChangePlan">Change Plan</button>
-        <button id="drawerToggleStatus">Suspend User</button>
-        <button id="drawerStorageOverride">Storage Override</button>
+        <button id="drawerChangePlan" disabled>Change Plan</button>
+        <button id="drawerToggleStatus" disabled>Suspend User</button>
+        <button id="drawerStorageOverride" disabled>Storage Override</button>
+        <button id="drawerDeleteAccount" hidden>Delete Account</button>
       </div>
     </div>
 
@@ -461,10 +461,10 @@
     <div class="drawer-section">
       <h3>Event actions</h3>
       <div class="action-grid">
-        <button id="eventToggleStatus">Suspend Event</button>
-        <button id="eventChangePlan">Change Package</button>
-        <button id="eventExtendArchive">Extend Archive</button>
-        <button id="eventChangeOwner">Change Owner</button>
+        <button id="eventToggleStatus" disabled>Suspend Event</button>
+        <button id="eventChangePlan" disabled>Change Package</button>
+        <button id="eventExtendArchive" disabled>Extend Archive</button>
+        <button id="eventChangeOwner" disabled>Change Owner</button>
       </div>
     </div>
 
@@ -483,21 +483,14 @@
     </div>
     <form id="createUserForm">
       <div class="form-grid">
-        <label><span>Full name</span><input required name="name" placeholder="Ayşe Demir" /></label>
-        <label><span>Email</span><input required type="email" name="email" placeholder="ayse@example.com" /></label>
-        <label><span>Phone</span><input name="phone" placeholder="+90 5xx xxx xx xx" /></label>
-        <label><span>Plan</span>
-          <select name="plan"><option>Free</option><option>Mini</option><option>Plus</option><option>Premium</option></select>
-        </label>
-        <label><span>Account status</span>
-          <select name="status"><option>Active</option><option>Unverified</option><option>Suspended</option></select>
-        </label>
-        <label><span>Password setup</span>
-          <select name="passwordMode"><option>Send setup link</option><option>Temporary password</option></select>
-        </label>
+        <label><span>Full name</span><input required name="name" maxlength="100" placeholder="Ayşe Demir" /></label>
+        <label><span>Email</span><input required type="email" name="email" maxlength="254" placeholder="ayse@example.com" /></label>
+        <label class="full-row"><span>Phone</span><input name="phone" maxlength="32" placeholder="+90 5xx xxx xx xx" /></label>
+        <label><span>Password</span><input required type="password" name="password" minlength="6" maxlength="72" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
+        <label><span>Confirm password</span><input required type="password" name="confirm_password" minlength="6" maxlength="72" autocomplete="new-password" placeholder="Repeat password" /></label>
       </div>
-      <div class="form-note">Recommended: send a setup link so the admin never knows the customer's password.</div>
-      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn">Create User</button></div>
+      <div class="form-note">This account will be created active and email-verified. The password is set by the admin and is never written to Admin Logs.</div>
+      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn" id="createUserSubmit">Create Verified User</button></div>
     </form>
   </div>
 
@@ -509,15 +502,14 @@
     <form id="createEventForm">
       <div class="form-grid">
         <label class="full-row"><span>Owner</span><select required name="owner" id="eventOwnerSelect"></select></label>
-        <label><span>Event name</span><input required name="name" placeholder="Wedding Celebration" /></label>
+        <label><span>Event name</span><input required name="name" maxlength="160" placeholder="Wedding Celebration" /></label>
         <label><span>Event date</span><input required type="date" name="date" /></label>
-        <label><span>Location</span><input name="location" placeholder="İstanbul" /></label>
+        <label><span>Location</span><input name="location" maxlength="160" placeholder="İstanbul" /></label>
         <label><span>Package</span><select name="plan"><option>Free</option><option>Mini</option><option>Plus</option><option>Premium</option></select></label>
-        <label><span>Storage limit</span><select name="storage"><option>250 MB</option><option>5 GB</option><option>10 GB</option><option>20 GB</option><option>Custom</option></select></label>
-        <label><span>Approval</span><select name="approval"><option>Required</option><option>Not required</option></select></label>
-        <label><span>Video upload</span><select name="video"><option>Allowed</option><option>Disabled</option></select></label>
+        <label class="full-row"><span>Approval</span><select name="approval"><option>Required</option><option>Not required</option></select></label>
       </div>
-      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn">Create Event</button></div>
+      <div class="form-note">This event is created directly for the selected SnapUp user. Storage limits follow the selected event package.</div>
+      <div class="modal-actions"><button type="button" class="ghost-light-btn" data-close-modal>Cancel</button><button type="submit" class="primary-btn" id="createEventSubmit">Create Event</button></div>
     </form>
   </div>
 
@@ -558,6 +550,58 @@
   </div>
 
 
+  <div class="modal small-modal" id="deleteUserModal">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow dark">Permanent action</span>
+        <h2>Delete User Account</h2>
+      </div>
+      <button class="close-btn" data-close-modal>×</button>
+    </div>
+
+    <form id="deleteUserForm">
+      <div class="form-note">
+        This permanently deletes the customer account, owned events, related guest records and media database records. Media assets are placed into the SnapUp cleanup flow. This action cannot be undone.
+      </div>
+
+      <div class="detail-list">
+        <div><span>User</span><strong id="deleteUserName">-</strong></div>
+        <div><span>Email</span><strong id="deleteUserEmail">-</strong></div>
+        <div><span>Owned events</span><strong id="deleteUserEvents">0</strong></div>
+        <div><span>Storage</span><strong id="deleteUserStorage">0 B</strong></div>
+      </div>
+
+      <label>
+        <span>Type the user's email to confirm</span>
+        <input
+          required
+          type="email"
+          id="deleteUserEmailConfirm"
+          name="confirmation_email"
+          autocomplete="off"
+          placeholder="user@example.com"
+        />
+      </label>
+
+      <label>
+        <span>Your current super-admin password</span>
+        <input
+          required
+          type="password"
+          id="deleteUserAdminPassword"
+          name="current_password"
+          autocomplete="current-password"
+          placeholder="Enter your admin password"
+        />
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-light-btn" data-close-modal>Cancel</button>
+        <button type="submit" class="primary-btn" id="deleteUserSubmit">Permanently Delete Account</button>
+      </div>
+    </form>
+  </div>
+
   <div class="modal small-modal audit-detail-modal" id="auditDetailModal">
     <div class="modal-head">
       <div>
@@ -588,6 +632,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script type="module" src="js/admin.js?v=admin-auth-1"></script>
+  <script type="module" src="js/admin.js?v=admin-delete-user-1"></script>
 </body>
 </html>

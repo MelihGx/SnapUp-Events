@@ -171,6 +171,7 @@ const eventDeleteConfirmName = document.getElementById(
   "eventDeleteConfirmName",
 );
 const eventTitle = document.getElementById("eventTitle");
+const eventNameEditButton = document.getElementById("eventNameEditButton");
 const eventDescription = document.getElementById("eventDescription");
 const eventStatisticsOpen = document.getElementById("eventStatisticsOpen");
 const eventStatisticsModal = document.getElementById("eventStatisticsModal");
@@ -268,7 +269,16 @@ const locationEditorResult = document.getElementById(
   "locationEditorResult",
 );
 const locationEditorSave = document.getElementById("locationEditorSave");
+const eventBasicEditorModal = document.getElementById("eventBasicEditorModal");
+const eventBasicEditorClose = document.getElementById("eventBasicEditorClose");
+const eventBasicEditorCancel = document.getElementById("eventBasicEditorCancel");
+const eventBasicEditorForm = document.getElementById("eventBasicEditorForm");
+const eventBasicEditorName = document.getElementById("eventBasicEditorName");
+const eventBasicEditorDate = document.getElementById("eventBasicEditorDate");
+const eventBasicEditorResult = document.getElementById("eventBasicEditorResult");
+const eventBasicEditorSave = document.getElementById("eventBasicEditorSave");
 const eventDate = document.getElementById("eventDate");
+const eventDateEditButton = document.getElementById("eventDateEditButton");
 const eventTime = document.getElementById("eventTime");
 const eventCreatedAt = document.getElementById("eventCreatedAt");
 const eventStatus = document.getElementById("eventStatus");
@@ -482,6 +492,7 @@ let eventDeleteConfirmResolver = null;
 let eventDeleteConfirmLastFocusedElement = null;
 let locationEditorPicker = null;
 let locationEditorLastFocusedElement = null;
+let eventBasicEditorLastFocusedElement = null;
 let currentEventStatistics = null;
 let eventStatisticsReturnTarget = null;
 let eventStatisticsScrollY = 0;
@@ -3019,6 +3030,82 @@ function closeLocationEditor({ restoreFocus = true } = {}) {
   }
 }
 
+
+function setEventBasicEditorResult(message = "", state = "") {
+  if (!eventBasicEditorResult) return;
+
+  eventBasicEditorResult.textContent = message;
+
+  if (state) {
+    eventBasicEditorResult.dataset.state = state;
+  } else {
+    delete eventBasicEditorResult.dataset.state;
+  }
+}
+
+function openEventBasicEditor(preferredField = "name") {
+  if (!eventBasicEditorModal || !currentEvent) return;
+
+  eventBasicEditorLastFocusedElement = document.activeElement;
+  eventBasicEditorName.value = currentEvent.event_name || "";
+  eventBasicEditorDate.value = currentEvent.event_date || "";
+  setEventBasicEditorResult();
+
+  eventBasicEditorModal.classList.add("active");
+  eventBasicEditorModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("event-basic-editor-open");
+
+  requestAnimationFrame(() => {
+    if (preferredField === "date") {
+      eventBasicEditorDate?.focus();
+    } else {
+      eventBasicEditorName?.focus();
+      eventBasicEditorName?.select?.();
+    }
+  });
+}
+
+function closeEventBasicEditor({ restoreFocus = true } = {}) {
+  if (!eventBasicEditorModal) return;
+
+  eventBasicEditorModal.classList.remove("active");
+  eventBasicEditorModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("event-basic-editor-open");
+  setEventBasicEditorResult();
+
+  if (restoreFocus) {
+    eventBasicEditorLastFocusedElement?.focus?.();
+  }
+}
+
+async function updateCurrentEventBasicInfo(payload) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/events/detail/${eventId}/basic`,
+    {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    },
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    logout();
+    return null;
+  }
+
+  if (!response.ok || !data.success || !data.event) {
+    const error = new Error(
+      data.message || "Event details could not be updated.",
+    );
+    error.serverMessage = data.error || "";
+    throw error;
+  }
+
+  return data.event;
+}
+
 async function updateCurrentEventLocation(payload) {
   const response = await fetch(
     `${API_BASE_URL}/api/events/detail/${eventId}/location`,
@@ -3941,6 +4028,77 @@ eventArchiveForm?.addEventListener("change", () => {
   setEventArchiveStatus();
 });
 
+
+eventNameEditButton?.addEventListener("click", () => {
+  openEventBasicEditor("name");
+});
+
+eventDateEditButton?.addEventListener("click", () => {
+  openEventBasicEditor("date");
+});
+
+eventBasicEditorClose?.addEventListener("click", () => {
+  closeEventBasicEditor();
+});
+
+eventBasicEditorCancel?.addEventListener("click", () => {
+  closeEventBasicEditor();
+});
+
+eventBasicEditorModal?.addEventListener("click", (event) => {
+  if (event.target === eventBasicEditorModal) {
+    closeEventBasicEditor();
+  }
+});
+
+eventBasicEditorForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const nextName = eventBasicEditorName.value.trim();
+  const nextDate = eventBasicEditorDate.value || null;
+
+  if (!nextName) {
+    setEventBasicEditorResult(t("Event name is required."), "error");
+    eventBasicEditorName.focus();
+    return;
+  }
+
+  try {
+    eventBasicEditorSave.disabled = true;
+    eventBasicEditorSave.textContent = t("Saving...");
+    setEventBasicEditorResult();
+
+    const updatedEvent = await updateCurrentEventBasicInfo({
+      event_name: nextName,
+      event_date: nextDate,
+    });
+
+    if (!updatedEvent) return;
+
+    currentEvent = { ...currentEvent, ...updatedEvent };
+    renderEventInfo(currentEvent);
+    setInvitationStudioEvent(currentEvent, getJoinUrl(currentEvent));
+    updateMemoryBookPreview();
+
+    closeEventBasicEditor({ restoreFocus: false });
+    showEventCoverToast(t("Event details updated."));
+
+    if (eventBasicEditorLastFocusedElement === eventDateEditButton) {
+      eventDateEditButton?.focus();
+    } else {
+      eventNameEditButton?.focus();
+    }
+  } catch (error) {
+    setEventBasicEditorResult(
+      t(error.message || "Event details could not be updated."),
+      "error",
+    );
+  } finally {
+    eventBasicEditorSave.disabled = false;
+    eventBasicEditorSave.textContent = t("Save changes");
+  }
+});
+
 eventLocationEditButton?.addEventListener("click", openLocationEditor);
 
 locationEditorClose?.addEventListener("click", () => {
@@ -4506,6 +4664,14 @@ window.addEventListener("keydown", (event) => {
   if (mediaDeleteConfirmModal?.classList.contains("active")) {
     if (event.key === "Escape") {
       closeMediaDeleteConfirmDialog(false);
+    }
+
+    return;
+  }
+
+  if (eventBasicEditorModal?.classList.contains("active")) {
+    if (event.key === "Escape") {
+      closeEventBasicEditor();
     }
 
     return;
