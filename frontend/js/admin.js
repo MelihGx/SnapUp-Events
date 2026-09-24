@@ -1,6 +1,7 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import {
   getAdminDashboard,
+  getAdminAnalytics,
   getAdminUsers,
   getAdminEvents,
   getAdminEvent,
@@ -8,7 +9,7 @@ import {
   createAdminEventForUser,
   getAdminLogs,
   deleteAdminUser,
-} from "./admin-api.js?v=admin-delete-user-1";
+} from "./admin-api.js?v=admin-live-clean-2";
 
 const ADMIN_LOGIN_PAGE = "login.html";
 const ADMIN_ACCOUNT_PAGE = "account.html";
@@ -123,6 +124,9 @@ const state = {
   events: [],
   logs: [],
   dashboard: null,
+  analytics: null,
+  analyticsDays: 30,
+  analyticsLoading: false,
   currentUserId: null,
   currentEventId: null,
   eventPeriod: "all",
@@ -131,10 +135,9 @@ const state = {
 
 const views = {
   dashboard:["Dashboard","Operate and monitor your SnapUp Events platform."],
-  analytics:["Analytics","Visualize growth, revenue, storage and usage trends."],
+  analytics:["Analytics","Live growth, media, package and storage analytics."],
   users:["Users","Create and inspect live customer accounts."],
   events:["Events","Create and inspect events on behalf of customers."],
-  storage:["Storage","Track platform usage and custom limits."],
   logs:["Admin Logs","Review persisted privileged administrative actions."]
 };
 
@@ -152,7 +155,6 @@ function escapeHtml(value){
 function escapeAttr(value){ return escapeHtml(value); }
 function ownerName(id){ return state.users.find(u=>u.id===id)?.name || "Unknown"; }
 function ownerEmail(id){ return state.users.find(u=>u.id===id)?.email || "-"; }
-function randomCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 function todayLabel(){ return new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"short",year:"numeric"}).format(new Date()); }
 function formatJoined(value){
   const d=new Date(value);
@@ -165,41 +167,6 @@ function showToast(msg){
   clearTimeout(showToast.timer); showToast.timer=setTimeout(()=>t.classList.remove("show"),2200);
 }
 
-function inferAuditCategory(type,title=""){
-  const value=String(title).toLowerCase();
-  if(value.includes("storage")) return "STORAGE";
-  if(value.includes("suspend") || value.includes("reactivat")) return "SECURITY";
-  return type==="EVENT" ? "EVENT" : "USER";
-}
-
-function inferAuditTarget(text=""){
-  const code=String(text).match(/#\d{6}/)?.[0];
-  if(code) return code;
-  const email=String(text).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
-  return email || "Platform";
-}
-
-function addLog(type,title,text){
-  const now=new Date();
-  state.logs.unshift({
-    id:`AUD-${now.getTime()}`,
-    type,
-    category:inferAuditCategory(type,title),
-    title,
-    text,
-    time:"Just now",
-    timestamp:now.toISOString(),
-    admin:currentAdmin.user_mail,
-    adminRole:currentAdmin.user_role === "super_admin" ? "Super Admin" : "Admin",
-    target:inferAuditTarget(text),
-    targetMeta:type==="EVENT" ? "Event" : "User account",
-    ip:"127.0.0.1",
-    requestId:`req_${Math.random().toString(16).slice(2,10)}`,
-    change:text
-  });
-  renderLogs();
-  renderRecent();
-}
 
 function switchView(name){
   $$(".view").forEach(v=>v.classList.remove("active"));
@@ -208,7 +175,11 @@ function switchView(name){
   $("#pageTitle").textContent=views[name][0];
   $("#pageSubtitle").textContent=views[name][1];
   $("#sidebar").classList.remove("open"); $("#overlay").classList.remove("show");
-  window.scrollTo({top:0,behavior:"smooth"}); if(typeof renderCharts==="function") setTimeout(renderCharts,0);
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  if(name==="analytics"){
+    loadAnalytics(state.analyticsDays);
+  }
 }
 
 function renderUsers(){
@@ -353,6 +324,23 @@ function renderRecent(){
   const recentLogs=state.logs.slice(0,3);
   $("#recentLogs").innerHTML=recentLogs.length ? recentLogs.map(log=>`
     <div class="mini-row"><div class="mini-copy"><b>${escapeHtml(log.title)}</b><span>${escapeHtml(log.text)}</span></div><span class="audit-category ${String(log.category||"USER").toLowerCase()}">${escapeHtml(log.category||"USER")}</span></div>`).join("") : `<div class="mini-row"><div class="mini-copy"><b>No admin actions yet</b><span>Privileged actions will appear here.</span></div></div>`;
+}
+
+
+function initializeAuditDateRange(){
+  const from=$("#auditDateFrom");
+  const to=$("#auditDateTo");
+  if(!from || !to) return;
+
+  const now=new Date();
+  const start=new Date(now);
+  start.setDate(start.getDate()-30);
+
+  const toIso=now.toISOString().slice(0,10);
+  const fromIso=start.toISOString().slice(0,10);
+
+  if(!from.value) from.value=fromIso;
+  if(!to.value) to.value=toIso;
 }
 
 function auditNow(){
@@ -517,11 +505,6 @@ function exportAuditCsv(){
   showToast(`${rows.length} audit records exported.`);
 }
 
-function renderStorage(){
-  const sorted=[...state.users].sort((a,b)=>(b.storage_bytes||0)-(a.storage_bytes||0));
-  $("#storageRanking").innerHTML=sorted.map((u,i)=>`
-    <div class="rank-row"><span class="rank-num">${String(i+1).padStart(2,"0")}</span><div class="rank-copy"><b>${escapeHtml(u.name)}</b><span>${escapeHtml(u.plan)} · ${u.events} events</span></div><strong>${escapeHtml(u.storage)}</strong></div>`).join("");
-}
 
 function refreshCounts(){
   const d=state.dashboard;
@@ -633,7 +616,7 @@ function lockRemainingActions(){
 }
 
 function rerenderAll(){
-  renderUsers(); renderEvents(); renderRecent(); renderLogs(); renderStorage(); refreshCounts();
+  renderUsers(); renderEvents(); renderRecent(); renderLogs(); refreshCounts();
 }
 
 $$(".nav-item").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
@@ -872,88 +855,267 @@ $("#logoutDemo").onclick=async()=>{
   }
 };
 
+initializeAuditDateRange();
 lockRemainingActions();
 await loadLiveAdminData();
 rerenderAll();
 
 
-const demoCharts = {
-  revenue: [142,156,171,168,194,209,221,248],
-  users: [910,955,1004,1060,1118,1172,1225,1284],
-  eventGrowth: [280,301,325,344,369,392,415,438],
-  storageGrowth: [119,128,139,147,158,169,177,184.7],
-  media: [
-    {label:"Mon",photo:610,video:94},{label:"Tue",photo:720,video:121},{label:"Wed",photo:660,video:102},
-    {label:"Thu",photo:840,video:148},{label:"Fri",photo:910,video:167},{label:"Sat",photo:1080,video:204},{label:"Sun",photo:930,video:181}
-  ],
-  eventsByWeek:[31,38,35,44,48,52,61,67]
-};
 
-function svgLineChart(targetId, series, labels, secondary=null, opts={}){
-  const root=document.getElementById(targetId); if(!root) return;
-  const width=760,height=250,padL=42,padR=16,padT=18,padB=34;
-  const all=secondary?[...series,...secondary]:series;
-  const min=opts.zero?0:Math.min(...all)*0.88, max=Math.max(...all)*1.06;
-  const x=i=>padL+(i*(width-padL-padR)/(series.length-1));
-  const y=v=>padT+(max-v)*(height-padT-padB)/(max-min || 1);
-  const path=arr=>arr.map((v,i)=>`${i?"L":"M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
-  const area=`${path(series)} L ${x(series.length-1)} ${height-padB} L ${x(0)} ${height-padB} Z`;
-  const grid=[0,.25,.5,.75,1].map(t=>{
-    const yy=padT+t*(height-padT-padB);
-    const val=max-t*(max-min);
-    return `<line class="chart-gridline" x1="${padL}" x2="${width-padR}" y1="${yy}" y2="${yy}"/><text class="chart-axis-label" x="2" y="${yy+3}">${Math.round(val)}</text>`;
-  }).join("");
-  const xlabels=labels.map((l,i)=>`<text class="chart-axis-label" text-anchor="middle" x="${x(i)}" y="${height-9}">${l}</text>`).join("");
-  const pts=series.map((v,i)=>`<circle class="chart-point-primary" cx="${x(i)}" cy="${y(v)}" r="4"><title>${labels[i]}: ${v}</title></circle>`).join("");
-  const secondaryMarkup=secondary?`<path class="chart-path-secondary" d="${path(secondary)}"/>${secondary.map((v,i)=>`<circle class="chart-point-secondary" cx="${x(i)}" cy="${y(v)}" r="3.5"><title>${labels[i]}: ${v}</title></circle>`).join("")}`:"";
-  root.innerHTML=`<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><defs><linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6d5dfc" stop-opacity=".28"/><stop offset="100%" stop-color="#6d5dfc" stop-opacity="0"/></linearGradient></defs>${grid}<path class="chart-area" d="${area}"/><path class="chart-path-primary" d="${path(series)}"/>${secondaryMarkup}${pts}${xlabels}</svg>`;
+function analyticsNumber(value){
+  return Number(value||0).toLocaleString();
 }
 
-function renderBarChart(targetId,data,mode="media"){
-  const root=document.getElementById(targetId); if(!root) return;
-  const max=mode==="media"?Math.max(...data.flatMap(d=>[d.photo,d.video])):Math.max(...data);
-  if(mode==="media"){
-    root.innerHTML=data.map(d=>`<div class="bar-group"><span class="bar-tooltip">${d.photo+d.video}</span><div class="bar-stack"><div class="bar video" style="height:${(d.video/max)*100}%"><title>Videos: ${d.video}</title></div><div class="bar photo" style="height:${(d.photo/max)*100}%"><title>Photos: ${d.photo}</title></div></div><label>${d.label}</label></div>`).join("");
-  } else {
-    const labels=["W1","W2","W3","W4","W5","W6","W7","W8"];
-    root.innerHTML=data.map((v,i)=>`<div class="bar-group"><span class="bar-tooltip">${v}</span><div class="bar-stack"><div class="bar eventbar" style="height:${(v/max)*100}%"></div></div><label>${labels[i]}</label></div>`).join("");
+function analyticsPercent(value){
+  return `${Number(value||0).toFixed(1)}%`;
+}
+
+function chartEmpty(root,message){
+  if(!root) return;
+  root.innerHTML=`<div class="event-empty"><strong>No data yet</strong><span>${escapeHtml(message)}</span></div>`;
+}
+
+function analyticsLineChart(targetId,primary,secondary,labels){
+  const root=document.getElementById(targetId);
+  if(!root) return;
+
+  if(!labels.length){
+    chartEmpty(root,"No growth data exists for this period.");
+    return;
+  }
+
+  const width=760,height=250,padL=44,padR=16,padT=18,padB=38;
+  const max=Math.max(1,...primary,...secondary);
+  const x=i=>{
+    if(labels.length===1) return (padL+width-padR)/2;
+    return padL+(i*(width-padL-padR)/(labels.length-1));
+  };
+  const y=v=>padT+(max-v)*(height-padT-padB)/max;
+  const path=arr=>arr.map((v,i)=>`${i?"L":"M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+
+  const grid=[0,.25,.5,.75,1].map(t=>{
+    const yy=padT+t*(height-padT-padB);
+    const val=Math.round(max*(1-t));
+    return `<line class="chart-gridline" x1="${padL}" x2="${width-padR}" y1="${yy}" y2="${yy}"/><text class="chart-axis-label" x="2" y="${yy+3}">${val}</text>`;
+  }).join("");
+
+  const labelStep=Math.max(1,Math.ceil(labels.length/8));
+  const xlabels=labels.map((label,index)=>{
+    if(index%labelStep!==0 && index!==labels.length-1) return "";
+    return `<text class="chart-axis-label" text-anchor="middle" x="${x(index)}" y="${height-9}">${escapeHtml(label)}</text>`;
+  }).join("");
+
+  root.innerHTML=`
+    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      ${grid}
+      <path class="chart-path-primary" d="${path(primary)}"/>
+      <path class="chart-path-secondary" d="${path(secondary)}"/>
+      ${primary.map((value,index)=>`<circle class="chart-point-primary" cx="${x(index)}" cy="${y(value)}" r="4"><title>${escapeHtml(labels[index])} · Users: ${value}</title></circle>`).join("")}
+      ${secondary.map((value,index)=>`<circle class="chart-point-secondary" cx="${x(index)}" cy="${y(value)}" r="3.5"><title>${escapeHtml(labels[index])} · Events: ${value}</title></circle>`).join("")}
+      ${xlabels}
+    </svg>`;
+}
+
+function analyticsMediaBars(targetId,timeline){
+  const root=document.getElementById(targetId);
+  if(!root) return;
+
+  if(!timeline.length){
+    chartEmpty(root,"No media was uploaded in this period.");
+    return;
+  }
+
+  const totals=timeline.map(item=>
+    Number(item.images||0)+Number(item.videos||0)+Number(item.messages||0)
+  );
+  const max=Math.max(1,...totals);
+  const labelStep=Math.max(1,Math.ceil(timeline.length/8));
+
+  root.innerHTML=timeline.map((item,index)=>{
+    const images=Number(item.images||0);
+    const videos=Number(item.videos||0);
+    const messages=Number(item.messages||0);
+    const total=images+videos+messages;
+
+    const imageHeight=(images/max)*100;
+    const videoHeight=(videos/max)*100;
+    const messageHeight=(messages/max)*100;
+    const label=(index%labelStep===0 || index===timeline.length-1)
+      ? escapeHtml(item.label)
+      : "";
+
+    return `<div class="bar-group">
+      <span class="bar-tooltip">${total}</span>
+      <div class="bar-stack">
+        <div class="bar" style="height:${messageHeight}%;background:#f59e0b"><title>Messages: ${messages}</title></div>
+        <div class="bar video" style="height:${videoHeight}%"><title>Videos: ${videos}</title></div>
+        <div class="bar photo" style="height:${imageHeight}%"><title>Images: ${images}</title></div>
+      </div>
+      <label>${label}</label>
+    </div>`;
+  }).join("");
+}
+
+function analyticsPackageDonut(mix){
+  const donut=$("#analyticsPackageDonut");
+  const legend=$("#analyticsPackageLegend");
+  if(!donut || !legend) return;
+
+  const values=[
+    {key:"premium",label:"Premium",value:Number(mix?.premium||0),color:"#6d5dfc"},
+    {key:"plus",label:"Plus",value:Number(mix?.plus||0),color:"#2563eb"},
+    {key:"mini",label:"Mini",value:Number(mix?.mini||0),color:"#f59e0b"},
+    {key:"free",label:"Free",value:Number(mix?.free||0),color:"#94a3b8"},
+  ];
+
+  const total=values.reduce((sum,item)=>sum+item.value,0);
+  $("#analyticsPackageTotal").textContent=analyticsNumber(total);
+
+  if(!total){
+    donut.style.background="conic-gradient(#e5e7eb 0 100%)";
+    legend.innerHTML=`<div class="legend-row"><span>No events yet</span></div>`;
+    return;
+  }
+
+  let cursor=0;
+  const stops=values.map(item=>{
+    const start=cursor;
+    cursor+=(item.value/total)*100;
+    return `${item.color} ${start.toFixed(2)}% ${cursor.toFixed(2)}%`;
+  });
+
+  donut.style.background=`conic-gradient(${stops.join(",")})`;
+  legend.innerHTML=values.map(item=>{
+    const percent=((item.value/total)*100).toFixed(1);
+    return `<div class="legend-row"><i style="background:${item.color}"></i><span>${escapeHtml(item.label)}</span><b>${item.value} · ${percent}%</b></div>`;
+  }).join("");
+}
+
+function analyticsTopStorage(events){
+  const root=$("#analyticsTopStorageBars");
+  if(!root) return;
+
+  if(!events?.length){
+    chartEmpty(root,"No event storage has been consumed yet.");
+    return;
+  }
+
+  const max=Math.max(1,...events.map(item=>Number(item.storage_bytes||0)));
+
+  root.innerHTML=events.map(item=>{
+    const value=Number(item.storage_bytes||0);
+    const width=Math.max(value>0?2:0,(value/max)*100);
+
+    return `<div class="hbar-row">
+      <span title="${escapeAttr(item.event_name)}">#${escapeHtml(item.event_code||"—")}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${width}%"></div></div>
+      <b title="${escapeAttr(item.event_name)}">${escapeHtml(item.storage_display||"0 B")}</b>
+    </div>`;
+  }).join("");
+}
+
+
+function formatAnalyticsGeneratedAt(value){
+  const date=new Date(value);
+  if(Number.isNaN(date.getTime())) return "Live database";
+
+  return `Live database · updated ${new Intl.DateTimeFormat("en-GB",{
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+  }).format(date)}`;
+}
+
+function renderAnalytics(){
+  const analytics=state.analytics;
+  if(!analytics) return;
+
+  const kpis=analytics.kpis || {};
+  const timeline=Array.isArray(analytics.timeline) ? analytics.timeline : [];
+
+  const liveStatus=$("#analyticsLiveStatus");
+  if(liveStatus){
+    liveStatus.textContent=formatAnalyticsGeneratedAt(analytics.generated_at);
+  }
+
+  $("#analyticsNewUsers").textContent=analyticsNumber(kpis.new_users);
+  $("#analyticsNewEvents").textContent=analyticsNumber(kpis.new_events);
+  $("#analyticsMediaUploads").textContent=analyticsNumber(kpis.media_uploads);
+  $("#analyticsAvgStorage").textContent=
+    kpis.average_storage_per_active_event_display || "0 B";
+
+  $("#analyticsNewUsersMeta").textContent=`Last ${analytics.period_days} days`;
+  $("#analyticsNewEventsMeta").textContent=
+    `${analyticsNumber(kpis.active_events)} active events now`;
+  $("#analyticsMediaUploadsMeta").textContent=
+    `${analyticsNumber(analytics.media_by_type?.image)} images · ${analyticsNumber(analytics.media_by_type?.video)} videos · ${analyticsNumber(analytics.media_by_type?.message)} messages`;
+  $("#analyticsAvgStorageMeta").textContent=
+    `${kpis.total_storage_display || "0 B"} total consumed`;
+
+  $("#analyticsGrowthSubtitle").textContent=
+    `New users and events created · last ${analytics.period_days} days`;
+  $("#analyticsMediaSubtitle").textContent=
+    `Images, videos and messages · last ${analytics.period_days} days`;
+  $("#analyticsPackageSubtitle").textContent=
+    `${analyticsPercent(kpis.paid_event_share)} of events are on paid packages`;
+  $("#analyticsStorageSubtitle").textContent=
+    `${kpis.total_storage_display || "0 B"} total cumulative event storage`;
+
+  analyticsLineChart(
+    "analyticsGrowthChart",
+    timeline.map(item=>Number(item.users||0)),
+    timeline.map(item=>Number(item.events||0)),
+    timeline.map(item=>item.label),
+  );
+
+  analyticsMediaBars("analyticsMediaChart",timeline);
+  analyticsPackageDonut(analytics.package_mix || {});
+  analyticsTopStorage(analytics.top_storage_events || []);
+}
+
+async function loadAnalytics(days=30){
+  const normalized=[7,30,90,365].includes(Number(days))
+    ? Number(days)
+    : 30;
+
+  state.analyticsDays=normalized;
+
+  if(state.analyticsLoading) return;
+  state.analyticsLoading=true;
+
+  const liveStatus=$("#analyticsLiveStatus");
+  if(liveStatus) liveStatus.textContent="Live database · loading…";
+
+  const select=$("#analyticsPeriod");
+  if(select) select.value=String(normalized);
+
+  ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars"].forEach(id=>{
+    const root=document.getElementById(id);
+    if(root) root.innerHTML=`<div class="event-empty"><strong>Loading analytics…</strong><span>Reading live SnapUp data.</span></div>`;
+  });
+
+  try{
+    const response=await getAdminAnalytics(normalized);
+    state.analytics=response.analytics || null;
+    renderAnalytics();
+  }catch(error){
+    console.error("Admin analytics load failed:",error);
+    state.analytics=null;
+    const liveStatus=$("#analyticsLiveStatus");
+    if(liveStatus) liveStatus.textContent="Live database · load failed";
+    ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars"].forEach(id=>{
+      chartEmpty(document.getElementById(id),"Analytics data could not be loaded.");
+    });
+    showToast(error.message || "Analytics data could not be loaded.");
+  }finally{
+    state.analyticsLoading=false;
   }
 }
 
-function setLegend(targetId,items){
-  const root=document.getElementById(targetId); if(!root) return;
-  root.innerHTML=items.map((x,i)=>`<div class="legend-row"><i style="background:${x.color}"></i><span>${x.label}</span><b>${x.value}</b></div>`).join("");
-}
+$("#analyticsPeriod")?.addEventListener("change",event=>{
+  loadAnalytics(Number(event.currentTarget.value));
+});
 
-function renderEventTypes(){
-  const root=document.getElementById("eventTypeBars"); if(!root) return;
-  const rows=[["Wedding",38],["Birthday",24],["Graduation",17],["Corporate",13],["Other",8]];
-  root.innerHTML=rows.map(([name,val])=>`<div class="hbar-row"><span>${name}</span><div class="hbar-track"><div class="hbar-fill" style="width:${val}%"></div></div><b>${val}%</b></div>`).join("");
-}
-
-function renderCharts(){
-  const months=["Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
-  const weeks=["W1","W2","W3","W4","W5","W6","W7","W8"];
-  svgLineChart("revenueChart",demoCharts.revenue,months);
-  svgLineChart("growthChart",demoCharts.users,weeks,demoCharts.eventGrowth);
-  svgLineChart("analyticsRevenueChart",demoCharts.revenue,months,demoCharts.users);
-  svgLineChart("storageGrowthChart",demoCharts.storageGrowth,weeks);
-  renderBarChart("mediaBarChart",demoCharts.media,"media");
-  renderBarChart("eventsBarChart",demoCharts.eventsByWeek,"events");
-  setLegend("planLegend",[
-    {label:"Premium",value:"40%",color:"#6d5dfc"},{label:"Plus",value:"28%",color:"#2563eb"},
-    {label:"Mini",value:"18%",color:"#f59e0b"},{label:"Free",value:"14%",color:"#94a3b8"}
-  ]);
-  const storageLegend=[
-    {label:"Images",value:"102 GB",color:"#6d5dfc"},
-    {label:"Videos",value:"81 GB",color:"#14b8a6"},
-    {label:"Other",value:"1.7 GB",color:"#f59e0b"}
-  ];
-  setLegend("storageLegend",storageLegend); setLegend("storagePageLegend",storageLegend);
-  renderEventTypes();
-}
-
-// Analytics charts stay disabled until the analytics API is connected.
 
 
 async function openEvent(id){

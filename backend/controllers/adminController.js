@@ -286,6 +286,111 @@ async function exactCount(table, configure = (query) => query) {
   return Number(count) || 0;
 }
 
+
+const ANALYTICS_PERIODS = new Set([7, 30, 90, 365]);
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function normalizeAnalyticsDays(value) {
+  const days = Number(value);
+  return ANALYTICS_PERIODS.has(days) ? days : 30;
+}
+
+function analyticsBucketDays(days) {
+  if (days <= 7) return 1;
+  if (days <= 30) return 3;
+  if (days <= 90) return 7;
+  return 30;
+}
+
+function analyticsStartDate(days, now = new Date()) {
+  const start = new Date(now);
+  start.setUTCHours(0, 0, 0, 0);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  return start;
+}
+
+function formatBucketLabel(date) {
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+function buildAnalyticsTimeline({
+  days,
+  start,
+  users = [],
+  events = [],
+  media = [],
+}) {
+  const bucketDays = analyticsBucketDays(days);
+  const bucketCount = Math.ceil(days / bucketDays);
+  const buckets = Array.from({ length: bucketCount }, (_, index) => {
+    const bucketStart = new Date(
+      start.getTime() + index * bucketDays * DAY_MS,
+    );
+
+    return {
+      label: formatBucketLabel(bucketStart),
+      users: 0,
+      events: 0,
+      images: 0,
+      videos: 0,
+      messages: 0,
+    };
+  });
+
+  const addRow = (value, field) => {
+    const timestamp = Date.parse(String(value || ""));
+    if (!Number.isFinite(timestamp) || timestamp < start.getTime()) return;
+
+    const index = Math.floor(
+      (timestamp - start.getTime()) / (bucketDays * DAY_MS),
+    );
+
+    if (index < 0 || index >= buckets.length) return;
+    buckets[index][field] += 1;
+  };
+
+  users.forEach((row) => addRow(row.user_created_at, "users"));
+  events.forEach((row) => addRow(row.event_created_at, "events"));
+
+  media.forEach((row) => {
+    const type = String(row.media_type || "").toLowerCase();
+
+    if (type === "image") {
+      addRow(row.media_created_at, "images");
+    } else if (type === "video") {
+      addRow(row.media_created_at, "videos");
+    } else if (type === "message") {
+      addRow(row.media_created_at, "messages");
+    }
+  });
+
+  return buckets;
+}
+
+function analyticsPackageMix(events = []) {
+  const mix = {
+    free: 0,
+    mini: 0,
+    plus: 0,
+    premium: 0,
+  };
+
+  events.forEach((event) => {
+    const key = String(event.package_key || "free").toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(mix, key)) {
+      mix[key] += 1;
+    } else {
+      mix.free += 1;
+    }
+  });
+
+  return mix;
+}
+
 const getAdminMe = async (req, res) => {
   return res.status(200).json({
     success: true,
@@ -611,6 +716,161 @@ const getAdminEvent = async (req, res) => {
   }
 };
 
+
+
+const getAdminAnalytics = async (req, res) => {
+  try {
+    const days = normalizeAnalyticsDays(req.query.days);
+    const now = new Date();
+    const start = analyticsStartDate(days, now);
+    const startIso = start.toISOString();
+
+    const [
+      periodUsers,
+      periodEvents,
+      periodMedia,
+      allEvents,
+    ] = await Promise.all([
+      loadAllRows(() =>
+        supabase
+          .from("users")
+          .select("user_id, user_created_at")
+          .gte("user_created_at", startIso)
+          .order("user_created_at", { ascending: true }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("event")
+          .select("event_id, event_created_at")
+          .gte("event_created_at", startIso)
+          .order("event_created_at", { ascending: true }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("media")
+          .select(
+            "media_id, event_id, media_type, media_status, media_created_at",
+          )
+          .gte("media_created_at", startIso)
+          .in("media_type", ["image", "video", "message"])
+          .order("media_created_at", { ascending: true }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("event")
+          .select(
+            "event_id, event_name, event_code, package_key, is_event_active, storage_consumed_bytes",
+          )
+          .order("event_created_at", { ascending: false }),
+      ),
+    ]);
+
+    const timeline = buildAnalyticsTimeline({
+      days,
+      start,
+      users: periodUsers,
+      events: periodEvents,
+      media: periodMedia,
+    });
+
+    const activeEvents = allEvents.filter(
+      (event) => event.is_event_active !== false,
+    );
+    const inactiveEvents = allEvents.length - activeEvents.length;
+
+    const totalStorageBytes = allEvents.reduce(
+      (sum, event) =>
+        sum + Math.max(0, Number(event.storage_consumed_bytes) || 0),
+      0,
+    );
+
+    const activeStorageBytes = activeEvents.reduce(
+      (sum, event) =>
+        sum + Math.max(0, Number(event.storage_consumed_bytes) || 0),
+      0,
+    );
+
+    const averageStoragePerActiveEventBytes = activeEvents.length
+      ? Math.round(activeStorageBytes / activeEvents.length)
+      : 0;
+
+    const packageMix = analyticsPackageMix(allEvents);
+    const paidEvents =
+      packageMix.mini + packageMix.plus + packageMix.premium;
+    const paidEventShare = allEvents.length
+      ? Number(((paidEvents / allEvents.length) * 100).toFixed(1))
+      : 0;
+
+    const mediaByType = {
+      image: 0,
+      video: 0,
+      message: 0,
+    };
+
+    periodMedia.forEach((item) => {
+      const type = String(item.media_type || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(mediaByType, type)) {
+        mediaByType[type] += 1;
+      }
+    });
+
+    const topStorageEvents = [...allEvents]
+      .sort(
+        (left, right) =>
+          (Number(right.storage_consumed_bytes) || 0) -
+          (Number(left.storage_consumed_bytes) || 0),
+      )
+      .slice(0, 6)
+      .map((event) => ({
+        event_id: event.event_id,
+        event_name: event.event_name || "Untitled event",
+        event_code: event.event_code || "",
+        package_key: event.package_key || "free",
+        storage_bytes: Math.max(
+          0,
+          Number(event.storage_consumed_bytes) || 0,
+        ),
+        storage_display: formatBytes(event.storage_consumed_bytes),
+      }));
+
+    return res.status(200).json({
+      success: true,
+      analytics: {
+        source: "live_database",
+        period_days: days,
+        period_start: startIso,
+        generated_at: now.toISOString(),
+        kpis: {
+          new_users: periodUsers.length,
+          new_events: periodEvents.length,
+          media_uploads: periodMedia.length,
+          average_storage_per_active_event_bytes:
+            averageStoragePerActiveEventBytes,
+          average_storage_per_active_event_display: formatBytes(
+            averageStoragePerActiveEventBytes,
+          ),
+          total_storage_bytes: totalStorageBytes,
+          total_storage_display: formatBytes(totalStorageBytes),
+          active_events: activeEvents.length,
+          inactive_events: inactiveEvents,
+          paid_event_share: paidEventShare,
+        },
+        package_mix: packageMix,
+        media_by_type: mediaByType,
+        timeline,
+        top_storage_events: topStorageEvents,
+      },
+    });
+  } catch (error) {
+    console.error("Admin analytics error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Analytics data could not be loaded.",
+      code: "ADMIN_ANALYTICS_FAILED",
+    });
+  }
+};
 
 const createAdminUser = async (req, res) => {
   try {
@@ -1116,6 +1376,7 @@ const getAdminLogs = async (req, res) => {
 module.exports = {
   getAdminMe,
   getAdminDashboard,
+  getAdminAnalytics,
   getAdminUsers,
   getAdminUser,
   getAdminEvents,

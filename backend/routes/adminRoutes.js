@@ -11,6 +11,7 @@ const {
 const {
   getAdminMe,
   getAdminDashboard,
+  getAdminAnalytics,
   getAdminUsers,
   getAdminUser,
   getAdminEvents,
@@ -32,6 +33,7 @@ router.use(adminLimiter);
 
 router.get("/me", getAdminMe);
 router.get("/dashboard", getAdminDashboard);
+router.get("/analytics", getAdminAnalytics);
 router.get("/users", getAdminUsers);
 router.post("/users", adminWriteLimiter, createAdminUser);
 router.get("/users/:userId", getAdminUser);

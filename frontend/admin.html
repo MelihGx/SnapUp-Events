@@ -28,7 +28,7 @@
 
       <nav class="nav">
         <button class="nav-item active" data-view="dashboard"><span class="icon">⌂</span><span>Dashboard</span></button>
-        <button class="nav-item" data-view="analytics" hidden><span class="icon">⌁</span><span>Analytics</span></button>
+        <button class="nav-item" data-view="analytics"><span class="icon">⌁</span><span>Analytics</span></button>
         <button class="nav-item" data-view="users"><span class="icon">◎</span><span>Users</span></button>
         <button class="nav-item" data-view="events"><span class="icon">◫</span><span>Events</span></button>
         <button class="nav-item" data-view="storage" hidden><span class="icon">◉</span><span>Storage</span></button>
@@ -83,34 +83,12 @@
             <article class="stat-card"><span>Storage Used</span><strong id="statStorage">—</strong><small id="statStorageMeta">Live cumulative event usage</small></article>
             <article class="stat-card"><span>Total Media</span><strong id="statMedia">—</strong><small id="statMediaMeta">Photos, videos and messages</small></article>
           </div>
-
-          <div class="chart-grid" hidden>
-            <article class="panel chart-card chart-wide">
-              <div class="panel-head">
-                <div><h3>Revenue trend</h3><p>Illustrative monthly gross revenue</p></div>
-                <span class="metric-chip">+18.7%</span>
-              </div>
-              <div class="chart-kpi"><strong>₺248,400</strong><span>September 2026</span></div>
-              <div class="svg-chart" id="revenueChart"></div>
-            </article>
-
-            <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Plan distribution</h3><p>Current user mix</p></div></div>
-              <div class="donut-layout">
-                <div class="donut-chart" id="planDonut"><div class="donut-center"><strong>1,284</strong><span>users</span></div></div>
-                <div class="chart-legend" id="planLegend"></div>
-              </div>
-            </article>
-          </div>
-
-          <div class="chart-grid secondary-charts" hidden>
-            <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Daily media uploads</h3><p>Photos and videos uploaded this week</p></div></div>
+</div>
               <div class="bar-chart" id="mediaBarChart"></div>
             </article>
 
             <article class="panel chart-card">
-              <div class="panel-head"><div><h3>User & event growth</h3><p>Last 8 weeks</p></div></div>
+              <div class="panel-head"><div><h3>New users & events</h3><p>Last 8 weeks</p></div></div>
               <div class="svg-chart compact" id="growthChart"></div>
               <div class="inline-legend"><span><i class="legend-dot users"></i>Users</span><span><i class="legend-dot events"></i>Events</span></div>
             </article>
@@ -163,40 +141,54 @@
           <div class="section-actions">
             <div>
               <h2 class="section-title">Analytics</h2>
-              <p class="section-copy">A visual summary of growth, revenue, package mix and platform activity.</p>
+              <p class="section-copy">Live growth, event, media and storage analytics from the SnapUp database.</p>
             </div>
-            <select class="select-input"><option>Last 30 days</option><option>Last 90 days</option><option>This year</option></select>
+            <div class="analytics-live-controls">
+              <span class="analytics-live-status" id="analyticsLiveStatus">
+                Live database · waiting for data
+              </span>
+              <select class="select-input" id="analyticsPeriod">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last 365 days</option>
+              </select>
+            </div>
           </div>
 
           <div class="analytics-kpis">
-            <article><span>MRR</span><strong>₺248.4K</strong><small>+18.7% vs last month</small></article>
-            <article><span>Paid conversion</span><strong>21.8%</strong><small>+2.4 percentage points</small></article>
-            <article><span>Avg. storage / event</span><strong>2.7 GB</strong><small>Across active events</small></article>
-            <article><span>Uploads / active event</span><strong>186</strong><small>7-day average</small></article>
+            <article><span>New users</span><strong id="analyticsNewUsers">—</strong><small id="analyticsNewUsersMeta">Selected period</small></article>
+            <article><span>New events</span><strong id="analyticsNewEvents">—</strong><small id="analyticsNewEventsMeta">Selected period</small></article>
+            <article><span>Media uploads</span><strong id="analyticsMediaUploads">—</strong><small id="analyticsMediaUploadsMeta">Images, videos and messages</small></article>
+            <article><span>Avg. storage / active event</span><strong id="analyticsAvgStorage">—</strong><small id="analyticsAvgStorageMeta">Cumulative event quota consumption</small></article>
           </div>
 
           <div class="chart-grid">
             <article class="panel chart-card chart-wide">
-              <div class="panel-head"><div><h3>Revenue & paid users</h3><p>Monthly trend, illustrative demo data</p></div></div>
-              <div class="svg-chart tall" id="analyticsRevenueChart"></div>
+              <div class="panel-head"><div><h3>User & event growth</h3><p id="analyticsGrowthSubtitle">New records created in the selected period</p></div></div>
+              <div class="svg-chart tall" id="analyticsGrowthChart"></div>
             </article>
+
             <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Storage composition</h3><p>Current media footprint</p></div></div>
+              <div class="panel-head"><div><h3>Event package mix</h3><p id="analyticsPackageSubtitle">Current package distribution</p></div></div>
               <div class="donut-layout vertical">
-                <div class="donut-chart storage-donut" id="storageDonut"><div class="donut-center"><strong>184.7</strong><span>GB used</span></div></div>
-                <div class="chart-legend" id="storageLegend"></div>
+                <div class="donut-chart" id="analyticsPackageDonut">
+                  <div class="donut-center"><strong id="analyticsPackageTotal">—</strong><span>events</span></div>
+                </div>
+                <div class="chart-legend" id="analyticsPackageLegend"></div>
               </div>
             </article>
           </div>
 
           <div class="chart-grid secondary-charts">
             <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Events created by week</h3><p>New events over the last 8 weeks</p></div></div>
-              <div class="bar-chart" id="eventsBarChart"></div>
+              <div class="panel-head"><div><h3>Media activity</h3><p id="analyticsMediaSubtitle">Uploads by type</p></div></div>
+              <div class="bar-chart" id="analyticsMediaChart"></div>
             </article>
+
             <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Event type mix</h3><p>Illustrative composition</p></div></div>
-              <div class="horizontal-bars" id="eventTypeBars"></div>
+              <div class="panel-head"><div><h3>Highest storage events</h3><p id="analyticsStorageSubtitle">Current cumulative storage consumption</p></div></div>
+              <div class="horizontal-bars" id="analyticsTopStorageBars"></div>
             </article>
           </div>
         </section>
@@ -284,34 +276,7 @@
             <div id="eventList" class="event-list"></div>
           </div>
         </section>
-
-        <section class="view" id="storageView">
-          <div class="stats-grid">
-            <article class="stat-card"><span>Total Used</span><strong>184.7 GB</strong><small>Current platform usage</small></article>
-            <article class="stat-card"><span>Images</span><strong>102 GB</strong><small>55.2%</small></article>
-            <article class="stat-card"><span>Videos</span><strong>81 GB</strong><small>43.9%</small></article>
-            <article class="stat-card"><span>Custom Limits</span><strong>17</strong><small>Users with overrides</small></article>
-          </div>
-          <div class="chart-grid">
-            <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Storage by media type</h3><p>Current platform footprint</p></div></div>
-              <div class="donut-layout">
-                <div class="donut-chart storage-donut" id="storagePageDonut"><div class="donut-center"><strong>184.7</strong><span>GB used</span></div></div>
-                <div class="chart-legend" id="storagePageLegend"></div>
-              </div>
-            </article>
-            <article class="panel chart-card">
-              <div class="panel-head"><div><h3>Storage growth</h3><p>Last 8 weeks</p></div></div>
-              <div class="svg-chart compact" id="storageGrowthChart"></div>
-            </article>
-          </div>
-          <div class="panel storage-ranking-panel">
-            <div class="panel-head"><div><h3>Top storage users</h3><p>Accounts with highest current usage</p></div></div>
-            <div class="rank-list" id="storageRanking"></div>
-          </div>
-        </section>
-
-        <section class="view" id="logsView">
+<section class="view" id="logsView">
           <div class="section-actions">
             <div>
               <h2 class="section-title">Admin Audit Log</h2>
@@ -321,7 +286,7 @@
           </div>
 
           <div class="audit-summary-grid">
-            <article><span>Total actions</span><strong id="auditTotalCount">0</strong><small>Visible demo audit records</small></article>
+            <article><span>Total actions</span><strong id="auditTotalCount">0</strong><small>Persisted audit records</small></article>
             <article><span>User actions</span><strong id="auditUserCount">0</strong><small>Account & package operations</small></article>
             <article><span>Event actions</span><strong id="auditEventCount">0</strong><small>Event administration</small></article>
             <article><span>Security actions</span><strong id="auditSecurityCount">0</strong><small>Suspend/reactivate actions</small></article>
@@ -350,8 +315,8 @@
           </div>
 
           <div class="audit-custom-range" id="auditCustomRange" hidden>
-            <label><span>From</span><input type="date" id="auditDateFrom" value="2026-09-01" /></label>
-            <label><span>To</span><input type="date" id="auditDateTo" value="2026-09-22" /></label>
+            <label><span>From</span><input type="date" id="auditDateFrom" /></label>
+            <label><span>To</span><input type="date" id="auditDateTo" /></label>
             <button class="primary-btn" id="applyAuditRange">Apply Range</button>
           </div>
 
@@ -632,6 +597,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script type="module" src="js/admin.js?v=admin-delete-user-1"></script>
+  <script type="module" src="js/admin.js?v=admin-live-clean-2"></script>
 </body>
 </html>
