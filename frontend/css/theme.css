@@ -1553,3 +1553,18 @@ html[data-theme="dark"] #flow-panel-gallery .flow-gallery__status {
     transition: none;
   }
 }
+
+
+/*
+ * Create Event + Event Gallery dark-mode background fix
+ * The generic dark-theme rule paints the centered page containers with
+ * --theme-bg, creating a black rectangular column over their existing
+ * purple body gradients. Keep those page containers transparent so the
+ * page-specific body backgrounds remain continuous.
+ */
+html[data-theme="dark"] :is(
+  .create-page,
+  .public-gallery-page
+) {
+  background-color: transparent;
+}

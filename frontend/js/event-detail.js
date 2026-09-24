@@ -275,6 +275,9 @@ const eventBasicEditorCancel = document.getElementById("eventBasicEditorCancel")
 const eventBasicEditorForm = document.getElementById("eventBasicEditorForm");
 const eventBasicEditorName = document.getElementById("eventBasicEditorName");
 const eventBasicEditorDate = document.getElementById("eventBasicEditorDate");
+const eventBasicEditorDescription = document.getElementById(
+  "eventBasicEditorDescription",
+);
 const eventBasicEditorResult = document.getElementById("eventBasicEditorResult");
 const eventBasicEditorSave = document.getElementById("eventBasicEditorSave");
 const eventDate = document.getElementById("eventDate");
@@ -3049,6 +3052,7 @@ function openEventBasicEditor(preferredField = "name") {
   eventBasicEditorLastFocusedElement = document.activeElement;
   eventBasicEditorName.value = currentEvent.event_name || "";
   eventBasicEditorDate.value = currentEvent.event_date || "";
+  eventBasicEditorDescription.value = currentEvent.description || "";
   setEventBasicEditorResult();
 
   eventBasicEditorModal.classList.add("active");
@@ -4056,6 +4060,7 @@ eventBasicEditorForm?.addEventListener("submit", async (event) => {
 
   const nextName = eventBasicEditorName.value.trim();
   const nextDate = eventBasicEditorDate.value || null;
+  const nextDescription = eventBasicEditorDescription.value.trim() || null;
 
   if (!nextName) {
     setEventBasicEditorResult(t("Event name is required."), "error");
@@ -4071,6 +4076,7 @@ eventBasicEditorForm?.addEventListener("submit", async (event) => {
     const updatedEvent = await updateCurrentEventBasicInfo({
       event_name: nextName,
       event_date: nextDate,
+      description: nextDescription,
     });
 
     if (!updatedEvent) return;

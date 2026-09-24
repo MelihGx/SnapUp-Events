@@ -6604,3 +6604,86 @@ body.media-delete-confirm-open {
     margin-top: 18px;
   }
 }
+
+
+/* Date card: balanced full-width action at the bottom */
+.info-card--date {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card--date > #eventDate {
+  margin-bottom: 14px;
+}
+
+.info-card--date .event-date-edit-button {
+  width: 100%;
+  min-height: 38px;
+  justify-content: center;
+  margin-top: auto;
+  padding: 9px 12px;
+  gap: 7px;
+  border-radius: 11px;
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.info-card--date .event-date-edit-button svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+}
+
+.info-card--date .event-date-edit-button span {
+  margin: 0;
+  white-space: normal;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .info-card--date .event-date-edit-button {
+    min-height: 37px;
+    padding: 8px 10px;
+  }
+}
+
+/*
+ * Preserve the Event Detail dark-mode background fix:
+ * theme.css paints the centered page container black; keep it transparent
+ * so the existing page-specific body gradient remains visible.
+ */
+html[data-theme="dark"] .event-detail-page {
+  background-color: transparent;
+}
+
+
+/* Event basic editor — description field */
+.event-basic-editor-description {
+  grid-column: 1 / -1;
+}
+
+.event-basic-editor-fields textarea {
+  width: 100%;
+  min-height: 108px;
+  resize: vertical;
+  padding: 12px 13px;
+  color: var(--detail-text);
+  background: var(--detail-surface-soft);
+  border: 1px solid var(--detail-line);
+  border-radius: 13px;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.event-basic-editor-fields textarea:focus {
+  border-color: color-mix(in srgb, var(--detail-purple) 55%, transparent);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--detail-purple) 12%, transparent);
+}
+
+.event-basic-editor-fields textarea::placeholder {
+  color: var(--detail-text-soft);
+  opacity: 0.72;
+}

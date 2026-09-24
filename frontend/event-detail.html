@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-basic-edit-1"
+      href="css/event-detail.css?v=event-description-edit-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -50,6 +50,10 @@
     />
     <script
       src="js/event-detail-i18n.js?v=event-delete-confirm-2"
+      defer
+    ></script>
+    <script
+      src="js/event-basic-edit-i18n.js?v=event-description-edit-1"
       defer
     ></script>
     <script
@@ -510,13 +514,15 @@
             </button>
           </div>
 
-          <div class="info-card">
+          <div class="info-card info-card--date">
             <span>Date</span>
             <strong id="eventDate">-</strong>
             <button
               type="button"
               class="event-location-edit-button event-date-edit-button"
               id="eventDateEditButton"
+              aria-label="Change date"
+              title="Change date"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M7 3v3M17 3v3M4 9h16"></path>
@@ -2308,7 +2314,7 @@
         <div class="location-editor-head">
           <span>Event details</span>
           <h2 id="eventBasicEditorTitle">Edit event details</h2>
-          <p>Change the event name or date without changing its code or QR link.</p>
+          <p>Change the event name, date or description without changing its code or QR link.</p>
         </div>
 
         <form class="location-editor-form" id="eventBasicEditorForm">
@@ -2331,6 +2337,15 @@
                 type="date"
                 id="eventBasicEditorDate"
               />
+            </label>
+
+            <label class="event-basic-editor-description">
+              <span>Description</span>
+              <textarea
+                id="eventBasicEditorDescription"
+                rows="4"
+                placeholder="Write a short description for your event..."
+              ></textarea>
             </label>
           </div>
 
@@ -2788,7 +2803,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=event-basic-edit-1"
+      src="js/event-detail.js?v=event-description-edit-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

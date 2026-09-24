@@ -790,7 +790,7 @@ const updateEventBasicInfo = async (req, res) => {
   try {
     const userId = req.user.user_id;
     const { eventId } = req.params;
-    const { event_name, eventName, event_date } = req.body || {};
+    const { event_name, eventName, event_date, description } = req.body || {};
 
     if (!eventId) {
       return res.status(400).json({
@@ -821,6 +821,12 @@ const updateEventBasicInfo = async (req, res) => {
     }
 
     const normalizedDate = normalizeEditableEventDate(event_date);
+    const normalizedDescription =
+      typeof description === "string"
+        ? description.trim() || null
+        : description === null || description === undefined
+          ? null
+          : String(description).trim() || null;
 
     if (normalizedDate.error) {
       return res.status(400).json({
@@ -861,10 +867,13 @@ const updateEventBasicInfo = async (req, res) => {
       .update({
         event_name: finalEventName,
         event_date: normalizedDate.value,
+        description: normalizedDescription,
       })
       .eq("event_id", eventId)
       .eq("user_id", userId)
-      .select("event_id, event_name, event_date, event_slug, event_code")
+      .select(
+        "event_id, event_name, event_date, description, event_slug, event_code",
+      )
       .single();
 
     if (updateError || !updatedEvent) {
