@@ -7,6 +7,7 @@ const {
 } = require("../services/cloudinaryDelivery");
 const { generateEventCode } = require("../utils/eventCode");
 const { generateUniqueEventSlug } = require("../utils/eventSlug");
+const { normalizeEventTypeCode } = require("../utils/eventTypes");
 const { normalizePackageKey } = require("../services/pricingService");
 const cloudinary = require("../config/cloudinary");
 const {
@@ -309,6 +310,7 @@ const createEvent = async (req, res) => {
     const {
       eventName,
       event_name,
+      event_type_code,
       event_location,
       event_address,
       event_latitude,
@@ -323,6 +325,7 @@ const createEvent = async (req, res) => {
     } = requestBody;
 
     const finalEventName = event_name || eventName;
+    const eventTypeCode = normalizeEventTypeCode(event_type_code, { required: true });
 
     if (!finalEventName || finalEventName.trim() === "") {
       return res.status(400).json({
@@ -369,6 +372,7 @@ const createEvent = async (req, res) => {
         {
           event_name: finalEventName.trim(),
           event_slug: eventSlug,
+          event_type_code: eventTypeCode,
           event_location: cleanOptionalText(event_location, 160),
           event_address: cleanOptionalText(event_address, 500),
           event_latitude: coordinates.latitude,
@@ -388,7 +392,7 @@ const createEvent = async (req, res) => {
         },
       ])
       .select(
-        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
+        "event_id, event_name, event_slug, event_type_code, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
       )
       .single();
 
@@ -469,7 +473,7 @@ const getEventByCode = async (req, res) => {
     const { data: event, error } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
+        "event_id, event_name, event_slug, event_type_code, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url",
       )
       .eq("event_code", eventCode)
       .eq("is_event_active", true)
@@ -539,7 +543,7 @@ const getEventDetail = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, event_name, event_slug, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, user_id",
+        "event_id, event_name, event_slug, event_type_code, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key, user_id",
       )
       .eq("event_id", eventId)
       .eq("user_id", userId)

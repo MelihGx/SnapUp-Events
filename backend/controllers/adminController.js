@@ -2,6 +2,8 @@ const bcrypt = require("bcryptjs");
 const QRCode = require("qrcode");
 const supabase = require("../config/supabaseClient");
 const { cleanText, normalizeEmail, validatePassword } = require("../utils/validation");
+const { normalizeCountryCode } = require("../utils/countries");
+const { normalizeEventTypeCode } = require("../utils/eventTypes");
 const { generateEventCode } = require("../utils/eventCode");
 const { generateUniqueEventSlug } = require("../utils/eventSlug");
 const {
@@ -238,6 +240,7 @@ function buildUserView(user, ownedEvents = []) {
     name: user.user_name || "Unnamed user",
     email: user.user_mail || "",
     phone: user.user_phone || "",
+    country_code: user.user_country_code || null,
     role: user.user_role || "user",
     plan: highestPackage(ownedEvents),
     events: ownedEvents.length,
@@ -259,6 +262,7 @@ function buildEventView(event, owner, settings = null) {
     name: event.event_name || "Untitled event",
     createdAt: event.event_created_at || null,
     code: event.event_code || "",
+    type_code: event.event_type_code || null,
     plan: titleCase(event.package_key || "free"),
     date: event.event_date || null,
     location: event.event_location || event.event_address || "",
@@ -513,7 +517,7 @@ const getAdminUsers = async (req, res) => {
         supabase
           .from("users")
           .select(
-            "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, user_role",
+            "user_id, user_name, user_mail, user_phone, user_country_code, user_created_at, is_user_active, is_email_verified, user_role",
           )
           .order("user_created_at", { ascending: false }),
       ),
@@ -567,7 +571,7 @@ const getAdminUser = async (req, res) => {
     const { data: user, error: userError } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, user_role",
+        "user_id, user_name, user_mail, user_phone, user_country_code, user_created_at, is_user_active, is_email_verified, user_role",
       )
       .eq("user_id", userId)
       .maybeSingle();
@@ -589,7 +593,7 @@ const getAdminUser = async (req, res) => {
         supabase
           .from("event")
           .select(
-            "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+            "event_id, user_id, event_name, event_code, event_type_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
           )
           .eq("user_id", userId)
           .order("event_created_at", { ascending: false }),
@@ -646,12 +650,13 @@ const getAdminUser = async (req, res) => {
 
 const getAdminEvents = async (req, res) => {
   try {
+    // Core event data must not depend on optional usage enrichment.
     const [events, users, settings] = await Promise.all([
       loadAllRows(() =>
         supabase
           .from("event")
           .select(
-            "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+            "event_id, user_id, event_name, event_code, event_type_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
           )
           .order("event_created_at", { ascending: false }),
       ),
@@ -672,21 +677,166 @@ const getAdminEvents = async (req, res) => {
     const ownersById = new Map(
       users.map((user) => [String(user.user_id), user]),
     );
+
     const settingsByEventId = new Map(
       settings.map((item) => [String(item.event_id), item]),
     );
 
-    const result = events.map((event) =>
-      buildEventView(
+    const guestCountByEventId = new Map();
+    const mediaUsageByEventId = new Map();
+
+    // Usage data is enrichment. A failure here must never take the event list
+    // or the rest of the admin panel down.
+    const [guestRowsResult, mediaRowsResult] = await Promise.allSettled([
+      loadAllRows(() =>
+        supabase
+          .from("event_guests")
+          .select("event_id")
+          .order("event_id", { ascending: true }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("events_media")
+          .select("event_id, media_type")
+          .in("media_type", ["image", "video", "message"])
+          .order("event_id", { ascending: true }),
+      ),
+    ]);
+
+    if (guestRowsResult.status === "fulfilled") {
+      guestRowsResult.value.forEach((guest) => {
+        const eventId = String(guest.event_id || "");
+
+        if (!eventId) return;
+
+        guestCountByEventId.set(
+          eventId,
+          (guestCountByEventId.get(eventId) || 0) + 1,
+        );
+      });
+    } else {
+      console.warn(
+        "Admin event guest bulk count failed; using exact-count fallback.",
+        guestRowsResult.reason,
+      );
+    }
+
+    if (mediaRowsResult.status === "fulfilled") {
+      mediaRowsResult.value.forEach((media) => {
+        const eventId = String(media.event_id || "");
+
+        if (!eventId) return;
+
+        const current = mediaUsageByEventId.get(eventId) || {
+          photos: 0,
+          videos: 0,
+          messages: 0,
+          total: 0,
+        };
+
+        const mediaType = String(media.media_type || "").toLowerCase();
+
+        if (mediaType === "image") current.photos += 1;
+        if (mediaType === "video") current.videos += 1;
+        if (mediaType === "message") current.messages += 1;
+
+        current.total += 1;
+        mediaUsageByEventId.set(eventId, current);
+      });
+    } else {
+      console.warn(
+        "Admin event media bulk count failed; using exact-count fallback.",
+        mediaRowsResult.reason,
+      );
+    }
+
+    // Only fall back to per-event exact counts for the source that failed.
+    // This keeps the common path efficient while guaranteeing that a failed
+    // enrichment query cannot blank the entire admin console.
+    if (
+      guestRowsResult.status === "rejected" ||
+      mediaRowsResult.status === "rejected"
+    ) {
+      await Promise.all(
+        events.map(async (event) => {
+          const eventId = String(event.event_id);
+
+          if (guestRowsResult.status === "rejected") {
+            try {
+              const count = await exactCount("event_guests", (query) =>
+                query.eq("event_id", event.event_id),
+              );
+              guestCountByEventId.set(eventId, count);
+            } catch (error) {
+              console.warn(
+                `Admin guest count fallback failed for event ${eventId}.`,
+                error,
+              );
+            }
+          }
+
+          if (mediaRowsResult.status === "rejected") {
+            try {
+              const count = await exactCount("media", (query) =>
+                query.eq("event_id", event.event_id),
+              );
+
+              mediaUsageByEventId.set(eventId, {
+                photos: null,
+                videos: null,
+                messages: null,
+                total: count,
+              });
+            } catch (error) {
+              console.warn(
+                `Admin media count fallback failed for event ${eventId}.`,
+                error,
+              );
+            }
+          }
+        }),
+      );
+    }
+
+    const result = events.map((event) => {
+      const eventId = String(event.event_id);
+      const usage = mediaUsageByEventId.get(eventId) || null;
+
+      const view = buildEventView(
         event,
         ownersById.get(String(event.user_id)),
-        settingsByEventId.get(String(event.event_id)),
-      ),
-    );
+        settingsByEventId.get(eventId),
+      );
+
+      view.guests = guestCountByEventId.has(eventId)
+        ? guestCountByEventId.get(eventId)
+        : null;
+
+      if (usage) {
+        view.photos = usage.photos;
+        view.videos = usage.videos;
+        view.messages = usage.messages;
+        view.media_total = usage.total;
+      } else {
+        view.media_total = null;
+      }
+
+      return view;
+    });
 
     return res.status(200).json({
       success: true,
       events: result,
+      usage: {
+        guests:
+          guestRowsResult.status === "fulfilled"
+            ? "bulk"
+            : "fallback",
+        media:
+          mediaRowsResult.status === "fulfilled"
+            ? "bulk"
+            : "fallback",
+      },
     });
   } catch (error) {
     console.error("Admin events error:", error);
@@ -706,7 +856,7 @@ const getAdminEvent = async (req, res) => {
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select(
-        "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
+        "event_id, user_id, event_name, event_code, event_type_code, event_created_at, event_date, event_location, event_address, is_event_active, admin_suspended, package_key, storage_consumed_bytes, storage_limit_override_bytes",
       )
       .eq("event_id", eventId)
       .maybeSingle();
@@ -823,7 +973,7 @@ const getAdminStorage = async (req, res) => {
         supabase
           .from("event")
           .select(
-            "event_id, user_id, event_name, event_code, package_key, is_event_active, admin_suspended, storage_consumed_bytes, storage_limit_override_bytes, event_created_at",
+            "event_id, user_id, event_name, event_code, event_type_code, package_key, is_event_active, admin_suspended, storage_consumed_bytes, storage_limit_override_bytes, event_created_at",
           )
           .order("event_created_at", { ascending: false }),
       ),
@@ -1074,6 +1224,7 @@ const getAdminAnalytics = async (req, res) => {
       periodEvents,
       periodMedia,
       allEvents,
+      allCustomerCountries,
     ] = await Promise.all([
       loadAllRows(() =>
         supabase
@@ -1103,9 +1254,16 @@ const getAdminAnalytics = async (req, res) => {
         supabase
           .from("event")
           .select(
-            "event_id, event_name, event_code, package_key, is_event_active, storage_consumed_bytes",
+            "event_id, event_name, event_code, event_type_code, package_key, is_event_active, storage_consumed_bytes",
           )
           .order("event_created_at", { ascending: false }),
+      ),
+      loadAllRows(() =>
+        supabase
+          .from("users")
+          .select("user_id, user_country_code")
+          .eq("user_role", "user")
+          .order("user_created_at", { ascending: false }),
       ),
     ]);
 
@@ -1177,6 +1335,73 @@ const getAdminAnalytics = async (req, res) => {
         storage_display: formatBytes(event.storage_consumed_bytes),
       }));
 
+
+    const eventTypeCounts = new Map();
+    let unknownEventTypes = 0;
+
+    allEvents.forEach((event) => {
+      const code = String(event.event_type_code || "").trim().toLowerCase();
+
+      if (!code) {
+        unknownEventTypes += 1;
+        return;
+      }
+
+      eventTypeCounts.set(code, (eventTypeCounts.get(code) || 0) + 1);
+    });
+
+    const eventsByType = [...eventTypeCounts.entries()]
+      .map(([event_type_code, count]) => ({
+        event_type_code,
+        count,
+        percentage: allEvents.length
+          ? Number(((count / allEvents.length) * 100).toFixed(1))
+          : 0,
+      }))
+      .sort((left, right) => {
+        if (right.count !== left.count) return right.count - left.count;
+        return left.event_type_code.localeCompare(right.event_type_code);
+      });
+
+    const knownEventTypes = allEvents.length - unknownEventTypes;
+
+    const countryCounts = new Map();
+    let unknownCountryUsers = 0;
+
+    allCustomerCountries.forEach((user) => {
+      const code = String(user.user_country_code || "")
+        .trim()
+        .toUpperCase();
+
+      if (!code) {
+        unknownCountryUsers += 1;
+        return;
+      }
+
+      countryCounts.set(code, (countryCounts.get(code) || 0) + 1);
+    });
+
+    const usersByCountry = [...countryCounts.entries()]
+      .map(([country_code, count]) => ({
+        country_code,
+        count,
+        percentage: allCustomerCountries.length
+          ? Number(
+              ((count / allCustomerCountries.length) * 100).toFixed(1),
+            )
+          : 0,
+      }))
+      .sort((left, right) => {
+        if (right.count !== left.count) {
+          return right.count - left.count;
+        }
+
+        return left.country_code.localeCompare(right.country_code);
+      });
+
+    const knownCountryUsers =
+      allCustomerCountries.length - unknownCountryUsers;
+
     return res.status(200).json({
       success: true,
       analytics: {
@@ -1200,6 +1425,20 @@ const getAdminAnalytics = async (req, res) => {
         },
         package_mix: packageMix,
         media_by_type: mediaByType,
+        events_by_type: {
+          total_events: allEvents.length,
+          known_type_events: knownEventTypes,
+          unknown_type_events: unknownEventTypes,
+          types_represented: eventsByType.length,
+          types: eventsByType,
+        },
+        users_by_country: {
+          total_customers: allCustomerCountries.length,
+          known_country_users: knownCountryUsers,
+          unknown_country_users: unknownCountryUsers,
+          countries_reached: usersByCountry.length,
+          countries: usersByCountry,
+        },
         timeline,
         top_storage_events: topStorageEvents,
       },
@@ -1228,6 +1467,10 @@ const createAdminUser = async (req, res) => {
       32,
     );
     const password = validatePassword(req.body?.password);
+    const countryCode = normalizeCountryCode(
+      req.body?.country_code || req.body?.user_country_code,
+      { required: true },
+    );
 
     const { data: existingUser, error: existingUserError } = await supabase
       .from("users")
@@ -1256,6 +1499,7 @@ const createAdminUser = async (req, res) => {
         user_name: name,
         user_mail: email,
         user_phone: phone,
+        user_country_code: countryCode,
         password_hash: passwordHash,
         is_user_active: true,
         is_email_verified: true,
@@ -1263,7 +1507,7 @@ const createAdminUser = async (req, res) => {
         user_role: "user",
       })
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
+        "user_id, user_name, user_mail, user_phone, user_country_code, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
       )
       .single();
 
@@ -1283,6 +1527,7 @@ const createAdminUser = async (req, res) => {
           summary: "Customer account created · Email verified by admin",
           user_name: newUser.user_name,
           user_mail: newUser.user_mail,
+          country_code: newUser.user_country_code,
           email_verified: true,
         },
       });
@@ -1368,6 +1613,10 @@ const createAdminEventForUser = async (req, res) => {
     const eventDate = normalizeEventDate(
       req.body?.date || req.body?.event_date,
     );
+    const eventTypeCode = normalizeEventTypeCode(
+      req.body?.event_type_code || req.body?.type_code,
+      { required: true },
+    );
     const eventLocation = cleanOptionalText(
       req.body?.location || req.body?.event_location,
       160,
@@ -1389,6 +1638,7 @@ const createAdminEventForUser = async (req, res) => {
       .insert({
         event_name: eventName,
         event_slug: eventSlug,
+        event_type_code: eventTypeCode,
         event_location: eventLocation,
         user_id: userId,
         packet_level_id: packetLevelId,
@@ -1402,7 +1652,7 @@ const createAdminEventForUser = async (req, res) => {
         is_event_private: true,
       })
       .select(
-        "event_id, user_id, event_name, event_code, event_created_at, event_date, event_location, event_address, is_event_active, package_key, storage_consumed_bytes",
+        "event_id, user_id, event_name, event_code, event_type_code, event_created_at, event_date, event_location, event_address, is_event_active, package_key, storage_consumed_bytes",
       )
       .single();
 
@@ -1448,6 +1698,7 @@ const createAdminEventForUser = async (req, res) => {
           summary: `Owner: ${eventOwner.user_mail} · Package: ${titleCase(selectedPackage)}`,
           event_code: newEvent.event_code,
           event_name: newEvent.event_name,
+          event_type_code: eventTypeCode,
           owner_user_id: eventOwner.user_id,
           owner_email: eventOwner.user_mail,
           package_key: selectedPackage,

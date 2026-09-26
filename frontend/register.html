@@ -34,11 +34,12 @@
     </script>
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <link rel="stylesheet" href="css/theme.css?v=join-modal-dark-fix-1" />
-    <link rel="stylesheet" href="css/auth.css?v=password-reveal-fix-8" />
+    <link rel="stylesheet" href="css/auth.css?v=country-dropdown-white-1" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-1" />
     <script src="js/email-verification-i18n.js?v=email-verification-1" defer></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
     <script src="js/ui-additions-i18n.js?v=ui-additions-50-languages-1" defer></script>
+    <script src="js/register-country-i18n.js?v=user-country-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
   <body>
@@ -204,6 +205,52 @@
             </div>
 
             <div class="auth-field">
+              <label for="userCountrySearch">Country</label>
+
+              <div class="country-combobox" id="userCountryCombobox">
+                <input
+                  type="text"
+                  id="userCountrySearch"
+                  class="country-combobox__input"
+                  autocomplete="off"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="userCountryList"
+                  aria-haspopup="listbox"
+                  placeholder="Select your country"
+                  required
+                />
+
+                <input
+                  type="hidden"
+                  id="userCountry"
+                  name="userCountry"
+                  value=""
+                />
+
+                <button
+                  type="button"
+                  class="country-combobox__toggle"
+                  id="userCountryToggle"
+                  aria-label="Show countries"
+                  tabindex="-1"
+                >
+                  <span aria-hidden="true"></span>
+                </button>
+
+                <div
+                  class="country-combobox__menu"
+                  id="userCountryList"
+                  role="listbox"
+                  hidden
+                ></div>
+              </div>
+
+              <small class="auth-field-error" id="userCountryError"></small>
+            </div>
+
+            <div class="auth-field">
               <label for="password">Password</label>
               <div class="auth-password-row">
                 <input
@@ -262,7 +309,7 @@
       </section>
     </main>
 
-    <script type="module" src="js/register.js?v=turnstile-visible-2"></script>
+    <script type="module" src="js/register.js?v=searchable-country-1"></script>
       <script src="js/theme.js?v=dark-gallery-colors-1"></script>
   </body>
 </html>

@@ -175,6 +175,32 @@
               <div class="horizontal-bars" id="analyticsTopStorageBars"></div>
             </article>
           </div>
+
+          <div class="chart-grid secondary-charts">
+            <article class="panel chart-card chart-wide">
+              <div class="panel-head">
+                <div>
+                  <h3>Users by country</h3>
+                  <p id="analyticsCountrySubtitle">Self-reported registration country · all customer accounts</p>
+                </div>
+                <span class="metric-chip" id="analyticsCountriesReached">— countries</span>
+              </div>
+              <div class="horizontal-bars" id="analyticsCountryBars"></div>
+            </article>
+          </div>
+
+          <div class="chart-grid secondary-charts">
+            <article class="panel chart-card chart-wide">
+              <div class="panel-head">
+                <div>
+                  <h3>Events by type</h3>
+                  <p id="analyticsEventTypeSubtitle">Current event concept distribution</p>
+                </div>
+                <span class="metric-chip" id="analyticsEventTypesRepresented">— types</span>
+              </div>
+              <div class="horizontal-bars" id="analyticsEventTypeBars"></div>
+            </article>
+          </div>
         </section>
 
         <section class="view" id="usersView">
@@ -198,7 +224,7 @@
             </div>
             <div class="table-scroll">
               <table>
-                <thead><tr><th>User</th><th>Top Event Plan</th><th>Events</th><th>Storage</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+                <thead><tr><th>User</th><th>Country</th><th>Top Event Plan</th><th>Events</th><th>Storage</th><th>Status</th><th>Joined</th><th></th></tr></thead>
                 <tbody id="usersTableBody"></tbody>
               </table>
             </div>
@@ -231,6 +257,23 @@
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
               <option value="Suspended">Suspended</option>
+            </select>
+            <select id="eventTypeFilter" class="select-input">
+              <option value="all">All event types</option>
+              <option value="wedding">Wedding</option>
+              <option value="engagement">Engagement</option>
+              <option value="henna_night">Henna Night</option>
+              <option value="birthday">Birthday</option>
+              <option value="graduation">Graduation</option>
+              <option value="baby_shower">Baby Shower</option>
+              <option value="anniversary">Anniversary</option>
+              <option value="corporate">Corporate Event</option>
+              <option value="conference_seminar">Conference / Seminar</option>
+              <option value="festival_concert">Festival / Concert</option>
+              <option value="party_celebration">Party / Celebration</option>
+              <option value="trip">Trip</option>
+              <option value="other">Other</option>
+              <option value="not_set">Not set</option>
             </select>
 
             <select id="eventSort" class="select-input">
@@ -498,6 +541,7 @@
       <div><span>Owner</span><strong id="eventDrawerOwner">-</strong></div>
       <div><span>Date</span><strong id="eventDrawerDate">-</strong></div>
       <div><span>Location</span><strong id="eventDrawerLocation">-</strong></div>
+      <div><span>Event type</span><strong id="eventDrawerType">Not set</strong></div>
       <div><span>Approval</span><strong id="eventDrawerApproval">Required</strong></div>
       <div><span>Video uploads</span><strong id="eventDrawerVideo">Allowed</strong></div>
       <div><span>Effective storage limit</span><strong id="eventDrawerStorageLimit">-</strong></div>
@@ -540,6 +584,7 @@
         <label><span>Full name</span><input required name="name" maxlength="100" placeholder="Ayşe Demir" /></label>
         <label><span>Email</span><input required type="email" name="email" maxlength="254" placeholder="ayse@example.com" /></label>
         <label class="full-row"><span>Phone</span><input name="phone" maxlength="32" placeholder="+90 5xx xxx xx xx" /></label>
+        <label class="full-row"><span>Country</span><select required name="country_code" id="createUserCountry"><option value="" selected disabled>Select country</option></select></label>
         <label><span>Password</span><input required type="password" name="password" minlength="6" maxlength="72" autocomplete="new-password" placeholder="Minimum 6 characters" /></label>
         <label><span>Confirm password</span><input required type="password" name="confirm_password" minlength="6" maxlength="72" autocomplete="new-password" placeholder="Repeat password" /></label>
       </div>
@@ -557,6 +602,22 @@
       <div class="form-grid">
         <label class="full-row"><span>Owner</span><select required name="owner" id="eventOwnerSelect"></select></label>
         <label><span>Event name</span><input required name="name" maxlength="160" placeholder="Wedding Celebration" /></label>
+        <label><span>Event type</span><select required name="event_type_code">
+          <option value="" selected disabled>Select event type</option>
+          <option value="wedding">Wedding</option>
+          <option value="engagement">Engagement</option>
+          <option value="henna_night">Henna Night</option>
+          <option value="birthday">Birthday</option>
+          <option value="graduation">Graduation</option>
+          <option value="baby_shower">Baby Shower</option>
+          <option value="anniversary">Anniversary</option>
+          <option value="corporate">Corporate Event</option>
+          <option value="conference_seminar">Conference / Seminar</option>
+          <option value="festival_concert">Festival / Concert</option>
+          <option value="party_celebration">Party / Celebration</option>
+          <option value="trip">Trip</option>
+          <option value="other">Other</option>
+        </select></label>
         <label><span>Event date</span><input required type="date" name="date" /></label>
         <label><span>Location</span><input name="location" maxlength="160" placeholder="İstanbul" /></label>
         <label><span>Package</span><select name="plan"><option>Free</option><option>Mini</option><option>Plus</option><option>Premium</option></select></label>
@@ -819,6 +880,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script type="module" src="js/admin.js?v=admin-event-ops-1"></script>
+  <script type="module" src="js/admin.js?v=event-type-analytics-1"></script>
 </body>
 </html>

@@ -10,6 +10,10 @@ const token = localStorage.getItem("snapup_token");
 const createEventForm = document.getElementById("createEventPageForm");
 const createEventSubmit = document.getElementById("createEventSubmit");
 const createEventResult = document.getElementById("createEventResult");
+const eventTypeSearchInput = document.getElementById("eventTypeSearch");
+const eventTypeComboboxRoot = document.getElementById("eventTypeCombobox");
+const eventTypeList = document.getElementById("eventTypeList");
+const eventTypeToggle = document.getElementById("eventTypeToggle");
 const eventCodePreview = document.getElementById("eventCodePreview");
 const qrPreviewBox = document.getElementById("qrPreviewBox");
 const qrActions = document.getElementById("qrActions");
@@ -116,6 +120,21 @@ function t(key, replacements = {}) {
     translated,
   );
 }
+
+
+const eventTypeCombobox = window.mountEventTypeCombobox?.({
+  root: eventTypeComboboxRoot,
+  searchInput: eventTypeSearchInput,
+  hiddenInput: document.getElementById("eventType"),
+  menu: eventTypeList,
+  toggleButton: eventTypeToggle,
+  placeholder: t("Select event type"),
+  noResultsText: t("No event types found"),
+});
+
+eventTypeSearchInput?.addEventListener("input", () => {
+  eventTypeComboboxRoot?.closest("label")?.classList.remove("has-error");
+});
 
 function showResult(message, type = "error") {
   createEventResult.textContent = message;
@@ -561,6 +580,7 @@ function resetPaymentForm() {
 function buildEventPayload() {
   return {
     eventName: document.getElementById("eventName").value.trim(),
+    event_type_code: document.getElementById("eventType").value,
     event_location:
       document.getElementById("eventLocation").value.trim() || null,
     event_address:
@@ -793,6 +813,18 @@ createEventForm.addEventListener("submit", (event) => {
     document.getElementById("eventName").focus();
     return;
   }
+
+  const eventType = document.getElementById("eventType");
+  const eventTypeLabel = eventTypeComboboxRoot?.closest("label");
+
+  if (!eventType.value) {
+    eventTypeLabel?.classList.add("has-error");
+    showResult(t("Event type is required."));
+    eventTypeSearchInput?.focus();
+    return;
+  }
+
+  eventTypeLabel?.classList.remove("has-error");
 
   if (!validateEventDateFields()) {
     return;

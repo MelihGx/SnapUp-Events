@@ -15,7 +15,13 @@ import {
   setAdminEventSuspension,
   changeAdminEventPackage,
   setAdminEventStorageOverride,
-} from "./admin-api.js?v=admin-event-ops-1";
+} from "./admin-api.js?v=user-country-analytics-1";
+
+import {
+  getCountryFlag,
+  getCountryName,
+  populateCountrySelect,
+} from "./countries.js?v=user-country-1";
 
 const ADMIN_LOGIN_PAGE = "login.html";
 const ADMIN_ACCOUNT_PAGE = "account.html";
@@ -157,6 +163,26 @@ const state = {
   auditPeriod: "all",
 };
 
+const EVENT_TYPE_LABELS=Object.freeze({
+  wedding:"Wedding",
+  engagement:"Engagement",
+  henna_night:"Henna Night",
+  birthday:"Birthday",
+  graduation:"Graduation",
+  baby_shower:"Baby Shower",
+  anniversary:"Anniversary",
+  corporate:"Corporate Event",
+  conference_seminar:"Conference / Seminar",
+  festival_concert:"Festival / Concert",
+  party_celebration:"Party / Celebration",
+  trip:"Trip",
+  other:"Other",
+});
+
+function eventTypeLabel(code){
+  return EVENT_TYPE_LABELS[String(code||"").trim().toLowerCase()] || "Not set";
+}
+
 const views = {
   dashboard:["Dashboard","Operate and monitor your SnapUp Events platform."],
   analytics:["Analytics","Live growth, media, package and storage analytics."],
@@ -251,19 +277,30 @@ function renderUsers(){
   const q=$("#userSearch")?.value.trim().toLowerCase() || "";
   const filter=$("#userStatusFilter")?.value || "all";
   const rows=state.users.filter(u=>{
-    const matches=[u.name,u.email,u.plan,u.status].join(" ").toLowerCase().includes(q);
+    const countrySearch=u.country_code
+      ? `${u.country_code} ${getCountryName(u.country_code,"en")}`
+      : "not set unknown";
+    const matches=[u.name,u.email,u.plan,u.status,countrySearch]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
     const status=filter==="all" || u.status===filter;
     return matches && status;
   });
   $("#usersTableBody").innerHTML=rows.length ? rows.map(u=>`
     <tr>
       <td><div class="user-cell"><div class="avatar small">${escapeHtml(initials(u.name))}</div><div><b>${escapeHtml(u.name)}</b><span>${escapeHtml(u.email)}</span></div></div></td>
+      <td>${
+        u.country_code
+          ? `${escapeHtml(getCountryFlag(u.country_code))} ${escapeHtml(getCountryName(u.country_code,"en"))}`
+          : '<span class="muted">Not set</span>'
+      }</td>
       <td><span class="plan ${planClass(u.plan)}">${escapeHtml(u.plan)}</span></td>
       <td>${u.events}</td><td>${escapeHtml(u.storage)}</td>
       <td><span class="badge ${statusClass(u.status)}">${escapeHtml(u.status)}</span></td>
       <td>${formatJoined(u.joined_at)}</td>
       <td><button class="open-btn" data-open-user="${escapeAttr(u.id)}">Manage</button></td>
-    </tr>`).join("") : `<tr><td colspan="7"><div class="event-empty"><strong>No users found</strong><span>Try changing your search or status filter.</span></div></td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="8"><div class="event-empty"><strong>No users found</strong><span>Try changing your search or status filter.</span></div></td></tr>`;
   $$("[data-open-user]").forEach(b=>b.onclick=()=>openUser(b.dataset.openUser));
 }
 
@@ -319,15 +356,26 @@ function renderEvents(){
   const root=$("#eventList"); if(!root) return;
   const query=$("#eventSearch")?.value.trim().toLowerCase() || "";
   const status=$("#eventStatusFilter")?.value || "all";
+  const typeFilter=$("#eventTypeFilter")?.value || "all";
   const sort=$("#eventSort")?.value || "newest";
   const period=state.eventPeriod || "all";
 
   let events=state.events.filter(e=>{
     const owner=ownerName(e.ownerId);
     const ownerMail=ownerEmail(e.ownerId);
-    const haystack=[e.name,e.code,e.location,e.plan,e.status,owner,ownerMail].join(" ").toLowerCase();
+    const typeLabel=eventTypeLabel(e.type_code);
+    const haystack=[
+      e.name,e.code,e.location,e.plan,e.status,typeLabel,e.type_code,owner,ownerMail
+    ].join(" ").toLowerCase();
+
+    const typeMatches=
+      typeFilter==="all" ||
+      (typeFilter==="not_set" && !e.type_code) ||
+      e.type_code===typeFilter;
+
     return haystack.includes(query) &&
       (status==="all" || e.status===status) &&
+      typeMatches &&
       matchesEventPeriod(e,period);
   });
 
@@ -353,7 +401,7 @@ function renderEvents(){
         <div class="event-list-icon ${i%3===1?"alt1":i%3===2?"alt2":""}">${escapeHtml(String(e.name||"E").charAt(0).toUpperCase())}</div>
         <div class="event-main-copy">
           <b>${escapeHtml(e.name)}</b>
-          <span>#${escapeHtml(e.code)} · ${escapeHtml(e.location || "No location")} · ${escapeHtml(e.plan)}</span>
+          <span>#${escapeHtml(e.code)} · ${escapeHtml(eventTypeLabel(e.type_code))} · ${escapeHtml(e.location || "No location")} · ${escapeHtml(e.plan)}</span>
         </div>
       </div>
       <div class="event-owner-cell">
@@ -364,7 +412,13 @@ function renderEvents(){
       <div class="event-date-cell">${formatEventDate(e.date)}</div>
       <div class="event-usage">
         <span><b>${e.guests ?? "—"}</b>Guests</span>
-        <span><b>${e.photos == null ? "—" : (e.photos||0)+(e.videos||0)+(e.messages||0)}</b>Media</span>
+        <span><b>${
+          e.media_total != null
+            ? e.media_total
+            : e.photos == null
+              ? "—"
+              : (e.photos||0)+(e.videos||0)+(e.messages||0)
+        }</b>Media</span>
         <span><b>${escapeHtml(e.storage)}</b>Storage</span>
       </div>
       <div><span class="badge ${e.status==="Active"?"active":"unverified"}">${escapeHtml(e.status)}</span></div>
@@ -897,25 +951,78 @@ async function loadLiveAdminData(){
   const subtitle=$("#pageSubtitle");
   if(subtitle) subtitle.textContent="Loading live SnapUp data…";
 
-  try{
-    const [dashboardResponse,usersResponse,eventsResponse,logsResponse]=await Promise.all([
-      getAdminDashboard(),
-      getAdminUsers(),
-      getAdminEvents(),
-      getAdminLogs(),
-    ]);
+  const results=await Promise.allSettled([
+    getAdminDashboard(),
+    getAdminUsers(),
+    getAdminEvents(),
+    getAdminLogs(),
+  ]);
 
-    state.dashboard=dashboardResponse.dashboard || null;
-    state.users=Array.isArray(usersResponse.users) ? usersResponse.users : [];
-    state.events=Array.isArray(eventsResponse.events) ? eventsResponse.events : [];
-    state.logs=Array.isArray(logsResponse.logs) ? logsResponse.logs : [];
+  const [
+    dashboardResult,
+    usersResult,
+    eventsResult,
+    logsResult,
+  ]=results;
 
-    if(subtitle) subtitle.textContent="Live SnapUp platform data — secure admin operations enabled.";
-  }catch(error){
-    console.error("Live admin data load failed:",error);
-    if(subtitle) subtitle.textContent="Live admin data could not be loaded.";
-    showToast(error.message || "Admin data could not be loaded.");
+  const failed=[];
+
+  if(dashboardResult.status==="fulfilled"){
+    state.dashboard=dashboardResult.value.dashboard || null;
+  }else{
+    console.error("Admin dashboard load failed:",dashboardResult.reason);
+    failed.push("Dashboard");
   }
+
+  if(usersResult.status==="fulfilled"){
+    state.users=Array.isArray(usersResult.value.users)
+      ? usersResult.value.users
+      : [];
+  }else{
+    console.error("Admin users load failed:",usersResult.reason);
+    failed.push("Users");
+  }
+
+  if(eventsResult.status==="fulfilled"){
+    state.events=Array.isArray(eventsResult.value.events)
+      ? eventsResult.value.events
+      : [];
+  }else{
+    console.error("Admin events load failed:",eventsResult.reason);
+    failed.push("Events");
+  }
+
+  if(logsResult.status==="fulfilled"){
+    state.logs=Array.isArray(logsResult.value.logs)
+      ? logsResult.value.logs
+      : [];
+  }else{
+    console.error("Admin logs load failed:",logsResult.reason);
+    failed.push("Logs");
+  }
+
+  if(!failed.length){
+    if(subtitle){
+      subtitle.textContent=
+        "Live SnapUp platform data — secure admin operations enabled.";
+    }
+    return;
+  }
+
+  if(failed.length===results.length){
+    if(subtitle) subtitle.textContent="Live admin data could not be loaded.";
+    showToast("Admin data could not be loaded.");
+    return;
+  }
+
+  if(subtitle){
+    subtitle.textContent=
+      `Live data loaded partially — ${failed.join(", ")} could not be loaded.`;
+  }
+
+  showToast(
+    `${failed.join(", ")} data could not be loaded. Other admin data is still available.`,
+  );
 }
 
 function lockRemainingActions(){
@@ -943,6 +1050,11 @@ $("#overlay").onclick=()=>{$("#sidebar").classList.remove("open");$("#overlay").
 $("#themeBtn").onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==="dark"?"light":"dark";localStorage.setItem("snapup-admin-theme",h.dataset.theme)};
 const savedTheme=localStorage.getItem("snapup-admin-theme"); if(savedTheme) document.documentElement.dataset.theme=savedTheme;
 
+populateCountrySelect($("#createUserCountry"), {
+  placeholder: "Select country",
+  locale: "en",
+});
+
 ["#quickCreateUser","#heroCreateUser","#opCreateUser","#createUserBtn"].forEach(s=>{
   const el=$(s);
   if(el) el.onclick=()=>{
@@ -965,6 +1077,7 @@ $("#userSearch").addEventListener("input",renderUsers); $("#userStatusFilter").a
 
 $("#eventSearch")?.addEventListener("input",renderEvents);
 $("#eventStatusFilter")?.addEventListener("change",renderEvents);
+$("#eventTypeFilter")?.addEventListener("change",renderEvents);
 $("#eventSort")?.addEventListener("change",renderEvents);
 $$("[data-period]").forEach(button=>{
   button.addEventListener("click",()=>{
@@ -1181,6 +1294,7 @@ $("#createUserForm").addEventListener("submit",async event=>{
       name:String(fields.get("name")||"").trim(),
       email:String(fields.get("email")||"").trim(),
       phone:String(fields.get("phone")||"").trim() || null,
+      country_code:String(fields.get("country_code")||"").trim().toUpperCase(),
       password,
     });
 
@@ -1219,6 +1333,7 @@ $("#createEventForm").addEventListener("submit",async event=>{
   try{
     await createAdminEventForUser(ownerId,{
       name:String(fields.get("name")||"").trim(),
+      event_type_code:String(fields.get("event_type_code")||"").trim(),
       date:String(fields.get("date")||"").trim(),
       location:String(fields.get("location")||"").trim() || null,
       plan:String(fields.get("plan")||"Free").toLowerCase(),
@@ -1417,6 +1532,125 @@ function analyticsTopStorage(events){
   }).join("");
 }
 
+
+function analyticsEventTypeBars(typeData){
+  const root=$("#analyticsEventTypeBars");
+  const represented=$("#analyticsEventTypesRepresented");
+  const subtitle=$("#analyticsEventTypeSubtitle");
+
+  if(!root) return;
+
+  const types=Array.isArray(typeData?.types) ? typeData.types : [];
+  const unknown=Number(typeData?.unknown_type_events||0);
+  const total=Number(typeData?.total_events||0);
+  const representedCount=Number(typeData?.types_represented||types.length);
+
+  if(represented){
+    represented.textContent=
+      `${analyticsNumber(representedCount)} ${representedCount===1?"type":"types"}`;
+  }
+
+  if(subtitle){
+    subtitle.textContent=
+      `${analyticsNumber(total)} events · ${analyticsNumber(unknown)} without type data`;
+  }
+
+  if(!types.length && !unknown){
+    chartEmpty(root,"No event type data exists yet.");
+    return;
+  }
+
+  const max=Math.max(1,...types.map(item=>Number(item.count||0)),unknown);
+
+  const rows=types.map(item=>{
+    const count=Number(item.count||0);
+    const width=Math.max(count>0?2:0,(count/max)*100);
+    const label=eventTypeLabel(item.event_type_code);
+    const percent=Number(item.percentage||0).toFixed(1);
+
+    return `<div class="hbar-row">
+      <span title="${escapeAttr(label)}">${escapeHtml(label)}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${width}%"></div></div>
+      <b>${analyticsNumber(count)} · ${percent}%</b>
+    </div>`;
+  });
+
+  if(unknown>0){
+    const width=Math.max(2,(unknown/max)*100);
+    const percent=total ? ((unknown/total)*100).toFixed(1) : "0.0";
+
+    rows.push(`<div class="hbar-row">
+      <span>Not set</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${width}%"></div></div>
+      <b>${analyticsNumber(unknown)} · ${percent}%</b>
+    </div>`);
+  }
+
+  root.innerHTML=rows.join("");
+}
+
+function analyticsCountryBars(countryData){
+  const root=$("#analyticsCountryBars");
+  const reached=$("#analyticsCountriesReached");
+  const subtitle=$("#analyticsCountrySubtitle");
+
+  if(!root) return;
+
+  const countries=Array.isArray(countryData?.countries)
+    ? countryData.countries
+    : [];
+  const unknown=Number(countryData?.unknown_country_users||0);
+  const total=Number(countryData?.total_customers||0);
+  const reachedCount=Number(countryData?.countries_reached||countries.length);
+
+  if(reached){
+    reached.textContent=`${analyticsNumber(reachedCount)} ${reachedCount===1?"country":"countries"}`;
+  }
+
+  if(subtitle){
+    subtitle.textContent=
+      `${analyticsNumber(total)} customer accounts · ${analyticsNumber(unknown)} without country data`;
+  }
+
+  if(!countries.length && !unknown){
+    chartEmpty(root,"No customer country data exists yet.");
+    return;
+  }
+
+  const max=Math.max(
+    1,
+    ...countries.map(item=>Number(item.count||0)),
+    unknown,
+  );
+
+  const rows=countries.map(item=>{
+    const count=Number(item.count||0);
+    const width=Math.max(count>0?2:0,(count/max)*100);
+    const name=getCountryName(item.country_code,"en");
+    const flag=getCountryFlag(item.country_code);
+    const percent=Number(item.percentage||0).toFixed(1);
+
+    return `<div class="hbar-row">
+      <span title="${escapeAttr(name)}">${escapeHtml(flag)} ${escapeHtml(name)}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${width}%"></div></div>
+      <b>${analyticsNumber(count)} · ${percent}%</b>
+    </div>`;
+  });
+
+  if(unknown>0){
+    const width=Math.max(2,(unknown/max)*100);
+    const percent=total ? ((unknown/total)*100).toFixed(1) : "0.0";
+
+    rows.push(`<div class="hbar-row">
+      <span>Not set</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${width}%"></div></div>
+      <b>${analyticsNumber(unknown)} · ${percent}%</b>
+    </div>`);
+  }
+
+  root.innerHTML=rows.join("");
+}
+
 function renderAnalytics(){
   const analytics=state.analytics;
   if(!analytics) return;
@@ -1457,6 +1691,8 @@ function renderAnalytics(){
   analyticsMediaBars("analyticsMediaChart",timeline);
   analyticsPackageDonut(analytics.package_mix || {});
   analyticsTopStorage(analytics.top_storage_events || []);
+  analyticsCountryBars(analytics.users_by_country || {});
+  analyticsEventTypeBars(analytics.events_by_type || {});
 }
 
 async function loadAnalytics(days=30){
@@ -1472,7 +1708,7 @@ async function loadAnalytics(days=30){
   const select=$("#analyticsPeriod");
   if(select) select.value=String(normalized);
 
-  ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars"].forEach(id=>{
+  ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars","analyticsCountryBars","analyticsEventTypeBars"].forEach(id=>{
     const root=document.getElementById(id);
     if(root) root.innerHTML=`<div class="event-empty"><strong>Loading analytics…</strong><span>Reading live SnapUp data.</span></div>`;
   });
@@ -1484,7 +1720,7 @@ async function loadAnalytics(days=30){
   }catch(error){
     console.error("Admin analytics load failed:",error);
     state.analytics=null;
-    ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars"].forEach(id=>{
+    ["analyticsGrowthChart","analyticsMediaChart","analyticsTopStorageBars","analyticsCountryBars","analyticsEventTypeBars"].forEach(id=>{
       chartEmpty(document.getElementById(id),"Analytics data could not be loaded.");
     });
     showToast(error.message || "Analytics data could not be loaded.");
@@ -1517,6 +1753,7 @@ async function openEvent(id){
     $("#eventDrawerOwner").textContent=`${e.ownerName || ownerName(e.ownerId)} (${e.ownerEmail || ownerEmail(e.ownerId)})`;
     $("#eventDrawerDate").textContent=e.date || "-";
     $("#eventDrawerLocation").textContent=e.location || "-";
+    $("#eventDrawerType").textContent=eventTypeLabel(e.type_code);
     $("#eventDrawerApproval").textContent=e.approval || "-";
     $("#eventDrawerVideo").textContent=e.video || "Allowed";
     $("#eventDrawerStorageLimit").textContent=e.storage_limit_display || "-";

@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const supabase = require("../config/supabaseClient");
 const { cleanText, normalizeEmail, validatePassword } = require("../utils/validation");
+const { normalizeCountryCode } = require("../utils/countries");
 const { setAuthCookie } = require("../utils/authCookie");
 const {
   RESEND_COOLDOWN_MS,
@@ -29,22 +30,34 @@ const createToken = (user) => {
 
 const register = async (req, res) => {
   try {
-    const { user_name, user_mail, user_phone, password, user_password } =
-      req.body;
+    const {
+      user_name,
+      user_mail,
+      user_phone,
+      user_country_code,
+      password,
+      user_password,
+    } = req.body;
 
     const rawPassword = password || user_password;
 
-    if (!user_name || !user_mail || !rawPassword) {
+    if (!user_name || !user_mail || !user_country_code || !rawPassword) {
       return res.status(400).json({
         success: false,
-        message: "İsim, mail ve şifre zorunludur.",
+        message: "İsim, mail, ülke ve şifre zorunludur.",
+        code: "REGISTER_FIELDS_REQUIRED",
       });
     }
 
     const validatedPassword = validatePassword(rawPassword);
     const normalizedMail = normalizeEmail(user_mail);
     const cleanName = cleanText(user_name, { min: 1, max: 100, field: "user_name" });
-    const cleanPhone = user_phone ? cleanText(user_phone, { max: 32, field: "user_phone" }) : null;
+    const cleanPhone = user_phone
+      ? cleanText(user_phone, { max: 32, field: "user_phone" })
+      : null;
+    const countryCode = normalizeCountryCode(user_country_code, {
+      required: true,
+    });
 
     const { data: existingUser, error: existingUserError } = await supabase
       .from("users")
@@ -76,15 +89,15 @@ const register = async (req, res) => {
           user_name: cleanName,
           user_mail: normalizedMail,
           user_phone: cleanPhone,
+          user_country_code: countryCode,
           password_hash: passwordHash,
           is_user_active: true,
           is_email_verified: false,
           email_verified_at: null,
-          user_role: "user",
         },
       ])
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
+        "user_id, user_name, user_mail, user_phone, user_country_code, user_role, user_created_at, is_user_active, is_email_verified, email_verified_at",
       )
       .single();
 
@@ -151,7 +164,7 @@ const login = async (req, res) => {
     const { data: user, error } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at, token_version, user_role",
+        "user_id, user_name, user_mail, user_phone, user_country_code, user_role, password_hash, user_created_at, is_user_active, is_email_verified, email_verified_at, token_version",
       )
       .eq("user_mail", normalizedMail)
       .maybeSingle();
@@ -195,12 +208,13 @@ const login = async (req, res) => {
       user_name: user.user_name,
       user_mail: user.user_mail,
       user_phone: user.user_phone,
+      user_country_code: user.user_country_code || null,
+      user_role: user.user_role || "user",
       user_created_at: user.user_created_at,
       is_user_active: user.is_user_active,
       is_email_verified: user.is_email_verified,
       email_verified_at: user.email_verified_at,
       token_version: Number(user.token_version) || 0,
-      user_role: user.user_role || "user",
     };
 
     const token = createToken(safeUser);
@@ -228,7 +242,7 @@ const getMe = async (req, res) => {
     const { data: user, error } = await supabase
       .from("users")
       .select(
-        "user_id, user_name, user_mail, user_phone, user_created_at, is_user_active, is_email_verified, email_verified_at, user_role",
+        "user_id, user_name, user_mail, user_phone, user_country_code, user_created_at, is_user_active, is_email_verified, email_verified_at",
       )
       .eq("user_id", userId)
       .maybeSingle();

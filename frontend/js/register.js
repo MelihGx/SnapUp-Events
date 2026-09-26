@@ -1,17 +1,24 @@
 import { API_URL as API_BASE_URL } from "./config.js?v=runtime-api-2";
 import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
+import { mountCountryCombobox } from "./countries.js?v=searchable-country-1";
 
 const registerForm = document.getElementById("registerForm");
 
 const userNameInput = document.getElementById("userName");
 const userMailInput = document.getElementById("userMail");
 const userPhoneInput = document.getElementById("userPhone");
+const userCountryInput = document.getElementById("userCountry");
+const userCountrySearchInput = document.getElementById("userCountrySearch");
+const userCountryCombobox = document.getElementById("userCountryCombobox");
+const userCountryList = document.getElementById("userCountryList");
+const userCountryToggle = document.getElementById("userCountryToggle");
 const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("confirmPassword");
 
 const userNameError = document.getElementById("userNameError");
 const userMailError = document.getElementById("userMailError");
 const userPhoneError = document.getElementById("userPhoneError");
+const userCountryError = document.getElementById("userCountryError");
 const passwordError = document.getElementById("passwordError");
 const confirmPasswordError = document.getElementById("confirmPasswordError");
 
@@ -20,6 +27,19 @@ const registerResult = document.getElementById("registerResult");
 const togglePassword = document.getElementById("togglePassword");
 
 const API_URL = `${API_BASE_URL}/api/auth/register`;
+
+const countryCombobox = mountCountryCombobox({
+  root: userCountryCombobox,
+  searchInput: userCountrySearchInput,
+  hiddenInput: userCountryInput,
+  menu: userCountryList,
+  toggleButton: userCountryToggle,
+  placeholder:
+    window.SnapUpI18n?.t?.("Select your country") || "Select your country",
+  noResultsText:
+    window.SnapUpI18n?.t?.("No countries found") || "No countries found",
+});
+
 const registerTurnstile = mountTurnstile({
   fieldId: "registerTurnstileField",
   widgetId: "registerTurnstileWidget",
@@ -31,6 +51,7 @@ function clearErrors() {
   userNameError.textContent = "";
   userMailError.textContent = "";
   userPhoneError.textContent = "";
+  userCountryError.textContent = "";
   passwordError.textContent = "";
   confirmPasswordError.textContent = "";
   registerResult.textContent = "";
@@ -53,6 +74,11 @@ togglePassword.addEventListener("click", () => {
   togglePassword.textContent = isPasswordHidden ? "Hide" : "Show";
 });
 
+userCountrySearchInput?.addEventListener("input", () => {
+  userCountrySearchInput.setCustomValidity("");
+  userCountryError.textContent = "";
+});
+
 registerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearErrors();
@@ -60,6 +86,7 @@ registerForm.addEventListener("submit", async (event) => {
   const user_name = userNameInput.value.trim();
   const user_mail = userMailInput.value.trim();
   const user_phone = userPhoneInput.value.trim();
+  const user_country_code = userCountryInput.value.trim().toUpperCase();
   const password = passwordInput.value;
   const confirmPassword = confirmPasswordInput.value;
 
@@ -73,6 +100,16 @@ registerForm.addEventListener("submit", async (event) => {
   if (!user_mail) {
     userMailError.textContent = "Email address is required.";
     hasError = true;
+  }
+
+  if (!user_country_code) {
+    userCountryError.textContent = "Country is required.";
+    userCountrySearchInput.setCustomValidity(
+      "Please select a country from the list.",
+    );
+    hasError = true;
+  } else {
+    userCountrySearchInput.setCustomValidity("");
   }
 
   if (!password) {
@@ -123,6 +160,7 @@ registerForm.addEventListener("submit", async (event) => {
         user_name,
         user_mail,
         user_phone,
+        user_country_code,
         password,
         language_code: window.SnapUpI18n?.language || "en",
         turnstile_token,
