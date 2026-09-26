@@ -422,8 +422,6 @@ const settingRequireApproval = document.getElementById(
 const settingAllowGalleryView = document.getElementById(
   "settingAllowGalleryView",
 );
-const settingMaxStorage = document.getElementById("settingMaxStorage");
-const settingMaxUpload = document.getElementById("settingMaxUpload");
 
 const guestNameInput = document.getElementById("guestName");
 const uploadTypeButtons = Array.from(
@@ -1633,9 +1631,7 @@ function fillSettingsForm(settings) {
     !settingAllowComments ||
     !settingAllowLikes ||
     !settingRequireApproval ||
-    !settingAllowGalleryView ||
-    !settingMaxStorage ||
-    !settingMaxUpload
+    !settingAllowGalleryView
   ) {
     return;
   }
@@ -1648,8 +1644,6 @@ function fillSettingsForm(settings) {
     settingAllowLikes.checked = true;
     settingRequireApproval.checked = false;
     settingAllowGalleryView.checked = true;
-    settingMaxStorage.value = 500;
-    settingMaxUpload.value = 20;
     return;
   }
 
@@ -1660,8 +1654,6 @@ function fillSettingsForm(settings) {
   settingAllowLikes.checked = Boolean(settings.allow_likes);
   settingRequireApproval.checked = Boolean(settings.require_approval);
   settingAllowGalleryView.checked = settings.allow_gallery_view !== false;
-  settingMaxStorage.value = settings.max_storage_per_guest || 500;
-  settingMaxUpload.value = settings.max_upload_per_guest || 20;
 }
 
 function renderSettings(settings) {
@@ -3180,8 +3172,12 @@ function getSettingsPayload() {
     allow_likes: settingAllowLikes.checked,
     require_approval: settingRequireApproval.checked,
     allow_gallery_view: settingAllowGalleryView.checked,
-    max_storage_per_guest: Number(settingMaxStorage.value) || 500,
-    max_upload_per_guest: Number(settingMaxUpload.value) || 20,
+    // These legacy limits are intentionally hidden from the UI. Preserve the
+    // current values so saving another setting does not silently reset them.
+    max_storage_per_guest:
+      Number(currentSettings?.max_storage_per_guest) || 500,
+    max_upload_per_guest:
+      Number(currentSettings?.max_upload_per_guest) || 20,
   };
 }
 
