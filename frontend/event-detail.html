@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=event-description-edit-1"
+      href="css/event-detail.css?v=cover-layout-v4"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -177,27 +177,31 @@
             />
 
             <div class="detail-cover-overlay">
-              <div class="detail-cover-dashboard">
-                <div class="detail-cover-copy">
-                  <span class="rec-chip"><i></i> EVENT DETAIL</span>
-                  <div class="event-title-row">
-                    <h1 id="eventTitle">Event title</h1>
-                    <button
-                      type="button"
-                      class="event-title-edit-button"
-                      id="eventNameEditButton"
-                      aria-label="Change event name"
-                      title="Change event name"
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
-                        <path d="m13.8 7.2 3 3"></path>
-                      </svg>
-                    </button>
-                  </div>
-                  <p id="eventDescription">Event description</p>
-                </div>
+              <div class="detail-cover-badge">
+                <span class="rec-chip"><i></i> EVENT DETAIL</span>
+              </div>
 
+              <div class="detail-cover-copy detail-cover-copy--hero-text">
+                <div class="event-title-row">
+                  <h1 id="eventTitle">Event title</h1>
+                </div>
+                <p id="eventDescription">Event description</p>
+              </div>
+
+              <div class="detail-cover-dashboard detail-cover-dashboard--stats-only">
+                <button
+                  type="button"
+                  class="event-title-edit-button event-title-edit-button--card"
+                  id="eventNameEditButton"
+                  aria-label="Change event name"
+                  title="Change event name"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
+                    <path d="m13.8 7.2 3 3"></path>
+                  </svg>
+                  <span>Change name</span>
+                </button>
                 <section
                   class="event-statistics-quick"
                   aria-labelledby="eventStatisticsQuickTitle"

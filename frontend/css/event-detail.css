@@ -6687,3 +6687,749 @@ html[data-theme="dark"] .event-detail-page {
   color: var(--detail-text-soft);
   opacity: 0.72;
 }
+
+
+/* =========================================================
+   Event Detail hero — title directly on the cover image
+   ========================================================= */
+
+/* Give the cover a little more breathing room for long event names. */
+.detail-cover {
+  min-height: clamp(480px, 48vw, 610px);
+}
+
+/* Strengthen only the readable zones; keep the image visible. */
+.detail-cover.has-image::after {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(10, 6, 20, 0.82) 0%,
+      rgba(10, 6, 20, 0.52) 34%,
+      rgba(10, 6, 20, 0.12) 67%,
+      rgba(10, 6, 20, 0.04) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(10, 6, 20, 0.72) 0%,
+      rgba(10, 6, 20, 0.24) 36%,
+      transparent 68%
+    );
+}
+
+/* The event identity now lives directly on the image. */
+.detail-cover-copy--on-image {
+  position: absolute;
+  z-index: 3;
+  left: clamp(24px, 3.4vw, 42px);
+  bottom: clamp(30px, 4vw, 46px);
+  width: min(52%, 620px);
+  max-width: 620px;
+  color: #ffffff;
+  pointer-events: auto;
+  text-shadow: 0 3px 18px rgba(5, 2, 14, 0.42);
+}
+
+.detail-cover-copy--on-image .rec-chip {
+  position: static;
+  display: inline-flex;
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(15, 9, 30, 0.58);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(7, 3, 18, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.detail-cover-copy--on-image .event-title-row {
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.detail-cover-copy--on-image .event-title-row h1 {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(34px, 4.2vw, 60px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+.detail-cover-copy--on-image > p {
+  max-width: 560px;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(12px, 1.1vw, 14px);
+  line-height: 1.5;
+  text-shadow: 0 2px 12px rgba(5, 2, 14, 0.4);
+}
+
+.detail-cover-copy--on-image .event-title-edit-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  margin: 0 0 4px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(16, 9, 31, 0.58);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 7px 20px rgba(5, 2, 14, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.detail-cover-copy--on-image .event-title-edit-button:hover {
+  color: #ffffff;
+  background: rgba(123, 63, 242, 0.72);
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+/* Statistics remain a separate compact floating panel. */
+.detail-cover-dashboard--stats-only {
+  right: clamp(20px, 2.8vw, 30px);
+  bottom: clamp(20px, 2.8vw, 30px);
+  left: auto;
+  width: min(51%, 610px);
+  display: block;
+  padding: 14px;
+  border-radius: 22px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick {
+  width: 100%;
+}
+
+/* The chip/title styles formerly scoped to the dashboard should not
+   affect the title that now sits directly on the image. */
+.detail-cover-dashboard--stats-only > .detail-cover-copy {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .detail-cover {
+    min-height: 600px;
+  }
+
+  .detail-cover-copy--on-image {
+    top: 112px;
+    right: 28px;
+    bottom: auto;
+    width: auto;
+    max-width: 720px;
+  }
+
+  .detail-cover-copy--on-image .event-title-row h1 {
+    max-width: 720px;
+    font-size: clamp(34px, 5vw, 56px);
+  }
+
+  .detail-cover-dashboard--stats-only {
+    right: 22px;
+    bottom: 22px;
+    left: 22px;
+    width: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail-cover {
+    min-height: 650px;
+  }
+
+  .detail-cover-copy--on-image {
+    top: 104px;
+    right: 20px;
+    left: 20px;
+    max-width: none;
+  }
+
+  .detail-cover-copy--on-image .rec-chip {
+    margin-bottom: 12px;
+  }
+
+  .detail-cover-copy--on-image .event-title-row {
+    align-items: flex-start;
+  }
+
+  .detail-cover-copy--on-image .event-title-row h1 {
+    font-size: clamp(31px, 10vw, 46px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+
+  .detail-cover-copy--on-image > p {
+    max-width: 92%;
+    margin-top: 10px;
+  }
+
+  .detail-cover-copy--on-image .event-title-edit-button {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .detail-cover-dashboard--stats-only {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    padding: 12px;
+    border-radius: 19px;
+  }
+}
+
+/*
+ * Preserve the dark-mode page fix: theme.css otherwise paints the centered
+ * event-detail page container as a solid dark block.
+ */
+html[data-theme="dark"] .event-detail-page {
+  background-color: transparent;
+}
+
+
+/* =========================================================
+   Event Detail hero layout v2
+   - chip in the top-left badge area
+   - title + description in a wider center-left content area
+   ========================================================= */
+
+.detail-cover-badge {
+  position: absolute;
+  z-index: 4;
+  top: clamp(18px, 2.2vw, 26px);
+  left: clamp(18px, 2.4vw, 28px);
+  pointer-events: none;
+}
+
+.detail-cover-badge .rec-chip {
+  position: static;
+  display: inline-flex;
+  margin: 0;
+  color: rgba(255,255,255,0.92);
+  background: rgba(15, 9, 30, 0.60);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 8px 24px rgba(7, 3, 18, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.detail-cover-copy--hero-text {
+  position: absolute;
+  z-index: 3;
+  top: clamp(72px, 11vw, 112px);
+  left: clamp(30px, 4.2vw, 38px);
+  right: clamp(210px, 8vw, 260px);
+  bottom: auto;
+  width: auto;
+  max-width: min(72%, 700px);
+  color: #ffffff;
+  pointer-events: auto;
+  text-shadow: 0 3px 18px rgba(5, 2, 14, 0.42);
+}
+
+.detail-cover-copy--hero-text .event-title-row {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.detail-cover-copy--hero-text .event-title-row h1 {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(40px, 5vw, 76px);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  text-wrap: balance;
+}
+
+.detail-cover-copy--hero-text > p {
+  max-width: 560px;
+  margin: 14px 0 0;
+  color: rgba(255,255,255,0.84);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.52;
+  text-shadow: 0 2px 12px rgba(5, 2, 14, 0.4);
+}
+
+.detail-cover-copy--hero-text .event-title-edit-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  margin-top: 8px;
+  color: rgba(255,255,255,0.88);
+  background: rgba(16, 9, 31, 0.58);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 7px 20px rgba(5, 2, 14, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.detail-cover-copy--hero-text .event-title-edit-button:hover {
+  color: #ffffff;
+  background: rgba(123, 63, 242, 0.72);
+  border-color: rgba(255,255,255,0.26);
+}
+
+.detail-cover-dashboard--stats-only {
+  right: clamp(20px, 2.8vw, 30px);
+  bottom: clamp(20px, 2.8vw, 30px);
+  left: auto;
+  width: min(49%, 580px);
+  display: block;
+  padding: 14px;
+  border-radius: 22px;
+}
+
+/* neutralize previous v1 title-on-image block */
+.detail-cover-copy--on-image {
+  position: static;
+  inset: auto;
+  width: auto;
+  max-width: none;
+}
+
+@media (max-width: 1240px) {
+  .detail-cover-copy--hero-text {
+    top: clamp(78px, 12vw, 118px);
+    right: 26px;
+    max-width: min(76%, 760px);
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    font-size: clamp(38px, 5.2vw, 68px);
+  }
+}
+
+@media (max-width: 980px) {
+  .detail-cover {
+    min-height: 620px;
+  }
+
+  .detail-cover-copy--hero-text {
+    top: 96px;
+    right: 24px;
+    left: 24px;
+    max-width: none;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    font-size: clamp(34px, 6vw, 56px);
+  }
+
+  .detail-cover-dashboard--stats-only {
+    right: 18px;
+    left: 18px;
+    width: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail-cover {
+    min-height: 660px;
+  }
+
+  .detail-cover-badge {
+    top: 16px;
+    left: 16px;
+  }
+
+  .detail-cover-copy--hero-text {
+    top: 84px;
+    left: 18px;
+    right: 18px;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row {
+    gap: 10px;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    font-size: clamp(30px, 10vw, 46px);
+    line-height: 0.98;
+  }
+
+  .detail-cover-copy--hero-text > p {
+    max-width: 95%;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .detail-cover-copy--hero-text .event-title-edit-button {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    margin-top: 6px;
+  }
+
+  .detail-cover-dashboard--stats-only {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    width: auto;
+    padding: 12px;
+    border-radius: 19px;
+  }
+}
+
+
+/* =========================================================
+   Event Detail hero layout v3
+   - wider stats card
+   - change name button moved onto white stats card
+   ========================================================= */
+
+.detail-cover-dashboard--stats-only {
+  right: clamp(18px, 2.2vw, 28px);
+  bottom: clamp(18px, 2.4vw, 28px);
+  left: auto;
+  width: min(58%, 680px);
+  display: block;
+  padding: 18px 16px 14px;
+  border-radius: 24px;
+}
+
+.detail-cover-copy--hero-text {
+  right: clamp(230px, 10vw, 300px);
+  max-width: min(70%, 740px);
+}
+
+.detail-cover-copy--hero-text .event-title-row {
+  gap: 0;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick {
+  width: 100%;
+}
+
+.event-title-edit-button--card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px auto;
+  padding: 10px 14px;
+  min-height: 40px;
+  width: fit-content;
+  color: #5b4676;
+  background: rgba(245, 241, 255, 0.98);
+  border: 1px solid rgba(126, 83, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(42, 26, 92, 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.event-title-edit-button--card svg {
+  width: 16px;
+  height: 16px;
+}
+
+.event-title-edit-button--card span {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.event-title-edit-button--card:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, #7b3ff2 0%, #e9519b 100%);
+  border-color: transparent;
+  box-shadow: 0 12px 28px rgba(123, 63, 242, 0.24);
+}
+
+@media (max-width: 1240px) {
+  .detail-cover-dashboard--stats-only {
+    width: min(61%, 660px);
+  }
+
+  .detail-cover-copy--hero-text {
+    right: 26px;
+    max-width: min(74%, 760px);
+  }
+}
+
+@media (max-width: 980px) {
+  .detail-cover-dashboard--stats-only {
+    right: 18px;
+    left: 18px;
+    width: auto;
+    padding: 16px 14px 12px;
+  }
+
+  .event-title-edit-button--card {
+    margin-bottom: 10px;
+  }
+
+  .detail-cover-copy--hero-text {
+    right: 24px;
+    left: 24px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail-cover-dashboard--stats-only {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    width: auto;
+    padding: 14px 12px 12px;
+    border-radius: 20px;
+  }
+
+  .event-title-edit-button--card {
+    gap: 7px;
+    padding: 9px 12px;
+    border-radius: 12px;
+  }
+
+  .event-title-edit-button--card span {
+    font-size: 12px;
+  }
+}
+
+
+/* =========================================================
+   Event Detail hero layout v4
+   Fit the white statistics card completely inside the bottom band.
+   ========================================================= */
+
+.detail-cover-dashboard--stats-only {
+  left: clamp(20px, 2.8vw, 28px);
+  right: clamp(20px, 2.8vw, 28px);
+  bottom: clamp(14px, 2vw, 18px);
+  width: auto;
+  max-width: none;
+  padding: 10px 12px 11px;
+  border-radius: 20px;
+}
+
+/* Keep Change name inside the card, but make it a compact control. */
+.event-title-edit-button--card {
+  min-height: 30px;
+  margin: 0 0 6px auto;
+  padding: 6px 10px;
+  gap: 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(42, 26, 92, 0.06);
+}
+
+.event-title-edit-button--card svg {
+  width: 14px;
+  height: 14px;
+}
+
+.event-title-edit-button--card span {
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Compress the statistics area vertically so the complete panel stays
+   inside the lower red area shown in the reference screenshot. */
+.detail-cover-dashboard--stats-only .event-statistics-quick {
+  padding: 8px;
+  border-radius: 15px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-head {
+  margin-bottom: 6px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-head > div > span {
+  margin-bottom: 2px;
+  font-size: 7px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-head h2 {
+  font-size: 11px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-head button {
+  min-height: 27px;
+  padding: 5px 8px;
+  border-radius: 9px;
+  font-size: 8px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-grid {
+  gap: 6px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-grid article {
+  min-height: 56px;
+  column-gap: 6px;
+  row-gap: 3px;
+  padding: 7px 8px;
+  border-radius: 11px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-grid article > svg {
+  width: 14px;
+  height: 14px;
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-grid article > span {
+  font-size: clamp(8px, 0.72vw, 10px);
+}
+
+.detail-cover-dashboard--stats-only .event-statistics-quick-grid article > strong {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.detail-cover-dashboard--stats-only .event-storage-quick {
+  margin-top: 6px;
+  padding: 6px 8px 7px;
+  border-radius: 10px;
+}
+
+.detail-cover-dashboard--stats-only .event-storage-quick__meta {
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+.detail-cover-dashboard--stats-only .event-storage-quick__meta strong {
+  font-size: 8px;
+}
+
+.detail-cover-dashboard--stats-only .event-storage-quick__meta b {
+  min-width: 31px;
+  min-height: 16px;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 8px;
+}
+
+.detail-cover-dashboard--stats-only .event-storage-quick__track {
+  height: 5px;
+}
+
+/* Leave a little more visual room above the full-width bottom card. */
+.detail-cover-copy--hero-text {
+  max-width: min(72%, 760px);
+}
+
+@media (max-width: 980px) {
+  .detail-cover-dashboard--stats-only {
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
+    width: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail-cover-dashboard--stats-only {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 9px;
+    border-radius: 18px;
+  }
+
+  .event-title-edit-button--card {
+    min-height: 28px;
+    margin-bottom: 5px;
+    padding: 5px 9px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-statistics-quick-grid {
+    gap: 5px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-statistics-quick-grid article {
+    min-height: 52px;
+    padding: 6px;
+  }
+}
+
+
+/* =========================================================
+   Mobile cover action buttons: icon-only
+   ========================================================= */
+@media (max-width: 720px) {
+  .event-cover-actions {
+    top: 14px;
+    right: 14px;
+    left: 14px;
+    gap: 8px;
+  }
+
+  .event-cover-change-button,
+  .event-cover-remove-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    gap: 0;
+    border-radius: 14px;
+    font-size: 0;
+  }
+
+  .event-cover-change-button span,
+  .event-cover-remove-button span {
+    display: none;
+  }
+
+  .event-cover-change-button svg,
+  .event-cover-remove-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+/* =========================================================
+   Event title alignment — centered on the cover
+   ========================================================= */
+.detail-cover-copy--hero-text {
+  left: clamp(28px, 4vw, 42px);
+  right: clamp(28px, 4vw, 42px);
+  width: auto;
+  max-width: none;
+  text-align: center;
+}
+
+.detail-cover-copy--hero-text .event-title-row {
+  justify-content: center;
+  width: 100%;
+}
+
+.detail-cover-copy--hero-text .event-title-row h1 {
+  width: min(100%, 920px);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.detail-cover-copy--hero-text > p {
+  margin-inline: auto;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .detail-cover-copy--hero-text {
+    left: 22px;
+    right: 22px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail-cover-copy--hero-text {
+    left: 18px;
+    right: 18px;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1,
+  .detail-cover-copy--hero-text > p {
+    text-align: center;
+  }
+}
