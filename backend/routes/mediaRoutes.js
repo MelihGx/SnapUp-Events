@@ -439,135 +439,243 @@ router.post(
   verifyTurnstile("guest_join"),
   optionalAuth,
   async (req, res) => {
-  try {
-    const { event_id, guest_name } = req.body;
+    try {
+      const { event_id, guest_name } = req.body;
 
-    if (!event_id) {
-      return res.status(400).json({
-        success: false,
-        message: "event_id is required.",
-      });
-    }
-
-    if (!guest_name || guest_name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "guest_name is required.",
-      });
-    }
-
-    const cleanGuestName = cleanText(guest_name, { min: 1, max: 80, field: "guest_name" });
-    const uploadStatus = await getUploadStatusForEvent(event_id);
-    if (uploadStatus.onlyUsers && !req.user?.user_id) {
-      return res.status(401).json({ success: false, message: "A registered user session is required.", code: "REGISTERED_USERS_ONLY" });
-    }
-
-    const { data: existingGuests, error: existingGuestError } = await supabase
-      .from("event_guests")
-      .select("guest_id, event_id, guest_name, user_id, guest_access_token_hash")
-      .eq("event_id", event_id)
-      .ilike("guest_name", cleanGuestName);
-
-    if (existingGuestError) {
-      return res.status(500).json({
-        success: false,
-        message: "Guest could not be checked.",
-        error: existingGuestError.message,
-      });
-    }
-
-    const currentUserId = req.user?.user_id || null;
-    const existingGuestToken = String(req.get("x-guest-token") || "");
-    const validatedSession = findGuestForSession(
-      existingGuests || [],
-      existingGuestToken,
-      event_id,
-    );
-    const reusableGuest =
-      validatedSession?.guest ||
-      (currentUserId
-        ? existingGuests?.find(
-            (item) => String(item.user_id || "") === String(currentUserId),
-          )
-        : null);
-
-    if (reusableGuest) {
-      if (
-        reusableGuest.user_id &&
-        currentUserId &&
-        String(reusableGuest.user_id) !== String(currentUserId)
-      ) {
-        return res.status(403).json({
+      if (!event_id) {
+        return res.status(400).json({
           success: false,
-          message: "This guest session belongs to another registered user.",
-          code: "REGISTERED_USER_SESSION_MISMATCH",
+          message: "event_id is required.",
         });
       }
 
-      const refreshed = await refreshGuestSession(
-        reusableGuest,
-        currentUserId || reusableGuest.user_id || null,
+      const currentUserId = req.user?.user_id || null;
+      const registeredUserName = currentUserId
+        ? cleanText(req.user?.user_name || "", {
+            min: 1,
+            max: 80,
+            field: "user_name",
+          })
+        : null;
+
+      if (!currentUserId && (!guest_name || guest_name.trim() === "")) {
+        return res.status(400).json({
+          success: false,
+          message: "guest_name is required.",
+        });
+      }
+
+      // Signed-in users get their account name as the default, but they may
+      // edit the display name used for this event/upload.
+      const requestedGuestName = String(guest_name || "").trim();
+      const cleanGuestName = requestedGuestName
+        ? cleanText(requestedGuestName, {
+            min: 1,
+            max: 80,
+            field: "guest_name",
+          })
+        : registeredUserName;
+
+      const uploadStatus = await getUploadStatusForEvent(event_id);
+
+      if (uploadStatus.onlyUsers && !currentUserId) {
+        return res.status(401).json({
+          success: false,
+          message: "A registered user session is required.",
+          code: "REGISTERED_USERS_ONLY",
+        });
+      }
+
+      let registeredGuest = null;
+
+      if (currentUserId) {
+        const { data, error } = await supabase
+          .from("event_guests")
+          .select(
+            "guest_id, event_id, guest_name, user_id, guest_access_token_hash",
+          )
+          .eq("event_id", event_id)
+          .eq("user_id", currentUserId)
+          .maybeSingle();
+
+        if (error) {
+          return res.status(500).json({
+            success: false,
+            message: "Registered guest could not be checked.",
+            error: error.message,
+          });
+        }
+
+        registeredGuest = data || null;
+      }
+
+      const { data: sameNameGuests, error: sameNameError } = await supabase
+        .from("event_guests")
+        .select(
+          "guest_id, event_id, guest_name, user_id, guest_access_token_hash",
+        )
+        .eq("event_id", event_id)
+        .ilike("guest_name", cleanGuestName);
+
+      if (sameNameError) {
+        return res.status(500).json({
+          success: false,
+          message: "Guest could not be checked.",
+          error: sameNameError.message,
+        });
+      }
+
+      if (registeredGuest) {
+        const nameCollision = (sameNameGuests || []).find(
+          (item) =>
+            String(item.guest_id) !== String(registeredGuest.guest_id),
+        );
+
+        if (nameCollision) {
+          return res.status(409).json({
+            success: false,
+            message:
+              "Your registered account name is already in use in this event.",
+            code: "REGISTERED_NAME_IN_USE",
+          });
+        }
+
+        if (registeredGuest.guest_name !== cleanGuestName) {
+          const { data: updatedGuest, error: updateError } = await supabase
+            .from("event_guests")
+            .update({ guest_name: cleanGuestName })
+            .eq("guest_id", registeredGuest.guest_id)
+            .eq("event_id", event_id)
+            .eq("user_id", currentUserId)
+            .select(
+              "guest_id, event_id, guest_name, user_id, guest_access_token_hash",
+            )
+            .single();
+
+          if (updateError || !updatedGuest) {
+            return res.status(500).json({
+              success: false,
+              message: "Registered guest name could not be synchronized.",
+              error: updateError?.message || "Updated guest could not be read.",
+            });
+          }
+
+          registeredGuest = updatedGuest;
+        }
+
+        const refreshed = await refreshGuestSession(
+          registeredGuest,
+          currentUserId,
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: "Registered guest session refreshed successfully.",
+          guest: refreshed.guest,
+          guest_access_token: refreshed.guestToken,
+        });
+      }
+
+      const existingGuestToken = String(req.get("x-guest-token") || "");
+      const validatedSession = findGuestForSession(
+        sameNameGuests || [],
+        existingGuestToken,
+        event_id,
       );
 
-      return res.status(200).json({
-        success: true,
-        message: "Guest session refreshed successfully.",
-        guest: refreshed.guest,
-        guest_access_token: refreshed.guestToken,
+      if (validatedSession?.guest) {
+        if (
+          validatedSession.guest.user_id &&
+          currentUserId &&
+          String(validatedSession.guest.user_id) !== String(currentUserId)
+        ) {
+          return res.status(403).json({
+            success: false,
+            message: "This guest session belongs to another registered user.",
+            code: "REGISTERED_USER_SESSION_MISMATCH",
+          });
+        }
+
+        const refreshed = await refreshGuestSession(
+          validatedSession.guest,
+          currentUserId || validatedSession.guest.user_id || null,
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: "Guest session refreshed successfully.",
+          guest: refreshed.guest,
+          guest_access_token: refreshed.guestToken,
+        });
+      }
+
+      if (sameNameGuests && sameNameGuests.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message: currentUserId
+            ? "Your registered account name is already in use in this event."
+            : "This guest name is already in use. Choose another name.",
+          code: currentUserId
+            ? "REGISTERED_NAME_IN_USE"
+            : "GUEST_NAME_IN_USE",
+        });
+      }
+
+      const { data, error } = await supabase
+        .from("event_guests")
+        .insert({
+          event_id,
+          guest_name: cleanGuestName,
+          user_id: currentUserId,
+        })
+        .select("guest_id, event_id, guest_name, user_id")
+        .single();
+
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Guest could not be created.",
+          error: error.message,
+        });
+      }
+
+      const guestToken = issueGuestToken({
+        guestId: data.guest_id,
+        eventId: data.event_id,
+        userId: data.user_id,
       });
-    }
 
-    if (existingGuests && existingGuests.length > 0) {
-      return res.status(409).json({ success: false, message: "This guest name is already in use. Choose another name.", code: "GUEST_NAME_IN_USE" });
-    }
+      const { error: tokenError } = await supabase
+        .from("event_guests")
+        .update({ guest_access_token_hash: hashGuestToken(guestToken) })
+        .eq("guest_id", data.guest_id);
 
-    const { data, error } = await supabase
-      .from("event_guests")
-      .insert({
-        event_id,
-        guest_name: cleanGuestName,
-        user_id: req.user?.user_id || null,
-      })
-      .select("guest_id, event_id, guest_name, user_id")
-      .single();
+      if (tokenError) {
+        throw createHttpError("Guest session could not be created.", 500);
+      }
 
-    if (error) {
-      return res.status(500).json({
+      return res.status(201).json({
+        success: true,
+        message: "Guest created successfully.",
+        guest: {
+          guest_id: data.guest_id,
+          event_id: data.event_id,
+          guest_name: data.guest_name,
+          user_id: data.user_id,
+        },
+        guest_access_token: guestToken,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
         success: false,
-        message: "Guest could not be created.",
+        message:
+          error.statusCode && error.statusCode < 500
+            ? error.message
+            : "Guest creation failed.",
+        code: error.code || "GUEST_CREATION_FAILED",
         error: error.message,
       });
     }
-
-    const guestToken = issueGuestToken({ guestId: data.guest_id, eventId: data.event_id, userId: data.user_id });
-    const { error: tokenError } = await supabase
-      .from("event_guests")
-      .update({ guest_access_token_hash: hashGuestToken(guestToken) })
-      .eq("guest_id", data.guest_id);
-    if (tokenError) throw createHttpError("Guest session could not be created.", 500);
-
-    return res.status(201).json({
-      success: true,
-      message: "Guest created successfully.",
-      guest: {
-        guest_id: data.guest_id,
-        event_id: data.event_id,
-        guest_name: data.guest_name,
-        user_id: data.user_id,
-      },
-      guest_access_token: guestToken,
-    });
-  } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message:
-        error.statusCode && error.statusCode < 500
-          ? error.message
-          : "Guest creation failed.",
-      code: error.code || "GUEST_CREATION_FAILED",
-      error: error.message,
-    });
-  }
   },
 );
 

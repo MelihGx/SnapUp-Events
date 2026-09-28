@@ -31,6 +31,60 @@ function getUserAuthHeaders() {
   return userToken ? { Authorization: `Bearer ${userToken}` } : {};
 }
 
+function readStoredRegisteredUser() {
+  if (!getUserToken()) return null;
+
+  try {
+    const user = JSON.parse(localStorage.getItem("snapup_user") || "null");
+    return user && typeof user === "object" ? user : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function applyRegisteredUploaderName(user) {
+  const input = document.getElementById("joinGuestName");
+  const userName = String(user?.user_name || "").trim();
+
+  if (!input || !userName) return false;
+
+  // Only prefill the account name. The user may edit it before upload.
+  if (!input.value.trim() || input.dataset.accountPrefilled === "true") {
+    input.value = userName;
+    input.dataset.accountPrefilled = "true";
+  }
+  input.readOnly = false;
+  input.removeAttribute("aria-readonly");
+  input.dataset.registeredName = "true";
+  return true;
+}
+
+async function hydrateRegisteredUploaderName() {
+  if (!getUserToken()) return;
+
+  applyRegisteredUploaderName(readStoredRegisteredUser());
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...getUserAuthHeaders(),
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.success || !data.user) return;
+
+    localStorage.setItem("snapup_user", JSON.stringify(data.user));
+    applyRegisteredUploaderName(data.user);
+  } catch (_error) {
+    // A cached profile can still provide the UX prefill. The backend remains
+    // authoritative and will validate the authenticated account name.
+  }
+}
+
 function createApiError(response, data, fallbackMessage) {
   const error = new Error(data.message || data.error || fallbackMessage);
   error.code = data.code || "";
@@ -1006,6 +1060,7 @@ export function initJoinUploadModal() {
   initFormSubmit();
   initUploadSuccessPopup();
   updateMediaFields();
+  hydrateRegisteredUploaderName();
 
   const params = new URLSearchParams(window.location.search);
   const codeFromUrl = params.get("code");

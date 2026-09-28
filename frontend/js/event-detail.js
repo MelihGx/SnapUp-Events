@@ -424,6 +424,62 @@ const settingAllowGalleryView = document.getElementById(
 );
 
 const guestNameInput = document.getElementById("guestName");
+
+function readStoredUploaderUser() {
+  try {
+    const user = JSON.parse(localStorage.getItem("snapup_user") || "null");
+    return user && typeof user === "object" ? user : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function applyAccountNameToUpload(user) {
+  const userName = String(user?.user_name || "").trim();
+
+  if (!guestNameInput || !userName) return false;
+
+  // Only prefill the account name. The user may edit it before upload.
+  if (
+    !guestNameInput.value.trim() ||
+    guestNameInput.dataset.accountPrefilled === "true"
+  ) {
+    guestNameInput.value = userName;
+    guestNameInput.dataset.accountPrefilled = "true";
+  }
+  guestNameInput.readOnly = false;
+  guestNameInput.removeAttribute("aria-readonly");
+  guestNameInput.dataset.registeredName = "true";
+  return true;
+}
+
+async function hydrateAccountNameForUpload() {
+  applyAccountNameToUpload(readStoredUploaderUser());
+
+  if (!token) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+      await logout();
+      return;
+    }
+
+    if (!response.ok || !data.success || !data.user) return;
+
+    localStorage.setItem("snapup_user", JSON.stringify(data.user));
+    applyAccountNameToUpload(data.user);
+  } catch (_error) {
+    // The backend still enforces the authenticated account name.
+  }
+}
+
 const uploadTypeButtons = Array.from(
   document.querySelectorAll("[data-upload-type]"),
 );
@@ -5088,4 +5144,5 @@ if (approveAllImagesButton) {
 }
 
 setupMobileSectionNavigation();
+hydrateAccountNameForUpload();
 loadEventDetail();

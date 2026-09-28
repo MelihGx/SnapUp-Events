@@ -16,7 +16,7 @@ module.exports = async function optionalAuth(req, _res, next) {
 
     const { data: user, error } = await supabase
       .from("users")
-      .select("user_id, user_mail, is_user_active, token_version")
+      .select("user_id, user_name, user_mail, is_user_active, token_version")
       .eq("user_id", decoded.user_id)
       .maybeSingle();
 
@@ -25,7 +25,11 @@ module.exports = async function optionalAuth(req, _res, next) {
       user?.is_user_active &&
       Number(user.token_version || 0) === Number(decoded.token_version || 0)
     ) {
-      req.user = { user_id: user.user_id, user_mail: user.user_mail };
+      req.user = {
+        user_id: user.user_id,
+        user_name: user.user_name,
+        user_mail: user.user_mail,
+      };
     }
   } catch (_error) {
     // Public routes decide whether an authenticated user is required.
