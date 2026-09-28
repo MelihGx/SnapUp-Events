@@ -6,6 +6,7 @@ const { once } = require("events");
 const { ZipArchive } = require("archiver");
 const jwt = require("jsonwebtoken");
 const PDFDocument = require("pdfkit");
+const { assertAllowedMediaUrl } = require("./mediaRemoteUrl");
 
 const ARCHIVE_TICKET_AUDIENCE = "snapup-event-archive";
 const ARCHIVE_TICKET_ISSUER = "snapup-events";
@@ -348,35 +349,18 @@ function createEventInfoPdfStream(event, counts, quality) {
   return document;
 }
 
-function assertCloudinaryUrl(urlValue) {
+function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
   let parsedUrl;
 
   try {
-    parsedUrl = new URL(String(urlValue || ""));
-  } catch (_error) {
+    parsedUrl = assertAllowedMediaUrl(urlValue);
+  } catch (error) {
     throw new EventArchiveError(
-      "Media address is invalid.",
-      "ARCHIVE_MEDIA_URL_INVALID",
+      error.message || "Media address is not allowed.",
+      error.code || "ARCHIVE_MEDIA_HOST_INVALID",
       422,
     );
   }
-
-  if (
-    parsedUrl.protocol !== "https:" ||
-    parsedUrl.hostname !== "res.cloudinary.com"
-  ) {
-    throw new EventArchiveError(
-      "Media address is not an allowed Cloudinary delivery URL.",
-      "ARCHIVE_MEDIA_HOST_INVALID",
-      422,
-    );
-  }
-
-  return parsedUrl;
-}
-
-function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
-  const parsedUrl = assertCloudinaryUrl(urlValue);
 
   return new Promise((resolve, reject) => {
     const request = https.get(
@@ -400,7 +384,7 @@ function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
           if (redirectsRemaining <= 0) {
             reject(
               new EventArchiveError(
-                "Cloudinary returned too many redirects.",
+                "Media storage returned too many redirects.",
                 "ARCHIVE_MEDIA_REDIRECT_LIMIT",
                 502,
               ),
@@ -412,7 +396,7 @@ function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
 
           try {
             redirectUrl = new URL(response.headers.location, parsedUrl);
-            assertCloudinaryUrl(redirectUrl.toString());
+            assertAllowedMediaUrl(redirectUrl.toString());
           } catch (error) {
             reject(error);
             return;
@@ -427,7 +411,7 @@ function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
           response.resume();
           reject(
             new EventArchiveError(
-              `Cloudinary returned HTTP ${statusCode || "unknown"}.`,
+              `Media storage returned HTTP ${statusCode || "unknown"}.`,
               "ARCHIVE_MEDIA_FETCH_FAILED",
               502,
             ),
@@ -442,7 +426,7 @@ function openRemoteResponse(urlValue, redirectsRemaining = MAX_REDIRECTS) {
     request.setTimeout(REMOTE_REQUEST_TIMEOUT_MS, () => {
       request.destroy(
         new EventArchiveError(
-          "Cloudinary media request timed out.",
+          "Media storage request timed out.",
           "ARCHIVE_MEDIA_TIMEOUT",
           504,
         ),
@@ -614,7 +598,7 @@ async function streamEventArchive({
     const mediaKind = getMediaKind(media);
 
     try {
-      const sourceUrl = resolveMediaUrl(
+      const sourceUrl = await resolveMediaUrl(
         media,
         mediaKind,
         normalizedOptions.quality,

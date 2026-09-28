@@ -65,6 +65,88 @@ async function inspectAndNormalizeFile(file) {
   return file;
 }
 
+
+async function inspectFilePreserveOriginal(file) {
+  const { fileTypeFromBuffer, fileTypeFromFile } = await import("file-type");
+
+  const detected = file.path
+    ? await fileTypeFromFile(file.path)
+    : await fileTypeFromBuffer(file.buffer);
+
+  if (
+    !detected ||
+    (!IMAGE_TYPES.has(detected.mime) && !VIDEO_TYPES.has(detected.mime))
+  ) {
+    const error = new Error(
+      "File content does not match an allowed media format.",
+    );
+    error.statusCode = 400;
+    error.code = "INVALID_FILE_SIGNATURE";
+    throw error;
+  }
+
+  if (IMAGE_TYPES.has(detected.mime)) {
+    const imageSource = file.path || file.buffer;
+    const metadata = await sharp(imageSource, {
+      failOn: "error",
+      limitInputPixels: MAX_IMAGE_PIXELS,
+    }).metadata();
+
+    if (
+      !metadata.width ||
+      !metadata.height ||
+      metadata.width * metadata.height > MAX_IMAGE_PIXELS
+    ) {
+      const error = new Error("Image dimensions exceed the allowed limit.");
+      error.statusCode = 400;
+      error.code = "IMAGE_DIMENSIONS_TOO_LARGE";
+      throw error;
+    }
+  }
+
+  // Security validation uses the detected MIME/extension, but the original
+  // bytes are intentionally left untouched.
+  file.mimetype = detected.mime;
+  file.detectedMime = detected.mime;
+  file.detectedFormat = detected.ext;
+
+  return file;
+}
+
+async function validateUploadedMediaFilesPreserveOriginal(req, _res, next) {
+  try {
+    const files = Array.isArray(req.files)
+      ? req.files
+      : req.files && typeof req.files === "object"
+        ? Object.values(req.files).flat()
+        : req.file
+          ? [req.file]
+          : [];
+
+    for (const file of files) {
+      await inspectFilePreserveOriginal(file);
+    }
+
+    next();
+  } catch (error) {
+    const files = Array.isArray(req.files)
+      ? req.files
+      : req.files && typeof req.files === "object"
+        ? Object.values(req.files).flat()
+        : req.file
+          ? [req.file]
+          : [];
+
+    await Promise.allSettled(
+      files
+        .filter((file) => file?.path)
+        .map((file) => fs.promises.unlink(file.path)),
+    );
+
+    next(error);
+  }
+}
+
 async function validateUploadedFiles(req, _res, next) {
   try {
     const files = Array.isArray(req.files)
@@ -94,4 +176,9 @@ async function validateUploadedFiles(req, _res, next) {
   }
 }
 
-module.exports = { inspectAndNormalizeFile, validateUploadedFiles };
+module.exports = {
+  inspectAndNormalizeFile,
+  inspectFilePreserveOriginal,
+  validateUploadedFiles,
+  validateUploadedMediaFilesPreserveOriginal,
+};

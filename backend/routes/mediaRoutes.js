@@ -8,14 +8,17 @@ const cloudinary = require("../config/cloudinary");
 const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
 const optionalAuth = require("../middlewares/optionalAuth");
-const { validateUploadedFiles } = require("../middlewares/fileValidation");
+const {
+  validateUploadedMediaFilesPreserveOriginal,
+} = require("../middlewares/fileValidation");
 const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/security");
 const { verifyTurnstile } = require("../middlewares/turnstile");
 const { cleanText } = require("../utils/validation");
 const {
-  getEffectiveStorageLimitBytes,
-  normalizePackageKey,
-} = require("../services/pricingService");
+  deleteImagePair,
+  uploadImagePair,
+} = require("../services/r2MediaService");
+const { getPackageStorageLimitBytes, normalizePackageKey } = require("../services/pricingService");
 const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
 const {
   assertRegisteredUserAccess,
@@ -158,9 +161,7 @@ function createHttpError(message, statusCode = 500, code = null) {
 async function getUploadStatusForEvent(eventId) {
   const { data: event, error: eventError } = await supabase
     .from("event")
-    .select(
-      "event_id, is_event_active, package_key, storage_consumed_bytes, storage_limit_override_bytes",
-    )
+    .select("event_id, is_event_active, package_key, storage_consumed_bytes")
     .eq("event_id", eventId)
     .maybeSingle();
 
@@ -198,10 +199,7 @@ async function getUploadStatusForEvent(eventId) {
     maxStoragePerGuest: Math.min(Number(settings?.max_storage_per_guest) || 250, 2048),
     onlyUsers: settings?.only_users === true,
     packageKey,
-    eventStorageLimitBytes: getEffectiveStorageLimitBytes(
-      packageKey,
-      event.storage_limit_override_bytes,
-    ),
+    eventStorageLimitBytes: getPackageStorageLimitBytes(packageKey),
     eventStorageUsedBytes: Math.max(0, Number(event.storage_consumed_bytes) || 0),
   };
 }
@@ -333,6 +331,26 @@ function uploadToCloudinary(file, eventId, resourceType) {
   });
 }
 
+
+async function cleanupUploadedItem(item) {
+  if (!item) return;
+
+  if (item.storage_provider === "r2") {
+    await deleteImagePair({
+      originalKey: item.r2?.original_key,
+      displayKey: item.r2?.display_key,
+    });
+    return;
+  }
+
+  if (item.cloudinary?.public_id) {
+    await cloudinary.uploader.destroy(item.cloudinary.public_id, {
+      resource_type: item.cloudinary.resource_type,
+      type: item.cloudinary.type || "authenticated",
+    });
+  }
+}
+
 function validateCloudinaryVideo(result) {
   const duration = Number(result?.duration);
   const width = Number(result?.width);
@@ -385,7 +403,7 @@ function getCloudinaryPublicId(mediaUrl) {
 async function getOwnedMedia(mediaId, userId) {
   const { data: media, error: mediaError } = await supabase
     .from("media")
-    .select("media_id, event_id, media_url, media_status")
+    .select("media_id, event_id, media_url, media_status, storage_provider, r2_original_key, r2_display_key")
     .eq("media_id", mediaId)
     .maybeSingle();
 
@@ -559,7 +577,7 @@ router.post(
   optionalAuth,
   enforceMediaRequestSize,
   handleMediaUpload,
-  validateUploadedFiles,
+  validateUploadedMediaFilesPreserveOriginal,
   async (req, res) => {
   const uploadedItems = [];
   const files = Object.values(req.files || {}).flat();
@@ -684,22 +702,47 @@ router.post(
       const resourceType = mediaKind === "video" ? "video" : "image";
       const mediaTypeId = await getMediaTypeId(mediaKind);
 
+      if (mediaKind === "image") {
+        const r2Result = await uploadImagePair(file, event_id);
+
+        uploadedItems.push({
+          event_id,
+          guest_id,
+          media_type_id: mediaTypeId,
+          media_url: r2Result.displayUrl,
+          message: cleanMessage,
+          media_status: mediaStatus,
+          storage_provider: "r2",
+          bytes: r2Result.originalBytes,
+          r2: {
+            original_key: r2Result.originalKey,
+            display_key: r2Result.displayKey,
+            original_bytes: r2Result.originalBytes,
+            display_bytes: r2Result.displayBytes,
+            original_mime_type: r2Result.originalContentType,
+            display_mime_type: r2Result.displayContentType,
+          },
+          cloudinary: null,
+        });
+
+        continue;
+      }
+
+      // Phase 1 keeps video transcoding/playback on Cloudinary.
       const cloudinaryResult = await uploadToCloudinary(
         file,
         event_id,
         resourceType,
       );
 
-      if (mediaKind === "video") {
-        try {
-          validateCloudinaryVideo(cloudinaryResult);
-        } catch (error) {
-          await cloudinary.uploader.destroy(cloudinaryResult.public_id, {
-            resource_type: "video",
-            type: cloudinaryResult.type || "authenticated",
-          });
-          throw error;
-        }
+      try {
+        validateCloudinaryVideo(cloudinaryResult);
+      } catch (error) {
+        await cloudinary.uploader.destroy(cloudinaryResult.public_id, {
+          resource_type: "video",
+          type: cloudinaryResult.type || "authenticated",
+        });
+        throw error;
       }
 
       uploadedItems.push({
@@ -709,6 +752,9 @@ router.post(
         media_url: cloudinaryResult.secure_url,
         message: cleanMessage,
         media_status: mediaStatus,
+        storage_provider: "cloudinary",
+        bytes: cloudinaryResult.bytes,
+        r2: null,
         cloudinary: {
           url: cloudinaryResult.secure_url,
           public_id: cloudinaryResult.public_id,
@@ -726,12 +772,21 @@ router.post(
       media_type_id: item.media_type_id,
       media_url: item.media_url,
       message: item.message,
-        media_status: item.media_status,
-        bytes: item.cloudinary.bytes,
-        cloudinary_public_id: item.cloudinary.public_id,
-        resource_type: item.cloudinary.resource_type,
-        delivery_type: item.cloudinary.type || "authenticated",
-        format: item.cloudinary.format,
+      media_status: item.media_status,
+      bytes: Math.max(0, Number(item.bytes) || 0),
+      storage_provider: item.storage_provider,
+      r2_original_key: item.r2?.original_key || null,
+      r2_display_key: item.r2?.display_key || null,
+      original_bytes: item.r2?.original_bytes || item.cloudinary?.bytes || null,
+      display_bytes: item.r2?.display_bytes || null,
+      original_mime_type: item.r2?.original_mime_type || null,
+      display_mime_type: item.r2?.display_mime_type || null,
+      cloudinary_public_id: item.cloudinary?.public_id || null,
+      // These columns predate R2. delivery_type is NOT NULL in the current
+      // database schema, so R2 rows must not explicitly insert NULL here.
+      resource_type: item.cloudinary?.resource_type || (item.storage_provider === "r2" ? "image" : null),
+      delivery_type: item.cloudinary?.type || (item.storage_provider === "r2" ? "authenticated" : "authenticated"),
+      format: item.cloudinary?.format || (item.storage_provider === "r2" ? "webp" : null),
     }));
 
     const { data, error } = await supabase
@@ -740,14 +795,18 @@ router.post(
       .select();
 
     if (error) {
-      await Promise.allSettled(uploadedItems.map((item) => cloudinary.uploader.destroy(
-        item.cloudinary.public_id,
-        { resource_type: item.cloudinary.resource_type, type: item.cloudinary.type || "authenticated" },
-      )));
+      await Promise.allSettled(
+        uploadedItems.map((item) => cleanupUploadedItem(item)),
+      );
       return res.status(500).json({
         success: false,
-        message: "Files uploaded to Cloudinary but Supabase insert failed.",
-        uploaded_cloudinary: uploadedItems.map((item) => item.cloudinary),
+        message: "Media storage upload succeeded but the database insert failed.",
+        uploaded_storage_assets: uploadedItems.map((item) => ({
+          provider: item.storage_provider,
+          original_key: item.r2?.original_key || null,
+          display_key: item.r2?.display_key || null,
+          cloudinary_public_id: item.cloudinary?.public_id || null,
+        })),
         error: error.message,
       });
     }
@@ -792,13 +851,17 @@ router.post(
       message: `${data.length} media file uploaded successfully.`,
       uploaded_count: data.length,
       media: data,
-      cloudinary: uploadedItems.map((item) => item.cloudinary),
+      storage_assets: uploadedItems.map((item) => ({
+        provider: item.storage_provider,
+        original_key: item.r2?.original_key || null,
+        display_key: item.r2?.display_key || null,
+        cloudinary_public_id: item.cloudinary?.public_id || null,
+      })),
     });
   } catch (error) {
-    await Promise.allSettled(uploadedItems.map((item) => cloudinary.uploader.destroy(
-      item.cloudinary.public_id,
-      { resource_type: item.cloudinary.resource_type, type: item.cloudinary.type || "authenticated" },
-    )));
+    await Promise.allSettled(
+      uploadedItems.map((item) => cleanupUploadedItem(item)),
+    );
     return res.status(error.statusCode || 500).json({
       success: false,
       message:
@@ -1226,19 +1289,31 @@ router.delete("/:mediaId", authMiddleware, async (req, res) => {
       });
     }
 
-    const publicId = getCloudinaryPublicId(media.media_url);
+    if (
+      media.storage_provider === "r2" &&
+      (media.r2_original_key || media.r2_display_key)
+    ) {
+      deleteImagePair({
+        originalKey: media.r2_original_key,
+        displayKey: media.r2_display_key,
+      }).catch((error) => {
+        console.error("R2 media delete error:", error.message);
+      });
+    } else {
+      const publicId = getCloudinaryPublicId(media.media_url);
 
-    if (publicId) {
-      cloudinary.uploader
-        .destroy(publicId, {
-          resource_type: media.media_url.includes("/video/")
-            ? "video"
-            : "image",
-          type: "authenticated",
-        })
-        .catch((error) => {
-          console.error("Cloudinary delete error:", error.message);
-        });
+      if (publicId) {
+        cloudinary.uploader
+          .destroy(publicId, {
+            resource_type: media.media_url.includes("/video/")
+              ? "video"
+              : "image",
+            type: "authenticated",
+          })
+          .catch((error) => {
+            console.error("Cloudinary delete error:", error.message);
+          });
+      }
     }
 
     return res.status(200).json({

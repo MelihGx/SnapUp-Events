@@ -1,4 +1,5 @@
 const cloudinary = require("../config/cloudinary");
+const { isR2DisplayUrl } = require("./r2MediaService");
 
 const AUTH_TOKEN_BUCKET_SECONDS = 300;
 const AUTH_TOKEN_CLOCK_SKEW_SECONDS = 30;
@@ -186,6 +187,10 @@ function createDeliveryUrl(asset, { transformation, format } = {}) {
 }
 
 function signedDeliveryUrl(urlValue) {
+  if (isR2DisplayUrl(urlValue)) {
+    return urlValue;
+  }
+
   const asset = parseAsset(urlValue);
   if (!asset) {
     return urlValue;
@@ -202,6 +207,10 @@ function signedDeliveryUrl(urlValue) {
 }
 
 function imageDeliveryUrl(urlValue, presetName) {
+  if (isR2DisplayUrl(urlValue)) {
+    return urlValue;
+  }
+
   const asset = parseAsset(urlValue);
   const preset = IMAGE_PRESETS[presetName];
 
@@ -235,6 +244,57 @@ function videoDeliveryUrl(urlValue, presetName) {
 }
 
 function buildImageDeliveryUrls(urlValue, profile = "full") {
+  if (isR2DisplayUrl(urlValue)) {
+    if (profile === "slideshow") {
+      return {
+        thumbnail: urlValue,
+        slideshow: {
+          full_hd: urlValue,
+          qhd: urlValue,
+          uhd: urlValue,
+        },
+      };
+    }
+
+    if (profile === "gallery") {
+      return {
+        feed: urlValue,
+        feed_srcset: {
+          small: urlValue,
+          medium: urlValue,
+          large: urlValue,
+        },
+        display: urlValue,
+      };
+    }
+
+    if (profile === "card") {
+      return { thumbnail: urlValue };
+    }
+
+    const staticUrls = {
+      feed: urlValue,
+      feed_srcset: {
+        small: urlValue,
+        medium: urlValue,
+        large: urlValue,
+      },
+      display: urlValue,
+      pdf: urlValue,
+    };
+
+    if (profile === "full") {
+      staticUrls.thumbnail = urlValue;
+      staticUrls.slideshow = {
+        full_hd: urlValue,
+        qhd: urlValue,
+        uhd: urlValue,
+      };
+    }
+
+    return staticUrls;
+  }
+
   const asset = parseAsset(urlValue);
   if (!asset || asset.resourceType !== "image") {
     return null;

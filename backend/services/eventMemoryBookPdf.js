@@ -1,6 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
+const sharp = require("sharp");
+const {
+  assertAllowedMediaUrl,
+  isCloudinaryUrl,
+} = require("./mediaRemoteUrl");
 
 const PAGE_WIDTH = 1080;
 const PAGE_HEIGHT = 607.5;
@@ -128,7 +133,11 @@ function formatTime(value) {
 }
 
 function getCloudinaryJpgUrl(imageUrl) {
-  if (!imageUrl || !imageUrl.includes("/upload/")) {
+  if (
+    !imageUrl ||
+    !isCloudinaryUrl(imageUrl) ||
+    !imageUrl.includes("/upload/")
+  ) {
     return imageUrl;
   }
 
@@ -158,20 +167,47 @@ function isSupportedImage(buffer) {
   return isJpeg || isPng;
 }
 
+function isWebP(buffer) {
+  return (
+    Buffer.isBuffer(buffer) &&
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP"
+  );
+}
+
+async function normalizePdfImage(buffer) {
+  if (isSupportedImage(buffer)) {
+    return buffer;
+  }
+
+  if (!isWebP(buffer)) {
+    throw new Error("The downloaded file is not a supported image.");
+  }
+
+  return sharp(buffer, {
+    failOn: "error",
+    limitInputPixels: 40_000_000,
+  })
+    .rotate()
+    .resize({
+      width: 2000,
+      height: 2000,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .jpeg({ quality: 88, mozjpeg: true })
+    .toBuffer();
+}
+
+
 async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
   if (typeof fetchImpl !== "function") {
     throw new Error("The Node.js fetch API is not available.");
   }
 
   const transformedUrl = getCloudinaryJpgUrl(imageUrl);
-  const parsedUrl = new URL(transformedUrl);
-
-  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-    throw new Error("Only HTTP and HTTPS image URLs are supported.");
-  }
-  if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "res.cloudinary.com") {
-    throw new Error("PDF images must come from the configured Cloudinary delivery host.");
-  }
+  const parsedUrl = assertAllowedMediaUrl(transformedUrl);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
@@ -181,7 +217,7 @@ async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        Accept: "image/jpeg,image/png,image/*;q=0.8",
+        Accept: "image/jpeg,image/png,image/webp,image/*;q=0.8",
       },
     });
 
@@ -211,11 +247,13 @@ async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
       throw new Error("Image is larger than the PDF download limit.");
     }
 
-    if (!isSupportedImage(buffer)) {
-      throw new Error("The downloaded file is not a supported JPEG or PNG.");
+    const normalizedBuffer = await normalizePdfImage(buffer);
+
+    if (normalizedBuffer.length > MAX_IMAGE_BYTES) {
+      throw new Error("Optimized PDF image is larger than the download limit.");
     }
 
-    return buffer;
+    return normalizedBuffer;
   } finally {
     clearTimeout(timeout);
   }

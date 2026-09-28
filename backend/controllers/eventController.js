@@ -30,6 +30,10 @@ const {
   EventStatisticsError,
   loadEventStatisticsData,
 } = require("../services/eventStatisticsService");
+const {
+  createOriginalDownloadUrl,
+  deleteImagePair,
+} = require("../services/r2MediaService");
 
 function cleanOptionalText(value, maxLength) {
   if (typeof value !== "string") {
@@ -1134,6 +1138,20 @@ const deleteEvent = async (req, res) => {
       });
     }
 
+    const { data: r2MediaRows, error: r2MediaError } = await supabase
+      .from("media")
+      .select("r2_original_key, r2_display_key")
+      .eq("event_id", eventId)
+      .eq("storage_provider", "r2");
+
+    if (r2MediaError) {
+      return res.status(500).json({
+        success: false,
+        message: "Event media cleanup data could not be prepared.",
+        error: r2MediaError.message,
+      });
+    }
+
     const { error: deleteError } = await supabase
       .from("event")
       .delete()
@@ -1152,6 +1170,25 @@ const deleteEvent = async (req, res) => {
       getCloudinaryPublicId(event.event_cover_url),
       getCloudinaryDeliveryType(event.event_cover_url),
     );
+
+    const r2CleanupResults = await Promise.allSettled(
+      (r2MediaRows || []).map((item) =>
+        deleteImagePair({
+          originalKey: item.r2_original_key,
+          displayKey: item.r2_display_key,
+        }),
+      ),
+    );
+
+    const r2CleanupFailures = r2CleanupResults.filter(
+      (result) => result.status === "rejected",
+    );
+
+    if (r2CleanupFailures.length > 0) {
+      console.error(
+        `R2 event cleanup failed for ${r2CleanupFailures.length} media item(s).`,
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -1721,18 +1758,52 @@ async function getApprovedArchiveMedia(eventId) {
   const pageSize = 500;
   const mediaItems = [];
 
+  const [{ data: mediaTypes, error: typeError }, { data: guests, error: guestError }] =
+    await Promise.all([
+      supabase.from("media_type").select("media_type_id, media_type"),
+      supabase
+        .from("event_guests")
+        .select("guest_id, guest_name")
+        .eq("event_id", eventId),
+    ]);
+
+  if (typeError || guestError) {
+    throw new EventArchiveError(
+      "Approved event content metadata could not be loaded.",
+      "ARCHIVE_MEDIA_METADATA_FAILED",
+      500,
+    );
+  }
+
+  const typeById = new Map(
+    (mediaTypes || []).map((item) => [
+      String(item.media_type_id),
+      item.media_type,
+    ]),
+  );
+  const guestById = new Map(
+    (guests || []).map((item) => [
+      String(item.guest_id),
+      item.guest_name,
+    ]),
+  );
+
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await supabase
-      .from("events_media")
+      .from("media")
       .select(
         `
         media_id,
-        guest_name,
-        media_type,
+        guest_id,
+        media_type_id,
         media_url,
         message,
         media_status,
-        media_created_at
+        media_created_at,
+        storage_provider,
+        r2_original_key,
+        r2_display_key,
+        original_mime_type
       `,
       )
       .eq("event_id", eventId)
@@ -1748,7 +1819,13 @@ async function getApprovedArchiveMedia(eventId) {
       );
     }
 
-    mediaItems.push(...(data || []));
+    mediaItems.push(
+      ...(data || []).map((item) => ({
+        ...item,
+        media_type: typeById.get(String(item.media_type_id)) || null,
+        guest_name: guestById.get(String(item.guest_id)) || null,
+      })),
+    );
 
     if (!data || data.length < pageSize) {
       break;
@@ -1877,7 +1954,15 @@ async function downloadEventArchive(req, res) {
       event,
       mediaItems,
       options: ticket.options,
-      resolveMediaUrl(media, mediaKind, quality) {
+      async resolveMediaUrl(media, mediaKind, quality) {
+        if (
+          quality === "original" &&
+          media.storage_provider === "r2" &&
+          media.r2_original_key
+        ) {
+          return createOriginalDownloadUrl(media.r2_original_key);
+        }
+
         if (quality === "original") {
           return signedDeliveryUrl(media.media_url);
         }

@@ -12,6 +12,7 @@ const {
   getEffectiveStorageLimitBytes,
 } = require("../services/pricingService");
 const { recordAdminAudit } = require("../services/adminAuditService");
+const { deleteImagePair } = require("../services/r2MediaService");
 
 const PAGE_SIZE = 1000;
 const PACKAGE_WEIGHT = Object.freeze({
@@ -2349,6 +2350,29 @@ const deleteAdminUser = async (req, res) => {
       });
     }
 
+    const targetEvents = await loadAllRows(() =>
+      supabase
+        .from("event")
+        .select("event_id")
+        .eq("user_id", targetUserId),
+    );
+
+    const targetEventIds = targetEvents
+      .map((event) => event.event_id)
+      .filter(Boolean);
+
+    let r2MediaRows = [];
+
+    if (targetEventIds.length > 0) {
+      r2MediaRows = await loadAllRows(() =>
+        supabase
+          .from("media")
+          .select("r2_original_key, r2_display_key")
+          .in("event_id", targetEventIds)
+          .eq("storage_provider", "r2"),
+      );
+    }
+
     const ipAddress = String(
       req.ip || req.socket?.remoteAddress || "",
     )
@@ -2375,6 +2399,25 @@ const deleteAdminUser = async (req, res) => {
         message: "User account could not be deleted safely.",
         code: "ADMIN_DELETE_USER_FAILED",
       });
+    }
+
+    const cleanupResults = await Promise.allSettled(
+      r2MediaRows.map((item) =>
+        deleteImagePair({
+          originalKey: item.r2_original_key,
+          displayKey: item.r2_display_key,
+        }),
+      ),
+    );
+
+    const cleanupFailures = cleanupResults.filter(
+      (result) => result.status === "rejected",
+    );
+
+    if (cleanupFailures.length > 0) {
+      console.error(
+        `R2 account cleanup failed for ${cleanupFailures.length} media item(s).`,
+      );
     }
 
     return res.status(200).json({
