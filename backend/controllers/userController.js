@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const cloudinary = require("../config/cloudinary");
 const { validatePassword } = require("../utils/validation");
 const { buildStorageUsage } = require("../services/pricingService");
+const { deleteImagePair } = require("../services/r2MediaService");
 
 
 function getCloudinaryPublicId(mediaUrl) {
@@ -412,6 +413,93 @@ const deleteMyAccount = async (req, res) => {
       });
     }
 
+    const { data: ownedEventsForR2, error: ownedEventsR2Error } =
+      await supabase
+        .from("event")
+        .select(
+          "event_id, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key",
+        )
+        .eq("user_id", userId);
+
+    if (ownedEventsR2Error) {
+      return res.status(500).json({
+        success: false,
+        message: "R2 event cleanup data could not be prepared.",
+        error: ownedEventsR2Error.message,
+      });
+    }
+
+    const { data: guestRowsForR2, error: guestRowsR2Error } = await supabase
+      .from("event_guests")
+      .select("guest_id")
+      .eq("user_id", userId);
+
+    if (guestRowsR2Error) {
+      return res.status(500).json({
+        success: false,
+        message: "R2 guest cleanup data could not be prepared.",
+        error: guestRowsR2Error.message,
+      });
+    }
+
+    const ownedEventIdsForR2 = (ownedEventsForR2 || [])
+      .map((event) => event.event_id)
+      .filter(Boolean);
+    const guestIdsForR2 = (guestRowsForR2 || [])
+      .map((guest) => guest.guest_id)
+      .filter(Boolean);
+
+    const r2MediaForDelete = [];
+
+    if (ownedEventIdsForR2.length > 0) {
+      const { data, error } = await supabase
+        .from("media")
+        .select("media_id, r2_original_key, r2_display_key")
+        .in("event_id", ownedEventIdsForR2)
+        .eq("storage_provider", "r2");
+
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "R2 owned-media cleanup data could not be prepared.",
+          error: error.message,
+        });
+      }
+
+      r2MediaForDelete.push(...(data || []));
+    }
+
+    if (guestIdsForR2.length > 0) {
+      const { data, error } = await supabase
+        .from("media")
+        .select("media_id, r2_original_key, r2_display_key")
+        .in("guest_id", guestIdsForR2)
+        .eq("storage_provider", "r2");
+
+      if (error) {
+        return res.status(500).json({
+          success: false,
+          message: "R2 guest-media cleanup data could not be prepared.",
+          error: error.message,
+        });
+      }
+
+      r2MediaForDelete.push(...(data || []));
+    }
+
+    const uniqueR2MediaForDelete = [
+      ...new Map(
+        r2MediaForDelete.map((item) => [String(item.media_id), item]),
+      ).values(),
+    ];
+
+    const r2CoversForDelete = (ownedEventsForR2 || []).filter(
+      (event) =>
+        event.event_cover_storage_provider === "r2" ||
+        event.event_cover_r2_original_key ||
+        event.event_cover_r2_display_key,
+    );
+
     const { data: deletionResult, error: deletionError } = await supabase.rpc(
       "delete_user_account",
       { p_user_id: String(userId) },
@@ -423,9 +511,25 @@ const deleteMyAccount = async (req, res) => {
         code: "ACCOUNT_DELETE_FAILED",
       });
     }
+
+    await Promise.allSettled([
+      ...uniqueR2MediaForDelete.map((item) =>
+        deleteImagePair({
+          originalKey: item.r2_original_key,
+          displayKey: item.r2_display_key,
+        }),
+      ),
+      ...r2CoversForDelete.map((event) =>
+        deleteImagePair({
+          originalKey: event.event_cover_r2_original_key,
+          displayKey: event.event_cover_r2_display_key,
+        }),
+      ),
+    ]);
+
     return res.status(200).json({
       success: true,
-      message: "Hesabın silindi. Medya varlıkları güvenli temizleme kuyruğuna alındı.",
+      message: "Hesabın silindi. Medya varlıkları güvenli biçimde temizlendi.",
       deleted: deletionResult,
     });
 

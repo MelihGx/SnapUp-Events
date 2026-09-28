@@ -113,6 +113,50 @@ async function inspectFilePreserveOriginal(file) {
   return file;
 }
 
+
+async function validateUploadedImageFilesPreserveOriginal(req, _res, next) {
+  try {
+    const files = Array.isArray(req.files)
+      ? req.files
+      : req.files && typeof req.files === "object"
+        ? Object.values(req.files).flat()
+        : req.file
+          ? [req.file]
+          : [];
+
+    for (const file of files) {
+      await inspectFilePreserveOriginal(file);
+
+      if (!IMAGE_TYPES.has(file.detectedMime || file.mimetype)) {
+        const error = new Error(
+          "Event cover content must be a JPG, PNG or WEBP image.",
+        );
+        error.statusCode = 400;
+        error.code = "INVALID_EVENT_COVER_SIGNATURE";
+        throw error;
+      }
+    }
+
+    next();
+  } catch (error) {
+    const files = Array.isArray(req.files)
+      ? req.files
+      : req.files && typeof req.files === "object"
+        ? Object.values(req.files).flat()
+        : req.file
+          ? [req.file]
+          : [];
+
+    await Promise.allSettled(
+      files
+        .filter((file) => file?.path)
+        .map((file) => fs.promises.unlink(file.path)),
+    );
+
+    next(error);
+  }
+}
+
 async function validateUploadedMediaFilesPreserveOriginal(req, _res, next) {
   try {
     const files = Array.isArray(req.files)
@@ -180,5 +224,6 @@ module.exports = {
   inspectAndNormalizeFile,
   inspectFilePreserveOriginal,
   validateUploadedFiles,
+  validateUploadedImageFilesPreserveOriginal,
   validateUploadedMediaFilesPreserveOriginal,
 };

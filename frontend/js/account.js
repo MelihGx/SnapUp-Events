@@ -509,7 +509,15 @@ function renderEvents(events) {
       let eventCoverUrl = "";
       try {
         const candidate = new URL(getEventCoverUrl(event, "card") || "");
-        if (candidate.protocol === "https:" && candidate.hostname === "res.cloudinary.com") {
+        const allowedEventCoverHosts = new Set([
+          "res.cloudinary.com",
+          "media.snapupevents.com",
+        ]);
+
+        if (
+          candidate.protocol === "https:" &&
+          allowedEventCoverHosts.has(candidate.hostname)
+        ) {
           eventCoverUrl = candidate.href;
         }
       } catch (_error) {}

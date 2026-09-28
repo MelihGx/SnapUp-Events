@@ -9,7 +9,9 @@ const {
   eventCodeLimiter,
   pdfLimiter,
 } = require("../middlewares/security");
-const { validateUploadedFiles } = require("../middlewares/fileValidation");
+const {
+  validateUploadedImageFilesPreserveOriginal,
+} = require("../middlewares/fileValidation");
 const {
   listEventInvitations,
   createEventInvitation,
@@ -91,7 +93,7 @@ function handleEventCoverUpload(req, res, next) {
 
 router.get("/pricing", getRegionalPricing);
 
-router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedFiles, createEvent);
+router.post("/", authMiddleware, handleEventCoverUpload, validateUploadedImageFilesPreserveOriginal, createEvent);
 
 router.get("/detail/:eventId", authMiddleware, getEventDetail);
 router.get("/detail/:eventId/guests", authMiddleware, getEventGuests);
@@ -158,7 +160,7 @@ router.put(
   "/detail/:eventId/cover",
   authMiddleware,
   handleEventCoverUpload,
-  validateUploadedFiles,
+  validateUploadedImageFilesPreserveOriginal,
   updateEventCover,
 );
 router.delete(

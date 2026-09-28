@@ -33,6 +33,7 @@ const {
 const {
   createOriginalDownloadUrl,
   deleteImagePair,
+  uploadImagePair,
 } = require("../services/r2MediaService");
 
 function cleanOptionalText(value, maxLength) {
@@ -194,30 +195,6 @@ async function getPacketLevelId(packageName) {
   return data.packet_level_id;
 }
 
-function uploadEventCover(fileBuffer, eventCode) {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "snapup-events/event-covers",
-        public_id: `${eventCode.toLowerCase()}-${Date.now()}`,
-        resource_type: "image",
-        type: "authenticated",
-        allowed_formats: ["jpg", "jpeg"],
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-
-        resolve(result);
-      },
-    );
-
-    stream.end(fileBuffer);
-  });
-}
-
 async function deleteEventCover(publicId, deliveryType = "authenticated") {
   if (!publicId) {
     return;
@@ -260,8 +237,55 @@ function getCloudinaryDeliveryType(mediaUrl) {
     : "authenticated";
 }
 
+function buildR2EventCoverFields(asset) {
+  return {
+    event_cover_url: asset.displayUrl,
+    event_cover_storage_provider: "r2",
+    event_cover_r2_original_key: asset.originalKey,
+    event_cover_r2_display_key: asset.displayKey,
+    event_cover_original_bytes: asset.originalBytes,
+    event_cover_display_bytes: asset.displayBytes,
+    event_cover_original_mime_type: asset.originalContentType,
+    event_cover_display_mime_type: asset.displayContentType,
+  };
+}
+
+function clearedEventCoverFields() {
+  return {
+    event_cover_url: null,
+    event_cover_storage_provider: null,
+    event_cover_r2_original_key: null,
+    event_cover_r2_display_key: null,
+    event_cover_original_bytes: null,
+    event_cover_display_bytes: null,
+    event_cover_original_mime_type: null,
+    event_cover_display_mime_type: null,
+  };
+}
+
+async function cleanupStoredEventCover(event) {
+  if (!event) return;
+
+  if (
+    event.event_cover_storage_provider === "r2" ||
+    event.event_cover_r2_original_key ||
+    event.event_cover_r2_display_key
+  ) {
+    await deleteImagePair({
+      originalKey: event.event_cover_r2_original_key,
+      displayKey: event.event_cover_r2_display_key,
+    });
+    return;
+  }
+
+  await deleteEventCover(
+    getCloudinaryPublicId(event.event_cover_url),
+    getCloudinaryDeliveryType(event.event_cover_url),
+  );
+}
+
 const createEvent = async (req, res) => {
-  let uploadedCoverPublicId = null;
+  let uploadedCoverAsset = null;
   let createdEventId = null;
 
   try {
@@ -359,16 +383,6 @@ const createEvent = async (req, res) => {
     const eventCode = await generateUniqueEventCode();
     const eventSlug = await generateUniqueEventSlug(finalEventName);
     const qrCodeUrl = await createQrCodeUrl(eventCode);
-    let eventCoverUrl = null;
-
-    if (req.file) {
-      const uploadedCover = await uploadEventCover(
-        req.file.buffer,
-        eventCode,
-      );
-      uploadedCoverPublicId = uploadedCover.public_id;
-      eventCoverUrl = uploadedCover.secure_url;
-    }
 
     const { data: newEvent, error: eventError } = await supabase
       .from("event")
@@ -389,7 +403,8 @@ const createEvent = async (req, res) => {
           event_finish_time: event_finish_time || null,
           event_code: eventCode,
           qr_code_url: qrCodeUrl,
-          event_cover_url: eventCoverUrl,
+          event_cover_url: null,
+          event_cover_storage_provider: null,
           description: description || null,
           is_event_active: true,
           is_event_private: true,
@@ -400,18 +415,51 @@ const createEvent = async (req, res) => {
       )
       .single();
 
-    if (eventError) {
-      await deleteEventCover(uploadedCoverPublicId);
-      uploadedCoverPublicId = null;
-
+    if (eventError || !newEvent) {
       return res.status(500).json({
         success: false,
         message: "Event oluşturulurken hata oluştu.",
-        error: eventError.message,
+        error: eventError?.message || "Oluşturulan event alınamadı.",
       });
     }
 
     createdEventId = newEvent.event_id;
+
+    if (req.file) {
+      uploadedCoverAsset = await uploadImagePair(req.file, newEvent.event_id, {
+        kind: "cover",
+      });
+
+      const { data: coverEvent, error: coverError } = await supabase
+        .from("event")
+        .update(buildR2EventCoverFields(uploadedCoverAsset))
+        .eq("event_id", newEvent.event_id)
+        .eq("user_id", userId)
+        .select(
+          "event_id, event_name, event_slug, event_type_code, event_location, event_address, event_latitude, event_longitude, event_created_at, is_event_active, is_event_private, event_date, event_start_time, event_finish_time, event_code, qr_code_url, description, event_cover_url, package_key",
+        )
+        .single();
+
+      if (coverError || !coverEvent) {
+        await deleteImagePair({
+          originalKey: uploadedCoverAsset.originalKey,
+          displayKey: uploadedCoverAsset.displayKey,
+        });
+        uploadedCoverAsset = null;
+
+        await supabase.from("event").delete().eq("event_id", newEvent.event_id);
+        createdEventId = null;
+
+        return res.status(500).json({
+          success: false,
+          message: "Etkinlik fotoğrafı R2'ye kaydedildi ancak event güncellenemedi.",
+          error: coverError?.message || "Güncellenen event alınamadı.",
+        });
+      }
+
+      Object.assign(newEvent, coverEvent);
+    }
+
     const eventSettings = settings || {};
 
     const { error: settingsError } = await supabase
@@ -432,8 +480,15 @@ const createEvent = async (req, res) => {
 
     if (settingsError) {
       await supabase.from("event").delete().eq("event_id", newEvent.event_id);
-      await deleteEventCover(uploadedCoverPublicId);
-      uploadedCoverPublicId = null;
+
+      if (uploadedCoverAsset) {
+        await deleteImagePair({
+          originalKey: uploadedCoverAsset.originalKey,
+          displayKey: uploadedCoverAsset.displayKey,
+        });
+        uploadedCoverAsset = null;
+      }
+
       createdEventId = null;
 
       return res.status(500).json({
@@ -442,6 +497,10 @@ const createEvent = async (req, res) => {
         error: settingsError.message,
       });
     }
+
+    // Ownership has moved to the event row. From this point forward normal
+    // event cleanup paths are responsible for the R2 objects.
+    uploadedCoverAsset = null;
 
     return res.status(201).json({
       success: true,
@@ -453,7 +512,12 @@ const createEvent = async (req, res) => {
       await supabase.from("event").delete().eq("event_id", createdEventId);
     }
 
-    await deleteEventCover(uploadedCoverPublicId);
+    if (uploadedCoverAsset) {
+      await deleteImagePair({
+        originalKey: uploadedCoverAsset.originalKey,
+        displayKey: uploadedCoverAsset.displayKey,
+      });
+    }
 
     return res.status(500).json({
       success: false,
@@ -462,6 +526,7 @@ const createEvent = async (req, res) => {
     });
   }
 };
+
 
 const getEventByCode = async (req, res) => {
   try {
@@ -615,7 +680,7 @@ const getEventDetail = async (req, res) => {
 };
 
 const updateEventCover = async (req, res) => {
-  let uploadedCoverPublicId = null;
+  let uploadedCoverAsset = null;
 
   try {
     const userId = req.user.user_id;
@@ -639,7 +704,9 @@ const updateEventCover = async (req, res) => {
 
     const { data: event, error: eventError } = await supabase
       .from("event")
-      .select("event_id, event_code, event_cover_url, user_id")
+      .select(
+        "event_id, event_code, event_cover_url, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key, user_id",
+      )
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -660,23 +727,24 @@ const updateEventCover = async (req, res) => {
       });
     }
 
-    const uploadedCover = await uploadEventCover(
-      req.file.buffer,
-      event.event_code,
-    );
-    uploadedCoverPublicId = uploadedCover.public_id;
+    uploadedCoverAsset = await uploadImagePair(req.file, eventId, {
+      kind: "cover",
+    });
 
     const { data: updatedEvent, error: updateError } = await supabase
       .from("event")
-      .update({ event_cover_url: uploadedCover.secure_url })
+      .update(buildR2EventCoverFields(uploadedCoverAsset))
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .select("event_id, event_code, event_cover_url")
       .single();
 
     if (updateError || !updatedEvent) {
-      await deleteEventCover(uploadedCoverPublicId);
-      uploadedCoverPublicId = null;
+      await deleteImagePair({
+        originalKey: uploadedCoverAsset.originalKey,
+        displayKey: uploadedCoverAsset.displayKey,
+      });
+      uploadedCoverAsset = null;
 
       return res.status(500).json({
         success: false,
@@ -685,11 +753,10 @@ const updateEventCover = async (req, res) => {
       });
     }
 
-    uploadedCoverPublicId = null;
-    await deleteEventCover(
-      getCloudinaryPublicId(event.event_cover_url),
-      getCloudinaryDeliveryType(event.event_cover_url),
-    );
+    // New cover is committed. Remove the previous R2 pair or legacy
+    // Cloudinary cover only after the database update succeeds.
+    uploadedCoverAsset = null;
+    await cleanupStoredEventCover(event);
 
     return res.status(200).json({
       success: true,
@@ -697,7 +764,12 @@ const updateEventCover = async (req, res) => {
       event: updatedEvent,
     });
   } catch (error) {
-    await deleteEventCover(uploadedCoverPublicId);
+    if (uploadedCoverAsset) {
+      await deleteImagePair({
+        originalKey: uploadedCoverAsset.originalKey,
+        displayKey: uploadedCoverAsset.displayKey,
+      });
+    }
 
     return res.status(500).json({
       success: false,
@@ -706,6 +778,7 @@ const updateEventCover = async (req, res) => {
     });
   }
 };
+
 
 const removeEventCover = async (req, res) => {
   try {
@@ -722,7 +795,9 @@ const removeEventCover = async (req, res) => {
 
     const { data: event, error: eventError } = await supabase
       .from("event")
-      .select("event_id, event_code, event_cover_url, user_id")
+      .select(
+        "event_id, event_code, event_cover_url, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key, user_id",
+      )
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -743,7 +818,11 @@ const removeEventCover = async (req, res) => {
       });
     }
 
-    if (!event.event_cover_url) {
+    if (
+      !event.event_cover_url &&
+      !event.event_cover_r2_original_key &&
+      !event.event_cover_r2_display_key
+    ) {
       return res.status(200).json({
         success: true,
         message: "Etkinlikte kaldırılacak bir fotoğraf bulunmuyor.",
@@ -755,12 +834,9 @@ const removeEventCover = async (req, res) => {
       });
     }
 
-    const previousCoverPublicId = getCloudinaryPublicId(
-      event.event_cover_url,
-    );
     const { data: updatedEvent, error: updateError } = await supabase
       .from("event")
-      .update({ event_cover_url: null })
+      .update(clearedEventCoverFields())
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .select("event_id, event_code, event_cover_url")
@@ -774,10 +850,7 @@ const removeEventCover = async (req, res) => {
       });
     }
 
-    await deleteEventCover(
-      previousCoverPublicId,
-      getCloudinaryDeliveryType(event.event_cover_url),
-    );
+    await cleanupStoredEventCover(event);
 
     return res.status(200).json({
       success: true,
@@ -1118,7 +1191,9 @@ const deleteEvent = async (req, res) => {
 
     const { data: event, error: eventError } = await supabase
       .from("event")
-      .select("event_id, user_id, event_cover_url")
+      .select(
+        "event_id, user_id, event_cover_url, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key",
+      )
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .maybeSingle();
@@ -1166,10 +1241,7 @@ const deleteEvent = async (req, res) => {
       });
     }
 
-    await deleteEventCover(
-      getCloudinaryPublicId(event.event_cover_url),
-      getCloudinaryDeliveryType(event.event_cover_url),
-    );
+    await cleanupStoredEventCover(event);
 
     const r2CleanupResults = await Promise.allSettled(
       (r2MediaRows || []).map((item) =>

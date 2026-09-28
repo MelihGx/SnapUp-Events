@@ -110,33 +110,40 @@ async function deleteImagePair({ originalKey, displayKey }) {
   ]);
 }
 
-async function uploadImagePair(file, eventId) {
-  if (!file?.path) {
-    throw new Error("R2 image upload requires a temporary file path.");
+async function uploadImagePair(file, eventId, options = {}) {
+  const source = file?.path || file?.buffer;
+
+  if (!source) {
+    throw new Error("R2 image upload requires a file path or buffer.");
   }
 
+  const objectKind = options.kind === "cover" ? "cover" : "media";
   const buckets = getR2Buckets();
   const assetId = crypto.randomUUID();
   const originalExtension = sanitizeExtension(
     file.detectedFormat || path.extname(file.originalname),
   );
 
-  const objectPrefix = `events/${eventId}/media/${assetId}`;
+  const objectPrefix = `events/${eventId}/${objectKind}/${assetId}`;
   const originalKey = `${objectPrefix}/original.${originalExtension}`;
   const displayKey = `${objectPrefix}/display.webp`;
 
-  const originalBytes = Math.max(0, Number(file.size) || 0);
-  const originalContentType =
-    String(file.detectedMime || file.mimetype || "application/octet-stream");
+  const originalBytes = Math.max(
+    0,
+    Number(file.size) || (Buffer.isBuffer(file.buffer) ? file.buffer.length : 0),
+  );
+  const originalContentType = String(
+    file.detectedMime || file.mimetype || "application/octet-stream",
+  );
 
   const { maxDimension, webpQuality } = getImageSettings();
 
   let displayBuffer;
 
   try {
-    // IMPORTANT: the source file itself is never overwritten or recompressed.
-    // Sharp only reads it to create a separate display derivative.
-    displayBuffer = await sharp(file.path, {
+    // The source object is never rewritten. Sharp only creates a separate
+    // display derivative, preserving the original bytes in the private bucket.
+    displayBuffer = await sharp(source, {
       failOn: "error",
       limitInputPixels: 40_000_000,
     })
@@ -153,16 +160,20 @@ async function uploadImagePair(file, eventId) {
       })
       .toBuffer();
 
+    const originalBody = file.path
+      ? fs.createReadStream(file.path)
+      : file.buffer;
+
     await putObject({
       bucket: buckets.originals,
       key: originalKey,
-      body: fs.createReadStream(file.path),
+      body: originalBody,
       contentType: originalContentType,
       contentLength: originalBytes,
       cacheControl: "private, no-store",
       metadata: {
         event_id: String(eventId),
-        asset_kind: "original",
+        asset_kind: `${objectKind}_original`,
       },
     });
 
@@ -176,7 +187,7 @@ async function uploadImagePair(file, eventId) {
         cacheControl: "public, max-age=31536000, immutable",
         metadata: {
           event_id: String(eventId),
-          asset_kind: "display",
+          asset_kind: `${objectKind}_display`,
           source_key: originalKey,
         },
       });
@@ -187,6 +198,7 @@ async function uploadImagePair(file, eventId) {
 
     return {
       storageProvider: "r2",
+      objectKind,
       originalKey,
       displayKey,
       displayUrl: buildDisplayUrl(displayKey),

@@ -2353,7 +2353,9 @@ const deleteAdminUser = async (req, res) => {
     const targetEvents = await loadAllRows(() =>
       supabase
         .from("event")
-        .select("event_id")
+        .select(
+          "event_id, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key",
+        )
         .eq("user_id", targetUserId),
     );
 
@@ -2401,14 +2403,27 @@ const deleteAdminUser = async (req, res) => {
       });
     }
 
-    const cleanupResults = await Promise.allSettled(
-      r2MediaRows.map((item) =>
+    const r2CoverRows = targetEvents.filter(
+      (event) =>
+        event.event_cover_storage_provider === "r2" ||
+        event.event_cover_r2_original_key ||
+        event.event_cover_r2_display_key,
+    );
+
+    const cleanupResults = await Promise.allSettled([
+      ...r2MediaRows.map((item) =>
         deleteImagePair({
           originalKey: item.r2_original_key,
           displayKey: item.r2_display_key,
         }),
       ),
-    );
+      ...r2CoverRows.map((event) =>
+        deleteImagePair({
+          originalKey: event.event_cover_r2_original_key,
+          displayKey: event.event_cover_r2_display_key,
+        }),
+      ),
+    ]);
 
     const cleanupFailures = cleanupResults.filter(
       (result) => result.status === "rejected",
