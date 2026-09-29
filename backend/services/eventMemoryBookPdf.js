@@ -14,7 +14,7 @@ const {
 const PAGE_WIDTH = 1080;
 const PAGE_HEIGHT = 607.5;
 const IMAGE_TIMEOUT_MS = 15_000;
-const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 50 * 1024 * 1024;
 const MAX_TOTAL_IMAGE_BYTES = 160 * 1024 * 1024;
 const MAX_PDF_IMAGES = 100;
 const DOWNLOAD_CONCURRENCY = 3;
@@ -181,10 +181,13 @@ function isWebP(buffer) {
 }
 
 async function normalizePdfImage(buffer) {
+  // JPEG and PNG originals are passed to PDFKit unchanged.
   if (isSupportedImage(buffer)) {
     return buffer;
   }
 
+  // PDFKit does not natively embed WebP, so an original WebP upload is the
+  // only case that must be converted before it can be placed in the PDF.
   if (!isWebP(buffer)) {
     throw new Error("The downloaded file is not a supported image.");
   }
@@ -288,11 +291,25 @@ async function resolvePdfMediaImage(
   logger = console,
 ) {
   if (item?.storage_provider === "r2") {
+    // Memory Book must use the guest's ORIGINAL upload as its primary source.
+    // display.webp is only the web/gallery derivative and is a fallback here.
+    if (item?.r2_original_key) {
+      try {
+        return await downloadR2OriginalImage(item.r2_original_key);
+      } catch (error) {
+        logger.warn("Memory Book R2 original read failed; trying display fallback.", {
+          media_id: item?.media_id,
+          r2_original_key: item?.r2_original_key,
+          error: error.message,
+        });
+      }
+    }
+
     if (item?.r2_display_key) {
       try {
         return await downloadR2DisplayImage(item.r2_display_key);
       } catch (error) {
-        logger.warn("Memory Book direct R2 display read failed; trying public display URL.", {
+        logger.warn("Memory Book direct R2 display fallback failed; trying public display URL.", {
           media_id: item?.media_id,
           error: error.message,
         });
@@ -300,23 +317,13 @@ async function resolvePdfMediaImage(
     }
 
     if (item?.media_url) {
-      try {
-        return await downloadImage(item.media_url, fetchImpl);
-      } catch (error) {
-        logger.warn("Memory Book public R2 display read failed; trying private original.", {
-          media_id: item?.media_id,
-          error: error.message,
-        });
-      }
+      return downloadImage(item.media_url, fetchImpl);
     }
 
-    if (item?.r2_original_key) {
-      return downloadR2OriginalImage(item.r2_original_key);
-    }
-
-    throw new Error("R2 image has no usable display or original source.");
+    throw new Error("R2 image has no usable original or display source.");
   }
 
+  // Legacy Cloudinary records continue to use their existing media URL.
   return downloadImage(item?.media_url, fetchImpl);
 }
 
