@@ -53,7 +53,7 @@ class EventArchiveError extends Error {
 function normalizeArchiveOptions(value = {}) {
   const includeValue = value.include || {};
   const options = {
-    quality: value.quality === "original" ? "original" : "optimized",
+    quality: value.quality === "optimized" ? "optimized" : "original",
     include: {
       photos: includeValue.photos !== false,
       videos: includeValue.videos !== false,
@@ -454,6 +454,33 @@ function getResponseExtension(response, sourceUrl, mediaKind) {
   return mediaKind === "video" ? ".mp4" : ".jpg";
 }
 
+function getDirectObjectExtension(source, media, mediaKind) {
+  const contentType = String(
+    source?.contentType ||
+      media?.original_mime_type ||
+      "",
+  )
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
+
+  const mimeExtension = MIME_EXTENSIONS[contentType];
+
+  if (mimeExtension) {
+    return mimeExtension;
+  }
+
+  const keyExtension = path
+    .extname(String(source?.key || media?.r2_original_key || ""))
+    .toLowerCase();
+
+  if (SAFE_MEDIA_EXTENSIONS.has(keyExtension)) {
+    return keyExtension === ".jpeg" ? ".jpg" : keyExtension;
+  }
+
+  return mediaKind === "video" ? ".mp4" : ".jpg";
+}
+
 function createMediaEntryBase(media, index) {
   const order = String(index + 1).padStart(4, "0");
   const guestName = sanitizeFileSegment(media.guest_name, "Guest", 48);
@@ -489,6 +516,45 @@ async function appendRemoteMedia({
   });
 
   await once(response, "end");
+  return entryName;
+}
+
+async function appendDirectMedia({
+  archive,
+  media,
+  mediaIndex,
+  rootFolder,
+  source,
+  mediaKind,
+}) {
+  if (
+    !source?.body ||
+    typeof source.body.pipe !== "function"
+  ) {
+    throw new EventArchiveError(
+      "R2 original media stream is unavailable.",
+      "ARCHIVE_R2_STREAM_INVALID",
+      502,
+    );
+  }
+
+  const extension = getDirectObjectExtension(
+    source,
+    media,
+    mediaKind,
+  );
+  const folder = mediaKind === "video" ? "Videos" : "Photos";
+  const entryName = `${rootFolder}/${folder}/${createMediaEntryBase(
+    media,
+    mediaIndex,
+  )}${extension}`;
+
+  archive.append(source.body, {
+    name: entryName,
+    store: true,
+  });
+
+  await once(source.body, "end");
   return entryName;
 }
 
@@ -598,28 +664,43 @@ async function streamEventArchive({
     const mediaKind = getMediaKind(media);
 
     try {
-      const sourceUrl = await resolveMediaUrl(
+      const source = await resolveMediaUrl(
         media,
         mediaKind,
         normalizedOptions.quality,
       );
 
-      if (!sourceUrl) {
+      if (!source) {
         throw new EventArchiveError(
-          "Media delivery URL could not be created.",
-          "ARCHIVE_MEDIA_URL_MISSING",
+          "Media source could not be created.",
+          "ARCHIVE_MEDIA_SOURCE_MISSING",
           422,
         );
       }
 
-      await appendRemoteMedia({
-        archive,
-        media,
-        mediaIndex: index,
-        rootFolder,
-        sourceUrl,
-        mediaKind,
-      });
+      if (
+        typeof source === "object" &&
+        source.body &&
+        typeof source.body.pipe === "function"
+      ) {
+        await appendDirectMedia({
+          archive,
+          media,
+          mediaIndex: index,
+          rootFolder,
+          source,
+          mediaKind,
+        });
+      } else {
+        await appendRemoteMedia({
+          archive,
+          media,
+          mediaIndex: index,
+          rootFolder,
+          sourceUrl: source,
+          mediaKind,
+        });
+      }
     } catch (error) {
       skippedFiles.push(
         `${media.media_id || `item-${index + 1}`} — ${error.code || error.message}`,

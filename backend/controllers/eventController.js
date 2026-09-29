@@ -31,8 +31,8 @@ const {
   loadEventStatisticsData,
 } = require("../services/eventStatisticsService");
 const {
-  createOriginalDownloadUrl,
   deleteImagePair,
+  getOriginalObjectStream,
   uploadImagePair,
 } = require("../services/r2MediaService");
 
@@ -2038,7 +2038,7 @@ async function downloadEventArchive(req, res) {
           media.storage_provider === "r2" &&
           media.r2_original_key
         ) {
-          return createOriginalDownloadUrl(media.r2_original_key);
+          return getOriginalObjectStream(media.r2_original_key);
         }
 
         if (quality === "original") {

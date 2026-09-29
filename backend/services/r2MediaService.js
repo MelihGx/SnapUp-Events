@@ -291,6 +291,36 @@ async function getDisplayObjectBuffer(
   return readObjectBodyToBuffer(response.Body, maxBytes);
 }
 
+
+async function getOriginalObjectStream(originalKey) {
+  if (!originalKey) {
+    throw new Error("R2 original object key is required.");
+  }
+
+  const { originals } = getR2Buckets();
+
+  const response = await getR2Client().send(
+    new GetObjectCommand({
+      Bucket: originals,
+      Key: originalKey,
+    }),
+  );
+
+  if (
+    !response.Body ||
+    typeof response.Body.pipe !== "function"
+  ) {
+    throw new Error("R2 original object body is not a readable stream.");
+  }
+
+  return {
+    body: response.Body,
+    key: originalKey,
+    contentType: response.ContentType || null,
+    contentLength: Number(response.ContentLength || 0) || null,
+  };
+}
+
 async function createOriginalDownloadUrl(originalKey, expiresIn = null) {
   if (!originalKey) return null;
 
@@ -323,6 +353,7 @@ module.exports = {
   createOriginalDownloadUrl,
   deleteImagePair,
   getDisplayObjectBuffer,
+  getOriginalObjectStream,
   isR2DisplayUrl,
   uploadImagePair,
 };

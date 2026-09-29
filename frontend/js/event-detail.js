@@ -2606,7 +2606,7 @@ function getEventArchiveOptions() {
   const quality =
     eventArchiveForm?.querySelector(
       'input[name="eventArchiveQuality"]:checked',
-    )?.value || "optimized";
+    )?.value || "original";
 
   return {
     quality,
