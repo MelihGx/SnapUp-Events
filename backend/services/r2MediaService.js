@@ -5,6 +5,7 @@ const sharp = require("sharp");
 const {
   DeleteObjectCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
@@ -108,6 +109,55 @@ async function deleteImagePair({ originalKey, displayKey }) {
     originalKey ? deleteObject(buckets.originals, originalKey) : null,
     displayKey ? deleteObject(buckets.display, displayKey) : null,
   ]);
+}
+
+async function listBucketObjects({
+  bucket,
+  prefix = "events/",
+}) {
+  if (!bucket) {
+    throw new Error("R2 bucket name is required.");
+  }
+
+  const objects = [];
+  let continuationToken;
+
+  do {
+    const response = await getR2Client().send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+        MaxKeys: 1000,
+      }),
+    );
+
+    for (const item of response.Contents || []) {
+      if (!item?.Key) continue;
+
+      objects.push({
+        key: item.Key,
+        size: Math.max(0, Number(item.Size) || 0),
+        lastModified: item.LastModified
+          ? new Date(item.LastModified)
+          : null,
+      });
+    }
+
+    continuationToken = response.IsTruncated
+      ? response.NextContinuationToken
+      : undefined;
+  } while (continuationToken);
+
+  return objects;
+}
+
+async function deleteBucketObject({ bucket, key }) {
+  if (!bucket || !key) {
+    throw new Error("R2 bucket and object key are required.");
+  }
+
+  await deleteObject(bucket, key);
 }
 
 async function uploadImagePair(file, eventId, options = {}) {
@@ -351,9 +401,11 @@ function isR2DisplayUrl(value) {
 module.exports = {
   buildDisplayUrl,
   createOriginalDownloadUrl,
+  deleteBucketObject,
   deleteImagePair,
   getDisplayObjectBuffer,
   getOriginalObjectStream,
   isR2DisplayUrl,
+  listBucketObjects,
   uploadImagePair,
 };

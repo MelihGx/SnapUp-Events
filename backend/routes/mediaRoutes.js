@@ -18,6 +18,10 @@ const {
   deleteImagePair,
   uploadImagePair,
 } = require("../services/r2MediaService");
+const {
+  STORAGE_PROVIDERS,
+  getMediaStorageProvider,
+} = require("../services/storagePolicy");
 const { getPackageStorageLimitBytes, normalizePackageKey } = require("../services/pricingService");
 const { hashGuestToken, issueGuestToken, verifyGuestToken } = require("../services/guestAccessService");
 const {
@@ -335,7 +339,7 @@ function uploadToCloudinary(file, eventId, resourceType) {
 async function cleanupUploadedItem(item) {
   if (!item) return;
 
-  if (item.storage_provider === "r2") {
+  if (item.storage_provider === STORAGE_PROVIDERS.R2) {
     await deleteImagePair({
       originalKey: item.r2?.original_key,
       displayKey: item.r2?.display_key,
@@ -820,7 +824,7 @@ router.post(
           media_url: r2Result.displayUrl,
           message: cleanMessage,
           media_status: mediaStatus,
-          storage_provider: "r2",
+          storage_provider: getMediaStorageProvider("image"),
           bytes: r2Result.originalBytes,
           r2: {
             original_key: r2Result.originalKey,
@@ -860,7 +864,7 @@ router.post(
         media_url: cloudinaryResult.secure_url,
         message: cleanMessage,
         media_status: mediaStatus,
-        storage_provider: "cloudinary",
+        storage_provider: getMediaStorageProvider("video"),
         bytes: cloudinaryResult.bytes,
         r2: null,
         cloudinary: {
@@ -892,9 +896,9 @@ router.post(
       cloudinary_public_id: item.cloudinary?.public_id || null,
       // These columns predate R2. delivery_type is NOT NULL in the current
       // database schema, so R2 rows must not explicitly insert NULL here.
-      resource_type: item.cloudinary?.resource_type || (item.storage_provider === "r2" ? "image" : null),
-      delivery_type: item.cloudinary?.type || (item.storage_provider === "r2" ? "authenticated" : "authenticated"),
-      format: item.cloudinary?.format || (item.storage_provider === "r2" ? "webp" : null),
+      resource_type: item.cloudinary?.resource_type || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "image" : null),
+      delivery_type: item.cloudinary?.type || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "authenticated" : "authenticated"),
+      format: item.cloudinary?.format || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "webp" : null),
     }));
 
     const { data, error } = await supabase
@@ -1042,6 +1046,7 @@ router.post("/message", uploadLimiter, optionalAuth, async (req, res) => {
         media_url: null,
         message: cleanText(message, { min: 1, max: 2000, field: "message" }),
         media_status: mediaStatus,
+        storage_provider: getMediaStorageProvider("message"),
       })
       .select()
       .single();
@@ -1398,7 +1403,7 @@ router.delete("/:mediaId", authMiddleware, async (req, res) => {
     }
 
     if (
-      media.storage_provider === "r2" &&
+      media.storage_provider === STORAGE_PROVIDERS.R2 &&
       (media.r2_original_key || media.r2_display_key)
     ) {
       deleteImagePair({
