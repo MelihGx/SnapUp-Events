@@ -8,6 +8,7 @@ const {
 } = require("./mediaRemoteUrl");
 const {
   getDisplayObjectBuffer,
+  getOriginalObjectBuffer,
 } = require("./r2MediaService");
 
 const PAGE_WIDTH = 1080;
@@ -273,23 +274,79 @@ async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
   }
 }
 
-async function resolvePdfMediaImage(item, fetchImpl = globalThis.fetch) {
-  if (
-    item?.storage_provider === "r2" &&
-    item?.r2_display_key
-  ) {
-    return downloadR2DisplayImage(item.r2_display_key);
+async function downloadR2OriginalImage(originalKey) {
+  const buffer = await getOriginalObjectBuffer(originalKey, {
+    maxBytes: MAX_IMAGE_BYTES,
+  });
+
+  return normalizeAndValidatePdfImage(buffer);
+}
+
+async function resolvePdfMediaImage(
+  item,
+  fetchImpl = globalThis.fetch,
+  logger = console,
+) {
+  if (item?.storage_provider === "r2") {
+    if (item?.r2_display_key) {
+      try {
+        return await downloadR2DisplayImage(item.r2_display_key);
+      } catch (error) {
+        logger.warn("Memory Book direct R2 display read failed; trying public display URL.", {
+          media_id: item?.media_id,
+          error: error.message,
+        });
+      }
+    }
+
+    if (item?.media_url) {
+      try {
+        return await downloadImage(item.media_url, fetchImpl);
+      } catch (error) {
+        logger.warn("Memory Book public R2 display read failed; trying private original.", {
+          media_id: item?.media_id,
+          error: error.message,
+        });
+      }
+    }
+
+    if (item?.r2_original_key) {
+      return downloadR2OriginalImage(item.r2_original_key);
+    }
+
+    throw new Error("R2 image has no usable display or original source.");
   }
 
   return downloadImage(item?.media_url, fetchImpl);
 }
 
-async function resolvePdfEventCover(event, fetchImpl = globalThis.fetch) {
-  if (
-    event?.event_cover_storage_provider === "r2" &&
-    event?.event_cover_r2_display_key
-  ) {
-    return downloadR2DisplayImage(event.event_cover_r2_display_key);
+async function resolvePdfEventCover(
+  event,
+  fetchImpl = globalThis.fetch,
+  logger = console,
+) {
+  if (event?.event_cover_storage_provider === "r2") {
+    if (event?.event_cover_r2_display_key) {
+      try {
+        return await downloadR2DisplayImage(
+          event.event_cover_r2_display_key,
+        );
+      } catch (error) {
+        logger.warn("Memory Book direct R2 cover read failed; trying public cover URL.", {
+          error: error.message,
+        });
+      }
+    }
+
+    if (event?.event_cover_url) {
+      try {
+        return await downloadImage(event.event_cover_url, fetchImpl);
+      } catch (error) {
+        logger.warn("Memory Book public R2 cover read failed.", {
+          error: error.message,
+        });
+      }
+    }
   }
 
   if (!event?.event_cover_url) {
@@ -332,7 +389,11 @@ async function prepareMemoryBookAssets({
     DOWNLOAD_CONCURRENCY,
     async (item) => {
       try {
-        const imageBuffer = await resolvePdfMediaImage(item, fetchImpl);
+        const imageBuffer = await resolvePdfMediaImage(
+          item,
+          fetchImpl,
+          logger,
+        );
         totalBytes += imageBuffer.length;
         if (totalBytes > MAX_TOTAL_IMAGE_BYTES) {
           throw new MemoryBookPdfError("Memory Book image budget exceeded.", "PDF_IMAGE_BUDGET_EXCEEDED");
@@ -364,7 +425,11 @@ async function prepareMemoryBookAssets({
     event?.event_cover_r2_display_key
   ) {
     try {
-      coverBuffer = await resolvePdfEventCover(event, fetchImpl);
+      coverBuffer = await resolvePdfEventCover(
+        event,
+        fetchImpl,
+        logger,
+      );
     } catch (error) {
       logger.warn("Memory Book could not load the event cover.", {
         error: error.message,

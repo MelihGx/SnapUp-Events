@@ -342,6 +342,33 @@ async function getDisplayObjectBuffer(
 }
 
 
+
+async function getOriginalObjectBuffer(
+  originalKey,
+  { maxBytes = 12 * 1024 * 1024 } = {},
+) {
+  if (!originalKey) {
+    throw new Error("R2 original object key is required.");
+  }
+
+  const { originals } = getR2Buckets();
+
+  const response = await getR2Client().send(
+    new GetObjectCommand({
+      Bucket: originals,
+      Key: originalKey,
+    }),
+  );
+
+  const declaredLength = Number(response.ContentLength || 0);
+
+  if (declaredLength > maxBytes) {
+    throw new Error("R2 original object exceeds the allowed size.");
+  }
+
+  return readObjectBodyToBuffer(response.Body, maxBytes);
+}
+
 async function getOriginalObjectStream(originalKey) {
   if (!originalKey) {
     throw new Error("R2 original object key is required.");
@@ -404,6 +431,7 @@ module.exports = {
   deleteBucketObject,
   deleteImagePair,
   getDisplayObjectBuffer,
+  getOriginalObjectBuffer,
   getOriginalObjectStream,
   isR2DisplayUrl,
   listBucketObjects,
