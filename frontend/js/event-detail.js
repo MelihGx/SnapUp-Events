@@ -1,6 +1,6 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventGalleryUrl } from "./event-url.js?v=event-slug-1";
-import { createMemoryBookPdf } from "./memory-book-pdf.js?v=cloudinary-bandwidth-1";
+import { createMemoryBookPdf } from "./memory-book-pdf.js?v=r2-memory-book-direct-1";
 import { setInvitationStudioEvent } from "./invitation-studio.js?v=cloudinary-bandwidth-1";
 import {
   buildEventMapUrl,
@@ -1754,14 +1754,6 @@ function renderSettings(settings) {
     {
       label: "Public Gallery",
       value: settings.allow_gallery_view !== false,
-    },
-    {
-      label: "Max Storage / Guest",
-      customValue: `${settings.max_storage_per_guest || 0} MB`,
-    },
-    {
-      label: "Max Upload / Guest",
-      customValue: `${settings.max_upload_per_guest || 0}`,
     },
   ];
 

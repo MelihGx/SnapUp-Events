@@ -59,7 +59,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/create-event-page.css?v=event-type-searchable-3"
+      href="css/create-event-page.css?v=event-type-select-only-1"
     />
     <link
       rel="stylesheet"
@@ -75,9 +75,9 @@
     <script src="js/ui-additions-i18n.js?v=ui-additions-50-languages-1" defer></script>
     <script src="js/pricing-i18n.js?v=pricing-all-languages-3" defer></script>
     <script src="js/package-i18n.js?v=package-slogans-50-languages-2" defer></script>
-    <script src="js/event-type-i18n.js?v=event-type-analytics-1" defer></script>
+    <script src="js/event-type-i18n.js?v=event-type-50-languages-1" defer></script>
     <script src="js/i18n.js?v=four-packages-5" defer></script>
-    <script src="js/event-type-combobox.js?v=event-type-searchable-3" defer></script>
+    <script src="js/event-type-combobox.js?v=event-type-select-only-1" defer></script>
   </head>
 
   <body class="create-event-page">
@@ -168,8 +168,9 @@
                   id="eventTypeSearch"
                   class="event-type-combobox__input"
                   autocomplete="off"
+                  readonly
                   role="combobox"
-                  aria-autocomplete="list"
+                  aria-autocomplete="none"
                   aria-expanded="false"
                   aria-controls="eventTypeList"
                   aria-haspopup="listbox"

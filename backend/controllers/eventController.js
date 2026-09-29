@@ -1643,6 +1643,8 @@ async function getPublicEventGallery(req, res) {
         event_code,
         description,
         event_cover_url,
+        event_cover_storage_provider,
+        event_cover_r2_display_key,
         is_event_active
       `,
       )
@@ -1806,24 +1808,28 @@ async function getPublicEventGallery(req, res) {
 }
 
 async function getApprovedEventImages(eventId) {
-  return supabase
-    .from("events_media")
-    .select(
-      `
-      media_id,
-      guest_name,
-      media_type,
-      media_url,
-      message,
-      media_status,
-      media_created_at
-    `,
-    )
-    .eq("event_id", eventId)
-    .eq("media_status", "approved")
-    .eq("media_type", "image")
-    .not("media_url", "is", null)
-    .order("media_created_at", { ascending: true });
+  try {
+    // Read from the base media table through the archive loader so R2 fields
+    // such as storage_provider and r2_display_key are available to the PDF
+    // generator. The legacy events_media view predates those columns.
+    const mediaItems = await getApprovedArchiveMedia(eventId);
+
+    return {
+      data: mediaItems.filter(
+        (item) =>
+          item &&
+          item.media_type === "image" &&
+          item.media_status === "approved" &&
+          (item.media_url || item.r2_display_key),
+      ),
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
 }
 
 async function getApprovedArchiveMedia(eventId) {
@@ -2154,6 +2160,8 @@ async function downloadEventMemoryBookV3(req, res) {
         event_code,
         description,
         event_cover_url,
+        event_cover_storage_provider,
+        event_cover_r2_display_key,
         user_id
       `,
       )

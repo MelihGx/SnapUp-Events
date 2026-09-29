@@ -6,12 +6,15 @@ const {
   assertAllowedMediaUrl,
   isCloudinaryUrl,
 } = require("./mediaRemoteUrl");
+const {
+  getDisplayObjectBuffer,
+} = require("./r2MediaService");
 
 const PAGE_WIDTH = 1080;
 const PAGE_HEIGHT = 607.5;
 const IMAGE_TIMEOUT_MS = 15_000;
-const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
-const MAX_TOTAL_IMAGE_BYTES = 120 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const MAX_TOTAL_IMAGE_BYTES = 160 * 1024 * 1024;
 const MAX_PDF_IMAGES = 100;
 const DOWNLOAD_CONCURRENCY = 3;
 
@@ -191,15 +194,32 @@ async function normalizePdfImage(buffer) {
   })
     .rotate()
     .resize({
-      width: 2000,
-      height: 2000,
+      width: 1800,
+      height: 1800,
       fit: "inside",
       withoutEnlargement: true,
     })
-    .jpeg({ quality: 88, mozjpeg: true })
+    .jpeg({ quality: 84, mozjpeg: true })
     .toBuffer();
 }
 
+async function normalizeAndValidatePdfImage(buffer) {
+  const normalizedBuffer = await normalizePdfImage(buffer);
+
+  if (normalizedBuffer.length > MAX_IMAGE_BYTES) {
+    throw new Error("Optimized PDF image is larger than the download limit.");
+  }
+
+  return normalizedBuffer;
+}
+
+async function downloadR2DisplayImage(displayKey) {
+  const buffer = await getDisplayObjectBuffer(displayKey, {
+    maxBytes: MAX_IMAGE_BYTES,
+  });
+
+  return normalizeAndValidatePdfImage(buffer);
+}
 
 async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
   if (typeof fetchImpl !== "function") {
@@ -247,16 +267,36 @@ async function downloadImage(imageUrl, fetchImpl = globalThis.fetch) {
       throw new Error("Image is larger than the PDF download limit.");
     }
 
-    const normalizedBuffer = await normalizePdfImage(buffer);
-
-    if (normalizedBuffer.length > MAX_IMAGE_BYTES) {
-      throw new Error("Optimized PDF image is larger than the download limit.");
-    }
-
-    return normalizedBuffer;
+    return normalizeAndValidatePdfImage(buffer);
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function resolvePdfMediaImage(item, fetchImpl = globalThis.fetch) {
+  if (
+    item?.storage_provider === "r2" &&
+    item?.r2_display_key
+  ) {
+    return downloadR2DisplayImage(item.r2_display_key);
+  }
+
+  return downloadImage(item?.media_url, fetchImpl);
+}
+
+async function resolvePdfEventCover(event, fetchImpl = globalThis.fetch) {
+  if (
+    event?.event_cover_storage_provider === "r2" &&
+    event?.event_cover_r2_display_key
+  ) {
+    return downloadR2DisplayImage(event.event_cover_r2_display_key);
+  }
+
+  if (!event?.event_cover_url) {
+    return null;
+  }
+
+  return downloadImage(event.event_cover_url, fetchImpl);
 }
 
 async function mapWithConcurrency(items, concurrency, mapper) {
@@ -292,7 +332,7 @@ async function prepareMemoryBookAssets({
     DOWNLOAD_CONCURRENCY,
     async (item) => {
       try {
-        const imageBuffer = await downloadImage(item.media_url, fetchImpl);
+        const imageBuffer = await resolvePdfMediaImage(item, fetchImpl);
         totalBytes += imageBuffer.length;
         if (totalBytes > MAX_TOTAL_IMAGE_BYTES) {
           throw new MemoryBookPdfError("Memory Book image budget exceeded.", "PDF_IMAGE_BUDGET_EXCEEDED");
@@ -319,9 +359,12 @@ async function prepareMemoryBookAssets({
 
   let coverBuffer = moments[0].imageBuffer;
 
-  if (event?.event_cover_url) {
+  if (
+    event?.event_cover_url ||
+    event?.event_cover_r2_display_key
+  ) {
     try {
-      coverBuffer = await downloadImage(event.event_cover_url, fetchImpl);
+      coverBuffer = await resolvePdfEventCover(event, fetchImpl);
     } catch (error) {
       logger.warn("Memory Book could not load the event cover.", {
         error: error.message,

@@ -19,13 +19,6 @@ function snapUpTranslateEventType(text) {
   return window.SnapUpI18n?.t?.(text) || text;
 }
 
-function normalizeEventTypeSearch(value, locale) {
-  return String(value || "")
-    .trim()
-    .toLocaleLowerCase(locale || undefined)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
 
 function mountEventTypeCombobox({
   root,
@@ -66,50 +59,24 @@ function mountEventTypeCombobox({
     });
   }
 
-  const allTypes = SNAPUP_EVENT_TYPES.map((item) => ({
+  const translatedTypes = SNAPUP_EVENT_TYPES.map((item) => ({
     ...item,
     label: snapUpTranslateEventType(item.labelKey),
-  })).sort((left, right) => collator.compare(left.label, right.label));
+  }));
+
+  const regularTypes = translatedTypes
+    .filter((item) => item.code !== "other")
+    .sort((left, right) => collator.compare(left.label, right.label));
+
+  const otherType = translatedTypes.find((item) => item.code === "other");
+  const allTypes = otherType
+    ? [...regularTypes, otherType]
+    : regularTypes;
 
   let filtered = [...allTypes];
   let activeIndex = -1;
   let isOpen = false;
 
-  function rankTypes(query) {
-    const normalizedQuery = normalizeEventTypeSearch(query, locale);
-
-    if (!normalizedQuery) {
-      return [...allTypes];
-    }
-
-    const starts = [];
-    const contains = [];
-
-    allTypes.forEach((item) => {
-      const normalizedLabel = normalizeEventTypeSearch(item.label, locale);
-      const normalizedCode = normalizeEventTypeSearch(item.code, locale);
-
-      if (
-        normalizedLabel.startsWith(normalizedQuery) ||
-        normalizedCode.startsWith(normalizedQuery)
-      ) {
-        starts.push(item);
-        return;
-      }
-
-      if (
-        normalizedLabel.includes(normalizedQuery) ||
-        normalizedCode.includes(normalizedQuery)
-      ) {
-        contains.push(item);
-      }
-    });
-
-    starts.sort((left, right) => collator.compare(left.label, right.label));
-    contains.sort((left, right) => collator.compare(left.label, right.label));
-
-    return [...starts, ...contains];
-  }
 
   function optionId(item) {
     return `event-type-option-${item.code}`;
@@ -185,39 +152,41 @@ function mountEventTypeCombobox({
   }
 
   function refresh() {
-    filtered = rankTypes(searchInput.value);
-    activeIndex = filtered.length ? 0 : -1;
+    filtered = [...allTypes];
+
+    const selectedIndex = filtered.findIndex(
+      (item) => item.code === hiddenInput.value,
+    );
+
+    activeIndex = selectedIndex >= 0
+      ? selectedIndex
+      : filtered.length
+        ? 0
+        : -1;
+
     render();
   }
 
   function open() {
     refresh();
     setExpanded(true);
-  }
 
-  function clearSelectionIfTextChanged() {
-    const current = allTypes.find((item) => item.code === hiddenInput.value);
-
-    if (!current) return;
-
-    if (
-      normalizeEventTypeSearch(searchInput.value, locale) !==
-      normalizeEventTypeSearch(current.label, locale)
-    ) {
-      hiddenInput.value = "";
-    }
+    window.requestAnimationFrame(() => {
+      menu
+        .querySelector(".event-type-combobox__option.is-active")
+        ?.scrollIntoView({ block: "nearest" });
+    });
   }
 
   searchInput.placeholder = placeholder;
+  searchInput.readOnly = true;
+  searchInput.setAttribute("aria-autocomplete", "none");
 
   searchInput.addEventListener("focus", open);
 
-  searchInput.addEventListener("input", () => {
-    clearSelectionIfTextChanged();
-    filtered = rankTypes(searchInput.value);
-    activeIndex = filtered.length ? 0 : -1;
-    setExpanded(true);
-    render();
+  // Prevent printable keys from behaving like a text-search field.
+  searchInput.addEventListener("beforeinput", (event) => {
+    event.preventDefault();
   });
 
   searchInput.addEventListener("keydown", (event) => {
@@ -266,27 +235,21 @@ function mountEventTypeCombobox({
     window.setTimeout(() => {
       const current = allTypes.find((item) => item.code === hiddenInput.value);
 
-      if (current) {
-        searchInput.value = current.label;
-      } else if (!searchInput.value.trim()) {
-        hiddenInput.value = "";
-      } else {
-        hiddenInput.value = "";
-        searchInput.value = "";
-      }
-
+      searchInput.value = current ? current.label : "";
       close();
     }, 120);
   });
 
   toggleButton?.addEventListener("click", () => {
-    searchInput.focus();
+    const wasOpen = isOpen;
 
-    if (isOpen) {
+    if (wasOpen) {
       close();
-    } else {
-      open();
+      return;
     }
+
+    searchInput.focus({ preventScroll: true });
+    open();
   });
 
   document.addEventListener("click", (event) => {

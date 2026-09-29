@@ -212,6 +212,85 @@ async function uploadImagePair(file, eventId, options = {}) {
   }
 }
 
+
+async function readObjectBodyToBuffer(body, maxBytes) {
+  if (!body) {
+    throw new Error("R2 object response body is empty.");
+  }
+
+  if (Buffer.isBuffer(body)) {
+    if (body.length > maxBytes) {
+      throw new Error("R2 object exceeds the allowed size.");
+    }
+    return body;
+  }
+
+  if (body instanceof Uint8Array) {
+    const buffer = Buffer.from(body);
+    if (buffer.length > maxBytes) {
+      throw new Error("R2 object exceeds the allowed size.");
+    }
+    return buffer;
+  }
+
+  if (typeof body[Symbol.asyncIterator] === "function") {
+    const chunks = [];
+    let total = 0;
+
+    for await (const chunk of body) {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      total += buffer.length;
+
+      if (total > maxBytes) {
+        throw new Error("R2 object exceeds the allowed size.");
+      }
+
+      chunks.push(buffer);
+    }
+
+    return Buffer.concat(chunks, total);
+  }
+
+  if (typeof body.transformToByteArray === "function") {
+    const bytes = await body.transformToByteArray();
+    const buffer = Buffer.from(bytes);
+
+    if (buffer.length > maxBytes) {
+      throw new Error("R2 object exceeds the allowed size.");
+    }
+
+    return buffer;
+  }
+
+  throw new Error("R2 object body could not be read.");
+}
+
+async function getDisplayObjectBuffer(
+  displayKey,
+  { maxBytes = 12 * 1024 * 1024 } = {},
+) {
+  if (!displayKey) {
+    throw new Error("R2 display object key is required.");
+  }
+
+  const { display } = getR2Buckets();
+
+  const response = await getR2Client().send(
+    new GetObjectCommand({
+      Bucket: display,
+      Key: displayKey,
+    }),
+  );
+
+  const declaredLength = Number(response.ContentLength || 0);
+
+  if (declaredLength > maxBytes) {
+    throw new Error("R2 display object exceeds the allowed size.");
+  }
+
+  return readObjectBodyToBuffer(response.Body, maxBytes);
+}
+
 async function createOriginalDownloadUrl(originalKey, expiresIn = null) {
   if (!originalKey) return null;
 
@@ -243,6 +322,7 @@ module.exports = {
   buildDisplayUrl,
   createOriginalDownloadUrl,
   deleteImagePair,
+  getDisplayObjectBuffer,
   isR2DisplayUrl,
   uploadImagePair,
 };
