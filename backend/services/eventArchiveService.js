@@ -510,12 +510,19 @@ async function appendRemoteMedia({
     mediaIndex,
   )}${extension}`;
 
+  // IMPORTANT:
+  // Register the completion listener BEFORE handing the stream to Archiver.
+  // With small/fast Cloudinary or display responses, the stream can otherwise
+  // emit "end" during archive.append(), leaving a later once("end") waiting
+  // forever and preventing the ZIP response from ever finishing.
+  const responseEnded = once(response, "end");
+
   archive.append(response, {
     name: entryName,
     store: true,
   });
 
-  await once(response, "end");
+  await responseEnded;
   return entryName;
 }
 
@@ -561,13 +568,16 @@ async function appendDirectMedia({
     return entryName;
   }
 
-  // Compatibility path only. Archiver owns stream consumption; waiting for
-  // "end" here can race with a fast stream and leave the request hanging.
+  // Compatibility path only. Register before append for the same reason as
+  // remote media: a fast readable can finish during archive.append().
+  const sourceEnded = once(source.body, "end");
+
   archive.append(source.body, {
     name: entryName,
     store: true,
   });
 
+  await sourceEnded;
   return entryName;
 }
 
