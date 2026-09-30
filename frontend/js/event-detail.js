@@ -386,9 +386,6 @@ const eventArchiveIncludeMessages = document.getElementById(
 const eventArchiveIncludeInfo = document.getElementById(
   "eventArchiveIncludeInfo",
 );
-const eventArchiveDownloadFrame = document.getElementById(
-  "eventArchiveDownloadFrame",
-);
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
@@ -2638,6 +2635,24 @@ async function startEventArchiveDownload(event) {
 
   const buttonText = eventArchiveDownload.querySelector("span");
 
+  // Must be opened before the first await while the browser still considers
+  // this code part of the user's button click. This avoids popup/download
+  // restrictions after the archive-ticket request completes.
+  const archiveDownloadWindow = window.open(
+    "about:blank",
+    "snapupEventArchiveDownload",
+  );
+
+  if (archiveDownloadWindow) {
+    try {
+      archiveDownloadWindow.document.title = "SnapUp Event Archive";
+      archiveDownloadWindow.document.body.innerHTML =
+        "<p style=\"font-family:Arial,sans-serif;padding:24px\">Preparing your SnapUp archive...</p>";
+    } catch (_error) {
+      // Cross-context preparation is cosmetic only.
+    }
+  }
+
   try {
     eventArchiveDownload.disabled = true;
     eventArchiveCancel.disabled = true;
@@ -2674,27 +2689,35 @@ async function startEventArchiveDownload(event) {
       eventId,
     )}/archive?ticket=${encodeURIComponent(data.ticket)}`;
 
-    if (eventArchiveDownloadFrame) {
-      eventArchiveDownloadFrame.src = downloadUrl;
+    setEventArchiveStatus(
+      t("Your ZIP is being prepared. The browser download will start automatically."),
+      "success",
+    );
+    buttonText.textContent = t("Preparing Download...");
+
+    if (archiveDownloadWindow && !archiveDownloadWindow.closed) {
+      // This is a real top-level browsing context opened synchronously from
+      // the user's click. It avoids the browser restrictions that affected
+      // the old hidden cross-origin iframe download.
+      archiveDownloadWindow.location.replace(downloadUrl);
     } else {
+      // Popup blockers can still disable the helper tab. In that case the
+      // signed ticket endpoint is safe to navigate to in the current tab;
+      // Content-Disposition: attachment causes the browser to download it.
       window.location.assign(downloadUrl);
     }
 
-    setEventArchiveStatus(
-      t("Your archive is being prepared. The download has started."),
-      "success",
-    );
-    buttonText.textContent = t("Download Started");
-    eventArchiveDownload.disabled = false;
-    eventArchiveCancel.disabled = false;
-    eventArchiveClose.disabled = false;
-
     window.setTimeout(() => {
-      if (eventArchiveModal?.classList.contains("active")) {
-        closeEventArchive();
-      }
-    }, 1700);
+      eventArchiveDownload.disabled = false;
+      eventArchiveCancel.disabled = false;
+      eventArchiveClose.disabled = false;
+      buttonText.textContent = t("Download ZIP Archive");
+    }, 5000);
   } catch (error) {
+    if (archiveDownloadWindow && !archiveDownloadWindow.closed) {
+      archiveDownloadWindow.close();
+    }
+
     console.error("Event archive ticket error:", error);
     setEventArchiveStatus(
       t(error.message || "The event archive could not be prepared."),

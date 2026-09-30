@@ -18,11 +18,14 @@
   Cache-Control: no-cache
   Referrer-Policy: no-referrer
 
+/event-detail
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /event-detail.html
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /js/event-detail.js
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /js/memory-book-pdf.js
   Cache-Control: no-cache, must-revalidate
