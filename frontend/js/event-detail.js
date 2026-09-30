@@ -2645,9 +2645,14 @@ async function startEventArchiveDownload(event) {
 
   if (archiveDownloadWindow) {
     try {
-      archiveDownloadWindow.document.title = "SnapUp Event Archive";
-      archiveDownloadWindow.document.body.innerHTML =
-        "<p style=\"font-family:Arial,sans-serif;padding:24px\">Preparing your SnapUp archive...</p>";
+      const helperDocument = archiveDownloadWindow.document;
+      helperDocument.title = `SnapUp — ${t("Event Archive")}`;
+
+      const helperMessage = helperDocument.createElement("p");
+      helperMessage.style.fontFamily = "Arial, sans-serif";
+      helperMessage.style.padding = "24px";
+      helperMessage.textContent = t("Preparing your SnapUp archive...");
+      helperDocument.body.replaceChildren(helperMessage);
     } catch (_error) {
       // Cross-context preparation is cosmetic only.
     }

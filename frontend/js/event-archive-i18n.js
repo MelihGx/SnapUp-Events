@@ -30,7 +30,11 @@
     "The event archive could not be prepared.": "Etkinlik arşivi hazırlanamadı.",
     "Your archive is being prepared. The download has started.": "Arşiviniz hazırlanıyor. İndirme başladı.",
     "Download Started": "İndirme Başladı",
-    "Archive download": "Arşiv indirme"
+    "Archive download": "Arşiv indirme",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Yalnızca onaylanmış içerik dahildir. Orijinal fotoğraflar güvenli depolamadan, yüklendiği haliyle indirilir.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "ZIP dosyanız hazırlanıyor. Tarayıcı indirmeyi otomatik olarak başlatacak.",
+    "Preparing Download...": "Arşiv hazırlanıyor...",
+    "Preparing your SnapUp archive...": "Arşiv hazırlanıyor..."
   },
   "ar": {
     "Event Archive": "أرشيف الأحداث",
@@ -60,7 +64,11 @@
     "The event archive could not be prepared.": "لا يمكن تحضير أرشيف الأحداث.",
     "Your archive is being prepared. The download has started.": "الأرشيف الخاص بك قيد الإعداد. لقد بدأ التنزيل.",
     "Download Started": "بدأ التنزيل",
-    "Archive download": "تحميل الأرشيف"
+    "Archive download": "تحميل الأرشيف",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "يتم تضمين المحتوى المعتمد فقط. يتم تنزيل الصور الأصلية من التخزين الآمن تمامًا كما تم رفعها.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "يتم تحضير ملف ZIP الخاص بك. سيبدأ المتصفح التنزيل تلقائيًا.",
+    "Preparing Download...": "جارٍ تحضير الأرشيف...",
+    "Preparing your SnapUp archive...": "جارٍ تحضير الأرشيف..."
   },
   "de": {
     "Event Archive": "Veranstaltungsarchiv",
@@ -90,7 +98,11 @@
     "The event archive could not be prepared.": "Das Ereignisarchiv konnte nicht vorbereitet werden.",
     "Your archive is being prepared. The download has started.": "Ihr Archiv wird vorbereitet. Der Download wurde gestartet.",
     "Download Started": "Download gestartet",
-    "Archive download": "Archiv-Download"
+    "Archive download": "Archiv-Download",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Nur genehmigte Inhalte sind enthalten. Originalfotos werden genau so, wie sie hochgeladen wurden, aus dem sicheren Speicher heruntergeladen.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Ihre ZIP-Datei wird vorbereitet. Der Browser startet den Download automatisch.",
+    "Preparing Download...": "Archiv wird vorbereitet...",
+    "Preparing your SnapUp archive...": "Archiv wird vorbereitet..."
   },
   "fr": {
     "Event Archive": "Archives d'événements",
@@ -120,7 +132,11 @@
     "The event archive could not be prepared.": "L'archive de l'événement n'a pas pu être préparée.",
     "Your archive is being prepared. The download has started.": "Votre archive est en cours de préparation. Le téléchargement a commencé.",
     "Download Started": "Téléchargement démarré",
-    "Archive download": "Téléchargement des archives"
+    "Archive download": "Téléchargement des archives",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Seul le contenu approuvé est inclus. Les photos originales sont téléchargées depuis le stockage sécurisé exactement telles qu’elles ont été envoyées.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Votre fichier ZIP est en cours de préparation. Le navigateur lancera automatiquement le téléchargement.",
+    "Preparing Download...": "Préparation des archives...",
+    "Preparing your SnapUp archive...": "Préparation des archives..."
   },
   "es": {
     "Event Archive": "Archivo de eventos",
@@ -150,7 +166,11 @@
     "The event archive could not be prepared.": "No se pudo preparar el archivo del evento.",
     "Your archive is being prepared. The download has started.": "Su archivo se está preparando. La descarga ha comenzado.",
     "Download Started": "Descarga iniciada",
-    "Archive download": "Descarga de archivos"
+    "Archive download": "Descarga de archivos",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Solo se incluye contenido aprobado. Las fotos originales se descargan desde el almacenamiento seguro exactamente como se subieron.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Tu archivo ZIP se está preparando. El navegador iniciará la descarga automáticamente.",
+    "Preparing Download...": "Preparando archivo...",
+    "Preparing your SnapUp archive...": "Preparando archivo..."
   },
   "it": {
     "Event Archive": "Archivio eventi",
@@ -180,7 +200,11 @@
     "The event archive could not be prepared.": "Non è stato possibile preparare l'archivio eventi.",
     "Your archive is being prepared. The download has started.": "Il tuo archivio è in preparazione. Il download è iniziato.",
     "Download Started": "Download avviato",
-    "Archive download": "Scaricamento dell'archivio"
+    "Archive download": "Scaricamento dell'archivio",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Sono inclusi solo i contenuti approvati. Le foto originali vengono scaricate dall’archivio sicuro esattamente come sono state caricate.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Il tuo file ZIP è in preparazione. Il browser avvierà automaticamente il download.",
+    "Preparing Download...": "Preparazione archivio...",
+    "Preparing your SnapUp archive...": "Preparazione archivio..."
   },
   "nl": {
     "Event Archive": "Evenementenarchief",
@@ -210,7 +234,11 @@
     "The event archive could not be prepared.": "Het evenementenarchief kon niet worden voorbereid.",
     "Your archive is being prepared. The download has started.": "Uw archief wordt voorbereid. Het downloaden is gestart.",
     "Download Started": "Downloaden gestart",
-    "Archive download": "Archief downloaden"
+    "Archive download": "Archief downloaden",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Alleen goedgekeurde inhoud wordt opgenomen. Originele foto’s worden vanuit beveiligde opslag exact zoals geüpload gedownload.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Je ZIP-bestand wordt voorbereid. De browser start de download automatisch.",
+    "Preparing Download...": "Archief voorbereiden...",
+    "Preparing your SnapUp archive...": "Archief voorbereiden..."
   },
   "bg": {
     "Event Archive": "Архив на събитието",
@@ -240,7 +268,11 @@
     "The event archive could not be prepared.": "Архивът на събитието не можа да бъде подготвен.",
     "Your archive is being prepared. The download has started.": "Вашият архив се подготвя. Изтеглянето започна.",
     "Download Started": "Изтеглянето започна",
-    "Archive download": "Изтегляне на архив"
+    "Archive download": "Изтегляне на архив",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Включва се само одобрено съдържание. Оригиналните снимки се изтеглят от защитеното хранилище точно както са качени.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Вашият ZIP файл се подготвя. Браузърът ще започне изтеглянето автоматично.",
+    "Preparing Download...": "Подготвя се архив...",
+    "Preparing your SnapUp archive...": "Подготвя се архив..."
   },
   "ro": {
     "Event Archive": "Arhiva evenimentelor",
@@ -270,7 +302,11 @@
     "The event archive could not be prepared.": "Arhiva evenimentului nu a putut fi pregătită.",
     "Your archive is being prepared. The download has started.": "Arhiva dvs. este în curs de pregătire. Descărcarea a început.",
     "Download Started": "Descărcarea a început",
-    "Archive download": "Descărcare arhivă"
+    "Archive download": "Descărcare arhivă",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Este inclus doar conținutul aprobat. Fotografiile originale sunt descărcate din stocarea securizată exact așa cum au fost încărcate.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Fișierul ZIP este în curs de pregătire. Browserul va porni automat descărcarea.",
+    "Preparing Download...": "Se pregătește arhiva...",
+    "Preparing your SnapUp archive...": "Se pregătește arhiva..."
   },
   "el": {
     "Event Archive": "Αρχείο Εκδηλώσεων",
@@ -300,7 +336,11 @@
     "The event archive could not be prepared.": "Δεν ήταν δυνατή η προετοιμασία του αρχείου της εκδήλωσης.",
     "Your archive is being prepared. The download has started.": "Το αρχείο σας ετοιμάζεται. Η λήψη ξεκίνησε.",
     "Download Started": "Η λήψη ξεκίνησε",
-    "Archive download": "Λήψη αρχείου"
+    "Archive download": "Λήψη αρχείου",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Περιλαμβάνεται μόνο εγκεκριμένο περιεχόμενο. Οι αρχικές φωτογραφίες λαμβάνονται από ασφαλή αποθήκευση ακριβώς όπως μεταφορτώθηκαν.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Το αρχείο ZIP σας προετοιμάζεται. Το πρόγραμμα περιήγησης θα ξεκινήσει αυτόματα τη λήψη.",
+    "Preparing Download...": "Προετοιμασία αρχείου...",
+    "Preparing your SnapUp archive...": "Προετοιμασία αρχείου..."
   },
   "sr": {
     "Event Archive": "Архива догађаја",
@@ -330,7 +370,11 @@
     "The event archive could not be prepared.": "Архива догађаја није могла бити припремљена.",
     "Your archive is being prepared. The download has started.": "Ваша архива је у припреми. Преузимање је почело.",
     "Download Started": "Преузимање је почело",
-    "Archive download": "Преузимање архиве"
+    "Archive download": "Преузимање архиве",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Uključuje se samo odobren sadržaj. Originalne fotografije se preuzimaju iz bezbednog skladišta tačno onako kako su otpremljene.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Vaš ZIP se priprema. Pregledač će automatski pokrenuti preuzimanje.",
+    "Preparing Download...": "Припрема архиве...",
+    "Preparing your SnapUp archive...": "Припрема архиве..."
   },
   "hr": {
     "Event Archive": "Arhiva događaja",
@@ -360,7 +404,11 @@
     "The event archive could not be prepared.": "Nije bilo moguće pripremiti arhivu događaja.",
     "Your archive is being prepared. The download has started.": "Vaša arhiva je u pripremi. Preuzimanje je počelo.",
     "Download Started": "Preuzimanje je počelo",
-    "Archive download": "Arhivsko preuzimanje"
+    "Archive download": "Arhivsko preuzimanje",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Uključuje se samo odobreni sadržaj. Izvorne fotografije preuzimaju se iz sigurnog spremišta točno onako kako su prenesene.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Vaš ZIP se priprema. Preglednik će automatski pokrenuti preuzimanje.",
+    "Preparing Download...": "Priprema arhive...",
+    "Preparing your SnapUp archive...": "Priprema arhive..."
   },
   "bs": {
     "Event Archive": "Arhiva događaja",
@@ -390,7 +438,11 @@
     "The event archive could not be prepared.": "Arhiva događaja nije mogla biti pripremljena.",
     "Your archive is being prepared. The download has started.": "Vaša arhiva je u pripremi. Preuzimanje je počelo.",
     "Download Started": "Preuzimanje je počelo",
-    "Archive download": "Preuzimanje arhive"
+    "Archive download": "Preuzimanje arhive",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Uključuje se samo odobreni sadržaj. Originalne fotografije se preuzimaju iz sigurnog spremišta tačno onako kako su učitane.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Vaš ZIP se priprema. Preglednik će automatski pokrenuti preuzimanje.",
+    "Preparing Download...": "Priprema arhive...",
+    "Preparing your SnapUp archive...": "Priprema arhive..."
   },
   "sq": {
     "Event Archive": "Arkivi i Ngjarjeve",
@@ -420,7 +472,11 @@
     "The event archive could not be prepared.": "Arkivi i ngjarjes nuk mund të përgatitej.",
     "Your archive is being prepared. The download has started.": "Arkivi juaj është duke u përgatitur. Shkarkimi ka filluar.",
     "Download Started": "Shkarkimi filloi",
-    "Archive download": "Shkarkimi i arkivit"
+    "Archive download": "Shkarkimi i arkivit",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Përfshihet vetëm përmbajtja e miratuar. Fotografitë origjinale shkarkohen nga ruajtja e sigurt pikërisht siç janë ngarkuar.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Skedari juaj ZIP po përgatitet. Shfletuesi do ta nisë shkarkimin automatikisht.",
+    "Preparing Download...": "Po përgatit arkivin...",
+    "Preparing your SnapUp archive...": "Po përgatit arkivin..."
   },
   "mk": {
     "Event Archive": "Архива на настани",
@@ -450,7 +506,11 @@
     "The event archive could not be prepared.": "Архивата на настанот не можеше да се подготви.",
     "Your archive is being prepared. The download has started.": "Вашата архива се подготвува. Преземањето започна.",
     "Download Started": "Преземањето започна",
-    "Archive download": "Преземање на архива"
+    "Archive download": "Преземање на архива",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Се вклучува само одобрена содржина. Оригиналните фотографии се преземаат од безбедното складиште точно како што биле прикачени.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Вашиот ZIP се подготвува. Прелистувачот автоматски ќе го започне преземањето.",
+    "Preparing Download...": "Се подготвува архива...",
+    "Preparing your SnapUp archive...": "Се подготвува архива..."
   },
   "hi": {
     "Event Archive": "घटना पुरालेख",
@@ -480,7 +540,11 @@
     "The event archive could not be prepared.": "घटना संग्रह तैयार नहीं किया जा सका.",
     "Your archive is being prepared. The download has started.": "आपका पुरालेख तैयार किया जा रहा है. डाउनलोड शुरू हो गया है.",
     "Download Started": "डाउनलोड प्रारंभ हुआ",
-    "Archive download": "पुरालेख डाउनलोड"
+    "Archive download": "पुरालेख डाउनलोड",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "केवल स्वीकृत सामग्री शामिल की जाती है। मूल फ़ोटो सुरक्षित स्टोरेज से बिल्कुल उसी रूप में डाउनलोड की जाती हैं जैसे वे अपलोड की गई थीं।",
+    "Your ZIP is being prepared. The browser download will start automatically.": "आपकी ZIP फ़ाइल तैयार की जा रही है। ब्राउज़र डाउनलोड अपने आप शुरू कर देगा।",
+    "Preparing Download...": "संग्रह तैयार किया जा रहा है...",
+    "Preparing your SnapUp archive...": "संग्रह तैयार किया जा रहा है..."
   },
   "ur": {
     "Event Archive": "ایونٹ آرکائیو",
@@ -510,7 +574,11 @@
     "The event archive could not be prepared.": "ایونٹ آرکائیو تیار نہیں کیا جا سکا۔",
     "Your archive is being prepared. The download has started.": "آپ کا آرکائیو تیار کیا جا رہا ہے۔ ڈاؤن لوڈ شروع ہو گیا ہے۔",
     "Download Started": "ڈاؤن لوڈ شروع ہو گیا۔",
-    "Archive download": "محفوظ شدہ دستاویزات ڈاؤن لوڈ"
+    "Archive download": "محفوظ شدہ دستاویزات ڈاؤن لوڈ",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "صرف منظور شدہ مواد شامل کیا جاتا ہے۔ اصل تصاویر محفوظ اسٹوریج سے بالکل اسی طرح ڈاؤن لوڈ کی جاتی ہیں جیسے اپ لوڈ کی گئی تھیں۔",
+    "Your ZIP is being prepared. The browser download will start automatically.": "آپ کی ZIP فائل تیار کی جا رہی ہے۔ براؤزر ڈاؤن لوڈ خودکار طور پر شروع کر دے گا۔",
+    "Preparing Download...": "آرکائیو تیار ہو رہا ہے...",
+    "Preparing your SnapUp archive...": "آرکائیو تیار ہو رہا ہے..."
   },
   "fa": {
     "Event Archive": "آرشیو رویداد",
@@ -540,7 +608,11 @@
     "The event archive could not be prepared.": "آرشیو رویداد آماده نشد.",
     "Your archive is being prepared. The download has started.": "آرشیو شما در حال آماده شدن است. دانلود شروع شد.",
     "Download Started": "دانلود شروع شد",
-    "Archive download": "دانلود بایگانی"
+    "Archive download": "دانلود بایگانی",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "فقط محتوای تأییدشده شامل می‌شود. عکس‌های اصلی دقیقاً همان‌طور که بارگذاری شده‌اند از فضای ذخیره‌سازی امن دانلود می‌شوند.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "فایل ZIP شما در حال آماده‌سازی است. مرورگر دانلود را به‌صورت خودکار آغاز می‌کند.",
+    "Preparing Download...": "در حال آماده سازی آرشیو...",
+    "Preparing your SnapUp archive...": "در حال آماده سازی آرشیو..."
   },
   "ja": {
     "Event Archive": "イベントアーカイブ",
@@ -570,7 +642,11 @@
     "The event archive could not be prepared.": "イベントアーカイブを準備できませんでした。",
     "Your archive is being prepared. The download has started.": "アーカイブを準備中です。ダウンロードが始まりました。",
     "Download Started": "ダウンロード開始",
-    "Archive download": "アーカイブのダウンロード"
+    "Archive download": "アーカイブのダウンロード",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "承認済みのコンテンツのみが含まれます。元の写真は、アップロードされた状態のまま安全なストレージからダウンロードされます。",
+    "Your ZIP is being prepared. The browser download will start automatically.": "ZIPファイルを準備しています。ブラウザーが自動的にダウンロードを開始します。",
+    "Preparing Download...": "アーカイブを準備しています...",
+    "Preparing your SnapUp archive...": "アーカイブを準備しています..."
   },
   "zh": {
     "Event Archive": "活动档案",
@@ -600,7 +676,11 @@
     "The event archive could not be prepared.": "无法准备事件档案。",
     "Your archive is being prepared. The download has started.": "您的档案正在准备中。下载已开始。",
     "Download Started": "下载开始",
-    "Archive download": "档案下载"
+    "Archive download": "档案下载",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "仅包含已批准的内容。原始照片会从安全存储中按上传时的原样下载。",
+    "Your ZIP is being prepared. The browser download will start automatically.": "正在准备您的 ZIP 文件。浏览器会自动开始下载。",
+    "Preparing Download...": "正在准备存档...",
+    "Preparing your SnapUp archive...": "正在准备存档..."
   },
   "ko": {
     "Event Archive": "이벤트 아카이브",
@@ -630,7 +710,11 @@
     "The event archive could not be prepared.": "이벤트 보관 파일을 준비할 수 없습니다.",
     "Your archive is being prepared. The download has started.": "보관 파일을 준비 중입니다. 다운로드가 시작되었습니다.",
     "Download Started": "다운로드가 시작되었습니다",
-    "Archive download": "아카이브 다운로드"
+    "Archive download": "아카이브 다운로드",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "승인된 콘텐츠만 포함됩니다. 원본 사진은 업로드된 그대로 보안 저장소에서 다운로드됩니다.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "ZIP 파일을 준비하고 있습니다. 브라우저에서 다운로드가 자동으로 시작됩니다.",
+    "Preparing Download...": "아카이브 준비 중...",
+    "Preparing your SnapUp archive...": "아카이브 준비 중..."
   },
   "pt": {
     "Event Archive": "Arquivo de eventos",
@@ -660,7 +744,11 @@
     "The event archive could not be prepared.": "O arquivo do evento não pôde ser preparado.",
     "Your archive is being prepared. The download has started.": "Seu arquivo está sendo preparado. O download começou.",
     "Download Started": "Download iniciado",
-    "Archive download": "Download de arquivo"
+    "Archive download": "Download de arquivo",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Apenas o conteúdo aprovado é incluído. As fotos originais são baixadas do armazenamento seguro exatamente como foram enviadas.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Seu arquivo ZIP está sendo preparado. O navegador iniciará o download automaticamente.",
+    "Preparing Download...": "Preparando arquivo...",
+    "Preparing your SnapUp archive...": "Preparando arquivo..."
   },
   "ru": {
     "Event Archive": "Архив событий",
@@ -690,7 +778,11 @@
     "The event archive could not be prepared.": "Не удалось подготовить архив событий.",
     "Your archive is being prepared. The download has started.": "Ваш архив готовится. Загрузка началась.",
     "Download Started": "Загрузка началась",
-    "Archive download": "Скачать архив"
+    "Archive download": "Скачать архив",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Включается только одобренный контент. Оригинальные фотографии загружаются из защищённого хранилища точно в том виде, в котором были отправлены.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Ваш ZIP-файл готовится. Браузер автоматически начнёт загрузку.",
+    "Preparing Download...": "Готовим архив...",
+    "Preparing your SnapUp archive...": "Готовим архив..."
   },
   "id": {
     "Event Archive": "Arsip Acara",
@@ -720,7 +812,11 @@
     "The event archive could not be prepared.": "Arsip acara tidak dapat disiapkan.",
     "Your archive is being prepared. The download has started.": "Arsip Anda sedang disiapkan. Pengunduhan telah dimulai.",
     "Download Started": "Pengunduhan Dimulai",
-    "Archive download": "Pengunduhan arsip"
+    "Archive download": "Pengunduhan arsip",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Hanya konten yang disetujui yang disertakan. Foto asli diunduh dari penyimpanan aman persis seperti saat diunggah.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "File ZIP Anda sedang disiapkan. Browser akan memulai unduhan secara otomatis.",
+    "Preparing Download...": "Mempersiapkan arsip...",
+    "Preparing your SnapUp archive...": "Mempersiapkan arsip..."
   },
   "pl": {
     "Event Archive": "Archiwum wydarzeń",
@@ -750,7 +846,11 @@
     "The event archive could not be prepared.": "Nie udało się przygotować archiwum wydarzeń.",
     "Your archive is being prepared. The download has started.": "Twoje archiwum jest w przygotowaniu. Pobieranie rozpoczęło się.",
     "Download Started": "Pobieranie rozpoczęte",
-    "Archive download": "Pobieranie archiwum"
+    "Archive download": "Pobieranie archiwum",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Uwzględniane są tylko zatwierdzone treści. Oryginalne zdjęcia są pobierane z bezpiecznej pamięci dokładnie w takiej postaci, w jakiej zostały przesłane.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Twój plik ZIP jest przygotowywany. Przeglądarka automatycznie rozpocznie pobieranie.",
+    "Preparing Download...": "Przygotowywanie archiwum...",
+    "Preparing your SnapUp archive...": "Przygotowywanie archiwum..."
   },
   "vi": {
     "Event Archive": "Lưu trữ sự kiện",
@@ -780,7 +880,11 @@
     "The event archive could not be prepared.": "Không thể chuẩn bị kho lưu trữ sự kiện.",
     "Your archive is being prepared. The download has started.": "Kho lưu trữ của bạn đang được chuẩn bị. Quá trình tải xuống đã bắt đầu.",
     "Download Started": "Đã bắt đầu tải xuống",
-    "Archive download": "Lưu trữ tải xuống"
+    "Archive download": "Lưu trữ tải xuống",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Chỉ nội dung đã được phê duyệt mới được đưa vào. Ảnh gốc được tải xuống từ bộ nhớ bảo mật đúng như khi đã tải lên.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Tệp ZIP của bạn đang được chuẩn bị. Trình duyệt sẽ tự động bắt đầu tải xuống.",
+    "Preparing Download...": "Đang chuẩn bị lưu trữ...",
+    "Preparing your SnapUp archive...": "Đang chuẩn bị lưu trữ..."
   },
   "uk": {
     "Event Archive": "Архів подій",
@@ -810,7 +914,11 @@
     "The event archive could not be prepared.": "Не вдалося підготувати архів події.",
     "Your archive is being prepared. The download has started.": "Ваш архів готується. Завантаження почалося.",
     "Download Started": "Завантаження розпочато",
-    "Archive download": "Завантаження архіву"
+    "Archive download": "Завантаження архіву",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Включається лише схвалений вміст. Оригінальні фотографії завантажуються із захищеного сховища саме в тому вигляді, у якому їх було надіслано.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Ваш ZIP-файл готується. Браузер автоматично розпочне завантаження.",
+    "Preparing Download...": "Підготовка архіву...",
+    "Preparing your SnapUp archive...": "Підготовка архіву..."
   },
   "th": {
     "Event Archive": "แฟ้มกิจกรรม",
@@ -840,7 +948,11 @@
     "The event archive could not be prepared.": "ไม่สามารถจัดเตรียมไฟล์เก็บถาวรเหตุการณ์ได้",
     "Your archive is being prepared. The download has started.": "กำลังจัดเตรียมไฟล์เก็บถาวรของคุณ การดาวน์โหลดได้เริ่มต้นขึ้นแล้ว",
     "Download Started": "เริ่มดาวน์โหลดแล้ว",
-    "Archive download": "ดาวน์โหลดเอกสารเก่า"
+    "Archive download": "ดาวน์โหลดเอกสารเก่า",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "รวมเฉพาะเนื้อหาที่ได้รับอนุมัติเท่านั้น รูปภาพต้นฉบับจะถูกดาวน์โหลดจากพื้นที่จัดเก็บที่ปลอดภัยในสภาพเดียวกับที่อัปโหลดไว้",
+    "Your ZIP is being prepared. The browser download will start automatically.": "กำลังเตรียมไฟล์ ZIP ของคุณ เบราว์เซอร์จะเริ่มดาวน์โหลดโดยอัตโนมัติ",
+    "Preparing Download...": "กำลังเตรียมการเก็บถาวร...",
+    "Preparing your SnapUp archive...": "กำลังเตรียมการเก็บถาวร..."
   },
   "cs": {
     "Event Archive": "Archiv událostí",
@@ -870,7 +982,11 @@
     "The event archive could not be prepared.": "Archiv událostí se nepodařilo připravit.",
     "Your archive is being prepared. The download has started.": "Váš archiv se připravuje. Stahování začalo.",
     "Download Started": "Stahování zahájeno",
-    "Archive download": "Archiv ke stažení"
+    "Archive download": "Archiv ke stažení",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Zahrnut je pouze schválený obsah. Původní fotografie se stahují ze zabezpečeného úložiště přesně tak, jak byly nahrány.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Váš soubor ZIP se připravuje. Prohlížeč automaticky zahájí stahování.",
+    "Preparing Download...": "Příprava archivu...",
+    "Preparing your SnapUp archive...": "Příprava archivu..."
   },
   "he": {
     "Event Archive": "ארכיון אירועים",
@@ -900,7 +1016,11 @@
     "The event archive could not be prepared.": "לא ניתן היה להכין את ארכיון האירוע.",
     "Your archive is being prepared. The download has started.": "הארכיון שלך מתכונן. ההורדה החלה.",
     "Download Started": "ההורדה החלה",
-    "Archive download": "הורדת ארכיון"
+    "Archive download": "הורדת ארכיון",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "רק תוכן שאושר נכלל. התמונות המקוריות יורדות מאחסון מאובטח בדיוק כפי שהועלו.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "קובץ ה-ZIP שלך בהכנה. הדפדפן יתחיל את ההורדה באופן אוטומטי.",
+    "Preparing Download...": "מכין ארכיון...",
+    "Preparing your SnapUp archive...": "מכין ארכיון..."
   },
   "hu": {
     "Event Archive": "Eseményarchívum",
@@ -930,7 +1050,11 @@
     "The event archive could not be prepared.": "Az esemény archívumát nem sikerült elkészíteni.",
     "Your archive is being prepared. The download has started.": "Az archívum előkészítése folyamatban van. A letöltés elindult.",
     "Download Started": "Letöltés elindult",
-    "Archive download": "Archívum letöltése"
+    "Archive download": "Archívum letöltése",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Csak a jóváhagyott tartalom kerül bele. Az eredeti fényképek a biztonságos tárhelyről pontosan úgy töltődnek le, ahogyan feltöltötték őket.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "A ZIP-fájl előkészítése folyamatban van. A böngésző automatikusan elindítja a letöltést.",
+    "Preparing Download...": "Archívum előkészítése...",
+    "Preparing your SnapUp archive...": "Archívum előkészítése..."
   },
   "sv": {
     "Event Archive": "Händelsearkiv",
@@ -960,7 +1084,11 @@
     "The event archive could not be prepared.": "Händelsearkivet kunde inte förberedas.",
     "Your archive is being prepared. The download has started.": "Ditt arkiv förbereds. Nedladdningen har börjat.",
     "Download Started": "Nedladdning startade",
-    "Archive download": "Arkiv nedladdning"
+    "Archive download": "Arkiv nedladdning",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Endast godkänt innehåll ingår. Originalbilderna hämtas från säker lagring exakt som de laddades upp.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Din ZIP-fil förbereds. Webbläsaren startar nedladdningen automatiskt.",
+    "Preparing Download...": "Förbereder arkiv...",
+    "Preparing your SnapUp archive...": "Förbereder arkiv..."
   },
   "bn": {
     "Event Archive": "ইভেন্ট আর্কাইভ",
@@ -990,7 +1118,11 @@
     "The event archive could not be prepared.": "ইভেন্ট সংরক্ষণাগার প্রস্তুত করা যায়নি.",
     "Your archive is being prepared. The download has started.": "আপনার সংরক্ষণাগার প্রস্তুত করা হচ্ছে. ডাউনলোড শুরু হয়েছে।",
     "Download Started": "ডাউনলোড শুরু হয়েছে",
-    "Archive download": "সংরক্ষণাগার ডাউনলোড"
+    "Archive download": "সংরক্ষণাগার ডাউনলোড",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "শুধু অনুমোদিত কনটেন্ট অন্তর্ভুক্ত করা হয়। মূল ছবিগুলো নিরাপদ স্টোরেজ থেকে আপলোড করা অবস্থাতেই ডাউনলোড করা হয়।",
+    "Your ZIP is being prepared. The browser download will start automatically.": "আপনার ZIP ফাইল প্রস্তুত করা হচ্ছে। ব্রাউজার স্বয়ংক্রিয়ভাবে ডাউনলোড শুরু করবে।",
+    "Preparing Download...": "সংরক্ষণাগার প্রস্তুত করা হচ্ছে...",
+    "Preparing your SnapUp archive...": "সংরক্ষণাগার প্রস্তুত করা হচ্ছে..."
   },
   "ms": {
     "Event Archive": "Arkib Acara",
@@ -1020,7 +1152,11 @@
     "The event archive could not be prepared.": "Arkib acara tidak dapat disediakan.",
     "Your archive is being prepared. The download has started.": "Arkib anda sedang disediakan. Muat turun telah bermula.",
     "Download Started": "Muat Turun Dimulakan",
-    "Archive download": "Muat turun arkib"
+    "Archive download": "Muat turun arkib",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Hanya kandungan yang diluluskan disertakan. Foto asal dimuat turun daripada storan selamat tepat seperti yang dimuat naik.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Fail ZIP anda sedang disediakan. Pelayar akan memulakan muat turun secara automatik.",
+    "Preparing Download...": "Menyediakan arkib...",
+    "Preparing your SnapUp archive...": "Menyediakan arkib..."
   },
   "fil": {
     "Event Archive": "Archive ng Kaganapan",
@@ -1050,7 +1186,11 @@
     "The event archive could not be prepared.": "Hindi maihanda ang archive ng kaganapan.",
     "Your archive is being prepared. The download has started.": "Inihahanda ang iyong archive. Nagsimula na ang pag-download.",
     "Download Started": "Nagsimula na ang pag-download",
-    "Archive download": "Pag-download ng archive"
+    "Archive download": "Pag-download ng archive",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Tanging aprubadong content ang kasama. Dina-download ang mga orihinal na larawan mula sa secure na storage nang eksakto kung paano sila in-upload.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Inihahanda ang iyong ZIP file. Awtomatikong sisimulan ng browser ang pag-download.",
+    "Preparing Download...": "Inihahanda ang archive...",
+    "Preparing your SnapUp archive...": "Inihahanda ang archive..."
   },
   "zh-tw": {
     "Event Archive": "活動檔案",
@@ -1080,7 +1220,11 @@
     "The event archive could not be prepared.": "無法準備事件檔案。",
     "Your archive is being prepared. The download has started.": "您的檔案正在準備中。下載已開始。",
     "Download Started": "下載開始",
-    "Archive download": "檔案下載"
+    "Archive download": "檔案下載",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "僅包含已核准的內容。原始照片會從安全儲存空間中依上傳時的原樣下載。",
+    "Your ZIP is being prepared. The browser download will start automatically.": "正在準備您的 ZIP 檔案。瀏覽器會自動開始下載。",
+    "Preparing Download...": "正在準備存檔...",
+    "Preparing your SnapUp archive...": "正在準備存檔..."
   },
   "pt-pt": {
     "Event Archive": "Arquivo de eventos",
@@ -1110,7 +1254,11 @@
     "The event archive could not be prepared.": "O ficheiro do evento não pôde ser preparado.",
     "Your archive is being prepared. The download has started.": "O seu arquivo está sendo preparado. O download começou.",
     "Download Started": "Download iniciado",
-    "Archive download": "Download de ficheiro"
+    "Archive download": "Download de ficheiro",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Apenas é incluído conteúdo aprovado. As fotografias originais são descarregadas do armazenamento seguro exatamente como foram carregadas.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "O seu ficheiro ZIP está a ser preparado. O navegador iniciará a transferência automaticamente.",
+    "Preparing Download...": "Preparar ficheiro...",
+    "Preparing your SnapUp archive...": "Preparar ficheiro..."
   },
   "da": {
     "Event Archive": "Begivenhedsarkiv",
@@ -1140,7 +1288,11 @@
     "The event archive could not be prepared.": "Begivenhedsarkivet kunne ikke forberedes.",
     "Your archive is being prepared. The download has started.": "Dit arkiv er ved at blive klargjort. Downloaden er startet.",
     "Download Started": "Download startede",
-    "Archive download": "Arkiv download"
+    "Archive download": "Arkiv download",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Kun godkendt indhold medtages. Originalbillederne downloades fra sikker lagring præcis, som de blev uploadet.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Din ZIP-fil klargøres. Browseren starter downloadet automatisk.",
+    "Preparing Download...": "Forbereder arkiv...",
+    "Preparing your SnapUp archive...": "Forbereder arkiv..."
   },
   "fi": {
     "Event Archive": "Tapahtuma-arkisto",
@@ -1170,7 +1322,11 @@
     "The event archive could not be prepared.": "Tapahtuma-arkistoa ei voitu valmistella.",
     "Your archive is being prepared. The download has started.": "Arkistoasi valmistellaan. Lataus on alkanut.",
     "Download Started": "Lataus aloitettu",
-    "Archive download": "Arkiston lataus"
+    "Archive download": "Arkiston lataus",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Vain hyväksytty sisältö sisällytetään. Alkuperäiset kuvat ladataan suojatusta tallennustilasta täsmälleen siinä muodossa kuin ne ladattiin palveluun.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "ZIP-tiedostoasi valmistellaan. Selain käynnistää latauksen automaattisesti.",
+    "Preparing Download...": "Valmistellaan arkistointia...",
+    "Preparing your SnapUp archive...": "Valmistellaan arkistointia..."
   },
   "nb": {
     "Event Archive": "Arrangementsarkiv",
@@ -1200,7 +1356,11 @@
     "The event archive could not be prepared.": "Hendelsesarkivet kunne ikke utarbeides.",
     "Your archive is being prepared. The download has started.": "Arkivet ditt forberedes. Nedlastingen har startet.",
     "Download Started": "Nedlasting startet",
-    "Archive download": "Arkiv nedlasting"
+    "Archive download": "Arkiv nedlasting",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Bare godkjent innhold tas med. Originalbildene lastes ned fra sikker lagring nøyaktig slik de ble lastet opp.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "ZIP-filen din klargjøres. Nettleseren starter nedlastingen automatisk.",
+    "Preparing Download...": "Forbereder arkiv...",
+    "Preparing your SnapUp archive...": "Forbereder arkiv..."
   },
   "sk": {
     "Event Archive": "Archív udalostí",
@@ -1230,7 +1390,11 @@
     "The event archive could not be prepared.": "Archív udalostí sa nepodarilo pripraviť.",
     "Your archive is being prepared. The download has started.": "Váš archív sa pripravuje. Sťahovanie sa začalo.",
     "Download Started": "Sťahovanie spustené",
-    "Archive download": "Stiahnutie archívu"
+    "Archive download": "Stiahnutie archívu",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Zahrnutý je iba schválený obsah. Pôvodné fotografie sa sťahujú zo zabezpečeného úložiska presne tak, ako boli nahrané.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Váš súbor ZIP sa pripravuje. Prehliadač automaticky spustí sťahovanie.",
+    "Preparing Download...": "Pripravuje sa archív...",
+    "Preparing your SnapUp archive...": "Pripravuje sa archív..."
   },
   "lt": {
     "Event Archive": "Renginių archyvas",
@@ -1260,7 +1424,11 @@
     "The event archive could not be prepared.": "Įvykio archyvo parengti nepavyko.",
     "Your archive is being prepared. The download has started.": "Jūsų archyvas ruošiamas. Atsisiuntimas prasidėjo.",
     "Download Started": "Atsisiuntimas pradėtas",
-    "Archive download": "Archyvo atsisiuntimas"
+    "Archive download": "Archyvo atsisiuntimas",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Įtraukiamas tik patvirtintas turinys. Originalios nuotraukos atsisiunčiamos iš saugios saugyklos tiksliai tokios, kokios buvo įkeltos.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Jūsų ZIP failas ruošiamas. Naršyklė automatiškai pradės atsisiuntimą.",
+    "Preparing Download...": "Ruošiamas archyvas...",
+    "Preparing your SnapUp archive...": "Ruošiamas archyvas..."
   },
   "lv": {
     "Event Archive": "Pasākumu arhīvs",
@@ -1290,7 +1458,11 @@
     "The event archive could not be prepared.": "Pasākuma arhīvu nevarēja sagatavot.",
     "Your archive is being prepared. The download has started.": "Jūsu arhīvs tiek gatavots. Lejupielāde ir sākusies.",
     "Download Started": "Lejupielāde sākta",
-    "Archive download": "Arhīva lejupielāde"
+    "Archive download": "Arhīva lejupielāde",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Tiek iekļauts tikai apstiprināts saturs. Oriģinālie fotoattēli tiek lejupielādēti no drošas krātuves tieši tādi, kādi tie tika augšupielādēti.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Jūsu ZIP fails tiek sagatavots. Pārlūkprogramma automātiski sāks lejupielādi.",
+    "Preparing Download...": "Notiek arhīva sagatavošana...",
+    "Preparing your SnapUp archive...": "Notiek arhīva sagatavošana..."
   },
   "et": {
     "Event Archive": "Sündmuste arhiiv",
@@ -1320,7 +1492,11 @@
     "The event archive could not be prepared.": "Sündmuse arhiivi ei saanud ette valmistada.",
     "Your archive is being prepared. The download has started.": "Teie arhiivi valmistatakse ette. Allalaadimine on alanud.",
     "Download Started": "Allalaadimine algas",
-    "Archive download": "Arhiivi allalaadimine"
+    "Archive download": "Arhiivi allalaadimine",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Kaasatakse ainult kinnitatud sisu. Originaalfotod laaditakse turvalisest salvestusest alla täpselt sellisena, nagu need üles laaditi.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Teie ZIP-faili valmistatakse ette. Brauser alustab allalaadimist automaatselt.",
+    "Preparing Download...": "Arhiivi ettevalmistamine...",
+    "Preparing your SnapUp archive...": "Arhiivi ettevalmistamine..."
   },
   "sl": {
     "Event Archive": "Arhiv dogodkov",
@@ -1350,7 +1526,11 @@
     "The event archive could not be prepared.": "Arhiva dogodkov ni bilo mogoče pripraviti.",
     "Your archive is being prepared. The download has started.": "Vaš arhiv je v pripravi. Prenos se je začel.",
     "Download Started": "Prenos se je začel",
-    "Archive download": "Prenos arhiva"
+    "Archive download": "Prenos arhiva",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Vključena je samo odobrena vsebina. Izvirne fotografije se prenesejo iz varnega pomnilnika natančno takšne, kot so bile naložene.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Vaša datoteka ZIP se pripravlja. Brskalnik bo samodejno začel prenos.",
+    "Preparing Download...": "Priprava arhiva ...",
+    "Preparing your SnapUp archive...": "Priprava arhiva ..."
   },
   "ta": {
     "Event Archive": "நிகழ்வு காப்பகம்",
@@ -1380,7 +1560,11 @@
     "The event archive could not be prepared.": "நிகழ்வு காப்பகத்தை தயார் செய்ய முடியவில்லை.",
     "Your archive is being prepared. The download has started.": "உங்கள் காப்பகம் தயாராகிறது. பதிவிறக்கம் தொடங்கியது.",
     "Download Started": "பதிவிறக்கம் தொடங்கியது",
-    "Archive download": "காப்பக பதிவிறக்கம்"
+    "Archive download": "காப்பக பதிவிறக்கம்",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "அங்கீகரிக்கப்பட்ட உள்ளடக்கம் மட்டுமே சேர்க்கப்படும். அசல் புகைப்படங்கள் பதிவேற்றப்பட்ட அதே வடிவில் பாதுகாப்பான சேமிப்பிலிருந்து பதிவிறக்கப்படும்.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "உங்கள் ZIP கோப்பு தயாராகிறது. உலாவி பதிவிறக்கத்தை தானாகத் தொடங்கும்.",
+    "Preparing Download...": "காப்பகத்தை தயார் செய்கிறது...",
+    "Preparing your SnapUp archive...": "காப்பகத்தை தயார் செய்கிறது..."
   },
   "te": {
     "Event Archive": "ఈవెంట్ ఆర్కైవ్",
@@ -1410,7 +1594,11 @@
     "The event archive could not be prepared.": "ఈవెంట్ ఆర్కైవ్‌ను సిద్ధం చేయడం సాధ్యపడలేదు.",
     "Your archive is being prepared. The download has started.": "మీ ఆర్కైవ్ సిద్ధం చేయబడుతోంది. డౌన్‌లోడ్ ప్రారంభమైంది.",
     "Download Started": "డౌన్‌లోడ్ ప్రారంభించబడింది",
-    "Archive download": "ఆర్కైవ్ డౌన్‌లోడ్"
+    "Archive download": "ఆర్కైవ్ డౌన్‌లోడ్",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "ఆమోదించబడిన కంటెంట్ మాత్రమే చేర్చబడుతుంది. అసలు ఫోటోలు అప్‌లోడ్ చేసిన విధంగానే సురక్షిత నిల్వ నుంచి డౌన్‌లోడ్ అవుతాయి.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "మీ ZIP ఫైల్ సిద్ధమవుతోంది. బ్రౌజర్ డౌన్‌లోడ్‌ను స్వయంచాలకంగా ప్రారంభిస్తుంది.",
+    "Preparing Download...": "ఆర్కైవ్‌ని సిద్ధం చేస్తోంది...",
+    "Preparing your SnapUp archive...": "ఆర్కైవ్‌ని సిద్ధం చేస్తోంది..."
   },
   "mr": {
     "Event Archive": "इव्हेंट संग्रहण",
@@ -1440,7 +1628,11 @@
     "The event archive could not be prepared.": "कार्यक्रम संग्रहण तयार करता आले नाही.",
     "Your archive is being prepared. The download has started.": "तुमचे संग्रहण तयार केले जात आहे. डाउनलोड सुरू झाले आहे.",
     "Download Started": "डाउनलोड सुरू झाले",
-    "Archive download": "संग्रहण डाउनलोड"
+    "Archive download": "संग्रहण डाउनलोड",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "फक्त मंजूर सामग्री समाविष्ट केली जाते. मूळ फोटो सुरक्षित स्टोरेजमधून अपलोड केले त्याच स्वरूपात डाउनलोड केले जातात.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "तुमची ZIP फाइल तयार केली जात आहे. ब्राउझर डाउनलोड आपोआप सुरू करेल.",
+    "Preparing Download...": "संग्रहण तयार करत आहे...",
+    "Preparing your SnapUp archive...": "संग्रहण तयार करत आहे..."
   },
   "sw": {
     "Event Archive": "Kumbukumbu ya Tukio",
@@ -1470,7 +1662,11 @@
     "The event archive could not be prepared.": "Kumbukumbu ya tukio haikuweza kutayarishwa.",
     "Your archive is being prepared. The download has started.": "Kumbukumbu yako inatayarishwa. Upakuaji umeanza.",
     "Download Started": "Upakuaji Umeanza",
-    "Archive download": "Hifadhi upakuaji"
+    "Archive download": "Hifadhi upakuaji",
+    "Only approved content is included. Original photos are downloaded exactly as uploaded from secure storage.": "Maudhui yaliyoidhinishwa pekee ndiyo yanajumuishwa. Picha asili hupakuliwa kutoka hifadhi salama jinsi zilivyopakiwa.",
+    "Your ZIP is being prepared. The browser download will start automatically.": "Faili yako ya ZIP inaandaliwa. Kivinjari kitaanza upakuaji kiotomatiki.",
+    "Preparing Download...": "Inatayarisha kumbukumbu...",
+    "Preparing your SnapUp archive...": "Inatayarisha kumbukumbu..."
   }
 };
   const existing = window.SnapUpPagePhrases || {};
