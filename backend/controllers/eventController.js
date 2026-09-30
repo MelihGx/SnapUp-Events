@@ -32,7 +32,7 @@ const {
 } = require("../services/eventStatisticsService");
 const {
   deleteImagePair,
-  getOriginalObjectStream,
+  getOriginalObjectBuffer,
   uploadImagePair,
 } = require("../services/r2MediaService");
 
@@ -2038,7 +2038,19 @@ async function downloadEventArchive(req, res) {
           media.storage_provider === "r2" &&
           media.r2_original_key
         ) {
-          return getOriginalObjectStream(media.r2_original_key);
+          const buffer = await getOriginalObjectBuffer(
+            media.r2_original_key,
+            {
+              maxBytes: 50 * 1024 * 1024,
+            },
+          );
+
+          return {
+            buffer,
+            key: media.r2_original_key,
+            contentType: media.original_mime_type || null,
+            contentLength: buffer.length,
+          };
         }
 
         if (quality === "original") {

@@ -527,13 +527,17 @@ async function appendDirectMedia({
   source,
   mediaKind,
 }) {
-  if (
-    !source?.body ||
-    typeof source.body.pipe !== "function"
-  ) {
+  const hasBuffer =
+    Buffer.isBuffer(source?.buffer) &&
+    source.buffer.length > 0;
+  const hasStream =
+    source?.body &&
+    typeof source.body.pipe === "function";
+
+  if (!hasBuffer && !hasStream) {
     throw new EventArchiveError(
-      "R2 original media stream is unavailable.",
-      "ARCHIVE_R2_STREAM_INVALID",
+      "R2 original media payload is unavailable.",
+      "ARCHIVE_R2_PAYLOAD_INVALID",
       502,
     );
   }
@@ -549,12 +553,21 @@ async function appendDirectMedia({
     mediaIndex,
   )}${extension}`;
 
+  if (hasBuffer) {
+    archive.append(source.buffer, {
+      name: entryName,
+      store: true,
+    });
+    return entryName;
+  }
+
+  // Compatibility path only. Archiver owns stream consumption; waiting for
+  // "end" here can race with a fast stream and leave the request hanging.
   archive.append(source.body, {
     name: entryName,
     store: true,
   });
 
-  await once(source.body, "end");
   return entryName;
 }
 
@@ -680,8 +693,10 @@ async function streamEventArchive({
 
       if (
         typeof source === "object" &&
-        source.body &&
-        typeof source.body.pipe === "function"
+        (
+          Buffer.isBuffer(source.buffer) ||
+          (source.body && typeof source.body.pipe === "function")
+        )
       ) {
         await appendDirectMedia({
           archive,
