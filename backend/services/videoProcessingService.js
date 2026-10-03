@@ -222,9 +222,22 @@ async function transcodeVideoForDisplay(file) {
     );
   }
 
-  const originalMetadata = validateVideoMetadata(
-    await probeVideoFile(sourcePath),
-  );
+  let originalMetadata;
+  try {
+    originalMetadata = validateVideoMetadata(await probeVideoFile(sourcePath));
+  } catch (error) {
+    if (error?.statusCode && error.statusCode < 500) throw error;
+
+    const wrapped = createVideoError(
+      "Video metadata could not be read on the server.",
+      "VIDEO_PROBE_FAILED",
+      500,
+    );
+    wrapped.stage = "probe";
+    wrapped.cause = error;
+    wrapped.process = error?.process;
+    throw wrapped;
+  }
 
   const token = crypto.randomUUID();
   const displayPath = `${sourcePath}.${token}.display.mp4`;
@@ -232,67 +245,111 @@ async function transcodeVideoForDisplay(file) {
   const posterPath = `${sourcePath}.${token}.poster.webp`;
 
   try {
-    await runProcess(process.env.FFMPEG_PATH || "ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-i",
-      sourcePath,
-      "-map",
-      "0:v:0",
-      "-map",
-      "0:a:0?",
-      "-vf",
-      `scale=w='min(${DISPLAY_MAX_WIDTH},iw)':h='min(${DISPLAY_MAX_HEIGHT},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "veryfast",
-      "-crf",
-      String(DISPLAY_CRF),
-      "-pix_fmt",
-      "yuv420p",
-      "-c:a",
-      "aac",
-      "-b:a",
-      DISPLAY_AUDIO_BITRATE,
-      "-ac",
-      "2",
-      "-movflags",
-      "+faststart",
-      "-max_muxing_queue_size",
-      "2048",
-      displayPath,
-    ]);
+    try {
+      await runProcess(process.env.FFMPEG_PATH || "ffmpeg", [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-nostdin",
+        "-y",
+        "-i",
+        sourcePath,
+        "-map",
+        "0:v:0",
+        "-map",
+        "0:a:0?",
+        "-vf",
+        `scale=w='min(${DISPLAY_MAX_WIDTH},iw)':h='min(${DISPLAY_MAX_HEIGHT},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        String(DISPLAY_CRF),
+        "-pix_fmt",
+        "yuv420p",
+        "-threads",
+        "2",
+        "-c:a",
+        "aac",
+        "-b:a",
+        DISPLAY_AUDIO_BITRATE,
+        "-ac",
+        "2",
+        "-movflags",
+        "+faststart",
+        "-max_muxing_queue_size",
+        "2048",
+        displayPath,
+      ]);
+    } catch (error) {
+      const wrapped = createVideoError(
+        "Video could not be converted to browser-compatible MP4.",
+        "VIDEO_TRANSCODE_PROCESS_FAILED",
+        500,
+      );
+      wrapped.stage = "transcode";
+      wrapped.cause = error;
+      wrapped.process = error?.process;
+      throw wrapped;
+    }
 
     const seekSeconds = Math.min(
       1,
       Math.max(0, originalMetadata.duration * 0.1),
     );
 
-    await runProcess(process.env.FFMPEG_PATH || "ffmpeg", [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-ss",
-      String(seekSeconds),
-      "-i",
-      sourcePath,
-      "-frames:v",
-      "1",
-      "-vf",
-      `scale=w='min(${POSTER_MAX_EDGE},iw)':h='min(${POSTER_MAX_EDGE},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
-      posterPngPath,
-    ]);
+    // Build the poster from the normalized MP4 instead of seeking the original
+    // container a second time. This is more reliable for unusual MP4/MOV/WEBM
+    // sources and avoids a successful transcode being discarded only because
+    // the original container is difficult to seek for thumbnail extraction.
+    try {
+      await runProcess(process.env.FFMPEG_PATH || "ffmpeg", [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-nostdin",
+        "-y",
+        "-i",
+        displayPath,
+        "-ss",
+        String(seekSeconds),
+        "-frames:v",
+        "1",
+        "-an",
+        "-vf",
+        `scale=w='min(${POSTER_MAX_EDGE},iw)':h='min(${POSTER_MAX_EDGE},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
+        posterPngPath,
+      ]);
+    } catch (error) {
+      const wrapped = createVideoError(
+        "Video poster could not be generated.",
+        "VIDEO_POSTER_PROCESS_FAILED",
+        500,
+      );
+      wrapped.stage = "poster";
+      wrapped.cause = error;
+      wrapped.process = error?.process;
+      throw wrapped;
+    }
 
-    await sharp(posterPngPath, {
-      failOn: "error",
-      limitInputPixels: 40_000_000,
-    })
-      .webp({ quality: 82, effort: 4 })
-      .toFile(posterPath);
+    try {
+      await sharp(posterPngPath, {
+        failOn: "error",
+        limitInputPixels: 40_000_000,
+      })
+        .webp({ quality: 82, effort: 4 })
+        .toFile(posterPath);
+    } catch (error) {
+      const wrapped = createVideoError(
+        "Video poster could not be encoded as WEBP.",
+        "VIDEO_POSTER_WEBP_FAILED",
+        500,
+      );
+      wrapped.stage = "poster-webp";
+      wrapped.cause = error;
+      throw wrapped;
+    }
 
     await safeUnlink(posterPngPath);
 
@@ -334,6 +391,7 @@ async function transcodeVideoForDisplay(file) {
       "VIDEO_TRANSCODE_FAILED",
       500,
     );
+    wrapped.stage = "unknown";
     wrapped.cause = error;
     throw wrapped;
   }

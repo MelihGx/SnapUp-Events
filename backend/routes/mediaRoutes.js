@@ -163,6 +163,96 @@ function createHttpError(message, statusCode = 500, code = null) {
   return error;
 }
 
+function getErrorIdentifier(error) {
+  return String(error?.code || error?.name || "MEDIA_UPLOAD_FAILED");
+}
+
+function getPublicUploadErrorMessage(error) {
+  const statusCode = Number(error?.statusCode) || 500;
+  const code = getErrorIdentifier(error);
+
+  if (statusCode < 500) {
+    return error?.message || "Media upload failed.";
+  }
+
+  // These are operational video errors with intentionally safe messages. They
+  // are useful to the client and do not expose credentials, paths or FFmpeg
+  // stderr. The detailed process output remains server-side in Render logs.
+  if (code.startsWith("VIDEO_")) {
+    return error?.message || "Video processing failed.";
+  }
+
+  if (code === "R2_CONFIG_MISSING") {
+    return "Media storage is not configured correctly on the server.";
+  }
+
+  if (code.startsWith("R2_VIDEO_")) {
+    return error?.message || "Video storage failed.";
+  }
+
+  if (
+    [
+      "AccessDenied",
+      "InvalidAccessKeyId",
+      "SignatureDoesNotMatch",
+      "NoSuchBucket",
+    ].includes(code)
+  ) {
+    return "Media storage rejected the upload.";
+  }
+
+  return "Media upload failed.";
+}
+
+function getPublicUploadErrorCode(error) {
+  const code = getErrorIdentifier(error);
+
+  if (code.startsWith("VIDEO_")) return code;
+  if (code === "R2_CONFIG_MISSING") return code;
+  if (code.startsWith("R2_VIDEO_")) return code;
+
+  if (
+    [
+      "AccessDenied",
+      "InvalidAccessKeyId",
+      "SignatureDoesNotMatch",
+      "NoSuchBucket",
+    ].includes(code)
+  ) {
+    return "R2_UPLOAD_FAILED";
+  }
+
+  return error?.code || "MEDIA_UPLOAD_FAILED";
+}
+
+function compactProcessDiagnostic(processInfo) {
+  if (!processInfo || typeof processInfo !== "object") return null;
+
+  const stderr = String(processInfo.stderr || "").trim();
+  const stdout = String(processInfo.stdout || "").trim();
+
+  return {
+    exit_code: processInfo.code ?? null,
+    signal: processInfo.signal ?? null,
+    stderr: stderr ? stderr.slice(-6000) : null,
+    stdout: stdout ? stdout.slice(-2000) : null,
+  };
+}
+
+function buildUploadErrorDiagnostic(error, depth = 0) {
+  if (!error || depth > 3) return null;
+
+  return {
+    name: error.name || null,
+    code: error.code || null,
+    status_code: error.statusCode || null,
+    stage: error.stage || null,
+    message: error.message || null,
+    process: compactProcessDiagnostic(error.process),
+    cause: buildUploadErrorDiagnostic(error.cause, depth + 1),
+  };
+}
+
 async function getUploadStatusForEvent(eventId) {
   const { data: event, error: eventError } = await supabase
     .from("event")
@@ -916,9 +1006,24 @@ router.post(
       await Promise.allSettled(
         uploadedItems.map((item) => cleanupUploadedItem(item)),
       );
+
+      console.error(
+        JSON.stringify({
+          level: "error",
+          event: "media_database_insert_failed",
+          request_id: req.requestId || null,
+          event_id,
+          code: error.code || null,
+          message: error.message || null,
+          details: error.details || null,
+          hint: error.hint || null,
+        }),
+      );
+
       return res.status(500).json({
         success: false,
         message: "Media storage upload succeeded but the database insert failed.",
+        code: "MEDIA_DATABASE_INSERT_FAILED",
         uploaded_storage_assets: uploadedItems.map((item) => ({
           provider: item.storage_provider,
           original_key: item.r2?.original_key || null,
@@ -981,13 +1086,29 @@ router.post(
     await Promise.allSettled(
       uploadedItems.map((item) => cleanupUploadedItem(item)),
     );
+
+    console.error(
+      JSON.stringify({
+        level: "error",
+        event: "media_upload_failed",
+        request_id: req.requestId || null,
+        event_id: req.body?.event_id || null,
+        guest_id: req.body?.guest_id || null,
+        files: files.map((file) => ({
+          name: file.originalname,
+          mime: file.mimetype,
+          detected_mime: file.detectedMime || null,
+          detected_format: file.detectedFormat || null,
+          bytes: file.size,
+        })),
+        error: buildUploadErrorDiagnostic(error),
+      }),
+    );
+
     return res.status(error.statusCode || 500).json({
       success: false,
-      message:
-        error.statusCode && error.statusCode < 500
-          ? error.message
-          : "Media upload failed.",
-      code: error.code || "MEDIA_UPLOAD_FAILED",
+      message: getPublicUploadErrorMessage(error),
+      code: getPublicUploadErrorCode(error),
       error: error.message,
     });
   } finally {

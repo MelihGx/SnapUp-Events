@@ -95,6 +95,15 @@ async function putObject({
   );
 }
 
+function wrapR2VideoUploadError(error, { code, message, stage }) {
+  const wrapped = new Error(message);
+  wrapped.code = code;
+  wrapped.statusCode = 502;
+  wrapped.stage = stage;
+  wrapped.cause = error;
+  return wrapped;
+}
+
 async function deleteObject(bucket, key) {
   if (!key) return;
 
@@ -299,49 +308,73 @@ async function uploadVideoBundle(file, eventId) {
   try {
     derivatives = await transcodeVideoForDisplay(file);
 
-    await putObject({
-      bucket: buckets.originals,
-      key: originalKey,
-      body: fs.createReadStream(file.path),
-      contentType: originalContentType,
-      contentLength: originalBytes,
-      cacheControl: "private, no-store",
-      metadata: {
-        event_id: String(eventId),
-        asset_kind: "media_video_original",
-      },
-    });
-    uploadedKeys.push({ bucket: buckets.originals, key: originalKey });
+    try {
+      await putObject({
+        bucket: buckets.originals,
+        key: originalKey,
+        body: fs.createReadStream(file.path),
+        contentType: originalContentType,
+        contentLength: originalBytes,
+        cacheControl: "private, no-store",
+        metadata: {
+          event_id: String(eventId),
+          asset_kind: "media_video_original",
+        },
+      });
+      uploadedKeys.push({ bucket: buckets.originals, key: originalKey });
+    } catch (error) {
+      throw wrapR2VideoUploadError(error, {
+        code: "R2_VIDEO_ORIGINAL_UPLOAD_FAILED",
+        message: "Original video could not be stored.",
+        stage: "r2-original",
+      });
+    }
 
-    await putObject({
-      bucket: buckets.display,
-      key: displayKey,
-      body: fs.createReadStream(derivatives.displayPath),
-      contentType: derivatives.displayContentType,
-      contentLength: derivatives.displayBytes,
-      cacheControl: "public, max-age=31536000, immutable",
-      metadata: {
-        event_id: String(eventId),
-        asset_kind: "media_video_display",
-        source_key: originalKey,
-      },
-    });
-    uploadedKeys.push({ bucket: buckets.display, key: displayKey });
+    try {
+      await putObject({
+        bucket: buckets.display,
+        key: displayKey,
+        body: fs.createReadStream(derivatives.displayPath),
+        contentType: derivatives.displayContentType,
+        contentLength: derivatives.displayBytes,
+        cacheControl: "public, max-age=31536000, immutable",
+        metadata: {
+          event_id: String(eventId),
+          asset_kind: "media_video_display",
+          source_key: originalKey,
+        },
+      });
+      uploadedKeys.push({ bucket: buckets.display, key: displayKey });
+    } catch (error) {
+      throw wrapR2VideoUploadError(error, {
+        code: "R2_VIDEO_DISPLAY_UPLOAD_FAILED",
+        message: "Converted video could not be stored.",
+        stage: "r2-display",
+      });
+    }
 
-    await putObject({
-      bucket: buckets.display,
-      key: posterKey,
-      body: fs.createReadStream(derivatives.posterPath),
-      contentType: derivatives.posterContentType,
-      contentLength: derivatives.posterBytes,
-      cacheControl: "public, max-age=31536000, immutable",
-      metadata: {
-        event_id: String(eventId),
-        asset_kind: "media_video_poster",
-        source_key: originalKey,
-      },
-    });
-    uploadedKeys.push({ bucket: buckets.display, key: posterKey });
+    try {
+      await putObject({
+        bucket: buckets.display,
+        key: posterKey,
+        body: fs.createReadStream(derivatives.posterPath),
+        contentType: derivatives.posterContentType,
+        contentLength: derivatives.posterBytes,
+        cacheControl: "public, max-age=31536000, immutable",
+        metadata: {
+          event_id: String(eventId),
+          asset_kind: "media_video_poster",
+          source_key: originalKey,
+        },
+      });
+      uploadedKeys.push({ bucket: buckets.display, key: posterKey });
+    } catch (error) {
+      throw wrapR2VideoUploadError(error, {
+        code: "R2_VIDEO_POSTER_UPLOAD_FAILED",
+        message: "Video poster could not be stored.",
+        stage: "r2-poster",
+      });
+    }
 
     return {
       storageProvider: "r2",

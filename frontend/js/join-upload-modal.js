@@ -86,8 +86,20 @@ async function hydrateRegisteredUploaderName() {
 }
 
 function createApiError(response, data, fallbackMessage) {
-  const error = new Error(data.message || data.error || fallbackMessage);
+  const baseMessage = data.message || data.error || fallbackMessage;
+  const diagnostics = [
+    data.code ? `code: ${data.code}` : null,
+    data.request_id ? `request: ${data.request_id}` : null,
+  ].filter(Boolean);
+
+  const error = new Error(
+    diagnostics.length > 0
+      ? `${baseMessage} (${diagnostics.join(" · ")})`
+      : baseMessage,
+  );
+
   error.code = data.code || "";
+  error.requestId = data.request_id || "";
   error.status = response.status;
   return error;
 }
