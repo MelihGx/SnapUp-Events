@@ -46,6 +46,8 @@ const summaryCreatedAt = document.getElementById("summaryCreatedAt");
 
 const eventsList = document.getElementById("eventsList");
 const accountLogout = document.getElementById("accountLogout");
+const accountBootLoader = document.getElementById("accountBootLoader");
+const accountBootLoaderText = document.getElementById("accountBootLoaderText");
 
 const passwordForm = document.getElementById("passwordForm");
 const currentPassword = document.getElementById("currentPassword");
@@ -705,6 +707,26 @@ function renderEvents(events) {
     });
 }
 
+
+function renderEventsLoadError() {
+  summaryEvents.textContent = "—";
+  eventsList.innerHTML = `
+    <div class="account-empty account-empty--error">
+      <h3>${escapeHtml(t("Backend connection error."))}</h3>
+      <button type="button" class="topbar-create-btn" id="retryEventsButton">
+        ${escapeHtml(t("Try Again"))}
+      </button>
+    </div>
+  `;
+
+  document
+    .getElementById("retryEventsButton")
+    ?.addEventListener("click", async () => {
+      eventsList.innerHTML = `<p class="account-muted">${escapeHtml(t("Loading events..."))}</p>`;
+      await loadEvents();
+    });
+}
+
 async function loadEvents() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/users/me/events`, {
@@ -720,8 +742,7 @@ async function loadEvents() {
     }
 
     if (!response.ok || !data.success) {
-      summaryEvents.textContent = "0";
-      renderNoEventsMessage();
+      renderEventsLoadError();
       return;
     }
 
@@ -729,8 +750,7 @@ async function loadEvents() {
   } catch (error) {
     console.error("Events error:", error);
 
-    summaryEvents.textContent = "0";
-    renderNoEventsMessage();
+    renderEventsLoadError();
   }
 }
 
@@ -987,7 +1007,41 @@ deleteAccountForm.addEventListener("submit", async (event) => {
   }
 });
 
-setActivePanel("events");
-loadProfile();
-loadEmailVerificationStatus();
-loadEvents();
+function finishAccountBoot() {
+  document.body.classList.remove("account-booting");
+  document.body.classList.add("account-ready");
+
+  if (accountBootLoader) {
+    accountBootLoader.setAttribute("aria-hidden", "true");
+    window.setTimeout(() => {
+      accountBootLoader.hidden = true;
+    }, 260);
+  }
+}
+
+async function initializeAccountPage() {
+  setActivePanel("events");
+
+  if (accountBootLoaderText) {
+    accountBootLoaderText.textContent = t("Loading events...");
+  }
+
+  const minimumLoaderTime = new Promise((resolve) => {
+    window.setTimeout(resolve, 350);
+  });
+
+  try {
+    await Promise.all([
+      minimumLoaderTime,
+      Promise.allSettled([
+        loadProfile(),
+        loadEmailVerificationStatus(),
+        loadEvents(),
+      ]),
+    ]);
+  } finally {
+    finishAccountBoot();
+  }
+}
+
+void initializeAccountPage();

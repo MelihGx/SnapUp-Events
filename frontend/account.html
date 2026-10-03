@@ -34,7 +34,7 @@
     </script>
 
     <link rel="stylesheet" href="css/theme.css?v=account-dashboard-1" />
-    <link rel="stylesheet" href="css/account.css?v=account-storage-3" />
+    <link rel="stylesheet" href="css/account.css?v=account-loading-1" />
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <script
       src="js/email-verification-i18n.js?v=email-verification-1"
@@ -45,7 +45,28 @@
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
 
-  <body>
+  <body class="account-booting">
+    <div
+      class="account-boot-loader"
+      id="accountBootLoader"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading events..."
+    >
+      <div class="account-boot-loader__card">
+        <img
+          class="account-boot-loader__logo"
+          src="icon/snapup-brand-mark-fixed-v3.png"
+          alt=""
+          width="64"
+          height="64"
+        />
+        <span class="account-boot-loader__spinner" aria-hidden="true"></span>
+        <strong>SnapUp<span>Events</span></strong>
+        <p id="accountBootLoaderText">Loading events...</p>
+      </div>
+    </div>
+
     <div class="account-page">
       <aside class="account-sidebar" aria-label="Account menu">
         <a
@@ -507,7 +528,7 @@
       </section>
     </div>
 
-    <script type="module" src="js/account.js?v=account-storage-3"></script>
+    <script type="module" src="js/account.js?v=account-loading-1"></script>
     <script src="js/theme.js?v=account-dashboard-1"></script>
   </body>
 </html>
