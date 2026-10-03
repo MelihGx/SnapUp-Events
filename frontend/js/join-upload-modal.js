@@ -87,17 +87,10 @@ async function hydrateRegisteredUploaderName() {
 
 function createApiError(response, data, fallbackMessage) {
   const baseMessage = data.message || data.error || fallbackMessage;
-  const diagnostics = [
-    data.code ? `code: ${data.code}` : null,
-    data.request_id ? `request: ${data.request_id}` : null,
-  ].filter(Boolean);
+  const error = new Error(baseMessage);
 
-  const error = new Error(
-    diagnostics.length > 0
-      ? `${baseMessage} (${diagnostics.join(" · ")})`
-      : baseMessage,
-  );
-
+  // Teknik hata bilgilerini kullanıcıya göstermiyoruz; uygulama mantığı ve
+  // console/debug takibi için Error nesnesinde tutmaya devam ediyoruz.
   error.code = data.code || "";
   error.requestId = data.request_id || "";
   error.status = response.status;
