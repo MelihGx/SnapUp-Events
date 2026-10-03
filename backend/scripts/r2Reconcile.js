@@ -59,7 +59,7 @@ async function loadExpectedR2References() {
       supabase
         .from("media")
         .select(
-          "media_id, event_id, r2_original_key, r2_display_key",
+          "media_id, event_id, r2_original_key, r2_display_key, r2_poster_key",
         )
         .eq("storage_provider", "r2"),
     ),
@@ -88,6 +88,14 @@ async function loadExpectedR2References() {
     if (row.r2_display_key) {
       display.set(row.r2_display_key, {
         kind: "media",
+        id: row.media_id,
+        eventId: row.event_id,
+      });
+    }
+
+    if (row.r2_poster_key) {
+      display.set(row.r2_poster_key, {
+        kind: "media-poster",
         id: row.media_id,
         eventId: row.event_id,
       });

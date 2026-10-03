@@ -14,6 +14,10 @@ const {
   getR2Client,
   getR2DisplayPublicBaseUrl,
 } = require("../config/r2");
+const {
+  cleanupVideoDerivatives,
+  transcodeVideoForDisplay,
+} = require("./videoProcessingService");
 
 const DEFAULT_DISPLAY_MAX_DIMENSION = 2560;
 const DEFAULT_DISPLAY_WEBP_QUALITY = 86;
@@ -51,15 +55,15 @@ function getOriginalDownloadTtlSeconds() {
   );
 }
 
-function sanitizeExtension(value) {
-  const extension = String(value || "")
+function sanitizeExtension(value, allowedExtensions, fallback = "bin") {
+  let extension = String(value || "")
     .trim()
     .toLowerCase()
     .replace(/^\./, "");
 
-  if (extension === "jpeg") return "jpg";
-  if (["jpg", "png", "webp"].includes(extension)) return extension;
-  return "bin";
+  if (extension === "jpeg") extension = "jpg";
+
+  return allowedExtensions.includes(extension) ? extension : fallback;
 }
 
 function buildDisplayUrl(key) {
@@ -102,13 +106,18 @@ async function deleteObject(bucket, key) {
   );
 }
 
-async function deleteImagePair({ originalKey, displayKey }) {
+async function deleteMediaAssets({ originalKey, displayKey, posterKey = null }) {
   const buckets = getR2Buckets();
 
   await Promise.allSettled([
     originalKey ? deleteObject(buckets.originals, originalKey) : null,
     displayKey ? deleteObject(buckets.display, displayKey) : null,
+    posterKey ? deleteObject(buckets.display, posterKey) : null,
   ]);
+}
+
+async function deleteImagePair({ originalKey, displayKey, posterKey = null }) {
+  return deleteMediaAssets({ originalKey, displayKey, posterKey });
 }
 
 async function listBucketObjects({
@@ -172,6 +181,7 @@ async function uploadImagePair(file, eventId, options = {}) {
   const assetId = crypto.randomUUID();
   const originalExtension = sanitizeExtension(
     file.detectedFormat || path.extname(file.originalname),
+    ["jpg", "png", "webp"],
   );
 
   const objectPrefix = `events/${eventId}/${objectKind}/${assetId}`;
@@ -259,6 +269,107 @@ async function uploadImagePair(file, eventId, options = {}) {
     };
   } finally {
     displayBuffer = null;
+  }
+}
+
+
+async function uploadVideoBundle(file, eventId) {
+  if (!file?.path) {
+    throw new Error("R2 video upload requires a temporary file path.");
+  }
+
+  const buckets = getR2Buckets();
+  const assetId = crypto.randomUUID();
+  const originalExtension = sanitizeExtension(
+    file.detectedFormat || path.extname(file.originalname),
+    ["mp4", "webm", "mov"],
+  );
+  const objectPrefix = `events/${eventId}/media/${assetId}`;
+  const originalKey = `${objectPrefix}/original.${originalExtension}`;
+  const displayKey = `${objectPrefix}/display.mp4`;
+  const posterKey = `${objectPrefix}/poster.webp`;
+  const originalBytes = Math.max(0, Number(file.size) || 0);
+  const originalContentType = String(
+    file.detectedMime || file.mimetype || "application/octet-stream",
+  );
+
+  let derivatives = null;
+  const uploadedKeys = [];
+
+  try {
+    derivatives = await transcodeVideoForDisplay(file);
+
+    await putObject({
+      bucket: buckets.originals,
+      key: originalKey,
+      body: fs.createReadStream(file.path),
+      contentType: originalContentType,
+      contentLength: originalBytes,
+      cacheControl: "private, no-store",
+      metadata: {
+        event_id: String(eventId),
+        asset_kind: "media_video_original",
+      },
+    });
+    uploadedKeys.push({ bucket: buckets.originals, key: originalKey });
+
+    await putObject({
+      bucket: buckets.display,
+      key: displayKey,
+      body: fs.createReadStream(derivatives.displayPath),
+      contentType: derivatives.displayContentType,
+      contentLength: derivatives.displayBytes,
+      cacheControl: "public, max-age=31536000, immutable",
+      metadata: {
+        event_id: String(eventId),
+        asset_kind: "media_video_display",
+        source_key: originalKey,
+      },
+    });
+    uploadedKeys.push({ bucket: buckets.display, key: displayKey });
+
+    await putObject({
+      bucket: buckets.display,
+      key: posterKey,
+      body: fs.createReadStream(derivatives.posterPath),
+      contentType: derivatives.posterContentType,
+      contentLength: derivatives.posterBytes,
+      cacheControl: "public, max-age=31536000, immutable",
+      metadata: {
+        event_id: String(eventId),
+        asset_kind: "media_video_poster",
+        source_key: originalKey,
+      },
+    });
+    uploadedKeys.push({ bucket: buckets.display, key: posterKey });
+
+    return {
+      storageProvider: "r2",
+      objectKind: "media",
+      originalKey,
+      displayKey,
+      posterKey,
+      displayUrl: buildDisplayUrl(displayKey),
+      posterUrl: buildDisplayUrl(posterKey),
+      originalBytes,
+      displayBytes: derivatives.displayBytes,
+      posterBytes: derivatives.posterBytes,
+      originalContentType,
+      displayContentType: derivatives.displayContentType,
+      posterContentType: derivatives.posterContentType,
+      durationSeconds: derivatives.originalMetadata.duration,
+      originalWidth: derivatives.originalMetadata.width,
+      originalHeight: derivatives.originalMetadata.height,
+      displayWidth: derivatives.displayMetadata.width,
+      displayHeight: derivatives.displayMetadata.height,
+    };
+  } catch (error) {
+    await Promise.allSettled(
+      uploadedKeys.map((item) => deleteObject(item.bucket, item.key)),
+    );
+    throw error;
+  } finally {
+    await cleanupVideoDerivatives(derivatives);
   }
 }
 
@@ -430,10 +541,12 @@ module.exports = {
   createOriginalDownloadUrl,
   deleteBucketObject,
   deleteImagePair,
+  deleteMediaAssets,
   getDisplayObjectBuffer,
   getOriginalObjectBuffer,
   getOriginalObjectStream,
   isR2DisplayUrl,
   listBucketObjects,
   uploadImagePair,
+  uploadVideoBundle,
 };

@@ -1215,7 +1215,7 @@ const deleteEvent = async (req, res) => {
 
     const { data: r2MediaRows, error: r2MediaError } = await supabase
       .from("media")
-      .select("r2_original_key, r2_display_key")
+      .select("r2_original_key, r2_display_key, r2_poster_key")
       .eq("event_id", eventId)
       .eq("storage_provider", "r2");
 
@@ -1248,6 +1248,7 @@ const deleteEvent = async (req, res) => {
         deleteImagePair({
           originalKey: item.r2_original_key,
           displayKey: item.r2_display_key,
+          posterKey: item.r2_poster_key,
         }),
       ),
     );

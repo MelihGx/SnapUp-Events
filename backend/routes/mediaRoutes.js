@@ -15,8 +15,9 @@ const { guestLimiter, uploadLimiter, likeLimiter } = require("../middlewares/sec
 const { verifyTurnstile } = require("../middlewares/turnstile");
 const { cleanText } = require("../utils/validation");
 const {
-  deleteImagePair,
+  deleteMediaAssets,
   uploadImagePair,
+  uploadVideoBundle,
 } = require("../services/r2MediaService");
 const {
   STORAGE_PROVIDERS,
@@ -340,9 +341,10 @@ async function cleanupUploadedItem(item) {
   if (!item) return;
 
   if (item.storage_provider === STORAGE_PROVIDERS.R2) {
-    await deleteImagePair({
+    await deleteMediaAssets({
       originalKey: item.r2?.original_key,
       displayKey: item.r2?.display_key,
+      posterKey: item.r2?.poster_key,
     });
     return;
   }
@@ -407,7 +409,7 @@ function getCloudinaryPublicId(mediaUrl) {
 async function getOwnedMedia(mediaId, userId) {
   const { data: media, error: mediaError } = await supabase
     .from("media")
-    .select("media_id, event_id, media_url, media_status, storage_provider, r2_original_key, r2_display_key")
+    .select("media_id, event_id, media_url, media_status, storage_provider, r2_original_key, r2_display_key, r2_poster_key")
     .eq("media_id", mediaId)
     .maybeSingle();
 
@@ -811,7 +813,6 @@ router.post(
         throw createHttpError("Unsupported media type.", 400);
       }
 
-      const resourceType = mediaKind === "video" ? "video" : "image";
       const mediaTypeId = await getMediaTypeId(mediaKind);
 
       if (mediaKind === "image") {
@@ -820,6 +821,7 @@ router.post(
         uploadedItems.push({
           event_id,
           guest_id,
+          media_kind: "image",
           media_type_id: mediaTypeId,
           media_url: r2Result.displayUrl,
           message: cleanMessage,
@@ -840,41 +842,31 @@ router.post(
         continue;
       }
 
-      // Phase 1 keeps video transcoding/playback on Cloudinary.
-      const cloudinaryResult = await uploadToCloudinary(
-        file,
-        event_id,
-        resourceType,
-      );
-
-      try {
-        validateCloudinaryVideo(cloudinaryResult);
-      } catch (error) {
-        await cloudinary.uploader.destroy(cloudinaryResult.public_id, {
-          resource_type: "video",
-          type: cloudinaryResult.type || "authenticated",
-        });
-        throw error;
-      }
+      const r2Video = await uploadVideoBundle(file, event_id);
 
       uploadedItems.push({
         event_id,
         guest_id,
+        media_kind: "video",
         media_type_id: mediaTypeId,
-        media_url: cloudinaryResult.secure_url,
+        media_url: r2Video.displayUrl,
         message: cleanMessage,
         media_status: mediaStatus,
         storage_provider: getMediaStorageProvider("video"),
-        bytes: cloudinaryResult.bytes,
-        r2: null,
-        cloudinary: {
-          url: cloudinaryResult.secure_url,
-          public_id: cloudinaryResult.public_id,
-          resource_type: cloudinaryResult.resource_type,
-          bytes: cloudinaryResult.bytes,
-          format: cloudinaryResult.format,
-          type: cloudinaryResult.type,
+        bytes: r2Video.originalBytes,
+        r2: {
+          original_key: r2Video.originalKey,
+          display_key: r2Video.displayKey,
+          poster_key: r2Video.posterKey,
+          original_bytes: r2Video.originalBytes,
+          display_bytes: r2Video.displayBytes,
+          original_mime_type: r2Video.originalContentType,
+          display_mime_type: r2Video.displayContentType,
+          video_duration_seconds: r2Video.durationSeconds,
+          video_width: r2Video.originalWidth,
+          video_height: r2Video.originalHeight,
         },
+        cloudinary: null,
       });
     }
 
@@ -889,16 +881,30 @@ router.post(
       storage_provider: item.storage_provider,
       r2_original_key: item.r2?.original_key || null,
       r2_display_key: item.r2?.display_key || null,
+      r2_poster_key: item.r2?.poster_key || null,
       original_bytes: item.r2?.original_bytes || item.cloudinary?.bytes || null,
       display_bytes: item.r2?.display_bytes || null,
       original_mime_type: item.r2?.original_mime_type || null,
       display_mime_type: item.r2?.display_mime_type || null,
+      video_duration_seconds: item.r2?.video_duration_seconds || null,
+      video_width: item.r2?.video_width || null,
+      video_height: item.r2?.video_height || null,
       cloudinary_public_id: item.cloudinary?.public_id || null,
       // These columns predate R2. delivery_type is NOT NULL in the current
       // database schema, so R2 rows must not explicitly insert NULL here.
-      resource_type: item.cloudinary?.resource_type || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "image" : null),
-      delivery_type: item.cloudinary?.type || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "authenticated" : "authenticated"),
-      format: item.cloudinary?.format || (item.storage_provider === STORAGE_PROVIDERS.R2 ? "webp" : null),
+      resource_type:
+        item.cloudinary?.resource_type ||
+        (item.storage_provider === STORAGE_PROVIDERS.R2 ? item.media_kind : null),
+      delivery_type:
+        item.cloudinary?.type ||
+        (item.storage_provider === STORAGE_PROVIDERS.R2 ? "authenticated" : "authenticated"),
+      format:
+        item.cloudinary?.format ||
+        (item.storage_provider === STORAGE_PROVIDERS.R2
+          ? item.media_kind === "video"
+            ? "mp4"
+            : "webp"
+          : null),
     }));
 
     const { data, error } = await supabase
@@ -917,6 +923,7 @@ router.post(
           provider: item.storage_provider,
           original_key: item.r2?.original_key || null,
           display_key: item.r2?.display_key || null,
+          poster_key: item.r2?.poster_key || null,
           cloudinary_public_id: item.cloudinary?.public_id || null,
         })),
         error: error.message,
@@ -1404,11 +1411,12 @@ router.delete("/:mediaId", authMiddleware, async (req, res) => {
 
     if (
       media.storage_provider === STORAGE_PROVIDERS.R2 &&
-      (media.r2_original_key || media.r2_display_key)
+      (media.r2_original_key || media.r2_display_key || media.r2_poster_key)
     ) {
-      deleteImagePair({
+      deleteMediaAssets({
         originalKey: media.r2_original_key,
         displayKey: media.r2_display_key,
+        posterKey: media.r2_poster_key,
       }).catch((error) => {
         console.error("R2 media delete error:", error.message);
       });

@@ -8,7 +8,7 @@ const STORAGE_PROVIDERS = Object.freeze({
 
 const MEDIA_STORAGE_POLICY = Object.freeze({
   image: STORAGE_PROVIDERS.R2,
-  video: STORAGE_PROVIDERS.CLOUDINARY,
+  video: STORAGE_PROVIDERS.R2,
   message: STORAGE_PROVIDERS.DATABASE,
 });
 

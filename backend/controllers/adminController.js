@@ -2353,9 +2353,7 @@ const deleteAdminUser = async (req, res) => {
     const targetEvents = await loadAllRows(() =>
       supabase
         .from("event")
-        .select(
-          "event_id, event_cover_storage_provider, event_cover_r2_original_key, event_cover_r2_display_key",
-        )
+        .select("event_id")
         .eq("user_id", targetUserId),
     );
 
@@ -2369,7 +2367,7 @@ const deleteAdminUser = async (req, res) => {
       r2MediaRows = await loadAllRows(() =>
         supabase
           .from("media")
-          .select("r2_original_key, r2_display_key")
+          .select("r2_original_key, r2_display_key, r2_poster_key")
           .in("event_id", targetEventIds)
           .eq("storage_provider", "r2"),
       );
@@ -2403,27 +2401,15 @@ const deleteAdminUser = async (req, res) => {
       });
     }
 
-    const r2CoverRows = targetEvents.filter(
-      (event) =>
-        event.event_cover_storage_provider === "r2" ||
-        event.event_cover_r2_original_key ||
-        event.event_cover_r2_display_key,
-    );
-
-    const cleanupResults = await Promise.allSettled([
-      ...r2MediaRows.map((item) =>
+    const cleanupResults = await Promise.allSettled(
+      r2MediaRows.map((item) =>
         deleteImagePair({
           originalKey: item.r2_original_key,
           displayKey: item.r2_display_key,
+          posterKey: item.r2_poster_key,
         }),
       ),
-      ...r2CoverRows.map((event) =>
-        deleteImagePair({
-          originalKey: event.event_cover_r2_original_key,
-          displayKey: event.event_cover_r2_display_key,
-        }),
-      ),
-    ]);
+    );
 
     const cleanupFailures = cleanupResults.filter(
       (result) => result.status === "rejected",
