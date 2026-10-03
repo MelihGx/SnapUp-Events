@@ -433,8 +433,8 @@ function getPhotoCardHtml(item, photoIndex) {
     : "";
 
   return `
-    <article class="approved-card">
-      <header class="approved-card-head">
+    <article class="approved-card approved-photo-card">
+      <header class="approved-card-head approved-photo-head">
         <span class="approved-card-avatar" aria-hidden="true">
           ${escapeHtml(guestInitial)}
         </span>
@@ -450,61 +450,64 @@ function getPhotoCardHtml(item, photoIndex) {
         </span>
       </header>
 
-      <button
-        type="button"
-        class="approved-media-button"
-        data-photo-index="${photoIndex}"
-        aria-label="${escapeHtml(openLabel)}"
-      >
-        <img
-          src="${escapeHtml(feedUrl)}"
-          ${srcSetAttribute}
-          sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1180px) calc(50vw - 36px), 560px"
-          alt="${escapeHtml(uploadedBy)}"
-          loading="lazy"
-          decoding="async"
-        />
-        <span class="approved-media-overlay" aria-hidden="true">
-          <span class="approved-overlay-author">
-            <i>${escapeHtml(guestInitial)}</i>
-            <span>
-              <strong>${escapeHtml(guestName)}</strong>
-              ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
-            </span>
-          </span>
-          <span class="approved-overlay-open">
-            <svg viewBox="0 0 24 24">
-              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
-            </svg>
-          </span>
-        </span>
-      </button>
-
-      <div class="approved-card-body">
-        <div class="approved-card-actions">
+      <div class="approved-photo-frame">
+        <button
+          type="button"
+          class="approved-media-button"
+          data-photo-index="${photoIndex}"
+          aria-label="${escapeHtml(openLabel)}"
+        >
+          <img
+            src="${escapeHtml(feedUrl)}"
+            ${srcSetAttribute}
+            sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1180px) calc(50vw - 36px), 560px"
+            alt="${escapeHtml(uploadedBy)}"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="approved-photo-shade" aria-hidden="true"></span>
+        </button>
+        <div class="media-like-overlay">
           ${getLikeButtonHtml(item)}
-          <button
-            type="button"
-            class="public-expand-button"
-            data-photo-index="${photoIndex}"
-            aria-label="${escapeHtml(openLabel)}"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path>
-            </svg>
-          </button>
         </div>
+      </div>
 
-        <p class="approved-card-caption">
-          ${
-            message
-              ? `<strong>${escapeHtml(guestName)}</strong><span>${escapeHtml(message)}</span>`
-              : `<span>${escapeHtml(uploadedBy)}</span>`
-          }
+      <div class="approved-card-body approved-photo-body">
+        <p class="approved-card-caption approved-photo-caption">
+          <strong>${escapeHtml(guestName)}</strong>
+          <span class="approved-caption-text is-clamped" data-caption-text>${escapeHtml(
+            message || t("Approved photo"),
+          )}</span>
         </p>
+        <button
+          type="button"
+          class="approved-caption-toggle"
+          data-caption-toggle
+          aria-expanded="false"
+          hidden
+        >${escapeHtml(t("More"))}</button>
       </div>
     </article>
   `;
+}
+
+function formatVideoDuration(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return "";
+  }
+
+  const totalSeconds = Math.max(1, Math.round(numeric));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function getVideoCardHtml(item) {
@@ -513,7 +516,6 @@ function getVideoCardHtml(item) {
   const uploadedAt = item.media_created_at
     ? formatDateTime(item.media_created_at)
     : "";
-  const uploadedBy = t("Uploaded by {name}", { name: guestName });
   const guestInitial =
     guestName
       .trim()
@@ -523,6 +525,12 @@ function getVideoCardHtml(item) {
   const posterUrl = getVideoPosterUrl(item);
   const posterAttribute = posterUrl
     ? `poster="${escapeHtml(posterUrl)}"`
+    : "";
+  const duration = formatVideoDuration(item.video_duration_seconds);
+  const durationHtml = duration
+    ? `<span class="approved-video-duration" aria-label="${escapeHtml(
+        t("Video duration {duration}", { duration }),
+      )}">${escapeHtml(duration)}</span>`
     : "";
 
   return `
@@ -543,35 +551,52 @@ function getVideoCardHtml(item) {
         </span>
       </header>
 
-      <div class="approved-video-frame">
+      <div class="approved-video-frame premium-video-frame" data-video-shell>
         <video
-          controls
           playsinline
           preload="none"
           ${posterAttribute}
+          data-premium-video
           aria-label="${escapeHtml(t("Approved video uploaded by {name}", { name: guestName }))}"
         >
           <source src="${escapeHtml(videoUrl)}" />
           ${escapeHtml(t("Your browser does not support video playback."))}
         </video>
 
-        <span class="approved-video-badge" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="m9 7 8 5-8 5Z"></path>
-          </svg>
-          ${escapeHtml(t("Video"))}
-        </span>
+        <span class="approved-video-shade" aria-hidden="true"></span>
+
+        <button
+          type="button"
+          class="approved-video-play"
+          data-video-play
+          aria-label="${escapeHtml(t("Play video"))}"
+        >
+          <span class="approved-video-play-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="m9 7 8 5-8 5Z"></path>
+            </svg>
+          </span>
+        </button>
+
+        ${durationHtml}
+
+        <div class="media-like-overlay">
+          ${getLikeButtonHtml(item)}
+        </div>
       </div>
 
       <div class="approved-card-body approved-video-body">
-        <div class="approved-card-actions approved-video-actions">
-          ${getLikeButtonHtml(item)}
-        </div>
-
         <p class="approved-card-caption approved-video-caption">
           <strong>${escapeHtml(guestName)}</strong>
-          <span>${escapeHtml(message)}</span>
+          <span class="approved-caption-text is-clamped" data-caption-text>${escapeHtml(message)}</span>
         </p>
+        <button
+          type="button"
+          class="approved-caption-toggle"
+          data-caption-toggle
+          aria-expanded="false"
+          hidden
+        >${escapeHtml(t("More"))}</button>
       </div>
     </article>
   `;
@@ -714,6 +739,25 @@ function syncGalleryControlState() {
   }
 }
 
+function syncCaptionToggles() {
+  window.requestAnimationFrame(() => {
+    approvedGalleryGrid.querySelectorAll("[data-caption-text]").forEach((textEl) => {
+      const body = textEl.closest(".approved-card-body");
+      const toggle = body?.querySelector("[data-caption-toggle]");
+      if (!toggle) return;
+
+      // Measure in the collapsed state so every render starts consistently.
+      textEl.classList.add("is-clamped");
+      body.classList.remove("caption-expanded");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = t("More");
+
+      const overflows = textEl.scrollHeight > textEl.clientHeight + 1;
+      toggle.hidden = !overflows;
+    });
+  });
+}
+
 function renderGalleryFeedView() {
   syncGalleryControlState();
 
@@ -756,6 +800,8 @@ function renderGalleryFeedView() {
       );
     })
     .join("");
+
+  syncCaptionToggles();
 }
 
 function renderApprovedFeed(media, messages) {
@@ -1035,6 +1081,47 @@ async function loadGallery() {
 }
 
 approvedGalleryGrid.addEventListener("click", async (event) => {
+  const captionToggle = event.target.closest("[data-caption-toggle]");
+
+  if (captionToggle) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const body = captionToggle.closest(".approved-card-body");
+    const textEl = body?.querySelector("[data-caption-text]");
+    if (!textEl) return;
+
+    const expanding = textEl.classList.contains("is-clamped");
+    textEl.classList.toggle("is-clamped", !expanding);
+    body.classList.toggle("caption-expanded", expanding);
+    captionToggle.setAttribute("aria-expanded", expanding ? "true" : "false");
+    captionToggle.textContent = t(expanding ? "Less" : "More");
+    return;
+  }
+
+  const videoPlayButton = event.target.closest("[data-video-play]");
+
+  if (videoPlayButton) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const shell = videoPlayButton.closest("[data-video-shell]");
+    const video = shell?.querySelector("[data-premium-video]");
+
+    if (!video) return;
+
+    video.controls = true;
+
+    try {
+      await video.play();
+      shell.classList.add("is-playing");
+    } catch (error) {
+      video.controls = false;
+      console.error("Video playback error:", error);
+    }
+
+    return;
+  }
   const likeButton = event.target.closest("[data-like-media-id]");
 
   if (likeButton) {
@@ -1052,6 +1139,21 @@ approvedGalleryGrid.addEventListener("click", async (event) => {
 
   openLightbox(Number(button.dataset.photoIndex), button);
 });
+
+approvedGalleryGrid.addEventListener(
+  "ended",
+  (event) => {
+    const video = event.target.closest?.("[data-premium-video]");
+    if (!video) return;
+
+    const shell = video.closest("[data-video-shell]");
+    video.controls = false;
+    video.currentTime = 0;
+    video.load();
+    shell?.classList.remove("is-playing");
+  },
+  true,
+);
 
 publicLightboxClose.addEventListener("click", closeLightbox);
 publicLightboxBackdrop.addEventListener("click", closeLightbox);

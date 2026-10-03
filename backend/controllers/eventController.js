@@ -597,6 +597,68 @@ const getEventByCode = async (req, res) => {
   }
 };
 
+async function loadEventMediaForUi(eventId, { approvedOnly = false } = {}) {
+  const mediaQuery = supabase
+    .from("media")
+    .select(
+      `
+      media_id,
+      event_id,
+      guest_id,
+      media_type_id,
+      media_url,
+      message,
+      media_status,
+      media_created_at,
+      storage_provider,
+      r2_display_key,
+      r2_poster_key,
+      video_duration_seconds,
+      video_width,
+      video_height
+    `,
+    )
+    .eq("event_id", eventId)
+    .order("media_created_at", { ascending: false });
+
+  if (approvedOnly) {
+    mediaQuery.eq("media_status", "approved");
+  }
+
+  const [mediaResult, typeResult, guestResult] = await Promise.all([
+    mediaQuery,
+    supabase.from("media_type").select("media_type_id, media_type"),
+    supabase
+      .from("event_guests")
+      .select("guest_id, guest_name")
+      .eq("event_id", eventId),
+  ]);
+
+  if (mediaResult.error) throw mediaResult.error;
+  if (typeResult.error) throw typeResult.error;
+  if (guestResult.error) throw guestResult.error;
+
+  const mediaTypeById = new Map(
+    (typeResult.data || []).map((item) => [
+      String(item.media_type_id),
+      item.media_type,
+    ]),
+  );
+  const guestNameById = new Map(
+    (guestResult.data || []).map((item) => [
+      String(item.guest_id),
+      item.guest_name,
+    ]),
+  );
+
+  return (mediaResult.data || []).map((item) => ({
+    ...item,
+    media_type: mediaTypeById.get(String(item.media_type_id)) || null,
+    media_type_name: mediaTypeById.get(String(item.media_type_id)) || null,
+    guest_name: guestNameById.get(String(item.guest_id)) || null,
+  }));
+}
+
 const getEventDetail = async (req, res) => {
   try {
     const userId = req.user.user_id;
@@ -647,13 +709,11 @@ const getEventDetail = async (req, res) => {
       });
     }
 
-    const { data: media, error: mediaError } = await supabase
-      .from("events_media")
-      .select("*")
-      .eq("event_id", eventId)
-      .order("media_created_at", { ascending: false });
+    let media;
 
-    if (mediaError) {
+    try {
+      media = await loadEventMediaForUi(eventId);
+    } catch (mediaError) {
       return res.status(500).json({
         success: false,
         message: "Event medyaları alınırken hata oluştu.",
@@ -1709,27 +1769,11 @@ async function getPublicEventGallery(req, res) {
       });
     }
 
-    const { data: media, error: mediaError } = await supabase
-      .from("events_media")
-      .select(
-        `
-        media_id,
-        event_id,
-        guest_id,
-        guest_name,
-        media_type,
-        media_url,
-        message,
-        media_status,
-        media_created_at
-      `,
-      )
-      .eq("event_id", event.event_id)
-      .eq("media_status", "approved")
-      .in("media_type", ["image", "video", "message"])
-      .order("media_created_at", { ascending: false });
+    let media;
 
-    if (mediaError) {
+    try {
+      media = await loadEventMediaForUi(event.event_id, { approvedOnly: true });
+    } catch (mediaError) {
       return res.status(500).json({
         success: false,
         message: "Approved gallery could not be loaded.",
@@ -1737,7 +1781,9 @@ async function getPublicEventGallery(req, res) {
       });
     }
 
-    const galleryItems = media || [];
+    const galleryItems = (media || []).filter((item) =>
+      ["image", "video", "message"].includes(item.media_type),
+    );
     const mediaList = galleryItems.filter(
       (item) =>
         ["image", "video"].includes(item.media_type) && Boolean(item.media_url),

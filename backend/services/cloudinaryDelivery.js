@@ -1,5 +1,5 @@
 const cloudinary = require("../config/cloudinary");
-const { isR2DisplayUrl } = require("./r2MediaService");
+const { buildDisplayUrl, isR2DisplayUrl } = require("./r2MediaService");
 
 const AUTH_TOKEN_BUCKET_SECONDS = 300;
 const AUTH_TOKEN_CLOCK_SKEW_SECONDS = 30;
@@ -364,7 +364,34 @@ function buildVideoDeliveryUrls(urlValue) {
   };
 }
 
+function buildR2MediaDeliveryUrls(media, profile = "full") {
+  const displayUrl = media?.r2_display_key
+    ? buildDisplayUrl(media.r2_display_key)
+    : isR2DisplayUrl(media?.media_url)
+      ? media.media_url
+      : "";
+
+  if (!displayUrl) {
+    return null;
+  }
+
+  // A poster key uniquely identifies the R2 video bundle. Images use the
+  // display derivative directly and keep the existing responsive fallbacks.
+  if (media?.r2_poster_key) {
+    return {
+      playback: displayUrl,
+      poster: buildDisplayUrl(media.r2_poster_key),
+    };
+  }
+
+  return buildImageDeliveryUrls(displayUrl, profile);
+}
+
 function buildMediaDeliveryUrls(urlValue, profile = "full") {
+  if (isR2DisplayUrl(urlValue)) {
+    return buildImageDeliveryUrls(urlValue, profile);
+  }
+
   const asset = parseAsset(urlValue);
   if (!asset) {
     return null;
@@ -425,7 +452,11 @@ function signAssetUrls(value, profile = "full") {
   }
 
   if (typeof value.media_url === "string" && value.media_url) {
-    const deliveryUrls = buildMediaDeliveryUrls(value.media_url, profile);
+    const deliveryUrls =
+      value.r2_display_key || value.r2_poster_key
+        ? buildR2MediaDeliveryUrls(value, profile)
+        : buildMediaDeliveryUrls(value.media_url, profile);
+
     if (deliveryUrls) {
       result.delivery_urls = deliveryUrls;
     }

@@ -2160,6 +2160,25 @@ function renderAdminActions(mediaId, status) {
   `;
 }
 
+function formatVideoDuration(value) {
+  const numeric = Number(value);
+
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return "";
+  }
+
+  const totalSeconds = Math.max(1, Math.round(numeric));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function renderMediaCards() {
   galleryLightboxItems = [];
 
@@ -2227,18 +2246,39 @@ function renderMediaCards() {
         const posterAttribute = posterUrl
           ? `poster="${escapeHtml(posterUrl)}"`
           : "";
+        const duration = formatVideoDuration(media.video_duration_seconds);
+        const durationHtml = duration
+          ? `<span class="admin-video-duration" aria-label="${escapeHtml(
+              t("Video duration {duration}", { duration }),
+            )}">${escapeHtml(duration)}</span>`
+          : "";
 
         return `
           <article class="media-card admin-media-card">
-            <div class="media-preview-wrap">
+            <div class="media-preview-wrap admin-video-preview" data-video-shell>
               ${badgeHtml}
               <video
                 src="${escapeHtml(videoUrl)}"
-                controls
                 playsinline
                 preload="none"
                 ${posterAttribute}
+                data-premium-video
               ></video>
+
+              <span class="admin-video-shade" aria-hidden="true"></span>
+
+              <button
+                type="button"
+                class="admin-video-play"
+                data-video-play
+                aria-label="${escapeHtml(t("Play video"))}"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 7 8 5-8 5Z"></path>
+                </svg>
+              </button>
+
+              ${durationHtml}
             </div>
 
             <div class="media-card-body">
@@ -4553,7 +4593,31 @@ if (deleteEventButton) {
 }
 
 if (mediaGallery) {
-  mediaGallery.addEventListener("click", (event) => {
+  mediaGallery.addEventListener("click", async (event) => {
+    const videoPlayButton = event.target.closest("[data-video-play]");
+
+    if (videoPlayButton) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const shell = videoPlayButton.closest("[data-video-shell]");
+      const video = shell?.querySelector("[data-premium-video]");
+
+      if (!video) return;
+
+      video.controls = true;
+
+      try {
+        await video.play();
+        shell.classList.add("is-playing");
+      } catch (error) {
+        video.controls = false;
+        console.error("Video playback error:", error);
+      }
+
+      return;
+    }
+
     const actionButton = event.target.closest("[data-media-action]");
 
     if (!actionButton) {
@@ -4565,6 +4629,21 @@ if (mediaGallery) {
 
     handleMediaAdminAction(action, mediaId);
   });
+
+  mediaGallery.addEventListener(
+    "ended",
+    (event) => {
+      const video = event.target.closest?.("[data-premium-video]");
+      if (!video) return;
+
+      const shell = video.closest("[data-video-shell]");
+      video.controls = false;
+      video.currentTime = 0;
+      video.load();
+      shell?.classList.remove("is-playing");
+    },
+    true,
+  );
 }
 
 if (guestSearchInput) {

@@ -1254,10 +1254,10 @@ router.post("/:mediaId/like", likeLimiter, async (req, res) => {
       });
     }
 
-    if (media.media_type !== "image" || !media.media_url) {
+    if (!["image", "video"].includes(media.media_type) || !media.media_url) {
       return res.status(400).json({
         success: false,
-        message: "Only approved images can be liked.",
+        message: "Only approved photos and videos can be liked.",
       });
     }
 
