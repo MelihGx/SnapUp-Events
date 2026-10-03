@@ -40,6 +40,7 @@
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
+    <link rel="stylesheet" href="css/upload-progress.css?v=upload-progress-1" />
     <link
       rel="stylesheet"
       href="css/invitation-studio.css?v=invitation-studio-8"
@@ -67,6 +68,7 @@
     <script src="js/event-archive-i18n.js?v=event-archive-50-languages-2" defer></script>
     <script src="js/event-highlights-i18n.js?v=event-highlights-1" defer></script>
     <script src="js/event-statistics-i18n.js?v=event-statistics-1" defer></script>
+    <script src="js/upload-progress-i18n.js?v=upload-progress-50-languages-1" defer></script>
     <script src="js/i18n.js?v=only-users-3" defer></script>
   </head>
 
@@ -812,6 +814,33 @@
                   aria-live="polite"
                 ></span>
               </div>
+
+          <div
+            class="snapup-upload-progress"
+            id="eventUploadProgress"
+            hidden
+            aria-live="polite"
+          >
+            <div class="snapup-upload-progress__head">
+              <div class="snapup-upload-progress__copy">
+                <strong id="eventUploadProgressStatus">Uploading...</strong>
+                <span id="eventUploadProgressBytes">0 KB / 0 KB</span>
+              </div>
+              <b id="eventUploadProgressPercent">0%</b>
+            </div>
+
+            <div
+              class="snapup-upload-progress__track"
+              id="eventUploadProgressTrack"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Uploading..."
+            >
+              <span id="eventUploadProgressFill"></span>
+            </div>
+          </div>
 
               <button type="button" id="uploadMediaBtn">Upload Photo</button>
 
@@ -2785,7 +2814,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=archive-final-50-languages-1"
+      src="js/event-detail.js?v=upload-progress-xhr-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

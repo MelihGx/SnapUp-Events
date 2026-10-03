@@ -489,6 +489,22 @@ const memoryMessageInput = document.getElementById("memoryMessageInput");
 const memoryMessageCount = document.getElementById("memoryMessageCount");
 const uploadMediaBtn = document.getElementById("uploadMediaBtn");
 const uploadMessage = document.getElementById("uploadMessage");
+const eventUploadProgress = document.getElementById("eventUploadProgress");
+const eventUploadProgressStatus = document.getElementById(
+  "eventUploadProgressStatus",
+);
+const eventUploadProgressBytes = document.getElementById(
+  "eventUploadProgressBytes",
+);
+const eventUploadProgressPercent = document.getElementById(
+  "eventUploadProgressPercent",
+);
+const eventUploadProgressTrack = document.getElementById(
+  "eventUploadProgressTrack",
+);
+const eventUploadProgressFill = document.getElementById(
+  "eventUploadProgressFill",
+);
 const photoPreviewBox = document.getElementById("photoPreviewBox");
 const photoPreviewList = document.getElementById("photoPreviewList");
 const videoPreviewBox = document.getElementById("videoPreviewBox");
@@ -3310,6 +3326,116 @@ function setUploadMessage(message, type = "info") {
   uploadMessage.className = `upload-message ${type}`;
 }
 
+function resetEventUploadProgress() {
+  if (!eventUploadProgress) return;
+
+  eventUploadProgress.hidden = true;
+  eventUploadProgress.dataset.state = "idle";
+
+  if (eventUploadProgressStatus) {
+    eventUploadProgressStatus.textContent = t("Uploading...");
+  }
+  if (eventUploadProgressBytes) {
+    eventUploadProgressBytes.textContent = "0 KB / 0 KB";
+  }
+  if (eventUploadProgressPercent) {
+    eventUploadProgressPercent.textContent = "0%";
+  }
+  if (eventUploadProgressFill) {
+    eventUploadProgressFill.style.width = "0%";
+  }
+  if (eventUploadProgressTrack) {
+    eventUploadProgressTrack.setAttribute("aria-valuenow", "0");
+    eventUploadProgressTrack.setAttribute("aria-label", t("Uploading..."));
+  }
+}
+
+function setEventUploadProgress({
+  state = "uploading",
+  percent = 0,
+  loadedBytes = 0,
+  totalBytes = 0,
+  status = "Uploading...",
+} = {}) {
+  if (!eventUploadProgress) return;
+
+  const safePercent = Math.max(0, Math.min(100, Math.round(percent || 0)));
+  const safeTotal = Math.max(0, Number(totalBytes) || 0);
+  const safeLoaded = Math.max(
+    0,
+    Math.min(safeTotal || Number(loadedBytes) || 0, Number(loadedBytes) || 0),
+  );
+
+  eventUploadProgress.hidden = false;
+  eventUploadProgress.dataset.state = state;
+
+  if (eventUploadProgressStatus) {
+    eventUploadProgressStatus.textContent = t(status);
+  }
+  if (eventUploadProgressBytes) {
+    eventUploadProgressBytes.textContent = safeTotal > 0
+      ? `${formatUploadFileSize(safeLoaded)} / ${formatUploadFileSize(safeTotal)}`
+      : "";
+  }
+  if (eventUploadProgressPercent) {
+    eventUploadProgressPercent.textContent = `${safePercent}%`;
+  }
+  if (eventUploadProgressFill) {
+    eventUploadProgressFill.style.width = `${safePercent}%`;
+  }
+  if (eventUploadProgressTrack) {
+    eventUploadProgressTrack.setAttribute("aria-valuenow", String(safePercent));
+    eventUploadProgressTrack.setAttribute("aria-label", t(status));
+  }
+}
+
+function beginEventUploadProgress(files) {
+  const totalBytes = Array.from(files || []).reduce(
+    (sum, file) => sum + (Number(file?.size) || 0),
+    0,
+  );
+
+  setEventUploadProgress({
+    state: "uploading",
+    percent: 0,
+    loadedBytes: 0,
+    totalBytes,
+    status: "Uploading...",
+  });
+
+  return totalBytes;
+}
+
+function markEventUploadProcessing(totalBytes) {
+  setEventUploadProgress({
+    state: "processing",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Preparing selected files...",
+  });
+}
+
+function markEventUploadComplete(totalBytes) {
+  setEventUploadProgress({
+    state: "success",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Upload complete",
+  });
+}
+
+function markEventUploadFailed(totalBytes = 0) {
+  setEventUploadProgress({
+    state: "error",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Upload failed.",
+  });
+}
+
 function openUploadSuccessPopup(title, message) {
   if (!uploadSuccessPopup) {
     return;
@@ -3609,6 +3735,7 @@ function setActiveUploadType(type) {
     uploadMediaBtn.textContent = getUploadButtonLabel(type);
   }
 
+  resetEventUploadProgress();
   setUploadMessage("", "info");
 }
 
@@ -3730,9 +3857,10 @@ async function createGuestForUpload(guestName, turnstileToken = "") {
 }
 
 async function uploadFilesToEvent(guestId, guestToken, files) {
+  const mediaFiles = Array.from(files || []);
   const formData = new FormData();
 
-  files.forEach((file) => formData.append("media", file));
+  mediaFiles.forEach((file) => formData.append("media", file));
   formData.append("event_id", eventId);
   formData.append("guest_id", guestId);
 
@@ -3742,30 +3870,78 @@ async function uploadFilesToEvent(guestId, guestToken, files) {
 
   setUploadMessage(t("Uploading selected files, please wait..."), "info");
 
-  const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
-    method: "POST",
-    headers: {
-      "X-Guest-Token": guestToken,
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
+  const totalFileBytes = beginEventUploadProgress(mediaFiles);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", `${API_BASE_URL}/api/media/upload`);
+    xhr.setRequestHeader("X-Guest-Token", guestToken);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable || event.total <= 0) {
+        return;
+      }
+
+      const ratio = Math.max(0, Math.min(1, event.loaded / event.total));
+      const loadedFileBytes = Math.round(totalFileBytes * ratio);
+
+      setEventUploadProgress({
+        state: "uploading",
+        percent: ratio * 100,
+        loadedBytes: loadedFileBytes,
+        totalBytes: totalFileBytes,
+        status: "Uploading...",
+      });
+    });
+
+    xhr.upload.addEventListener("load", () => {
+      markEventUploadProcessing(totalFileBytes);
+      setUploadMessage(t("Preparing selected files..."), "info");
+    });
+
+    xhr.addEventListener("load", async () => {
+      let data = {};
+
+      try {
+        data = JSON.parse(xhr.responseText || "{}");
+      } catch (_error) {
+        data = {};
+      }
+
+      if (xhr.status === 401) {
+        markEventUploadFailed(totalFileBytes);
+        await logout();
+        reject(createApiError(xhr, data, "Session is no longer valid."));
+        return;
+      }
+
+      if (xhr.status < 200 || xhr.status >= 300 || !data.success) {
+        markEventUploadFailed(totalFileBytes);
+        reject(createApiError(xhr, data, "Media upload failed."));
+        return;
+      }
+
+      markEventUploadComplete(totalFileBytes);
+      resolve({
+        uploaded: Number(data.uploaded_count) || mediaFiles.length,
+        failures: [],
+      });
+    });
+
+    xhr.addEventListener("error", () => {
+      markEventUploadFailed(totalFileBytes);
+      reject(new Error("Media upload failed."));
+    });
+
+    xhr.addEventListener("abort", () => {
+      markEventUploadFailed(totalFileBytes);
+      reject(new Error("Upload failed."));
+    });
+
+    xhr.send(formData);
   });
-
-  const data = await response.json();
-
-  if (response.status === 401) {
-    await logout();
-    throw createApiError(response, data, "Session is no longer valid.");
-  }
-
-  if (!response.ok || !data.success) {
-    throw createApiError(response, data, "Media upload failed.");
-  }
-
-  return {
-    uploaded: Number(data.uploaded_count) || files.length,
-    failures: [],
-  };
 }
 
 async function sendMessageToEvent(guestId, guestToken, message) {
@@ -4851,6 +5027,7 @@ uploadTypeButtons.forEach((button) => {
 
 function handleUploadFileSelection(type, fileList) {
   const newlySelectedFiles = Array.from(fileList || []);
+  resetEventUploadProgress();
 
   if (newlySelectedFiles.length === 0) {
     return;
@@ -4932,6 +5109,7 @@ initDetailFilePicker("photo", photoInput, photoFilePicker);
 initDetailFilePicker("video", videoInput, videoFilePicker);
 
 photoClearButton?.addEventListener("click", () => {
+  resetEventUploadProgress();
   resetUploadInput("photo");
   uploadMediaBtn.textContent = getUploadButtonLabel("photo");
   setUploadMessage("", "info");
@@ -4939,6 +5117,7 @@ photoClearButton?.addEventListener("click", () => {
 });
 
 videoClearButton?.addEventListener("click", () => {
+  resetEventUploadProgress();
   resetUploadInput("video");
   uploadMediaBtn.textContent = getUploadButtonLabel("video");
   setUploadMessage("", "info");
@@ -5076,6 +5255,16 @@ if (uploadMediaBtn) {
       await loadEventDetail();
     } catch (error) {
       console.error("Upload error:", error);
+
+      if (selectedType !== "message") {
+        const selectedFiles = getSelectedUploadFiles(selectedType);
+        const totalBytes = selectedFiles.reduce(
+          (sum, file) => sum + (Number(file?.size) || 0),
+          0,
+        );
+        markEventUploadFailed(totalBytes);
+      }
+
       setUploadMessage(
         t(error.message || "Something went wrong while uploading."),
         "error",

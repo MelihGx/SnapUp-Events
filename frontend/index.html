@@ -29,6 +29,7 @@
     <script src="js/pricing-i18n.js?v=pricing-all-languages-3" defer></script>
     <script src="js/package-i18n.js?v=package-slogans-50-languages-2" defer></script>
     <script src="js/feature-showcase.js?v=50-languages-1" defer></script>
+    <script src="js/upload-progress-i18n.js?v=upload-progress-50-languages-1" defer></script>
     <script src="js/i18n.js?v=four-packages-4" defer></script>
       <script>
       (() => {
@@ -53,6 +54,7 @@
     <link rel="stylesheet" href="css/theme.css?v=modern-pricing-2" />
     <link rel="stylesheet" href="css/pricing.css?v=modern-pricing-12" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-1" />
+    <link rel="stylesheet" href="css/upload-progress.css?v=upload-progress-1" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -1239,6 +1241,33 @@
             ></small>
           </div>
 
+          <div
+            class="snapup-upload-progress"
+            id="joinUploadProgress"
+            hidden
+            aria-live="polite"
+          >
+            <div class="snapup-upload-progress__head">
+              <div class="snapup-upload-progress__copy">
+                <strong id="joinUploadProgressStatus">Uploading...</strong>
+                <span id="joinUploadProgressBytes">0 KB / 0 KB</span>
+              </div>
+              <b id="joinUploadProgressPercent">0%</b>
+            </div>
+
+            <div
+              class="snapup-upload-progress__track"
+              id="joinUploadProgressTrack"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Uploading..."
+            >
+              <span id="joinUploadProgressFill"></span>
+            </div>
+          </div>
+
           <button
             type="submit"
             class="join-submit-button"
@@ -1315,7 +1344,7 @@
         });
       })();
     </script>
-    <script type="module" src="js/main.js?v=event-slug-1"></script>
+    <script type="module" src="js/main.js?v=upload-progress-1"></script>
       <script src="js/theme.js?v=dark-process-panel-1"></script>
   </body>
 </html>

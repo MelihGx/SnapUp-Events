@@ -30,3 +30,11 @@
 /js/memory-book-pdf.js
   Cache-Control: no-cache, must-revalidate
 
+/js/join-upload-modal.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/js/upload-progress-i18n.js
+  Cache-Control: no-cache, must-revalidate
+
+/css/upload-progress.css
+  Cache-Control: no-cache, must-revalidate

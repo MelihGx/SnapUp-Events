@@ -1,0 +1,202 @@
+/* SnapUp real upload progress
+   Browser -> backend uses measured XMLHttpRequest upload progress.
+   After 100%, the bar switches to a processing state while the backend
+   prepares/transcodes the media and writes it to R2. */
+
+.snapup-upload-progress {
+  --sup-progress-surface: rgba(124, 58, 237, 0.055);
+  --sup-progress-line: rgba(124, 58, 237, 0.2);
+  --sup-progress-track: rgba(124, 58, 237, 0.11);
+  --sup-progress-text: #24183b;
+  --sup-progress-muted: rgba(61, 49, 82, 0.66);
+  --sup-progress-shadow: 0 14px 32px rgba(94, 57, 160, 0.08);
+
+  display: grid;
+  gap: 11px;
+  width: 100%;
+  margin: 14px 0 4px;
+  padding: 15px 16px 16px;
+  border: 1px solid var(--sup-progress-line);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 211, 197, 0.08), transparent 38%),
+    var(--sup-progress-surface);
+  box-shadow: var(--sup-progress-shadow);
+}
+
+.snapup-upload-progress[hidden] {
+  display: none !important;
+}
+
+.snapup-upload-progress__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.snapup-upload-progress__copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.snapup-upload-progress__copy strong {
+  overflow: hidden;
+  color: var(--sup-progress-text);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snapup-upload-progress__copy span {
+  color: var(--sup-progress-muted);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.snapup-upload-progress__head > b {
+  flex: 0 0 auto;
+  min-width: 44px;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 950;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.snapup-upload-progress__track {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sup-progress-track);
+  box-shadow: inset 0 1px 2px rgba(56, 36, 90, 0.08);
+}
+
+.snapup-upload-progress__track > span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c3aed 0%, #ec4899 58%, #22d3c5 100%);
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.24);
+  transition: width 160ms ease;
+}
+
+.snapup-upload-progress[data-state="processing"] {
+  border-color: rgba(34, 211, 197, 0.32);
+}
+
+.snapup-upload-progress[data-state="processing"]
+  .snapup-upload-progress__track > span {
+  width: 100% !important;
+  background-size: 220% 100%;
+  animation: snapupUploadProcessing 1.3s linear infinite;
+}
+
+.snapup-upload-progress[data-state="success"] {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.055);
+}
+
+.snapup-upload-progress[data-state="success"]
+  .snapup-upload-progress__head > b {
+  color: #059669;
+}
+
+.snapup-upload-progress[data-state="error"] {
+  border-color: rgba(225, 29, 72, 0.28);
+  background: rgba(225, 29, 72, 0.055);
+}
+
+.snapup-upload-progress[data-state="error"]
+  .snapup-upload-progress__head > b {
+  color: #e11d48;
+}
+
+@keyframes snapupUploadProcessing {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
+/* Dark mode: intentionally scoped to the progress component so existing
+   SnapUp light/dark styles are untouched. */
+html[data-theme="dark"] .snapup-upload-progress,
+body[data-theme="dark"] .snapup-upload-progress,
+body.dark-mode .snapup-upload-progress,
+.dark-mode .snapup-upload-progress {
+  --sup-progress-surface: rgba(139, 92, 246, 0.1);
+  --sup-progress-line: rgba(196, 181, 253, 0.2);
+  --sup-progress-track: rgba(255, 255, 255, 0.1);
+  --sup-progress-text: #f7f3ff;
+  --sup-progress-muted: rgba(235, 229, 247, 0.64);
+  --sup-progress-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 211, 197, 0.11), transparent 40%),
+    rgba(255, 255, 255, 0.035);
+}
+
+html[data-theme="dark"]
+  .snapup-upload-progress[data-state="success"],
+body[data-theme="dark"]
+  .snapup-upload-progress[data-state="success"],
+body.dark-mode
+  .snapup-upload-progress[data-state="success"],
+.dark-mode
+  .snapup-upload-progress[data-state="success"] {
+  border-color: rgba(52, 211, 153, 0.26);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+html[data-theme="dark"]
+  .snapup-upload-progress[data-state="error"],
+body[data-theme="dark"]
+  .snapup-upload-progress[data-state="error"],
+body.dark-mode
+  .snapup-upload-progress[data-state="error"],
+.dark-mode
+  .snapup-upload-progress[data-state="error"] {
+  border-color: rgba(251, 113, 133, 0.24);
+  background: rgba(225, 29, 72, 0.08);
+}
+
+html[lang="ar"] .snapup-upload-progress__head > b {
+  text-align: left;
+}
+
+@media (max-width: 560px) {
+  .snapup-upload-progress {
+    padding: 13px 14px 14px;
+    border-radius: 15px;
+  }
+
+  .snapup-upload-progress__head {
+    gap: 10px;
+  }
+
+  .snapup-upload-progress__copy strong {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snapup-upload-progress__track > span {
+    transition: none;
+  }
+
+  .snapup-upload-progress[data-state="processing"]
+    .snapup-upload-progress__track > span {
+    animation: none;
+  }
+}

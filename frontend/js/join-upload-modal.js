@@ -231,6 +231,126 @@ function setResult(message, type = "info") {
   result.className = `join-upload-result ${type}`;
 }
 
+function getJoinUploadProgressElements() {
+  return {
+    root: document.getElementById("joinUploadProgress"),
+    status: document.getElementById("joinUploadProgressStatus"),
+    bytes: document.getElementById("joinUploadProgressBytes"),
+    percent: document.getElementById("joinUploadProgressPercent"),
+    track: document.getElementById("joinUploadProgressTrack"),
+    fill: document.getElementById("joinUploadProgressFill"),
+  };
+}
+
+function resetJoinUploadProgress() {
+  const elements = getJoinUploadProgressElements();
+  if (!elements.root) return;
+
+  elements.root.hidden = true;
+  elements.root.dataset.state = "idle";
+
+  if (elements.status) elements.status.textContent = translate("Uploading...");
+  if (elements.bytes) elements.bytes.textContent = "0 KB / 0 KB";
+  if (elements.percent) elements.percent.textContent = "0%";
+  if (elements.fill) elements.fill.style.width = "0%";
+
+  if (elements.track) {
+    elements.track.setAttribute("aria-valuenow", "0");
+    elements.track.setAttribute("aria-label", translate("Uploading..."));
+  }
+}
+
+function setJoinUploadProgress({
+  state = "uploading",
+  percent = 0,
+  loadedBytes = 0,
+  totalBytes = 0,
+  status = "Uploading...",
+} = {}) {
+  const elements = getJoinUploadProgressElements();
+  if (!elements.root) return;
+
+  const safePercent = Math.max(0, Math.min(100, Math.round(percent || 0)));
+  const safeTotal = Math.max(0, Number(totalBytes) || 0);
+  const safeLoaded = Math.max(
+    0,
+    Math.min(safeTotal || Number(loadedBytes) || 0, Number(loadedBytes) || 0),
+  );
+
+  elements.root.hidden = false;
+  elements.root.dataset.state = state;
+
+  if (elements.status) {
+    elements.status.textContent = translate(status);
+  }
+
+  if (elements.bytes) {
+    elements.bytes.textContent = safeTotal > 0
+      ? `${formatFileSize(safeLoaded)} / ${formatFileSize(safeTotal)}`
+      : "";
+  }
+
+  if (elements.percent) {
+    elements.percent.textContent = `${safePercent}%`;
+  }
+
+  if (elements.fill) {
+    elements.fill.style.width = `${safePercent}%`;
+  }
+
+  if (elements.track) {
+    elements.track.setAttribute("aria-valuenow", String(safePercent));
+    elements.track.setAttribute("aria-label", translate(status));
+  }
+}
+
+function beginJoinUploadProgress(files) {
+  const totalBytes = Array.from(files || []).reduce(
+    (sum, file) => sum + (Number(file?.size) || 0),
+    0,
+  );
+
+  setJoinUploadProgress({
+    state: "uploading",
+    percent: 0,
+    loadedBytes: 0,
+    totalBytes,
+    status: "Uploading...",
+  });
+
+  return totalBytes;
+}
+
+function markJoinUploadProcessing(totalBytes) {
+  setJoinUploadProgress({
+    state: "processing",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Preparing selected files...",
+  });
+}
+
+function markJoinUploadComplete(totalBytes) {
+  setJoinUploadProgress({
+    state: "success",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Upload complete",
+  });
+}
+
+function markJoinUploadFailed(totalBytes = 0) {
+  setJoinUploadProgress({
+    state: "error",
+    percent: 100,
+    loadedBytes: totalBytes,
+    totalBytes,
+    status: "Upload failed.",
+  });
+}
+
 function setLoading(isLoading) {
   const button = document.getElementById("joinSubmitButton");
   if (!button) return;
@@ -238,8 +358,11 @@ function setLoading(isLoading) {
   button.disabled = isLoading;
   button.classList.toggle("is-loading", isLoading);
   button.setAttribute("aria-busy", String(isLoading));
+  const loadingLabel =
+    selectedMediaType === "message" ? "Sending..." : "Uploading...";
+
   button.textContent = translate(
-    isLoading ? "Sending..." : getSubmitButtonLabel(),
+    isLoading ? loadingLabel : getSubmitButtonLabel(),
   );
 }
 
@@ -252,6 +375,7 @@ function openModal() {
   renderEventPreview(null);
   setResult("");
   setLoading(false);
+  resetJoinUploadProgress();
 
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
@@ -267,6 +391,7 @@ function closeModal() {
   if (!modal) return;
 
   closeUploadSuccessPopup();
+  resetJoinUploadProgress();
   modal.classList.remove("active");
   modal.setAttribute("aria-hidden", "true");
   document.body.classList.remove("join-upload-open");
@@ -360,6 +485,8 @@ function isSameFile(fileA, fileB) {
 
 function addFilesToSelection(files) {
   const incomingFiles = Array.from(files || []);
+  resetJoinUploadProgress();
+
   const allowedTypes = selectedMediaType === "video"
     ? VIDEO_MEDIA_TYPES
     : IMAGE_MEDIA_TYPES;
@@ -531,6 +658,7 @@ function updateMediaFields() {
 
   messageField.hidden = false;
   clearSelectedFiles();
+  resetJoinUploadProgress();
 
   if (selectedMediaType === "message") {
     fileField.hidden = true;
@@ -769,22 +897,80 @@ async function uploadMedia(eventId, guestId, guestToken, files, messageText = ""
     formData.append("message", messageText.trim());
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/media/upload`, {
-    method: "POST",
-    headers: {
+  const totalFileBytes = beginJoinUploadProgress(mediaFiles);
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", `${API_BASE_URL}/api/media/upload`);
+
+    const headers = {
       "X-Guest-Token": guestToken,
       ...getUserAuthHeaders(),
-    },
-    body: formData,
+    };
+
+    Object.entries(headers).forEach(([name, value]) => {
+      if (value) xhr.setRequestHeader(name, value);
+    });
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable || event.total <= 0) {
+        return;
+      }
+
+      const ratio = Math.max(0, Math.min(1, event.loaded / event.total));
+      const loadedFileBytes = Math.round(totalFileBytes * ratio);
+
+      setJoinUploadProgress({
+        state: "uploading",
+        percent: ratio * 100,
+        loadedBytes: loadedFileBytes,
+        totalBytes: totalFileBytes,
+        status: "Uploading...",
+      });
+    });
+
+    xhr.upload.addEventListener("load", () => {
+      markJoinUploadProcessing(totalFileBytes);
+    });
+
+    xhr.addEventListener("load", () => {
+      let data = {};
+
+      try {
+        data = JSON.parse(xhr.responseText || "{}");
+      } catch (_error) {
+        data = {};
+      }
+
+      if (xhr.status < 200 || xhr.status >= 300 || !data.success) {
+        markJoinUploadFailed(totalFileBytes);
+        reject(
+          createApiError(
+            xhr,
+            data,
+            "Media could not be uploaded.",
+          ),
+        );
+        return;
+      }
+
+      markJoinUploadComplete(totalFileBytes);
+      resolve(data);
+    });
+
+    xhr.addEventListener("error", () => {
+      markJoinUploadFailed(totalFileBytes);
+      reject(new Error("Media could not be uploaded."));
+    });
+
+    xhr.addEventListener("abort", () => {
+      markJoinUploadFailed(totalFileBytes);
+      reject(new Error("Upload failed."));
+    });
+
+    xhr.send(formData);
   });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw createApiError(response, data, "Media could not be uploaded.");
-  }
-
-  return data;
 }
 
 function resetFormAfterSuccess() {
@@ -1003,6 +1189,15 @@ function initFormSubmit() {
       }
     } catch (error) {
       console.error("Join upload error:", error);
+
+      if (submissionMediaType !== "message") {
+        const totalBytes = selectedFiles.reduce(
+          (sum, file) => sum + (Number(file?.size) || 0),
+          0,
+        );
+        markJoinUploadFailed(totalBytes);
+      }
+
       if (handleRegisteredOnlyError(error, eventCode)) return;
       setResult(error.message || "Upload failed.", "error");
     } finally {
