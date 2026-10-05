@@ -4656,6 +4656,33 @@ input:focus-visible + .event-archive-check-mark {
   transform: translateX(16px);
 }
 
+
+.settings-limit-field {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 150px);
+  align-items: center;
+  gap: 14px;
+  padding: 10px 13px;
+  color: var(--detail-text);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 14px;
+}
+
+.settings-limit-field__copy { min-width: 0; display: grid; gap: 3px; }
+.settings-limit-field__copy strong { font-size: 12px; font-weight: 820; }
+.settings-limit-field__copy small { color: var(--detail-text-soft); font-size: 10px; font-weight: 650; line-height: 1.4; }
+.settings-limit-field input {
+  width: 100%; min-height: 40px; padding: 8px 11px; color: var(--detail-text);
+  background: var(--detail-field); border: 1px solid var(--detail-line); border-radius: 11px;
+  outline: 0; text-align: center; font: inherit; font-size: 12px; font-weight: 800;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.settings-limit-field input::placeholder { color: var(--detail-text-faint); opacity: 1; }
+.settings-limit-field input:focus { border-color: var(--detail-purple); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1); }
+@media (max-width: 560px) { .settings-limit-field { grid-template-columns: minmax(0, 1fr) 118px; gap: 10px; } }
+
 .settings-number-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6210,6 +6237,22 @@ body.upload-success-open {
   color: var(--detail-text-soft);
   font-size: 13px;
   line-height: 1.6;
+}
+
+.upload-success-note {
+  margin: -8px auto 21px !important;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--detail-purple) 18%, transparent);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--detail-purple) 7%, transparent);
+  color: var(--detail-text-soft) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+}
+
+.upload-success-note[hidden] {
+  display: none;
 }
 
 .upload-success-dialog > button {

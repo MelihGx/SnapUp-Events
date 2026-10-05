@@ -147,6 +147,7 @@ function openUploadSuccessPopup(mediaType, uploadedCount = 1) {
   const popup = document.getElementById("joinUploadSuccess");
   const title = document.getElementById("joinUploadSuccessTitle");
   const message = document.getElementById("joinUploadSuccessMessage");
+  const note = document.getElementById("joinUploadSuccessNote");
   const button = document.getElementById("joinUploadSuccessButton");
   const uploadPanel = document.querySelector(".join-upload-panel");
 
@@ -163,6 +164,15 @@ function openUploadSuccessPopup(mediaType, uploadedCount = 1) {
   message.textContent = isMessage
     ? translate("Message sent successfully!")
     : translate(`${safeCount} file(s) uploaded successfully!`);
+
+  if (note) {
+    const showVideoNote = mediaType === "video";
+    note.hidden = !showVideoNote;
+    note.textContent = showVideoNote
+      ? translate("It may take a few minutes to appear in the gallery.")
+      : "";
+  }
+
   button.textContent = translate("Continue");
 
   popup.hidden = false;
@@ -936,7 +946,13 @@ async function uploadMedia(eventId, guestId, guestToken, files, messageText = ""
     });
 
     xhr.upload.addEventListener("load", () => {
-      markJoinUploadProcessing(totalFileBytes);
+      setJoinUploadProgress({
+        state: "uploading",
+        percent: 100,
+        loadedBytes: totalFileBytes,
+        totalBytes: totalFileBytes,
+        status: "Uploading...",
+      });
     });
 
     xhr.addEventListener("load", () => {

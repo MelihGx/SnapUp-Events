@@ -3470,18 +3470,7 @@ html[data-theme="dark"] .join-event-map-link:hover {
   border-radius: 30px;
   color: #17122b;
   text-align: center;
-  background:
-    radial-gradient(
-      circle at 12% 0%,
-      rgba(236, 72, 153, 0.15),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 92% 12%,
-      rgba(34, 211, 197, 0.16),
-      transparent 30%
-    ),
-    #fffaf2;
+  background: #ffffff;
   box-shadow:
     0 38px 110px rgba(10, 6, 24, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.88);
@@ -3544,6 +3533,23 @@ html[data-theme="dark"] .join-event-map-link:hover {
   font-size: 15px;
   font-weight: 750;
   line-height: 1.55;
+}
+
+.join-upload-success__note {
+  margin-top: 10px !important;
+  padding: 10px 12px;
+  max-width: 360px !important;
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.06);
+  color: rgba(23, 18, 43, 0.72) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+}
+
+.join-upload-success__note[hidden] {
+  display: none;
 }
 
 .join-upload-success__button {

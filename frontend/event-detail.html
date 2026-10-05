@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=premium-video-cover-1"
+      href="css/event-detail.css?v=guest-upload-limit-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -63,7 +63,7 @@
     ></script>
     <script src="js/location-i18n.js?v=location-map-2" defer></script>
     <script src="js/asian-i18n.js?v=join-upload-modern-2" defer></script>
-    <script src="js/ui-additions-i18n.js?v=upload-disabled-50langs-1" defer></script>
+    <script src="js/ui-additions-i18n.js?v=guest-upload-limit-1" defer></script>
     <script src="js/live-slideshow-i18n.js?v=live-slideshow-1" defer></script>
     <script src="js/event-archive-i18n.js?v=event-archive-50-languages-2" defer></script>
     <script src="js/event-highlights-i18n.js?v=event-highlights-1" defer></script>
@@ -2600,6 +2600,23 @@
             <span>Allow Upload</span>
           </label>
 
+          <label class="settings-limit-field" for="settingMaxUploadPerGuest">
+            <span class="settings-limit-field__copy">
+              <strong>Upload Limit Per Guest</strong>
+              <small>Leave blank for unlimited.</small>
+            </span>
+            <input
+              type="number"
+              id="settingMaxUploadPerGuest"
+              min="1"
+              max="9999"
+              step="1"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="Unlimited"
+            />
+          </label>
+
           <label class="settings-switch-row">
             <input type="checkbox" id="settingOnlyUsers" />
             <span>Only Registered Users</span>
@@ -2803,6 +2820,7 @@
         <span>Completed</span>
         <h2 id="uploadSuccessTitle">Upload complete</h2>
         <p id="uploadSuccessText">Your files were received successfully.</p>
+        <p class="upload-success-note" id="uploadSuccessNote" hidden></p>
         <button type="button" id="uploadSuccessClose">Done</button>
       </div>
     </div>
@@ -2814,7 +2832,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=premium-video-cover-1"
+      src="js/event-detail.js?v=guest-upload-limit-9999-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

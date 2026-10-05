@@ -189,7 +189,7 @@ export function initCreateEvent() {
       allow_likes: form.elements.allow_likes?.checked ?? true,
       require_approval: form.elements.require_approval?.checked ?? false,
       max_storage_per_guest: getNumberSetting("max_storage_per_guest", 500),
-      max_upload_per_guest: getNumberSetting("max_upload_per_guest", 20),
+      max_upload_per_guest: null,
       only_users: form.elements.only_users?.checked ?? false,
     };
   }
@@ -207,7 +207,9 @@ export function initCreateEvent() {
       settings.require_approval ? "Approval required" : "Approval not required",
       settings.only_users ? "Registered users only" : "All guests can join",
       `${settings.max_storage_per_guest} MB / guest`,
-      `${settings.max_upload_per_guest} upload / guest`,
+      settings.max_upload_per_guest == null
+        ? "Unlimited uploads / guest"
+        : `${settings.max_upload_per_guest} upload / guest`,
     ];
   }
 

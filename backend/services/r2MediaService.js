@@ -1,6 +1,8 @@
 const crypto = require("crypto");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+const { pipeline } = require("stream/promises");
 const sharp = require("sharp");
 const {
   DeleteObjectCommand,
@@ -278,6 +280,188 @@ async function uploadImagePair(file, eventId, options = {}) {
     };
   } finally {
     displayBuffer = null;
+  }
+}
+
+
+function buildVideoObjectKeys(file, eventId) {
+  const assetId = crypto.randomUUID();
+  const originalExtension = sanitizeExtension(
+    file?.detectedFormat || path.extname(file?.originalname || ""),
+    ["mp4", "webm", "mov"],
+  );
+  const objectPrefix = `events/${eventId}/media/${assetId}`;
+
+  return {
+    originalExtension,
+    originalKey: `${objectPrefix}/original.${originalExtension}`,
+    displayKey: `${objectPrefix}/display.mp4`,
+    posterKey: `${objectPrefix}/poster.webp`,
+  };
+}
+
+async function uploadVideoOriginal(file, eventId) {
+  if (!file?.path) {
+    throw new Error("R2 video upload requires a temporary file path.");
+  }
+
+  const buckets = getR2Buckets();
+  const keys = buildVideoObjectKeys(file, eventId);
+  const originalBytes = Math.max(0, Number(file.size) || 0);
+  const originalContentType = String(
+    file.detectedMime || file.mimetype || "application/octet-stream",
+  );
+
+  try {
+    await putObject({
+      bucket: buckets.originals,
+      key: keys.originalKey,
+      body: fs.createReadStream(file.path),
+      contentType: originalContentType,
+      contentLength: originalBytes,
+      cacheControl: "private, no-store",
+      metadata: {
+        event_id: String(eventId),
+        asset_kind: "media_video_original",
+      },
+    });
+  } catch (error) {
+    throw wrapR2VideoUploadError(error, {
+      code: "R2_VIDEO_ORIGINAL_UPLOAD_FAILED",
+      message: "Original video could not be stored.",
+      stage: "r2-original",
+    });
+  }
+
+  return {
+    storageProvider: "r2",
+    objectKind: "media",
+    ...keys,
+    originalBytes,
+    originalContentType,
+  };
+}
+
+async function processStoredVideoOriginal({
+  eventId,
+  originalKey,
+  displayKey,
+  posterKey,
+  originalContentType = "application/octet-stream",
+}) {
+  if (!eventId || !originalKey || !displayKey || !posterKey) {
+    throw new Error("Stored video processing requires event and R2 object keys.");
+  }
+
+  const extension = sanitizeExtension(
+    path.extname(originalKey),
+    ["mp4", "webm", "mov"],
+  );
+  const sourcePath = path.join(
+    os.tmpdir(),
+    `snapup-video-worker-${crypto.randomUUID()}.${extension}`,
+  );
+
+  let derivatives = null;
+  let displayUploaded = false;
+  let posterUploaded = false;
+
+  try {
+    const originalObject = await getOriginalObjectStream(originalKey);
+
+    await pipeline(
+      originalObject.body,
+      fs.createWriteStream(sourcePath, { mode: 0o600 }),
+    );
+
+    const sourceStat = await fs.promises.stat(sourcePath);
+
+    derivatives = await transcodeVideoForDisplay({
+      path: sourcePath,
+      size: sourceStat.size,
+      mimetype: originalContentType,
+      detectedMime: originalContentType,
+      detectedFormat: extension,
+      originalname: `original.${extension}`,
+    });
+
+    const buckets = getR2Buckets();
+
+    try {
+      await putObject({
+        bucket: buckets.display,
+        key: displayKey,
+        body: fs.createReadStream(derivatives.displayPath),
+        contentType: derivatives.displayContentType,
+        contentLength: derivatives.displayBytes,
+        cacheControl: "public, max-age=31536000, immutable",
+        metadata: {
+          event_id: String(eventId),
+          asset_kind: "media_video_display",
+          source_key: originalKey,
+        },
+      });
+      displayUploaded = true;
+    } catch (error) {
+      throw wrapR2VideoUploadError(error, {
+        code: "R2_VIDEO_DISPLAY_UPLOAD_FAILED",
+        message: "Converted video could not be stored.",
+        stage: "r2-display",
+      });
+    }
+
+    try {
+      await putObject({
+        bucket: buckets.display,
+        key: posterKey,
+        body: fs.createReadStream(derivatives.posterPath),
+        contentType: derivatives.posterContentType,
+        contentLength: derivatives.posterBytes,
+        cacheControl: "public, max-age=31536000, immutable",
+        metadata: {
+          event_id: String(eventId),
+          asset_kind: "media_video_poster",
+          source_key: originalKey,
+        },
+      });
+      posterUploaded = true;
+    } catch (error) {
+      throw wrapR2VideoUploadError(error, {
+        code: "R2_VIDEO_POSTER_UPLOAD_FAILED",
+        message: "Video poster could not be stored.",
+        stage: "r2-poster",
+      });
+    }
+
+    return {
+      displayKey,
+      posterKey,
+      displayUrl: buildDisplayUrl(displayKey),
+      posterUrl: buildDisplayUrl(posterKey),
+      displayBytes: derivatives.displayBytes,
+      posterBytes: derivatives.posterBytes,
+      displayContentType: derivatives.displayContentType,
+      posterContentType: derivatives.posterContentType,
+      durationSeconds: derivatives.originalMetadata.duration,
+      originalWidth: derivatives.originalMetadata.width,
+      originalHeight: derivatives.originalMetadata.height,
+      displayWidth: derivatives.displayMetadata.width,
+      displayHeight: derivatives.displayMetadata.height,
+    };
+  } catch (error) {
+    const buckets = getR2Buckets();
+
+    await Promise.allSettled([
+      displayUploaded ? deleteObject(buckets.display, displayKey) : null,
+      posterUploaded ? deleteObject(buckets.display, posterKey) : null,
+    ]);
+
+    throw error;
+  } finally {
+    await Promise.allSettled([
+      cleanupVideoDerivatives(derivatives),
+      fs.promises.unlink(sourcePath).catch(() => {}),
+    ]);
   }
 }
 
@@ -582,4 +766,6 @@ module.exports = {
   listBucketObjects,
   uploadImagePair,
   uploadVideoBundle,
+  uploadVideoOriginal,
+  processStoredVideoOriginal,
 };

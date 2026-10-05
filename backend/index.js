@@ -10,6 +10,9 @@ const mediaRoutes = require("./routes/mediaRoutes");
 const securityRoutes = require("./routes/securityRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const { requestContext, globalLimiter } = require("./middlewares/security");
+const {
+  startVideoProcessingWorker,
+} = require("./services/videoProcessingQueueService");
 
 const app = express();
 app.disable("x-powered-by");
@@ -178,4 +181,14 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
+
+  startVideoProcessingWorker().catch((error) => {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        event: "video_processing_worker_start_failed",
+        message: error?.message || "Video processing worker could not start.",
+      }),
+    );
+  });
 });

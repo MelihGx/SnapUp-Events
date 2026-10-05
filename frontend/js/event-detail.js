@@ -410,6 +410,9 @@ const eventDeleteSuccessButton = document.getElementById(
 
 const settingEventActive = document.getElementById("settingEventActive");
 const settingAllowUpload = document.getElementById("settingAllowUpload");
+const settingMaxUploadPerGuest = document.getElementById(
+  "settingMaxUploadPerGuest",
+);
 const settingOnlyUsers = document.getElementById("settingOnlyUsers");
 const settingAllowComments = document.getElementById("settingAllowComments");
 const settingAllowLikes = document.getElementById("settingAllowLikes");
@@ -533,6 +536,7 @@ const uploadSuccessPopup = document.getElementById("uploadSuccessPopup");
 const uploadSuccessBackdrop = document.getElementById("uploadSuccessBackdrop");
 const uploadSuccessTitle = document.getElementById("uploadSuccessTitle");
 const uploadSuccessText = document.getElementById("uploadSuccessText");
+const uploadSuccessNote = document.getElementById("uploadSuccessNote");
 const uploadSuccessClose = document.getElementById("uploadSuccessClose");
 
 const params = new URLSearchParams(window.location.search);
@@ -1696,6 +1700,7 @@ function updateMemoryBookPreview() {
 function fillSettingsForm(settings) {
   if (
     !settingAllowUpload ||
+    !settingMaxUploadPerGuest ||
     !settingOnlyUsers ||
     !settingAllowComments ||
     !settingAllowLikes ||
@@ -1708,6 +1713,7 @@ function fillSettingsForm(settings) {
   if (!settings) {
     settingEventActive.checked = true;
     settingAllowUpload.checked = true;
+    settingMaxUploadPerGuest.value = "";
     settingOnlyUsers.checked = false;
     settingAllowComments.checked = true;
     settingAllowLikes.checked = true;
@@ -1718,6 +1724,11 @@ function fillSettingsForm(settings) {
 
   settingEventActive.checked = settings.is_event_active !== false;
   settingAllowUpload.checked = Boolean(settings.allow_upload);
+  settingMaxUploadPerGuest.value =
+    settings.max_upload_per_guest === null ||
+    settings.max_upload_per_guest === undefined
+      ? ""
+      : String(settings.max_upload_per_guest);
   settingOnlyUsers.checked = Boolean(settings.only_users);
   settingAllowComments.checked = Boolean(settings.allow_comments);
   settingAllowLikes.checked = Boolean(settings.allow_likes);
@@ -1747,6 +1758,14 @@ function renderSettings(settings) {
     {
       label: "Allow Upload",
       value: settings.allow_upload,
+    },
+    {
+      label: "Upload Limit Per Guest",
+      customValue:
+        settings.max_upload_per_guest === null ||
+        settings.max_upload_per_guest === undefined
+          ? t("Unlimited")
+          : String(settings.max_upload_per_guest),
     },
     {
       label: "Only Registered Users",
@@ -3296,6 +3315,18 @@ function closeSettingsModal() {
 }
 
 function getSettingsPayload() {
+  const uploadLimitRaw = settingMaxUploadPerGuest.value.trim();
+  const uploadLimit = uploadLimitRaw === "" ? null : Number(uploadLimitRaw);
+
+  if (
+    uploadLimit !== null &&
+    (!Number.isInteger(uploadLimit) || uploadLimit < 1 || uploadLimit > 9999)
+  ) {
+    throw new Error(
+      "Upload limit must be a positive whole number or left blank for unlimited.",
+    );
+  }
+
   return {
     is_event_active: settingEventActive.checked,
     allow_upload: settingAllowUpload.checked,
@@ -3304,12 +3335,9 @@ function getSettingsPayload() {
     allow_likes: settingAllowLikes.checked,
     require_approval: settingRequireApproval.checked,
     allow_gallery_view: settingAllowGalleryView.checked,
-    // These legacy limits are intentionally hidden from the UI. Preserve the
-    // current values so saving another setting does not silently reset them.
     max_storage_per_guest:
       Number(currentSettings?.max_storage_per_guest) || 500,
-    max_upload_per_guest:
-      Number(currentSettings?.max_upload_per_guest) || 20,
+    max_upload_per_guest: uploadLimit,
   };
 }
 
@@ -3476,7 +3504,7 @@ function markEventUploadFailed(totalBytes = 0) {
   });
 }
 
-function openUploadSuccessPopup(title, message) {
+function openUploadSuccessPopup(title, message, note = "") {
   if (!uploadSuccessPopup) {
     return;
   }
@@ -3489,6 +3517,11 @@ function openUploadSuccessPopup(title, message) {
 
   if (uploadSuccessText) {
     uploadSuccessText.textContent = message;
+  }
+
+  if (uploadSuccessNote) {
+    uploadSuccessNote.hidden = !note;
+    uploadSuccessNote.textContent = note || "";
   }
 
   uploadSuccessPopup.classList.add("active");
@@ -3937,8 +3970,14 @@ async function uploadFilesToEvent(guestId, guestToken, files) {
     });
 
     xhr.upload.addEventListener("load", () => {
-      markEventUploadProcessing(totalFileBytes);
-      setUploadMessage(t("Preparing selected files..."), "info");
+      setEventUploadProgress({
+        state: "uploading",
+        percent: 100,
+        loadedBytes: totalFileBytes,
+        totalBytes: totalFileBytes,
+        status: "Uploading...",
+      });
+      setUploadMessage(t("Uploading selected files, please wait..."), "info");
     });
 
     xhr.addEventListener("load", async () => {
@@ -4505,6 +4544,27 @@ if (settingsModal) {
   settingsModal.addEventListener("click", (event) => {
     if (event.target === settingsModal) {
       closeSettingsModal();
+    }
+  });
+}
+
+if (settingMaxUploadPerGuest) {
+  settingMaxUploadPerGuest.addEventListener("input", () => {
+    const rawValue = settingMaxUploadPerGuest.value.trim();
+
+    if (rawValue === "") {
+      return;
+    }
+
+    const numericValue = Number(rawValue);
+
+    if (!Number.isFinite(numericValue)) {
+      settingMaxUploadPerGuest.value = "";
+      return;
+    }
+
+    if (numericValue > 9999) {
+      settingMaxUploadPerGuest.value = "9999";
     }
   });
 }
@@ -5328,6 +5388,9 @@ if (uploadMediaBtn) {
                 uploaded: uploadResult.uploaded,
                 failed: uploadResult.failures.length,
               }),
+          selectedType === "video"
+            ? t("It may take a few minutes to appear in the gallery.")
+            : "",
         );
       }
 

@@ -17,8 +17,15 @@ const { cleanText } = require("../utils/validation");
 const {
   deleteMediaAssets,
   uploadImagePair,
-  uploadVideoBundle,
+  uploadVideoOriginal,
 } = require("../services/r2MediaService");
+const {
+  probeVideoFile,
+  validateVideoMetadata,
+} = require("../services/videoProcessingService");
+const {
+  wakeVideoProcessingWorker,
+} = require("../services/videoProcessingQueueService");
 const {
   STORAGE_PROVIDERS,
   getMediaStorageProvider,
@@ -290,7 +297,11 @@ async function getUploadStatusForEvent(eventId) {
 
   return {
     mediaStatus: settings?.require_approval ? "pending" : "approved",
-    maxUploadPerGuest: Number(settings?.max_upload_per_guest) || 20,
+    maxUploadPerGuest:
+      settings?.max_upload_per_guest === null ||
+      settings?.max_upload_per_guest === undefined
+        ? null
+        : Number(settings.max_upload_per_guest),
     maxStoragePerGuest: Math.min(Number(settings?.max_storage_per_guest) || 250, 2048),
     onlyUsers: settings?.only_users === true,
     packageKey,
@@ -377,23 +388,58 @@ async function refreshGuestSession(guest, userId = null) {
   return { guest: data, guestToken };
 }
 
+async function getPendingVideoUsage(eventId, guestId) {
+  const { data, count, error } = await supabase
+    .from("video_processing_jobs")
+    .select("original_bytes", {
+      count: "exact",
+    })
+    .eq("event_id", eventId)
+    .eq("guest_id", guestId)
+    .in("status", ["queued", "processing"]);
+
+  if (error) {
+    throw createHttpError("Pending video usage could not be checked.", 500);
+  }
+
+  return {
+    count: count || 0,
+    bytes: (data || []).reduce(
+      (sum, row) => sum + Math.max(0, Number(row?.original_bytes) || 0),
+      0,
+    ),
+  };
+}
+
 async function checkGuestUploadLimit(eventId, guestId, incomingFileCount) {
   const { maxUploadPerGuest } = await getUploadStatusForEvent(eventId);
 
-  const { count, error } = await supabase
-    .from("media")
-    .select("media_id", {
-      count: "exact",
-      head: true,
-    })
-    .eq("event_id", eventId)
-    .eq("guest_id", guestId);
+  // NULL means unlimited. Skip the count queries entirely in that case.
+  if (
+    maxUploadPerGuest === null ||
+    !Number.isInteger(maxUploadPerGuest) ||
+    maxUploadPerGuest < 1
+  ) {
+    return;
+  }
+
+  const [{ count, error }, pendingVideoUsage] = await Promise.all([
+    supabase
+      .from("media")
+      .select("media_id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("event_id", eventId)
+      .eq("guest_id", guestId),
+    getPendingVideoUsage(eventId, guestId),
+  ]);
 
   if (error) {
     throw createHttpError(error.message, 500);
   }
 
-  const currentUploadCount = count || 0;
+  const currentUploadCount = (count || 0) + pendingVideoUsage.count;
   const nextUploadCount = currentUploadCount + incomingFileCount;
 
   if (nextUploadCount > maxUploadPerGuest) {
@@ -783,226 +829,413 @@ router.post(
   handleMediaUpload,
   validateUploadedMediaFilesPreserveOriginal,
   async (req, res) => {
-  const uploadedItems = [];
-  const files = Object.values(req.files || {}).flat();
+    const uploadedItems = [];
+    const insertedMediaIds = [];
+    const insertedJobIds = [];
+    const files = Object.values(req.files || {}).flat();
 
-  try {
-    const { event_id, guest_id, message } = req.body;
-
-    if (!event_id) {
-      return res.status(400).json({
-        success: false,
-        message: "event_id is required.",
-      });
+    async function rollbackDatabaseWrites() {
+      await Promise.allSettled([
+        insertedMediaIds.length
+          ? supabase.from("media").delete().in("media_id", insertedMediaIds)
+          : null,
+        insertedJobIds.length
+          ? supabase
+              .from("video_processing_jobs")
+              .delete()
+              .in("job_id", insertedJobIds)
+          : null,
+      ]);
     }
 
-    if (!guest_id) {
-      return res.status(400).json({
-        success: false,
-        message: "guest_id is required.",
-      });
-    }
+    try {
+      const { event_id, guest_id, message } = req.body;
 
-    if (files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one media file is required.",
-      });
-    }
-
-    if (files.length > MAX_MEDIA_FILES_PER_REQUEST) {
-      return res.status(400).json({
-        success: false,
-        message: "A maximum of 15 media files can be uploaded at once.",
-        code: "MEDIA_FILE_LIMIT_EXCEEDED",
-      });
-    }
-
-    const incomingBytes = files.reduce((sum, file) => sum + file.size, 0);
-    if (incomingBytes > MAX_MEDIA_REQUEST_BYTES) {
-      return res.status(413).json({
-        success: false,
-        message: "The selected files must be 200 MB or smaller in total.",
-        code: "MEDIA_REQUEST_TOO_LARGE",
-      });
-    }
-
-    const guestToken = String(req.get("x-guest-token") || "");
-    let guestClaims;
-    try { guestClaims = verifyGuestToken(guestToken); } catch (_error) {
-      return res.status(401).json({ success: false, message: "Guest session is invalid or expired.", code: "INVALID_GUEST_SESSION" });
-    }
-    if (String(guestClaims.event_id) !== String(event_id) || String(guestClaims.guest_id) !== String(guest_id)) {
-      return res.status(403).json({ success: false, message: "Guest session does not match this event.", code: "GUEST_SESSION_MISMATCH" });
-    }
-    await checkGuestBelongsToEvent(event_id, guest_id);
-    const guestSecurity = await getGuestSecurity(event_id, guest_id);
-    if (!guestSecurity || guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)) {
-      return res.status(401).json({ success: false, message: "Guest session has been revoked.", code: "GUEST_SESSION_REVOKED" });
-    }
-
-    const {
-      mediaStatus,
-      maxStoragePerGuest,
-      onlyUsers,
-      packageKey,
-      eventStorageLimitBytes,
-      eventStorageUsedBytes,
-    } = await getUploadStatusForEvent(event_id);
-    assertRegisteredUserAccess({
-      onlyUsers,
-      currentUser: req.user,
-      guestSecurity,
-      guestClaims,
-    });
-    await checkGuestUploadLimit(event_id, guest_id, files.length);
-    const { data: guestUsageRows, error: usageError } = await supabase
-      .from("media")
-      .select("bytes")
-      .eq("event_id", event_id)
-      .eq("guest_id", guest_id);
-
-    if (usageError) {
-      throw createHttpError("Storage usage could not be checked.", 500);
-    }
-
-    // Event quota is cumulative: deleting media does not return event storage quota.
-    const eventUsedBytes = eventStorageUsedBytes;
-    const guestUsedBytes = (guestUsageRows || []).reduce(
-      (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
-      0,
-    );
-
-    if (eventUsedBytes + incomingBytes > eventStorageLimitBytes) {
-      return res.status(413).json({
-        success: false,
-        message: "Event storage quota exceeded.",
-        code: "EVENT_STORAGE_QUOTA_EXCEEDED",
-        package: packageKey,
-        used_bytes: eventUsedBytes,
-        limit_bytes: eventStorageLimitBytes,
-        remaining_bytes: Math.max(0, eventStorageLimitBytes - eventUsedBytes),
-      });
-    }
-
-    if (guestUsedBytes + incomingBytes > maxStoragePerGuest * 1024 * 1024) {
-      return res.status(413).json({
-        success: false,
-        message: "Guest storage quota exceeded.",
-        code: "GUEST_STORAGE_QUOTA_EXCEEDED",
-      });
-    }
-
-    const cleanMessage =
-      message && message.trim() !== "" ? cleanText(message, { max: 2000, field: "message" }) : null;
-
-    for (const file of files) {
-      const mediaKind = getMediaKindFromMime(file.mimetype);
-
-      if (!mediaKind) {
-        throw createHttpError("Unsupported media type.", 400);
+      if (!event_id) {
+        return res.status(400).json({
+          success: false,
+          message: "event_id is required.",
+        });
       }
 
-      const mediaTypeId = await getMediaTypeId(mediaKind);
+      if (!guest_id) {
+        return res.status(400).json({
+          success: false,
+          message: "guest_id is required.",
+        });
+      }
 
-      if (mediaKind === "image") {
-        const r2Result = await uploadImagePair(file, event_id);
+      if (files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "At least one media file is required.",
+        });
+      }
+
+      if (files.length > MAX_MEDIA_FILES_PER_REQUEST) {
+        return res.status(400).json({
+          success: false,
+          message: "A maximum of 15 media files can be uploaded at once.",
+          code: "MEDIA_FILE_LIMIT_EXCEEDED",
+        });
+      }
+
+      const incomingBytes = files.reduce((sum, file) => sum + file.size, 0);
+      if (incomingBytes > MAX_MEDIA_REQUEST_BYTES) {
+        return res.status(413).json({
+          success: false,
+          message: "The selected files must be 200 MB or smaller in total.",
+          code: "MEDIA_REQUEST_TOO_LARGE",
+        });
+      }
+
+      const guestToken = String(req.get("x-guest-token") || "");
+      let guestClaims;
+      try {
+        guestClaims = verifyGuestToken(guestToken);
+      } catch (_error) {
+        return res.status(401).json({
+          success: false,
+          message: "Guest session is invalid or expired.",
+          code: "INVALID_GUEST_SESSION",
+        });
+      }
+
+      if (
+        String(guestClaims.event_id) !== String(event_id) ||
+        String(guestClaims.guest_id) !== String(guest_id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Guest session does not match this event.",
+          code: "GUEST_SESSION_MISMATCH",
+        });
+      }
+
+      await checkGuestBelongsToEvent(event_id, guest_id);
+      const guestSecurity = await getGuestSecurity(event_id, guest_id);
+
+      if (
+        !guestSecurity ||
+        guestSecurity.guest_access_token_hash !== hashGuestToken(guestToken)
+      ) {
+        return res.status(401).json({
+          success: false,
+          message: "Guest session has been revoked.",
+          code: "GUEST_SESSION_REVOKED",
+        });
+      }
+
+      const {
+        mediaStatus,
+        maxStoragePerGuest,
+        onlyUsers,
+        packageKey,
+        eventStorageLimitBytes,
+        eventStorageUsedBytes,
+      } = await getUploadStatusForEvent(event_id);
+
+      assertRegisteredUserAccess({
+        onlyUsers,
+        currentUser: req.user,
+        guestSecurity,
+        guestClaims,
+      });
+
+      await checkGuestUploadLimit(event_id, guest_id, files.length);
+
+      const [{ data: guestUsageRows, error: usageError }, pendingVideoUsage] =
+        await Promise.all([
+          supabase
+            .from("media")
+            .select("bytes")
+            .eq("event_id", event_id)
+            .eq("guest_id", guest_id),
+          getPendingVideoUsage(event_id, guest_id),
+        ]);
+
+      if (usageError) {
+        throw createHttpError("Storage usage could not be checked.", 500);
+      }
+
+      // Event quota is cumulative: deleting media does not return event storage
+      // quota. A video begins consuming quota as soon as its original has been
+      // accepted into R2, before FFmpeg starts in the background.
+      const eventUsedBytes = eventStorageUsedBytes;
+      const guestUsedBytes =
+        (guestUsageRows || []).reduce(
+          (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
+          0,
+        ) + pendingVideoUsage.bytes;
+
+      if (eventUsedBytes + incomingBytes > eventStorageLimitBytes) {
+        return res.status(413).json({
+          success: false,
+          message: "Event storage quota exceeded.",
+          code: "EVENT_STORAGE_QUOTA_EXCEEDED",
+          package: packageKey,
+          used_bytes: eventUsedBytes,
+          limit_bytes: eventStorageLimitBytes,
+          remaining_bytes: Math.max(
+            0,
+            eventStorageLimitBytes - eventUsedBytes,
+          ),
+        });
+      }
+
+      if (
+        guestUsedBytes + incomingBytes >
+        maxStoragePerGuest * 1024 * 1024
+      ) {
+        return res.status(413).json({
+          success: false,
+          message: "Guest storage quota exceeded.",
+          code: "GUEST_STORAGE_QUOTA_EXCEEDED",
+        });
+      }
+
+      const cleanMessage =
+        message && message.trim() !== ""
+          ? cleanText(message, { max: 2000, field: "message" })
+          : null;
+
+      // Files are intentionally handled one by one. A single request can carry
+      // up to 15 files and serial work keeps memory/disk pressure predictable.
+      for (const file of files) {
+        const mediaKind = getMediaKindFromMime(file.mimetype);
+
+        if (!mediaKind) {
+          throw createHttpError("Unsupported media type.", 400);
+        }
+
+        const mediaTypeId = await getMediaTypeId(mediaKind);
+
+        if (mediaKind === "image") {
+          const r2Result = await uploadImagePair(file, event_id);
+
+          uploadedItems.push({
+            event_id,
+            guest_id,
+            media_kind: "image",
+            media_type_id: mediaTypeId,
+            media_url: r2Result.displayUrl,
+            message: cleanMessage,
+            media_status: mediaStatus,
+            storage_provider: getMediaStorageProvider("image"),
+            bytes: r2Result.originalBytes,
+            r2: {
+              original_key: r2Result.originalKey,
+              display_key: r2Result.displayKey,
+              poster_key: null,
+              original_bytes: r2Result.originalBytes,
+              display_bytes: r2Result.displayBytes,
+              original_mime_type: r2Result.originalContentType,
+              display_mime_type: r2Result.displayContentType,
+            },
+            cloudinary: null,
+          });
+
+          continue;
+        }
+
+        // ffprobe is intentionally performed before the success response. It
+        // is lightweight compared with transcoding and lets us reject videos
+        // longer than 5 minutes or larger than 4K before accepting the upload.
+        const videoMetadata = validateVideoMetadata(
+          await probeVideoFile(file.path),
+        );
+
+        // Only the original video is stored during the request. FFmpeg and
+        // poster generation happen after HTTP 202 through the persistent queue.
+        const r2Video = await uploadVideoOriginal(file, event_id);
 
         uploadedItems.push({
           event_id,
           guest_id,
-          media_kind: "image",
+          media_kind: "video",
           media_type_id: mediaTypeId,
-          media_url: r2Result.displayUrl,
+          media_url: null,
           message: cleanMessage,
           media_status: mediaStatus,
-          storage_provider: getMediaStorageProvider("image"),
-          bytes: r2Result.originalBytes,
+          storage_provider: getMediaStorageProvider("video"),
+          bytes: r2Video.originalBytes,
           r2: {
-            original_key: r2Result.originalKey,
-            display_key: r2Result.displayKey,
-            original_bytes: r2Result.originalBytes,
-            display_bytes: r2Result.displayBytes,
-            original_mime_type: r2Result.originalContentType,
-            display_mime_type: r2Result.displayContentType,
+            original_key: r2Video.originalKey,
+            display_key: r2Video.displayKey,
+            poster_key: r2Video.posterKey,
+            original_bytes: r2Video.originalBytes,
+            display_bytes: null,
+            original_mime_type: r2Video.originalContentType,
+            display_mime_type: null,
+            video_duration_seconds: videoMetadata.duration,
+            video_width: videoMetadata.width,
+            video_height: videoMetadata.height,
           },
           cloudinary: null,
         });
-
-        continue;
       }
 
-      const r2Video = await uploadVideoBundle(file, event_id);
+      const imageItems = uploadedItems.filter(
+        (item) => item.media_kind === "image",
+      );
+      const videoItems = uploadedItems.filter(
+        (item) => item.media_kind === "video",
+      );
 
-      uploadedItems.push({
-        event_id,
-        guest_id,
-        media_kind: "video",
-        media_type_id: mediaTypeId,
-        media_url: r2Video.displayUrl,
-        message: cleanMessage,
-        media_status: mediaStatus,
-        storage_provider: getMediaStorageProvider("video"),
-        bytes: r2Video.originalBytes,
-        r2: {
-          original_key: r2Video.originalKey,
-          display_key: r2Video.displayKey,
-          poster_key: r2Video.posterKey,
-          original_bytes: r2Video.originalBytes,
-          display_bytes: r2Video.displayBytes,
-          original_mime_type: r2Video.originalContentType,
-          display_mime_type: r2Video.displayContentType,
-          video_duration_seconds: r2Video.durationSeconds,
-          video_width: r2Video.originalWidth,
-          video_height: r2Video.originalHeight,
-        },
-        cloudinary: null,
+      const mediaRows = imageItems.map((item) => ({
+        event_id: item.event_id,
+        guest_id: item.guest_id,
+        media_type_id: item.media_type_id,
+        media_url: item.media_url,
+        message: item.message,
+        media_status: item.media_status,
+        bytes: Math.max(0, Number(item.bytes) || 0),
+        storage_provider: item.storage_provider,
+        r2_original_key: item.r2?.original_key || null,
+        r2_display_key: item.r2?.display_key || null,
+        r2_poster_key: null,
+        original_bytes: item.r2?.original_bytes || null,
+        display_bytes: item.r2?.display_bytes || null,
+        original_mime_type: item.r2?.original_mime_type || null,
+        display_mime_type: item.r2?.display_mime_type || null,
+        video_duration_seconds: null,
+        video_width: null,
+        video_height: null,
+        cloudinary_public_id: null,
+        resource_type: "image",
+        delivery_type: "authenticated",
+        format: "webp",
+      }));
+
+      let insertedMedia = [];
+
+      if (mediaRows.length > 0) {
+        const { data, error } = await supabase
+          .from("media")
+          .insert(mediaRows)
+          .select();
+
+        if (error) {
+          throw createHttpError(
+            `Media database insert failed: ${error.message}`,
+            500,
+            "MEDIA_DATABASE_INSERT_FAILED",
+          );
+        }
+
+        insertedMedia = data || [];
+        insertedMediaIds.push(
+          ...insertedMedia.map((row) => row.media_id).filter(Boolean),
+        );
+      }
+
+      const videoJobRows = videoItems.map((item) => ({
+        event_id: item.event_id,
+        guest_id: item.guest_id,
+        message: item.message,
+        target_media_status: item.media_status,
+        status: "queued",
+        original_key: item.r2.original_key,
+        display_key: item.r2.display_key,
+        poster_key: item.r2.poster_key,
+        original_bytes: Math.max(0, Number(item.r2.original_bytes) || 0),
+        original_mime_type: item.r2.original_mime_type || null,
+        video_duration_seconds:
+          Number(item.r2.video_duration_seconds) || null,
+        video_width: Number(item.r2.video_width) || null,
+        video_height: Number(item.r2.video_height) || null,
+      }));
+
+      let queuedJobs = [];
+
+      if (videoJobRows.length > 0) {
+        const { data, error } = await supabase
+          .from("video_processing_jobs")
+          .insert(videoJobRows)
+          .select(
+            "job_id, status, event_id, guest_id, original_bytes, created_at",
+          );
+
+        if (error) {
+          console.error(
+            JSON.stringify({
+              level: "error",
+              event: "video_queue_insert_failed",
+              request_id: req.requestId || null,
+              event_id,
+              code: error.code || null,
+              message: error.message || null,
+              details: error.details || null,
+              hint: error.hint || null,
+            }),
+          );
+
+          throw createHttpError(
+            "Video could not be queued for processing.",
+            500,
+            "VIDEO_QUEUE_INSERT_FAILED",
+          );
+        }
+
+        queuedJobs = data || [];
+        insertedJobIds.push(
+          ...queuedJobs.map((row) => row.job_id).filter(Boolean),
+        );
+      }
+
+      const consumedBytes = uploadedItems.reduce(
+        (sum, item) => sum + Math.max(0, Number(item.bytes) || 0),
+        0,
+      );
+
+      if (consumedBytes > 0) {
+        const { error: storageCounterError } = await supabase.rpc(
+          "increment_event_storage_consumed",
+          {
+            p_event_id: event_id,
+            p_bytes: Math.round(consumedBytes),
+          },
+        );
+
+        if (storageCounterError) {
+          throw createHttpError(
+            "Event storage usage could not be recorded.",
+            500,
+            "EVENT_STORAGE_COUNTER_FAILED",
+          );
+        }
+      }
+
+      if (queuedJobs.length > 0) {
+        // This only nudges the single-concurrency worker. The job itself is
+        // already durable in Postgres, so closing the browser cannot cancel it.
+        wakeVideoProcessingWorker();
+      }
+
+      return res.status(queuedJobs.length > 0 ? 202 : 201).json({
+        success: true,
+        message:
+          queuedJobs.length > 0
+            ? "Upload completed. Video processing will continue in the background."
+            : `${insertedMedia.length} media file uploaded successfully.`,
+        uploaded_count: insertedMedia.length + queuedJobs.length,
+        queued_video_count: queuedJobs.length,
+        media: insertedMedia,
+        video_jobs: queuedJobs,
+        storage_assets: uploadedItems.map((item) => ({
+          provider: item.storage_provider,
+          original_key: item.r2?.original_key || null,
+          display_key:
+            item.media_kind === "image" ? item.r2?.display_key || null : null,
+          poster_key: null,
+          processing_status:
+            item.media_kind === "video" ? "queued" : "ready",
+          cloudinary_public_id: item.cloudinary?.public_id || null,
+        })),
       });
-    }
+    } catch (error) {
+      await rollbackDatabaseWrites();
 
-    const mediaRows = uploadedItems.map((item) => ({
-      event_id: item.event_id,
-      guest_id: item.guest_id,
-      media_type_id: item.media_type_id,
-      media_url: item.media_url,
-      message: item.message,
-      media_status: item.media_status,
-      bytes: Math.max(0, Number(item.bytes) || 0),
-      storage_provider: item.storage_provider,
-      r2_original_key: item.r2?.original_key || null,
-      r2_display_key: item.r2?.display_key || null,
-      r2_poster_key: item.r2?.poster_key || null,
-      original_bytes: item.r2?.original_bytes || item.cloudinary?.bytes || null,
-      display_bytes: item.r2?.display_bytes || null,
-      original_mime_type: item.r2?.original_mime_type || null,
-      display_mime_type: item.r2?.display_mime_type || null,
-      video_duration_seconds: item.r2?.video_duration_seconds || null,
-      video_width: item.r2?.video_width || null,
-      video_height: item.r2?.video_height || null,
-      cloudinary_public_id: item.cloudinary?.public_id || null,
-      // These columns predate R2. delivery_type is NOT NULL in the current
-      // database schema, so R2 rows must not explicitly insert NULL here.
-      resource_type:
-        item.cloudinary?.resource_type ||
-        (item.storage_provider === STORAGE_PROVIDERS.R2 ? item.media_kind : null),
-      delivery_type:
-        item.cloudinary?.type ||
-        (item.storage_provider === STORAGE_PROVIDERS.R2 ? "authenticated" : "authenticated"),
-      format:
-        item.cloudinary?.format ||
-        (item.storage_provider === STORAGE_PROVIDERS.R2
-          ? item.media_kind === "video"
-            ? "mp4"
-            : "webp"
-          : null),
-    }));
-
-    const { data, error } = await supabase
-      .from("media")
-      .insert(mediaRows)
-      .select();
-
-    if (error) {
       await Promise.allSettled(
         uploadedItems.map((item) => cleanupUploadedItem(item)),
       );
@@ -1010,110 +1243,30 @@ router.post(
       console.error(
         JSON.stringify({
           level: "error",
-          event: "media_database_insert_failed",
+          event: "media_upload_failed",
           request_id: req.requestId || null,
-          event_id,
-          code: error.code || null,
-          message: error.message || null,
-          details: error.details || null,
-          hint: error.hint || null,
+          event_id: req.body?.event_id || null,
+          guest_id: req.body?.guest_id || null,
+          files: files.map((file) => ({
+            name: file.originalname,
+            mime: file.mimetype,
+            detected_mime: file.detectedMime || null,
+            detected_format: file.detectedFormat || null,
+            bytes: file.size,
+          })),
+          error: buildUploadErrorDiagnostic(error),
         }),
       );
 
-      return res.status(500).json({
+      return res.status(error.statusCode || 500).json({
         success: false,
-        message: "Media storage upload succeeded but the database insert failed.",
-        code: "MEDIA_DATABASE_INSERT_FAILED",
-        uploaded_storage_assets: uploadedItems.map((item) => ({
-          provider: item.storage_provider,
-          original_key: item.r2?.original_key || null,
-          display_key: item.r2?.display_key || null,
-          poster_key: item.r2?.poster_key || null,
-          cloudinary_public_id: item.cloudinary?.public_id || null,
-        })),
+        message: getPublicUploadErrorMessage(error),
+        code: getPublicUploadErrorCode(error),
         error: error.message,
       });
+    } finally {
+      await cleanupTemporaryFiles(files);
     }
-
-    const consumedBytes = (data || []).reduce(
-      (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
-      0,
-    );
-
-    if (consumedBytes > 0) {
-      const { error: storageCounterError } = await supabase.rpc(
-        "increment_event_storage_consumed",
-        {
-          p_event_id: event_id,
-          p_bytes: Math.round(consumedBytes),
-        },
-      );
-
-      if (storageCounterError) {
-        const insertedMediaIds = (data || []).map((row) => row.media_id).filter(Boolean);
-        if (insertedMediaIds.length > 0) {
-          const { error: rollbackError } = await supabase
-            .from("media")
-            .delete()
-            .in("media_id", insertedMediaIds);
-
-          if (rollbackError) {
-            console.error("Media rollback error after storage counter failure:", rollbackError.message);
-          }
-        }
-
-        throw createHttpError(
-          "Event storage usage could not be recorded.",
-          500,
-          "EVENT_STORAGE_COUNTER_FAILED",
-        );
-      }
-    }
-
-    return res.status(201).json({
-      success: true,
-      message: `${data.length} media file uploaded successfully.`,
-      uploaded_count: data.length,
-      media: data,
-      storage_assets: uploadedItems.map((item) => ({
-        provider: item.storage_provider,
-        original_key: item.r2?.original_key || null,
-        display_key: item.r2?.display_key || null,
-        cloudinary_public_id: item.cloudinary?.public_id || null,
-      })),
-    });
-  } catch (error) {
-    await Promise.allSettled(
-      uploadedItems.map((item) => cleanupUploadedItem(item)),
-    );
-
-    console.error(
-      JSON.stringify({
-        level: "error",
-        event: "media_upload_failed",
-        request_id: req.requestId || null,
-        event_id: req.body?.event_id || null,
-        guest_id: req.body?.guest_id || null,
-        files: files.map((file) => ({
-          name: file.originalname,
-          mime: file.mimetype,
-          detected_mime: file.detectedMime || null,
-          detected_format: file.detectedFormat || null,
-          bytes: file.size,
-        })),
-        error: buildUploadErrorDiagnostic(error),
-      }),
-    );
-
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: getPublicUploadErrorMessage(error),
-      code: getPublicUploadErrorCode(error),
-      error: error.message,
-    });
-  } finally {
-    await cleanupTemporaryFiles(files);
-  }
   },
 );
 

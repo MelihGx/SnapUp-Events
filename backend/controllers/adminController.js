@@ -1672,7 +1672,7 @@ const createAdminEventForUser = async (req, res) => {
       require_approval: requireApproval,
       allow_gallery_view: true,
       max_storage_per_guest: 500,
-      max_upload_per_guest: 20,
+      max_upload_per_guest: null,
     };
 
     const { data: createdSettings, error: settingsError } = await supabase

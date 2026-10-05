@@ -45,6 +45,25 @@ function cleanOptionalText(value, maxLength) {
   return cleaned ? cleaned.slice(0, maxLength) : null;
 }
 
+
+function normalizeOptionalUploadLimit(value) {
+  if (value === null || value === undefined || value === "") {
+    return { value: null, error: null };
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 9999) {
+    return {
+      value: null,
+      error:
+        "Upload limit must be between 1 and 9999 or left blank for unlimited.",
+    };
+  }
+
+  return { value: parsed, error: null };
+}
+
 function normalizeEditableEventDate(value) {
   if (value === null || value === undefined || value === "") {
     return { value: null, error: null };
@@ -375,6 +394,18 @@ const createEvent = async (req, res) => {
       });
     }
 
+    const uploadLimit = normalizeOptionalUploadLimit(
+      settings?.max_upload_per_guest,
+    );
+
+    if (uploadLimit.error) {
+      return res.status(400).json({
+        success: false,
+        message: uploadLimit.error,
+        code: "INVALID_UPLOAD_LIMIT",
+      });
+    }
+
     const selectedPackage = normalizePackageKey(
       eventPackage || packageName || "free",
     );
@@ -474,7 +505,7 @@ const createEvent = async (req, res) => {
           require_approval: eventSettings.require_approval ?? false,
           allow_gallery_view: eventSettings.allow_gallery_view ?? true,
           max_storage_per_guest: eventSettings.max_storage_per_guest ?? 500,
-          max_upload_per_guest: eventSettings.max_upload_per_guest ?? 20,
+          max_upload_per_guest: uploadLimit.value,
         },
       ]);
 
@@ -1148,6 +1179,16 @@ const updateEventSettings = async (req, res) => {
       max_upload_per_guest,
     } = req.body;
 
+    const uploadLimit = normalizeOptionalUploadLimit(max_upload_per_guest);
+
+    if (uploadLimit.error) {
+      return res.status(400).json({
+        success: false,
+        message: uploadLimit.error,
+        code: "INVALID_UPLOAD_LIMIT",
+      });
+    }
+
     const { data: event, error: eventError } = await supabase
       .from("event")
       .select("event_id, user_id")
@@ -1207,7 +1248,7 @@ const updateEventSettings = async (req, res) => {
       require_approval: require_approval ?? false,
       allow_gallery_view: allow_gallery_view !== false,
       max_storage_per_guest: Number(max_storage_per_guest) || 500,
-      max_upload_per_guest: Number(max_upload_per_guest) || 20,
+      max_upload_per_guest: uploadLimit.value,
       settings_updated_at: new Date().toISOString(),
     };
 
@@ -1287,6 +1328,20 @@ const deleteEvent = async (req, res) => {
       });
     }
 
+    const { data: queuedVideoRows, error: queuedVideoError } = await supabase
+      .from("video_processing_jobs")
+      .select("original_key, display_key, poster_key, status")
+      .eq("event_id", eventId)
+      .in("status", ["queued", "processing", "failed"]);
+
+    if (queuedVideoError) {
+      return res.status(500).json({
+        success: false,
+        message: "Queued video cleanup data could not be prepared.",
+        error: queuedVideoError.message,
+      });
+    }
+
     const { error: deleteError } = await supabase
       .from("event")
       .delete()
@@ -1303,15 +1358,22 @@ const deleteEvent = async (req, res) => {
 
     await cleanupStoredEventCover(event);
 
-    const r2CleanupResults = await Promise.allSettled(
-      (r2MediaRows || []).map((item) =>
+    const r2CleanupResults = await Promise.allSettled([
+      ...(r2MediaRows || []).map((item) =>
         deleteImagePair({
           originalKey: item.r2_original_key,
           displayKey: item.r2_display_key,
           posterKey: item.r2_poster_key,
         }),
       ),
-    );
+      ...(queuedVideoRows || []).map((item) =>
+        deleteImagePair({
+          originalKey: item.original_key,
+          displayKey: item.display_key,
+          posterKey: item.poster_key,
+        }),
+      ),
+    ]);
 
     const r2CleanupFailures = r2CleanupResults.filter(
       (result) => result.status === "rejected",

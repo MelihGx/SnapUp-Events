@@ -603,10 +603,10 @@ function buildEventPayload() {
       allow_comments: document.getElementById("allowComments").checked,
       allow_likes: document.getElementById("allowLikes").checked,
       require_approval: document.getElementById("requireApproval").checked,
-      // Legacy backend compatibility. These limits are no longer exposed
-      // in the Create Event UI.
+      // Storage stays at the legacy default. Upload count is unlimited
+      // unless the owner later enters a limit in Event Settings.
       max_storage_per_guest: 500,
-      max_upload_per_guest: 20,
+      max_upload_per_guest: null,
     },
   };
 }
