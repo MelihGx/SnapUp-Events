@@ -3536,6 +3536,7 @@ html[data-theme="dark"] .join-event-map-link:hover {
 }
 
 .join-upload-success__note {
+  white-space: pre-line;
   margin-top: 10px !important;
   padding: 10px 12px;
   max-width: 360px !important;

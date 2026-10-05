@@ -596,7 +596,7 @@ const getEventByCode = async (req, res) => {
 
     const { data: settings, error: settingsError } = await supabase
       .from("event_settings")
-      .select("allow_gallery_view, allow_upload, only_users")
+      .select("allow_gallery_view, allow_upload, only_users, require_approval")
       .eq("event_id", event.event_id)
       .maybeSingle();
 
@@ -613,6 +613,7 @@ const getEventByCode = async (req, res) => {
       allow_gallery_view: settings?.allow_gallery_view !== false,
       allow_upload: settings?.allow_upload !== false,
       only_users: settings?.only_users === true,
+      require_approval: settings?.require_approval === true,
     };
 
     return res.status(200).json({

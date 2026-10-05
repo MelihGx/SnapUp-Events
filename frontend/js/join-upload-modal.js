@@ -166,11 +166,24 @@ function openUploadSuccessPopup(mediaType, uploadedCount = 1) {
     : translate(`${safeCount} file(s) uploaded successfully!`);
 
   if (note) {
-    const showVideoNote = mediaType === "video";
-    note.hidden = !showVideoNote;
-    note.textContent = showVideoNote
-      ? translate("It may take a few minutes to appear in the gallery.")
-      : "";
+    const successNotes = [];
+
+    if (selectedEvent?.require_approval === true) {
+      successNotes.push(
+        translate(
+          "Your upload will appear in the gallery after approval by the event administrator.",
+        ),
+      );
+    }
+
+    if (mediaType === "video") {
+      successNotes.push(
+        translate("It may take a few minutes to appear in the gallery."),
+      );
+    }
+
+    note.hidden = successNotes.length === 0;
+    note.textContent = successNotes.join("\n");
   }
 
   button.textContent = translate("Continue");
@@ -392,6 +405,13 @@ function openModal() {
   setLoading(false);
   resetJoinUploadProgress();
 
+  const eventCodeInput = document.getElementById("joinEventCode");
+  if (eventCodeInput) {
+    eventCodeInput.readOnly = false;
+    eventCodeInput.removeAttribute("aria-readonly");
+    delete eventCodeInput.dataset.contextLocked;
+  }
+
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("join-upload-open");
@@ -399,6 +419,40 @@ function openModal() {
   setTimeout(() => {
     document.getElementById("joinEventCode")?.focus();
   }, 80);
+}
+
+
+export async function openJoinUploadModalForEvent(eventData = {}) {
+  const code = String(eventData?.event_code || "")
+    .trim()
+    .toUpperCase();
+
+  openModal();
+
+  const eventCodeInput = document.getElementById("joinEventCode");
+  if (!eventCodeInput || !code) {
+    return;
+  }
+
+  eventCodeInput.value = code;
+  eventCodeInput.readOnly = true;
+  eventCodeInput.setAttribute("aria-readonly", "true");
+  eventCodeInput.dataset.contextLocked = "true";
+
+  try {
+    setResult("Checking event code...", "info");
+    selectedEvent = await findEventByCode(code);
+    renderEventPreview(selectedEvent);
+    showEventAccessStatus(selectedEvent);
+
+    window.setTimeout(() => {
+      document.getElementById("joinGuestName")?.focus();
+    }, 80);
+  } catch (error) {
+    selectedEvent = null;
+    renderEventPreview(null);
+    setResult(error.message || "Event could not be found.", "error");
+  }
 }
 
 function closeModal() {
@@ -1190,6 +1244,15 @@ function initFormSubmit() {
         setResult("Message sent successfully!", "success");
         resetFormAfterSuccess();
         openUploadSuccessPopup(submissionMediaType);
+        window.dispatchEvent(
+          new CustomEvent("snapup:upload-success", {
+            detail: {
+              eventCode: eventData.event_code || eventCode,
+              mediaType: submissionMediaType,
+              uploadedCount: 1,
+            },
+          }),
+        );
         return;
       } else {
         const uploadResult = await uploadMedia(
@@ -1206,6 +1269,15 @@ function initFormSubmit() {
         setResult(`${uploadedCount} file(s) uploaded successfully!`, "success");
         resetFormAfterSuccess();
         openUploadSuccessPopup(submissionMediaType, uploadedCount);
+        window.dispatchEvent(
+          new CustomEvent("snapup:upload-success", {
+            detail: {
+              eventCode: eventData.event_code || eventCode,
+              mediaType: submissionMediaType,
+              uploadedCount,
+            },
+          }),
+        );
         return;
       }
     } catch (error) {

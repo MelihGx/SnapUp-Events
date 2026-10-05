@@ -5388,9 +5388,18 @@ if (uploadMediaBtn) {
                 uploaded: uploadResult.uploaded,
                 failed: uploadResult.failures.length,
               }),
-          selectedType === "video"
-            ? t("It may take a few minutes to appear in the gallery.")
-            : "",
+          [
+            currentSettings?.require_approval === true
+              ? t(
+                  "Your upload will appear in the gallery after approval by the event administrator.",
+                )
+              : "",
+            selectedType === "video"
+              ? t("It may take a few minutes to appear in the gallery.")
+              : "",
+          ]
+            .filter(Boolean)
+            .join("\n"),
         );
       }
 

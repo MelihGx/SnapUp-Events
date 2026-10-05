@@ -10,6 +10,10 @@ import {
   canonicalizeEventGalleryAddress,
   readEventGalleryIdentifier,
 } from "./event-url.js?v=event-slug-1";
+import {
+  initJoinUploadModal,
+  openJoinUploadModalForEvent,
+} from "./join-upload-modal.js?v=approval-note-1";
 
 const API_BASE_URL = API_URL;
 
@@ -53,6 +57,12 @@ const galleryStickySortSelect = document.getElementById(
 );
 const galleryCustomComboboxes = Array.from(
   document.querySelectorAll(".gallery-custom-combobox"),
+);
+const galleryViewButtons = Array.from(
+  document.querySelectorAll("[data-gallery-view]"),
+);
+const galleryUploadActions = Array.from(
+  document.querySelectorAll("[data-gallery-upload-action]"),
 );
 
 function closeGalleryCustomComboboxes(except = null) {
@@ -185,7 +195,106 @@ let lightboxReturnTarget = null;
 let touchStartX = null;
 let gallerySettings = {
   allow_likes: true,
+  allow_upload: true,
 };
+let currentGalleryEvent = null;
+
+
+function syncGalleryUploadAction() {
+  if (!galleryUploadActions.length) return;
+
+  const uploadsAllowed = gallerySettings.allow_upload !== false;
+  const label = t("Upload your memory");
+  const disabledTitle = t("Uploads are disabled for this event.");
+
+  galleryUploadActions.forEach((button) => {
+    button.disabled = !uploadsAllowed;
+
+    const labelNode = button.querySelector("span:last-child");
+    if (labelNode) {
+      labelNode.textContent = label;
+    }
+
+    button.setAttribute("aria-label", label);
+
+    if (uploadsAllowed) {
+      button.removeAttribute("title");
+    } else {
+      button.title = disabledTitle;
+    }
+  });
+}
+
+const GALLERY_VIEW_STORAGE_KEY = "snapup_gallery_view";
+
+function readSavedGalleryView() {
+  try {
+    const saved = localStorage.getItem(GALLERY_VIEW_STORAGE_KEY);
+    return saved === "grid" || saved === "feed" ? saved : "feed";
+  } catch (_) {
+    return "feed";
+  }
+}
+
+let activeGalleryView = readSavedGalleryView();
+let lastMobileGalleryViewport = window.matchMedia("(max-width: 768px)").matches;
+
+function isMobileGalleryViewport() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
+function getEffectiveGalleryView() {
+  return isMobileGalleryViewport() ? activeGalleryView : "feed";
+}
+
+function syncGalleryViewState() {
+  const effectiveView = getEffectiveGalleryView();
+  approvedGalleryGrid.classList.toggle(
+    "is-mobile-grid-view",
+    effectiveView === "grid",
+  );
+  approvedGalleryGrid.dataset.galleryView = effectiveView;
+
+  galleryViewButtons.forEach((button) => {
+    const active = button.dataset.galleryView === effectiveView;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+
+    const label = t(
+      button.dataset.galleryView === "grid" ? "Grid view" : "Feed view",
+    );
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  });
+}
+
+function setGalleryView(nextView, { persist = true } = {}) {
+  if (nextView !== "grid" && nextView !== "feed") return;
+
+  let needsRender = false;
+
+  if (nextView === "grid" && activeGalleryFilter === "message") {
+    activeGalleryFilter = "all";
+    needsRender = true;
+  }
+
+  activeGalleryView = nextView;
+
+  if (persist) {
+    try {
+      localStorage.setItem(GALLERY_VIEW_STORAGE_KEY, nextView);
+    } catch (_) {}
+  }
+
+  if (needsRender) {
+    renderGalleryFeedView();
+    return;
+  }
+
+  syncGalleryControlState();
+  syncGalleryViewState();
+}
+
 
 function getLanguage() {
   return window.SnapUpI18n?.language || "en";
@@ -433,7 +542,7 @@ function getPhotoCardHtml(item, photoIndex) {
     : "";
 
   return `
-    <article class="approved-card approved-photo-card">
+    <article class="approved-card approved-photo-card" data-media-id="${escapeHtml(item.media_id)}">
       <header class="approved-card-head approved-photo-head">
         <span class="approved-card-avatar" aria-hidden="true">
           ${escapeHtml(guestInitial)}
@@ -534,7 +643,7 @@ function getVideoCardHtml(item) {
     : "";
 
   return `
-    <article class="approved-card approved-video-card">
+    <article class="approved-card approved-video-card" data-media-id="${escapeHtml(item.media_id)}">
       <header class="approved-card-head approved-video-head">
         <span class="approved-card-avatar" aria-hidden="true">
           ${escapeHtml(guestInitial)}
@@ -636,6 +745,13 @@ function setGalleryFilter(nextFilter) {
   if (!nextFilter || nextFilter === activeGalleryFilter) {
     syncGalleryControlState();
     return;
+  }
+
+  if (nextFilter === "message" && getEffectiveGalleryView() === "grid") {
+    activeGalleryView = "feed";
+    try {
+      localStorage.setItem(GALLERY_VIEW_STORAGE_KEY, "feed");
+    } catch (_) {}
   }
 
   activeGalleryFilter = nextFilter;
@@ -760,6 +876,7 @@ function syncCaptionToggles() {
 
 function renderGalleryFeedView() {
   syncGalleryControlState();
+  syncGalleryViewState();
 
   const visibleFeed = getVisibleGalleryFeed();
   approvedPhotos = visibleFeed.filter((item) => item.feed_type === "image");
@@ -1009,6 +1126,12 @@ async function handleLikeClick(button) {
   }
 }
 
+galleryViewButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setGalleryView(button.dataset.galleryView);
+  });
+});
+
 galleryFilterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     setGalleryFilter(button.dataset.galleryFilter);
@@ -1041,7 +1164,15 @@ galleryStickySortSelect?.addEventListener("change", () => {
 window.addEventListener("scroll", scheduleMobileStickyToolbarUpdate, {
   passive: true,
 });
-window.addEventListener("resize", scheduleMobileStickyToolbarUpdate);
+window.addEventListener("resize", () => {
+  scheduleMobileStickyToolbarUpdate();
+
+  const isMobileNow = isMobileGalleryViewport();
+  if (isMobileNow !== lastMobileGalleryViewport) {
+    lastMobileGalleryViewport = isMobileNow;
+    syncGalleryViewState();
+  }
+});
 
 async function loadGallery() {
   if (!eventCode && !eventSlug) {
@@ -1067,7 +1198,10 @@ async function loadGallery() {
 
     gallerySettings = {
       allow_likes: data.settings?.allow_likes !== false,
+      allow_upload: data.settings?.allow_upload !== false,
     };
+    currentGalleryEvent = data.event || null;
+    syncGalleryUploadAction();
 
     canonicalizeEventGalleryAddress(data.event || {});
     renderEvent(data.event || {});
@@ -1107,6 +1241,14 @@ approvedGalleryGrid.addEventListener("click", async (event) => {
 
     const shell = videoPlayButton.closest("[data-video-shell]");
     const video = shell?.querySelector("[data-premium-video]");
+
+    if (getEffectiveGalleryView() === "grid") {
+      setGalleryView("feed");
+      videoPlayButton.closest("[data-media-id]")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
 
     if (!video) return;
 
@@ -1207,6 +1349,34 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") {
     showLightboxItem(activePhotoIndex + 1);
   }
+});
+
+syncGalleryViewState();
+
+initJoinUploadModal();
+syncGalleryUploadAction();
+
+galleryUploadActions.forEach((button) => {
+  button.addEventListener("click", async () => {
+    if (gallerySettings.allow_upload === false || !currentGalleryEvent) {
+      return;
+    }
+
+    await openJoinUploadModalForEvent(currentGalleryEvent);
+  });
+});
+
+window.addEventListener("snapup:upload-success", (event) => {
+  const uploadedEventCode = String(event.detail?.eventCode || "").toUpperCase();
+  const currentEventCode = String(currentGalleryEvent?.event_code || "").toUpperCase();
+
+  if (uploadedEventCode && currentEventCode && uploadedEventCode !== currentEventCode) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    loadGallery();
+  }, 350);
 });
 
 loadGallery();

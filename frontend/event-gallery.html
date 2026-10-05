@@ -37,18 +37,21 @@
     <link rel="stylesheet" href="css/theme.css?v=gallery-without-book-2" />
     <link
       rel="stylesheet"
-      href="css/event-gallery.css?v=premium-video-cover-1"
+      href="css/event-gallery.css?v=approval-note-1"
     />
     <link
       rel="stylesheet"
       href="css/i18n.css?v=global-languages-3"
     />
+    <link rel="stylesheet" href="css/turnstile.css?v=turnstile-1" />
+    <link rel="stylesheet" href="css/upload-progress.css?v=upload-progress-1" />
     <script
       src="js/event-gallery-i18n.js?v=mixed-feed-video-1"
       defer
     ></script>
     <script src="js/asian-i18n.js?v=global-languages-3" defer></script>
-    <script src="js/ui-additions-i18n.js?v=video-background-note-1" defer></script>
+    <script src="js/upload-progress-i18n.js?v=upload-progress-50-languages-1" defer></script>
+    <script src="js/ui-additions-i18n.js?v=approval-note-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
   </head>
 
@@ -198,6 +201,24 @@
           <div class="participant-list" id="participantList"></div>
         </section>
 
+        <div class="gallery-upload-action-row gallery-upload-action-row--mobile">
+          <button
+            type="button"
+            class="gallery-upload-action gallery-upload-action--mobile"
+            data-gallery-upload-action
+            aria-label="Upload your memory"
+          >
+            <span class="gallery-upload-action__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 16V4"></path>
+                <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+              </svg>
+            </span>
+            <span>Upload your memory</span>
+          </button>
+        </div>
+
         <section class="approved-gallery-panel">
           <div class="gallery-panel-head">
             <div class="section-head">
@@ -205,7 +226,26 @@
               <h2>Shared memories</h2>
               <p>Photos, videos and guest messages shared by guests come together here.</p>
             </div>
-            <span class="gallery-count-badge" id="memoryCountBadge">0 memories</span>
+
+            <div class="gallery-panel-actions">
+              <span class="gallery-count-badge" id="memoryCountBadge">0 memories</span>
+
+              <button
+                type="button"
+                class="gallery-upload-action gallery-upload-action--desktop"
+                data-gallery-upload-action
+                aria-label="Upload your memory"
+              >
+                <span class="gallery-upload-action__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 16V4"></path>
+                    <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                    <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                  </svg>
+                </span>
+                <span>Upload your memory</span>
+              </button>
+            </div>
           </div>
 
           <div class="gallery-feed-controls" aria-label="Gallery controls">
@@ -267,10 +307,312 @@
             </div>
           </div>
 
+          <div
+            class="gallery-mobile-view-switcher"
+            id="galleryMobileViewSwitcher"
+            role="group"
+            aria-label="Gallery view"
+          >
+            <button
+              type="button"
+              class="gallery-mobile-view-btn"
+              data-gallery-view="grid"
+              aria-pressed="false"
+              aria-label="Grid view"
+              title="Grid view"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="5" height="5" rx="1"></rect>
+                <rect x="9.5" y="3" width="5" height="5" rx="1"></rect>
+                <rect x="16" y="3" width="5" height="5" rx="1"></rect>
+                <rect x="3" y="9.5" width="5" height="5" rx="1"></rect>
+                <rect x="9.5" y="9.5" width="5" height="5" rx="1"></rect>
+                <rect x="16" y="9.5" width="5" height="5" rx="1"></rect>
+                <rect x="3" y="16" width="5" height="5" rx="1"></rect>
+                <rect x="9.5" y="16" width="5" height="5" rx="1"></rect>
+                <rect x="16" y="16" width="5" height="5" rx="1"></rect>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="gallery-mobile-view-btn active"
+              data-gallery-view="feed"
+              aria-pressed="true"
+              aria-label="Feed view"
+              title="Feed view"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="3" width="16" height="7" rx="2"></rect>
+                <rect x="4" y="14" width="16" height="7" rx="2"></rect>
+              </svg>
+            </button>
+          </div>
+
           <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
         </section>
       </section>
     </main>
+
+    <div class="join-upload-modal" id="joinUploadModal" aria-hidden="true">
+      <div class="join-upload-backdrop" data-join-upload-close></div>
+
+      <div class="join-upload-panel" role="dialog" aria-modal="true">
+        <button
+          type="button"
+          class="join-upload-close"
+          data-join-upload-close
+          aria-label="Close upload modal"
+        >
+          ×
+        </button>
+
+        <div class="join-upload-head">
+          <span><i></i> JOIN EVENT</span>
+          <h2>Upload your memory</h2>
+          <p>Enter the event code, choose media type, and send your memory.</p>
+        </div>
+
+        <form class="join-upload-form" id="joinUploadForm">
+          <div class="join-upload-grid">
+            <label>
+              Event Code
+              <input
+                type="text"
+                id="joinEventCode"
+                placeholder="Example: A7K3P9"
+                maxlength="12"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+              />
+            </label>
+
+            <label>
+              Your Name
+              <input
+                type="text"
+                id="joinGuestName"
+                placeholder="Enter your name"
+                autocomplete="name"
+              />
+            </label>
+          </div>
+
+          <div class="join-event-preview" id="joinEventPreview" hidden>
+            <div class="join-event-cover" id="joinEventCover">
+              <img id="joinEventCoverImage" alt="" hidden />
+              <span id="joinEventCoverPlaceholder" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2l1.3-1.6h4.4L15.5 5h2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"
+                  ></path>
+                  <circle cx="12" cy="12" r="3.2"></circle>
+                </svg>
+              </span>
+            </div>
+
+            <div class="join-event-preview__details">
+              <strong id="joinEventName">Event name</strong>
+              <span id="joinEventMeta">Event details</span>
+              <span
+                class="join-event-address"
+                id="joinEventAddress"
+                hidden
+              ></span>
+              <a
+                class="join-event-map-link"
+                id="joinEventMapLink"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 5h5v5"></path>
+                  <path d="m19 5-8 8"></path>
+                  <path
+                    d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"
+                  ></path>
+                </svg>
+                <span>Open in Maps</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="join-media-type">
+            <span>Choose Media</span>
+
+            <div>
+              <button
+                type="button"
+                class="active"
+                data-join-media-type="message"
+              >
+                Text
+              </button>
+              <button type="button" data-join-media-type="image">Image</button>
+              <button type="button" data-join-media-type="video">Video</button>
+            </div>
+          </div>
+
+          <div class="join-message-field" id="joinMessageField">
+            <label>
+              Message
+              <textarea
+                id="joinMessageText"
+                maxlength="250"
+                placeholder="Write your memory or wish..."
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="join-file-field" id="joinFileField" hidden>
+            <span class="join-file-label" data-i18n="Select File(s)">
+              Select File(s)
+            </span>
+
+            <label class="join-file-picker" for="joinMediaFile">
+              <input
+                class="join-file-input"
+                type="file"
+                id="joinMediaFile"
+                aria-describedby="joinFilePickerHint joinFileHelperText"
+                multiple
+              />
+
+              <span class="join-file-picker__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 16V4"></path>
+                  <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                  <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                </svg>
+              </span>
+
+              <span class="join-file-picker__copy">
+                <strong data-i18n="Select File(s)">Select File(s)</strong>
+                <span
+                  id="joinFilePickerHint"
+                  data-i18n="Drop photo or video here"
+                >
+                  Drop photo or video here
+                </span>
+              </span>
+
+              <span
+                class="join-file-picker__count"
+                id="joinFilePickerCount"
+                aria-live="polite"
+                hidden
+              ></span>
+
+              <span class="join-file-picker__arrow" aria-hidden="true">
+                <svg viewBox="0 0 20 20">
+                  <path d="m7.5 4.5 5 5-5 5"></path>
+                </svg>
+              </span>
+            </label>
+
+            <p class="join-file-helper-text" id="joinFileHelperText">
+              Up to 15 files · 50 MB each · 200 MB total
+            </p>
+
+            <div class="join-file-preview" id="joinFilePreview" hidden></div>
+          </div>
+
+          <div class="turnstile-field" id="joinTurnstileField" hidden>
+            <div class="turnstile-widget" id="joinTurnstileWidget"></div>
+            <small
+              class="turnstile-message"
+              id="joinTurnstileMessage"
+              role="status"
+              aria-live="polite"
+            ></small>
+          </div>
+
+          <div
+            class="snapup-upload-progress"
+            id="joinUploadProgress"
+            hidden
+            aria-live="polite"
+          >
+            <div class="snapup-upload-progress__head">
+              <div class="snapup-upload-progress__copy">
+                <strong id="joinUploadProgressStatus">Uploading...</strong>
+                <span id="joinUploadProgressBytes">0 KB / 0 KB</span>
+              </div>
+              <b id="joinUploadProgressPercent">0%</b>
+            </div>
+
+            <div
+              class="snapup-upload-progress__track"
+              id="joinUploadProgressTrack"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Uploading..."
+            >
+              <span id="joinUploadProgressFill"></span>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="join-submit-button"
+            id="joinSubmitButton"
+          >
+            Send to Event
+          </button>
+
+          <p class="join-upload-result" id="joinUploadResult"></p>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="join-upload-success"
+      id="joinUploadSuccess"
+      aria-hidden="true"
+      hidden
+    >
+      <div
+        class="join-upload-success__backdrop"
+        data-upload-success-finish
+      ></div>
+
+      <section
+        class="join-upload-success__card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="joinUploadSuccessTitle"
+        aria-describedby="joinUploadSuccessMessage"
+      >
+        <div class="join-upload-success__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="m14.5 24.5 6.2 6.2 13.4-14.1"></path>
+          </svg>
+        </div>
+
+        <span class="join-upload-success__brand">SnapUp Events</span>
+        <h2 id="joinUploadSuccessTitle">Uploaded!</h2>
+        <p id="joinUploadSuccessMessage"></p>
+        <p
+          class="join-upload-success__note"
+          id="joinUploadSuccessNote"
+          hidden
+        ></p>
+
+        <button
+          type="button"
+          class="join-upload-success__button"
+          id="joinUploadSuccessButton"
+          data-upload-success-finish
+        >
+          Continue
+        </button>
+      </section>
+    </div>
 
     <div
       class="public-lightbox"
@@ -320,7 +662,7 @@
 
     <script
       type="module"
-      src="js/event-gallery.js?v=premium-video-cover-1"
+      src="js/event-gallery.js?v=approval-note-1"
     ></script>
     <script src="js/theme.js?v=gallery-without-book-2"></script>
   </body>
