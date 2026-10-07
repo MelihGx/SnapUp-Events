@@ -8851,3 +8851,92 @@ html[data-theme="dark"] .event-type-card:focus-visible {
     transform: none;
   }
 }
+
+
+
+/* =========================================================
+   Homepage product-flow Create Event CTA — flat SnapUp purple
+   ========================================================= */
+
+.product-flow__actions .btn-hot[href="create-event.html"] {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.product-flow__actions .btn-hot[href="create-event.html"]:hover,
+.product-flow__actions .btn-hot[href="create-event.html"]:focus-visible {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  background-image: none !important;
+  border-color: #6607b2 !important;
+  box-shadow: none !important;
+}
+
+.product-flow__actions .btn-hot[href="create-event.html"]:focus-visible {
+  outline: 3px solid rgba(120, 8, 208, 0.18);
+  outline-offset: 3px;
+}
+
+html[data-theme="dark"]
+  .product-flow__actions .btn-hot[href="create-event.html"] {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"]
+  .product-flow__actions .btn-hot[href="create-event.html"]:hover {
+  background: #8f2add !important;
+  border-color: #8f2add !important;
+}
+
+
+
+/* =========================================================
+   Homepage event-types CTA — flat SnapUp purple
+   ========================================================= */
+
+.event-types__cta {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.event-types__cta:hover,
+.event-types__cta:focus-visible {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  background-image: none !important;
+  border-color: #6607b2 !important;
+  box-shadow: none !important;
+}
+
+.event-types__cta:focus-visible {
+  outline: 3px solid rgba(120, 8, 208, 0.18);
+  outline-offset: 3px;
+}
+
+.event-types__cta span {
+  color: inherit !important;
+}
+
+html[data-theme="dark"] .event-types__cta {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .event-types__cta:hover {
+  background: #8f2add !important;
+  border-color: #8f2add !important;
+}
+

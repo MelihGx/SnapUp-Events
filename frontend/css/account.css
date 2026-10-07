@@ -2166,3 +2166,59 @@ html[data-theme="dark"] .event-item-link:hover .sweet-gallery-btn {
   border-color: var(--snapup-brand-purple-hover) !important;
 }
 
+
+
+/* =========================================================
+   Account forms — flat SnapUp purple buttons
+   Save changes + Change password
+   ========================================================= */
+
+#accountSaveButton,
+#passwordSaveButton {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+}
+
+#accountSaveButton:hover:not(:disabled),
+#accountSaveButton:focus-visible:not(:disabled),
+#passwordSaveButton:hover:not(:disabled),
+#passwordSaveButton:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+#accountSaveButton:focus-visible,
+#passwordSaveButton:focus-visible {
+  outline: 3px solid rgba(120, 8, 208, 0.18);
+  outline-offset: 3px;
+}
+
+#accountSaveButton:disabled,
+#passwordSaveButton:disabled {
+  background: #a86bd7 !important;
+  border-color: #a86bd7 !important;
+  box-shadow: none !important;
+  opacity: 0.68;
+}
+
+/* Keep the same brand purple in dark mode. */
+html[data-theme="dark"] #accountSaveButton,
+html[data-theme="dark"] #passwordSaveButton {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] #accountSaveButton:hover:not(:disabled),
+html[data-theme="dark"] #passwordSaveButton:hover:not(:disabled) {
+  background: #8f2add !important;
+  border-color: #8f2add !important;
+}
+
