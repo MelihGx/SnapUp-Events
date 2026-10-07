@@ -1160,9 +1160,35 @@ body.memory-book-open :where(.theme-toggle, .snapup-language) {
 }
 
 .participant-list {
+  max-height: 250px;
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline-end: 6px;
+  scrollbar-width: thin;
+  scrollbar-color:
+    color-mix(in srgb, var(--gallery-purple) 45%, transparent)
+    transparent;
+}
+
+.participant-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.participant-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.participant-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--gallery-purple) 35%, transparent);
+  border-radius: 999px;
+}
+
+.participant-list::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--gallery-purple) 55%, transparent);
 }
 
 .participant-chip {
@@ -2194,6 +2220,11 @@ html[data-theme="dark"] body.event-gallery-shell .public-lightbox-backdrop {
   .participants-panel,
   .approved-gallery-panel {
     padding: 17px;
+  }
+
+  .participant-list {
+    max-height: 200px;
+    padding-inline-end: 4px;
   }
 
   .participant-chip {

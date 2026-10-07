@@ -7663,3 +7663,1398 @@ html[data-theme="dark"] .event-detail-page {
     height: 54px;
   }
 }
+
+/* =========================================================
+   Detail action palette — flat professional colors
+   Keeps each action visually distinct without gradients or glow.
+   ========================================================= */
+
+.detail-actions .memory-book-open {
+  color: #ffffff !important;
+  background: #6b4a8e !important;
+  background-image: none !important;
+  border-color: #6b4a8e !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .memory-book-open:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: #593d77 !important;
+  background-image: none !important;
+  border-color: #593d77 !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .event-archive-open {
+  color: #ffffff !important;
+  background: #49536e !important;
+  background-image: none !important;
+  border-color: #49536e !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .event-archive-open:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: #3c455d !important;
+  background-image: none !important;
+  border-color: #3c455d !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .event-highlights-open {
+  color: #ffffff !important;
+  background: #9b5269 !important;
+  background-image: none !important;
+  border-color: #9b5269 !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .event-highlights-open:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: #87465b !important;
+  background-image: none !important;
+  border-color: #87465b !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .live-slideshow-open {
+  color: #ffffff !important;
+  background: #242127 !important;
+  background-image: none !important;
+  border-color: #242127 !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .live-slideshow-open:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: #151318 !important;
+  background-image: none !important;
+  border-color: #151318 !important;
+  box-shadow: none !important;
+}
+
+/* Keep disabled buttons neutral. */
+.detail-actions .memory-book-open:disabled,
+.detail-actions .event-archive-open:disabled,
+.detail-actions .event-highlights-open:disabled,
+.detail-actions .live-slideshow-open:disabled {
+  color: var(--detail-text-faint) !important;
+  background: var(--detail-surface-raised) !important;
+  border-color: var(--detail-line) !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   Quick Upload — unified SnapUp purple
+   Replaces bright gradient/pink/cyan accents with the brand purple.
+   ========================================================= */
+
+:root {
+  --snapup-upload-purple: #7808d0;
+  --snapup-upload-purple-hover: #6607b2;
+  --snapup-upload-purple-soft: rgba(120, 8, 208, 0.08);
+  --snapup-upload-purple-line: rgba(120, 8, 208, 0.34);
+}
+
+/* Quick Upload label */
+.upload-panel .detail-kicker,
+.upload-panel .section-kicker {
+  color: var(--snapup-upload-purple) !important;
+}
+
+/* Photo / Video / Message segmented control */
+.upload-type-button:hover {
+  color: var(--snapup-upload-purple) !important;
+  background: var(--snapup-upload-purple-soft) !important;
+}
+
+.upload-type-button.active,
+.upload-type-button.active:hover {
+  color: #ffffff !important;
+  background: var(--snapup-upload-purple) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* File picker: keep it light, use purple only as the interaction accent. */
+.detail-file-picker,
+.upload-type-panel .detail-file-picker {
+  border-color: var(--snapup-upload-purple-line) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.detail-file-picker:hover,
+.detail-file-picker:focus-within,
+.upload-type-panel .detail-file-picker:hover,
+.upload-type-panel .detail-file-picker:focus-within {
+  border-color: var(--snapup-upload-purple) !important;
+  background: rgba(120, 8, 208, 0.025) !important;
+  background-image: none !important;
+  box-shadow: 0 0 0 3px rgba(120, 8, 208, 0.07) !important;
+}
+
+/* Upload icon */
+.detail-file-picker__icon {
+  color: var(--snapup-upload-purple) !important;
+  background: rgba(120, 8, 208, 0.07) !important;
+  background-image: none !important;
+  border-color: rgba(120, 8, 208, 0.20) !important;
+  box-shadow: none !important;
+}
+
+/* Selected file count */
+.detail-file-picker__count {
+  color: var(--snapup-upload-purple) !important;
+  background: rgba(120, 8, 208, 0.07) !important;
+  border-color: rgba(120, 8, 208, 0.18) !important;
+}
+
+/* Text fields: subtle purple focus only. */
+.upload-form input:focus,
+.upload-form textarea:focus,
+.upload-form select:focus {
+  border-color: rgba(120, 8, 208, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(120, 8, 208, 0.08) !important;
+}
+
+/* Main upload action */
+.upload-form > button {
+  color: #ffffff !important;
+  background: var(--snapup-upload-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-upload-purple) !important;
+  box-shadow: none !important;
+}
+
+.upload-form > button:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: var(--snapup-upload-purple-hover) !important;
+  background-image: none !important;
+  border-color: var(--snapup-upload-purple-hover) !important;
+  box-shadow: none !important;
+  transform: translateY(-1px);
+}
+
+/* Keep disabled button visually neutral. */
+.upload-form > button:disabled {
+  background: var(--detail-surface-raised) !important;
+  color: var(--detail-text-faint) !important;
+  border-color: var(--detail-line) !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode keeps the same brand purple, with quieter surfaces. */
+html[data-theme="dark"] .detail-file-picker,
+html[data-theme="dark"] .upload-type-panel .detail-file-picker {
+  background: #1c1920 !important;
+  border-color: rgba(120, 8, 208, 0.42) !important;
+}
+
+html[data-theme="dark"] .detail-file-picker:hover,
+html[data-theme="dark"] .detail-file-picker:focus-within {
+  background: rgba(120, 8, 208, 0.06) !important;
+  border-color: #8e2bd6 !important;
+}
+
+html[data-theme="dark"] .detail-file-picker__icon {
+  color: #c997ec !important;
+  background: rgba(120, 8, 208, 0.16) !important;
+  border-color: rgba(201, 151, 236, 0.18) !important;
+}
+
+/* =========================================================
+   Uploaded Memories — minimal underline filter tabs
+   Replaces pill/gradient filters with a cleaner admin-style tab bar.
+   ========================================================= */
+
+.media-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--detail-line);
+  scrollbar-width: none;
+}
+
+.media-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.media-filter-bar button {
+  position: relative;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 2px 12px;
+  color: var(--detail-text-soft);
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.media-filter-bar button:hover {
+  color: var(--detail-text);
+  background: transparent;
+}
+
+.media-filter-bar button::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: transparent;
+  border-radius: 999px 999px 0 0;
+  transition: background-color 160ms ease;
+}
+
+.media-filter-bar button span {
+  min-width: 22px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+  color: #837c87;
+  background: #f0edf2;
+  border: 0;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.media-filter-bar button.active {
+  color: #7808d0;
+  background: transparent;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.media-filter-bar button.active::after {
+  background: #7808d0;
+}
+
+.media-filter-bar button.active span {
+  color: #7808d0;
+  background: rgba(120, 8, 208, 0.09);
+}
+
+/* Keyboard focus without reintroducing a glow-heavy look. */
+.media-filter-bar button:focus-visible {
+  outline: 2px solid rgba(120, 8, 208, 0.22);
+  outline-offset: 3px;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .media-filter-bar {
+  border-bottom-color: var(--detail-line);
+}
+
+html[data-theme="dark"] .media-filter-bar button {
+  color: var(--detail-text-soft);
+  background: transparent;
+}
+
+html[data-theme="dark"] .media-filter-bar button:hover {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .media-filter-bar button span {
+  color: #aaa3ad;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .media-filter-bar button.active {
+  color: #b85ee9;
+  background: transparent;
+}
+
+html[data-theme="dark"] .media-filter-bar button.active::after {
+  background: #9b36dd;
+}
+
+html[data-theme="dark"] .media-filter-bar button.active span {
+  color: #d09af0;
+  background: rgba(120, 8, 208, 0.18);
+}
+
+@media (max-width: 640px) {
+  .media-filter-bar {
+    gap: 18px;
+  }
+
+  .media-filter-bar button {
+    min-height: 42px;
+    padding-bottom: 11px;
+    font-size: 11px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Settings modal — flat SnapUp purple
+   Replaces bright gradient / orange / pink accents with a clean brand purple.
+   ========================================================= */
+
+:root {
+  --snapup-settings-purple: #7808d0;
+  --snapup-settings-purple-hover: #6607b2;
+  --snapup-settings-purple-soft: rgba(120, 8, 208, 0.07);
+  --snapup-settings-purple-line: rgba(120, 8, 208, 0.22);
+}
+
+/* Event Active highlighted row */
+.settings-switch-row-primary {
+  border-color: var(--snapup-settings-purple-line) !important;
+  background: var(--snapup-settings-purple-soft) !important;
+}
+
+/* Checked toggle */
+.settings-switch-row input:checked {
+  background: var(--snapup-settings-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-settings-purple) !important;
+}
+
+/* Keep all purple focus states unified */
+.settings-limit-field input:focus,
+.settings-number-grid input:focus {
+  border-color: var(--snapup-settings-purple) !important;
+  box-shadow: 0 0 0 4px rgba(120, 8, 208, 0.10) !important;
+}
+
+/* Primary action */
+.settings-save-button {
+  color: #ffffff !important;
+  background: var(--snapup-settings-purple) !important;
+  background-image: none !important;
+  border: 1px solid var(--snapup-settings-purple) !important;
+  box-shadow: none !important;
+}
+
+.settings-save-button:hover:not(:disabled),
+.settings-save-button:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: var(--snapup-settings-purple-hover) !important;
+  border-color: var(--snapup-settings-purple-hover) !important;
+  box-shadow: none !important;
+}
+
+/* Secondary destructive action toned down into the same purple family */
+.delete-event-button {
+  color: var(--snapup-settings-purple) !important;
+  background: rgba(120, 8, 208, 0.05) !important;
+  background-image: none !important;
+  border: 1px solid var(--snapup-settings-purple-line) !important;
+  box-shadow: none !important;
+}
+
+.delete-event-button:hover:not(:disabled),
+.delete-event-button:focus-visible:not(:disabled) {
+  color: var(--snapup-settings-purple-hover) !important;
+  background: rgba(120, 8, 208, 0.09) !important;
+  border-color: rgba(102, 7, 178, 0.30) !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode equivalents */
+html[data-theme="dark"] .settings-switch-row-primary {
+  border-color: rgba(120, 8, 208, 0.30) !important;
+  background: rgba(120, 8, 208, 0.10) !important;
+}
+
+html[data-theme="dark"] .settings-switch-row input:checked {
+  background: var(--snapup-settings-purple) !important;
+  border-color: var(--snapup-settings-purple) !important;
+}
+
+html[data-theme="dark"] .settings-save-button {
+  color: #ffffff !important;
+  background: var(--snapup-settings-purple) !important;
+  border-color: var(--snapup-settings-purple) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .settings-save-button:hover:not(:disabled),
+html[data-theme="dark"] .settings-save-button:focus-visible:not(:disabled) {
+  background: #8f2add !important;
+  border-color: #8f2add !important;
+}
+
+html[data-theme="dark"] .delete-event-button {
+  color: #cf9df0 !important;
+  background: rgba(120, 8, 208, 0.10) !important;
+  border-color: rgba(120, 8, 208, 0.28) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .delete-event-button:hover:not(:disabled),
+html[data-theme="dark"] .delete-event-button:focus-visible:not(:disabled) {
+  color: #dfb6f8 !important;
+  background: rgba(120, 8, 208, 0.16) !important;
+  border-color: rgba(143, 42, 221, 0.36) !important;
+}
+
+
+
+/* =========================================================
+   Media moderation actions — clear action hierarchy
+   Approve = primary purple, Reject = neutral, Delete = destructive.
+   ========================================================= */
+
+.media-admin-actions {
+  gap: 8px;
+}
+
+.media-admin-btn {
+  min-height: 36px;
+  padding: 8px 9px;
+  border-radius: 9px;
+  box-shadow: none !important;
+  font-size: 9.5px;
+  font-weight: 800;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+/* Primary action */
+.media-admin-btn.approve {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.media-admin-btn.approve:hover:not(:disabled),
+.media-admin-btn.approve:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+  transform: translateY(-1px);
+}
+
+/* Secondary action */
+.media-admin-btn.reject {
+  color: #5f5964 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #d8d3da !important;
+  box-shadow: none !important;
+}
+
+.media-admin-btn.reject:hover:not(:disabled),
+.media-admin-btn.reject:focus-visible:not(:disabled) {
+  color: #403a44 !important;
+  background: #f4f2f5 !important;
+  border-color: #c7c1ca !important;
+  transform: translateY(-1px);
+}
+
+/* Destructive action */
+.media-admin-btn.delete {
+  color: #b54756 !important;
+  background: transparent !important;
+  background-image: none !important;
+  border-color: #e6bcc2 !important;
+  box-shadow: none !important;
+}
+
+.media-admin-btn.delete:hover:not(:disabled),
+.media-admin-btn.delete:focus-visible:not(:disabled) {
+  color: #963847 !important;
+  background: #fbeff1 !important;
+  border-color: #dba5ad !important;
+  transform: translateY(-1px);
+}
+
+.media-admin-btn:focus-visible {
+  outline: 2px solid rgba(120, 8, 208, 0.18);
+  outline-offset: 2px;
+}
+
+.media-admin-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .media-admin-btn.approve {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.approve:hover:not(:disabled),
+html[data-theme="dark"] .media-admin-btn.approve:focus-visible:not(:disabled) {
+  background: #8e28d8 !important;
+  border-color: #8e28d8 !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.reject {
+  color: #cbc5ce !important;
+  background: #211f24 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.reject:hover:not(:disabled),
+html[data-theme="dark"] .media-admin-btn.reject:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: #2a272e !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.delete {
+  color: #df8d99 !important;
+  background: transparent !important;
+  border-color: rgba(223, 141, 153, 0.30) !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.delete:hover:not(:disabled),
+html[data-theme="dark"] .media-admin-btn.delete:focus-visible:not(:disabled) {
+  color: #f4a8b2 !important;
+  background: rgba(181, 71, 86, 0.11) !important;
+  border-color: rgba(244, 168, 178, 0.42) !important;
+}
+
+
+
+/* =========================================================
+   Admin media cards — cleaner editorial moderation card
+   White content surface, compact metadata, calmer badges/play control,
+   and a stronger primary Approve action.
+   ========================================================= */
+
+.admin-media-card {
+  overflow: hidden;
+  background: #ffffff !important;
+  border: 1px solid #e3dfe5 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 22px rgba(28, 24, 31, 0.055) !important;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.admin-media-card:hover {
+  transform: translateY(-1px);
+  border-color: #d2ccd5 !important;
+  box-shadow: 0 12px 28px rgba(28, 24, 31, 0.075) !important;
+}
+
+/* Media remains the visual hero of the card. */
+.admin-media-card .media-preview-wrap {
+  min-height: 210px;
+  background: #18151c !important;
+}
+
+.admin-media-card .media-preview-wrap video,
+.admin-media-card .media-lightbox-trigger,
+.admin-media-card .media-lightbox-trigger img {
+  height: 230px;
+}
+
+/* Cleaner body: no pastel surface. */
+.admin-media-card .media-card-body {
+  padding: 15px 15px 14px;
+  background: #ffffff !important;
+}
+
+/* "Uploaded by" is redundant in a moderation card. Keep name + time only. */
+.admin-media-card .media-uploader > span {
+  display: none !important;
+}
+
+.admin-media-card .media-uploader strong {
+  margin-top: 0;
+  color: #211d25;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.admin-media-card .media-uploader small {
+  margin-top: 4px;
+  color: #8a838d;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.admin-media-card .media-card-body > p {
+  margin: 13px 0 14px;
+  color: #746d77;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Type badge: understated black glass, no colored glow. */
+.admin-media-card .media-type-badge {
+  min-height: 24px;
+  padding: 5px 8px;
+  color: #ffffff;
+  background: rgba(18, 16, 21, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Pending becomes a restrained amber outline rather than a filled orange pill. */
+.admin-media-card .media-status-badge.pending {
+  color: #7c541b !important;
+  background: rgba(255, 248, 235, 0.94) !important;
+  border: 1px solid rgba(169, 110, 33, 0.42) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.admin-media-card .media-status-badge.approved {
+  color: #3e6750 !important;
+  background: rgba(239, 248, 242, 0.94) !important;
+  border: 1px solid rgba(79, 107, 89, 0.30) !important;
+  box-shadow: none !important;
+}
+
+.admin-media-card .media-status-badge.rejected {
+  color: #9a3f4d !important;
+  background: rgba(253, 241, 243, 0.95) !important;
+  border: 1px solid rgba(181, 71, 86, 0.30) !important;
+  box-shadow: none !important;
+}
+
+/* Smaller, neutral video play control. */
+.admin-media-card .admin-video-play {
+  width: 54px !important;
+  height: 54px !important;
+  color: #ffffff;
+  background: rgba(22, 19, 25, 0.68) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.admin-media-card .admin-video-play:hover {
+  transform: translate(-50%, -50%) scale(1.04);
+  background: rgba(13, 12, 15, 0.86) !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22) !important;
+}
+
+.admin-media-card .admin-video-play:focus-visible {
+  outline: 3px solid rgba(120, 8, 208, 0.24) !important;
+  outline-offset: 3px;
+}
+
+.admin-media-card .admin-video-play svg {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.admin-media-card .admin-video-duration {
+  min-height: 26px;
+  left: 11px;
+  bottom: 11px;
+  padding: 4px 8px;
+  background: rgba(18, 16, 21, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+  font-size: 9px;
+}
+
+/* Action hierarchy:
+   Approve gets more space; Reject/Delete remain compact secondary actions. */
+.admin-media-card .media-admin-actions {
+  grid-template-columns: 1.45fr 1fr 1fr;
+  gap: 8px;
+}
+
+.admin-media-card .media-admin-btn {
+  min-height: 39px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.admin-media-card .media-admin-btn.approve {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+}
+
+.admin-media-card .media-admin-btn.approve:hover:not(:disabled),
+.admin-media-card .media-admin-btn.approve:focus-visible:not(:disabled) {
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+}
+
+.admin-media-card .media-admin-btn.reject {
+  color: #5f5964 !important;
+  background: #ffffff !important;
+  border-color: #d8d3da !important;
+}
+
+.admin-media-card .media-admin-btn.reject:hover:not(:disabled),
+.admin-media-card .media-admin-btn.reject:focus-visible:not(:disabled) {
+  color: #403a44 !important;
+  background: #f4f2f5 !important;
+  border-color: #c7c1ca !important;
+}
+
+.admin-media-card .media-admin-btn.delete {
+  color: #b54756 !important;
+  background: #ffffff !important;
+  border-color: #e3b9c0 !important;
+}
+
+.admin-media-card .media-admin-btn.delete:hover:not(:disabled),
+.admin-media-card .media-admin-btn.delete:focus-visible:not(:disabled) {
+  color: #963847 !important;
+  background: #fbeff1 !important;
+  border-color: #dba5ad !important;
+}
+
+/* Text-memory cards keep the same clean body language. */
+.admin-media-card.text-memory-card .media-card-body {
+  min-height: 230px;
+  background: #ffffff !important;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .admin-media-card {
+  background: #1b191e !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-theme="dark"] .admin-media-card:hover {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-card-body,
+html[data-theme="dark"] .admin-media-card.text-memory-card .media-card-body {
+  background: #1b191e !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-uploader strong {
+  color: #f2eff3;
+}
+
+html[data-theme="dark"] .admin-media-card .media-uploader small,
+html[data-theme="dark"] .admin-media-card .media-card-body > p {
+  color: #aaa4ad;
+}
+
+html[data-theme="dark"] .admin-media-card .media-status-badge.pending {
+  color: #d4aa67 !important;
+  background: rgba(68, 49, 22, 0.90) !important;
+  border-color: rgba(212, 170, 103, 0.35) !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-status-badge.approved {
+  color: #9fc1aa !important;
+  background: rgba(26, 50, 35, 0.92) !important;
+  border-color: rgba(159, 193, 170, 0.28) !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-status-badge.rejected {
+  color: #e9a0aa !important;
+  background: rgba(62, 30, 35, 0.92) !important;
+  border-color: rgba(233, 160, 170, 0.28) !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-admin-btn.reject {
+  color: #cbc5ce !important;
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html[data-theme="dark"] .admin-media-card .media-admin-btn.delete {
+  color: #df8d99 !important;
+  background: transparent !important;
+  border-color: rgba(223, 141, 153, 0.30) !important;
+}
+
+@media (max-width: 768px) {
+  .admin-media-card .admin-video-play {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .admin-media-card .media-admin-actions {
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 7px;
+  }
+}
+
+
+
+/* =========================================================
+   Admin media card typography + green Approve refinement
+   Slightly larger copy and a deep green primary approval action
+   that has the same visual weight as SnapUp purple.
+   ========================================================= */
+
+:root {
+  --snapup-approve-green: #178a57;
+  --snapup-approve-green-hover: #126f47;
+}
+
+/* Slightly larger card typography */
+.admin-media-card .media-uploader strong {
+  font-size: 14px !important;
+  line-height: 1.3;
+}
+
+.admin-media-card .media-uploader small {
+  margin-top: 5px;
+  font-size: 11px !important;
+  line-height: 1.35;
+}
+
+.admin-media-card .media-card-body > p {
+  margin: 14px 0 15px;
+  font-size: 12px !important;
+  line-height: 1.55;
+}
+
+.admin-media-card .media-type-badge,
+.admin-media-card .media-status-badge {
+  font-size: 10px !important;
+  font-weight: 800;
+}
+
+.admin-media-card .admin-video-duration {
+  font-size: 10px !important;
+  font-weight: 800;
+}
+
+.admin-media-card .media-admin-btn {
+  min-height: 40px;
+  font-size: 11.5px !important;
+  font-weight: 800;
+}
+
+/* Approve now uses a restrained, saturated green equivalent
+   to the brand purple rather than a pastel success tone. */
+.media-admin-btn.approve,
+.admin-media-card .media-admin-btn.approve {
+  color: #ffffff !important;
+  background: var(--snapup-approve-green) !important;
+  background-image: none !important;
+  border-color: var(--snapup-approve-green) !important;
+  box-shadow: none !important;
+}
+
+.media-admin-btn.approve:hover:not(:disabled),
+.media-admin-btn.approve:focus-visible:not(:disabled),
+.admin-media-card .media-admin-btn.approve:hover:not(:disabled),
+.admin-media-card .media-admin-btn.approve:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: var(--snapup-approve-green-hover) !important;
+  border-color: var(--snapup-approve-green-hover) !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode keeps the same deep green visual hierarchy. */
+html[data-theme="dark"] .media-admin-btn.approve,
+html[data-theme="dark"] .admin-media-card .media-admin-btn.approve {
+  color: #ffffff !important;
+  background: #1d9460 !important;
+  border-color: #1d9460 !important;
+}
+
+html[data-theme="dark"] .media-admin-btn.approve:hover:not(:disabled),
+html[data-theme="dark"] .media-admin-btn.approve:focus-visible:not(:disabled),
+html[data-theme="dark"] .admin-media-card .media-admin-btn.approve:hover:not(:disabled),
+html[data-theme="dark"] .admin-media-card .media-admin-btn.approve:focus-visible:not(:disabled) {
+  background: #27a66f !important;
+  border-color: #27a66f !important;
+}
+
+@media (max-width: 768px) {
+  .admin-media-card .media-uploader strong {
+    font-size: 13.5px !important;
+  }
+
+  .admin-media-card .media-uploader small,
+  .admin-media-card .media-card-body > p {
+    font-size: 11px !important;
+  }
+
+  .admin-media-card .media-admin-btn {
+    font-size: 11px !important;
+  }
+}
+
+
+
+/* =========================================================
+   Admin media cards — inline approval status in metadata row
+   Moves Pending/Approved/Rejected into the card header area
+   beside the uploader information.
+   ========================================================= */
+
+.admin-media-card .media-card-meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-media-card .media-card-meta .media-uploader {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.admin-media-card .media-inline-status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.admin-media-card .media-inline-status.pending {
+  color: #7c541b;
+  background: rgba(255, 248, 235, 0.94);
+  border-color: rgba(169, 110, 33, 0.42);
+}
+
+.admin-media-card .media-inline-status.approved {
+  color: #246846;
+  background: rgba(239, 248, 242, 0.96);
+  border-color: rgba(36, 104, 70, 0.25);
+}
+
+.admin-media-card .media-inline-status.rejected {
+  color: #9a3f4d;
+  background: rgba(253, 241, 243, 0.96);
+  border-color: rgba(181, 71, 86, 0.28);
+}
+
+html[data-theme="dark"] .admin-media-card .media-inline-status.pending {
+  color: #d4aa67;
+  background: rgba(68, 49, 22, 0.90);
+  border-color: rgba(212, 170, 103, 0.35);
+}
+
+html[data-theme="dark"] .admin-media-card .media-inline-status.approved {
+  color: #9fc1aa;
+  background: rgba(26, 50, 35, 0.92);
+  border-color: rgba(159, 193, 170, 0.28);
+}
+
+html[data-theme="dark"] .admin-media-card .media-inline-status.rejected {
+  color: #e9a0aa;
+  background: rgba(62, 30, 35, 0.92);
+  border-color: rgba(233, 160, 170, 0.28);
+}
+
+@media (max-width: 520px) {
+  .admin-media-card .media-inline-status {
+    font-size: 9.5px;
+    padding: 5px 8px;
+  }
+}
+
+
+
+/* =========================================================
+   Approve All Photos button — flat SnapUp purple
+   Removes gradient/glow and aligns with the rest of the refined UI.
+   ========================================================= */
+
+.approve-all-images-button {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.approve-all-images-button:hover:not(:disabled),
+.approve-all-images-button:focus-visible:not(:disabled) {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .approve-all-images-button {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .approve-all-images-button:hover:not(:disabled),
+html[data-theme="dark"] .approve-all-images-button:focus-visible:not(:disabled) {
+  background: #8f2add !important;
+  border-color: #8f2add !important;
+}
+
+
+
+/* =========================================================
+   Mobile detail navigation — flat segmented navigation
+   Keeps the existing 3-tab structure and replaces the gradient/glow
+   active state with the SnapUp brand purple.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .mobile-detail-nav {
+    gap: 6px;
+    padding: 6px;
+    color: #ffffff;
+    background: #17131f !important;
+    background-image: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(12, 8, 18, 0.16) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .mobile-detail-nav a {
+    min-height: 46px;
+    gap: 7px;
+    padding: 8px 6px;
+    color: #b8b1bd !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+    border-radius: 11px;
+    box-shadow: none !important;
+    font-size: 10px;
+    font-weight: 800;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      transform 140ms ease;
+  }
+
+  .mobile-detail-nav a:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+  }
+
+  .mobile-detail-nav a:active {
+    transform: scale(0.985);
+  }
+
+  .mobile-detail-nav a[aria-current="true"] {
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    background-image: none !important;
+    border-color: #7808d0 !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-detail-nav a[aria-current="true"]:hover {
+    color: #ffffff !important;
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+  }
+
+  .mobile-detail-nav svg {
+    width: 17px;
+    height: 17px;
+    stroke-width: 1.85;
+  }
+
+  .mobile-detail-nav span {
+    color: inherit;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav {
+    background: #120f17 !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24) !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a {
+    color: #b8b1bd !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a[aria-current="true"] {
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    border-color: #7808d0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-detail-nav {
+    gap: 5px;
+    padding: 5px;
+    border-radius: 15px;
+  }
+
+  .mobile-detail-nav a {
+    min-height: 44px;
+    gap: 5px;
+    padding-inline: 4px;
+    border-radius: 10px;
+    font-size: 9.5px;
+  }
+
+  .mobile-detail-nav svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+
+
+/* =========================================================
+   Mobile detail navigation — light mode polish
+   The mobile nav should feel light/clean in light theme rather than dark.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .mobile-detail-nav {
+    color: #241f2a;
+    background: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e4dfea !important;
+    box-shadow: 0 8px 22px rgba(31, 24, 38, 0.08) !important;
+  }
+
+  .mobile-detail-nav a {
+    color: #746d79 !important;
+    background: transparent !important;
+    border-color: transparent !important;
+  }
+
+  .mobile-detail-nav a:hover {
+    color: #241f2a !important;
+    background: #f4f1f8 !important;
+  }
+
+  .mobile-detail-nav a[aria-current="true"] {
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    border-color: #7808d0 !important;
+  }
+
+  .mobile-detail-nav a[aria-current="true"]:hover {
+    color: #ffffff !important;
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav {
+    color: #ffffff;
+    background: #120f17 !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24) !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a {
+    color: #b8b1bd !important;
+    background: transparent !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a[aria-current="true"] {
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    border-color: #7808d0 !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav a[aria-current="true"]:hover {
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+  }
+}
+
+/* =========================================================
+   Event Detail notification popup
+   Replaces native browser alert with an in-app confirmation dialog.
+   ========================================================= */
+
+.detail-notice-overlay {
+  position: fixed;
+  z-index: 260;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.detail-notice-overlay.active {
+  display: flex;
+}
+
+.detail-notice-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(15, 12, 18, 0.46);
+  border: 0;
+  cursor: default;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.detail-notice-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(390px, calc(100vw - 32px));
+  padding: 28px 26px 24px;
+  color: var(--detail-text);
+  background: #ffffff;
+  border: 1px solid #e5e0e6;
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(20, 15, 24, 0.20);
+  text-align: center;
+  animation: detailNoticeEnter 180ms ease-out both;
+}
+
+.detail-notice-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 17px;
+  color: #ffffff;
+  background: #178a57;
+  border-radius: 50%;
+}
+
+.detail-notice-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.detail-notice-error { display: none; }
+
+.detail-notice-overlay[data-type="error"] .detail-notice-icon {
+  background: #b54756;
+}
+
+.detail-notice-overlay[data-type="error"] .detail-notice-check {
+  display: none;
+}
+
+.detail-notice-overlay[data-type="error"] .detail-notice-error {
+  display: block;
+}
+
+.detail-notice-message {
+  margin: 0;
+  color: #29242d;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.detail-notice-close {
+  min-width: 116px;
+  min-height: 42px;
+  margin-top: 22px;
+  padding: 9px 18px;
+  color: #ffffff;
+  background: #7808d0;
+  border: 1px solid #7808d0;
+  border-radius: 999px;
+  box-shadow: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.detail-notice-close:hover,
+.detail-notice-close:focus-visible {
+  background: #6607b2;
+  border-color: #6607b2;
+}
+
+.detail-notice-close:focus-visible {
+  outline: 3px solid rgba(120, 8, 208, 0.18);
+  outline-offset: 3px;
+}
+
+@keyframes detailNoticeEnter {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+html[data-theme="dark"] .detail-notice-dialog {
+  color: #f2eff3;
+  background: #1c1a1f;
+  border-color: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 24px 74px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme="dark"] .detail-notice-message {
+  color: #f2eff3;
+}
+
+@media (max-width: 520px) {
+  .detail-notice-dialog {
+    width: min(340px, calc(100vw - 28px));
+    padding: 25px 20px 21px;
+    border-radius: 18px;
+  }
+
+  .detail-notice-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .detail-notice-message {
+    font-size: 14px;
+  }
+
+  .detail-notice-close {
+    width: 100%;
+  }
+}
+

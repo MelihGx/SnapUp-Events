@@ -1692,3 +1692,31 @@ html[data-theme="dark"] body.event-detail-shell
     grid-row: 1;
   }
 }
+
+/* =========================================================
+   Invitation action — SnapUp brand purple
+   ========================================================= */
+
+.detail-actions .invitation-studio-open {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .invitation-studio-open:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: #6607b2 !important;
+  background-image: none !important;
+  border-color: #6607b2 !important;
+  box-shadow: none !important;
+}
+
+.detail-actions .invitation-studio-open:disabled {
+  color: var(--detail-text-faint) !important;
+  background: var(--detail-surface-raised) !important;
+  border-color: var(--detail-line) !important;
+  box-shadow: none !important;
+}
+

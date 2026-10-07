@@ -2087,3 +2087,82 @@ html[data-theme="dark"] .account-email-verification__copy > p:not(.account-email
 .account-empty.account-empty--error h3 {
   color: var(--account-danger);
 }
+
+/* =========================================================
+   SnapUp account buttons — unified brand purple
+   ========================================================= */
+
+:root {
+  --snapup-brand-purple: #7808d0;
+  --snapup-brand-purple-hover: #6607b2;
+}
+
+/* Active sidebar item */
+.sidebar-link.active {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-brand-purple) !important;
+  box-shadow: none !important;
+}
+
+.sidebar-link.active:hover,
+.sidebar-link.active:focus-visible {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple-hover) !important;
+  border-color: var(--snapup-brand-purple-hover) !important;
+}
+
+/* Create New Event */
+.topbar-create-btn {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-brand-purple) !important;
+  box-shadow: none !important;
+}
+
+.topbar-create-btn:hover,
+.topbar-create-btn:focus-visible {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple-hover) !important;
+  border-color: var(--snapup-brand-purple-hover) !important;
+  box-shadow: none !important;
+}
+
+/* Manage Event */
+.sweet-gallery-btn {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-brand-purple) !important;
+  box-shadow: none !important;
+}
+
+.event-item-link:hover .sweet-gallery-btn,
+.sweet-gallery-btn:hover {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple-hover) !important;
+  border-color: var(--snapup-brand-purple-hover) !important;
+  box-shadow: none !important;
+}
+
+/* Same brand color in dark mode */
+html[data-theme="dark"] .sidebar-link.active,
+html[data-theme="dark"] .topbar-create-btn,
+html[data-theme="dark"] .sweet-gallery-btn {
+  color: #ffffff !important;
+  background: var(--snapup-brand-purple) !important;
+  background-image: none !important;
+  border-color: var(--snapup-brand-purple) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .sidebar-link.active:hover,
+html[data-theme="dark"] .topbar-create-btn:hover,
+html[data-theme="dark"] .sweet-gallery-btn:hover,
+html[data-theme="dark"] .event-item-link:hover .sweet-gallery-btn {
+  background: var(--snapup-brand-purple-hover) !important;
+  border-color: var(--snapup-brand-purple-hover) !important;
+}
+

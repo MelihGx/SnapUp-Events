@@ -72,6 +72,7 @@ const liveCardExpiry = document.getElementById("liveCardExpiry");
 
 const paymentSuccessPopup = document.getElementById("paymentSuccessPopup");
 const paymentSuccessClose = document.getElementById("paymentSuccessClose");
+let createdEventDetailUrl = null;
 
 let pendingEventPayload = null;
 let currentQrCodeUrl = null;
@@ -656,6 +657,12 @@ function closePaymentSuccessPopup() {
   paymentSuccessPopup.classList.remove("active");
   paymentSuccessPopup.setAttribute("aria-hidden", "true");
   setPageScrollLocked(false);
+
+  if (createdEventDetailUrl) {
+    window.location.assign(createdEventDetailUrl);
+    return;
+  }
+
   createEventSubmit.focus();
 }
 
@@ -868,6 +875,12 @@ paymentDemoButton.addEventListener("click", async () => {
       : t("Creating your event...");
 
     const createdEvent = await createEventOnBackend();
+    const createdEventId = createdEvent.event_id || createdEvent.id || null;
+
+    createdEventDetailUrl = createdEventId
+      ? `event-detail.html?event_id=${encodeURIComponent(createdEventId)}`
+      : null;
+
     paymentDemoButton.textContent = t("Payment Completed");
 
     if (eventCodePreview) {

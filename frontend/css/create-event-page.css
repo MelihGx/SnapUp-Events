@@ -2714,3 +2714,625 @@ body.dark-mode .event-type-combobox__menu::-webkit-scrollbar-thumb {
 .event-type-combobox__input[readonly]:focus {
   cursor: pointer;
 }
+
+
+
+/* =========================================================
+   Create Event — cleaner settings checkboxes
+   Flat SnapUp purple, no gradient/glow, quieter selected cards.
+   ========================================================= */
+
+.setting-card__control {
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  background: #ffffff;
+  border: 1.5px solid #cfc8d5;
+  border-radius: 7px;
+  box-shadow: none;
+  transform: none;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.setting-card__control::after {
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  opacity: 0;
+  transform: rotate(45deg) scale(0.75);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+/* Selected card stays restrained instead of becoming a pink-purple panel. */
+.setting-card:has(input:checked) {
+  background: rgba(120, 8, 208, 0.035);
+  background-image: none;
+  border-color: rgba(120, 8, 208, 0.26);
+  box-shadow: none;
+}
+
+.setting-card:has(input:checked) .setting-card__control {
+  background: #7808d0;
+  background-image: none;
+  border-color: #7808d0;
+  box-shadow: none;
+  transform: none;
+}
+
+.setting-card:has(input:checked) .setting-card__control::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+
+/* Hover is structural, not colorful. */
+.setting-card:hover {
+  transform: translateY(-1px);
+  border-color: #c8c1cd;
+  box-shadow: 0 6px 16px rgba(31, 25, 36, 0.045);
+}
+
+.setting-card:has(input:checked):hover {
+  border-color: rgba(120, 8, 208, 0.38);
+  box-shadow: 0 6px 16px rgba(120, 8, 208, 0.055);
+}
+
+/* Keyboard focus uses the same brand purple. */
+.setting-card:has(input:focus-visible) {
+  outline: 3px solid rgba(120, 8, 208, 0.16);
+  outline-offset: 3px;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .setting-card__control {
+  background: #1b181f;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+html[data-theme="dark"] .setting-card:has(input:checked) {
+  background: rgba(120, 8, 208, 0.08);
+  border-color: rgba(120, 8, 208, 0.34);
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .setting-card:has(input:checked) .setting-card__control {
+  background: #7808d0;
+  border-color: #7808d0;
+}
+
+@media (max-width: 640px) {
+  .setting-card__control {
+    width: 25px;
+    height: 25px;
+    border-radius: 7px;
+  }
+}
+
+
+
+/* =========================================================
+   Create Event — package card redesign
+   Cleaner editorial-style package cards with calmer hierarchy,
+   better spacing, clearer price footer and restrained selection state.
+   ========================================================= */
+
+.package-grid {
+  gap: 20px;
+}
+
+.package-card {
+  min-height: 420px;
+  padding: 24px 24px 20px;
+  background: #ffffff;
+  border: 1px solid #ddd7e4;
+  border-radius: 24px;
+  box-shadow: 0 10px 26px rgba(26, 20, 34, 0.045);
+}
+
+.package-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  border-radius: 24px 24px 0 0;
+  background: #d7d1de;
+}
+
+.package-card:nth-child(2)::before {
+  background: #c9b8ee;
+}
+
+.package-card:nth-child(3)::before {
+  background: #7808d0;
+}
+
+.package-card:nth-child(4)::before {
+  background: #b28a48;
+}
+
+.package-card:hover {
+  transform: translateY(-4px);
+  border-color: #cfc7d8;
+  box-shadow: 0 18px 40px rgba(29, 21, 38, 0.085);
+}
+
+.package-card input {
+  inset: 0;
+}
+
+.package-card__radio {
+  top: 18px;
+  left: auto;
+  right: 18px;
+  width: 22px;
+  height: 22px;
+  background: #ffffff;
+  border: 1.5px solid #cabfe0;
+  box-shadow: none;
+}
+
+.package-card__radio::after {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+}
+
+.package-card-content {
+  gap: 18px;
+  padding-top: 12px;
+}
+
+.package-card-head strong {
+  font-size: 19px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.package-card p {
+  min-height: 40px;
+  max-width: 42ch;
+  color: #736b7f;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.package-meta {
+  gap: 8px;
+}
+
+.package-meta span {
+  padding: 8px 12px;
+  color: #6e4ad2;
+  background: #f5f0ff;
+  border: 1px solid #e7def8;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.package-meta span:last-child {
+  color: #4d3e73;
+  background: #f2eff6;
+  border-color: #e5dfea;
+}
+
+.package-features {
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 2px;
+  border-top: 1px solid #ece6f1;
+}
+
+.package-features li {
+  padding-left: 22px;
+  color: #4a4357;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.42;
+}
+
+.package-features li::before {
+  content: "";
+  top: 5px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  background: #16a67b;
+  border-radius: 50%;
+  box-shadow: none;
+}
+
+.package-price-row {
+  min-height: 78px;
+  align-items: end;
+  margin-top: auto;
+  padding: 16px 18px;
+  background: #f8f6fb;
+  border: 1px solid #ece5f4;
+  border-radius: 18px;
+  border-top: 1px solid #ece5f4;
+}
+
+.package-price-row span {
+  color: #81788d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.package-price-row strong {
+  color: #241d37;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.package-card.recommended {
+  border-color: #cbb1ef;
+  box-shadow: 0 16px 36px rgba(120, 8, 208, 0.075);
+}
+
+.package-card.recommended b {
+  top: 16px;
+  right: 52px;
+  padding: 7px 11px;
+  color: #ffffff;
+  background: #2a2240;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: none;
+}
+
+.package-card:has(input:checked) {
+  transform: translateY(-4px);
+  background: #ffffff;
+  border-color: #7808d0;
+  box-shadow:
+    0 0 0 3px rgba(120, 8, 208, 0.11),
+    0 18px 42px rgba(120, 8, 208, 0.08);
+}
+
+.package-card:has(input:checked)::before {
+  height: 6px;
+  background: #7808d0;
+}
+
+.package-card:has(input:checked) .package-card__radio {
+  background: #7808d0;
+  border-color: #7808d0;
+  box-shadow: none;
+}
+
+.package-card:has(input:checked) .package-card__radio::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.package-card:has(input:checked) .package-price-row {
+  background: #f6efff;
+  border-color: #e1d0fb;
+}
+
+.package-card:has(input:checked) .package-price-row strong {
+  color: #7808d0;
+}
+
+.package-card:has(input:focus-visible) {
+  outline: 3px solid rgba(120, 8, 208, 0.14);
+  outline-offset: 4px;
+}
+
+html[data-theme="dark"] .package-card {
+  background: #17131d;
+  border-color: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .package-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] .package-card__radio {
+  background: #120f16;
+  border-color: rgba(214, 194, 255, 0.34);
+}
+
+html[data-theme="dark"] .package-card p {
+  color: #b8b1c4;
+}
+
+html[data-theme="dark"] .package-meta span {
+  color: #d2c2ff;
+  background: rgba(120, 8, 208, 0.12);
+  border-color: rgba(120, 8, 208, 0.22);
+}
+
+html[data-theme="dark"] .package-meta span:last-child {
+  color: #ddd6e8;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .package-features {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .package-features li {
+  color: #d2ccdc;
+}
+
+html[data-theme="dark"] .package-price-row {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .package-price-row span {
+  color: #a79fb5;
+}
+
+html[data-theme="dark"] .package-price-row strong {
+  color: #f2edf8;
+}
+
+html[data-theme="dark"] .package-card.recommended {
+  border-color: rgba(203, 177, 239, 0.42);
+  box-shadow: 0 16px 36px rgba(120, 8, 208, 0.11);
+}
+
+html[data-theme="dark"] .package-card.recommended b {
+  background: #f1eaff;
+  color: #2a2240;
+}
+
+html[data-theme="dark"] .package-card:has(input:checked) {
+  border-color: #8f46df;
+  box-shadow:
+    0 0 0 3px rgba(143, 70, 223, 0.16),
+    0 18px 42px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .package-card:has(input:checked) .package-card__radio {
+  background: #8f46df;
+  border-color: #8f46df;
+}
+
+html[data-theme="dark"] .package-card:has(input:checked) .package-price-row {
+  background: rgba(120, 8, 208, 0.12);
+  border-color: rgba(143, 70, 223, 0.26);
+}
+
+html[data-theme="dark"] .package-card:has(input:checked) .package-price-row strong {
+  color: #dfcbff;
+}
+
+@media (max-width: 760px) {
+  .package-grid {
+    gap: 16px;
+  }
+
+  .package-card {
+    min-height: 0;
+    padding: 20px 18px 18px;
+    border-radius: 20px;
+  }
+
+  .package-card::before {
+    border-radius: 20px 20px 0 0;
+  }
+
+  .package-card__radio {
+    top: 16px;
+    right: 16px;
+  }
+
+  .package-card-content {
+    gap: 16px;
+    padding-top: 10px;
+  }
+
+  .package-card-head strong {
+    font-size: 18px;
+  }
+
+  .package-card p {
+    min-height: 0;
+    font-size: 13px;
+  }
+
+  .package-features li {
+    font-size: 12.5px;
+  }
+
+  .package-price-row {
+    min-height: 72px;
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  .package-price-row strong {
+    font-size: 29px;
+  }
+
+  .package-card.recommended b {
+    right: 48px;
+  }
+}
+
+
+
+/* =========================================================
+   Create Event — Premium gold treatment
+   Premium remains clean/white, with restrained matte-gold accents.
+   ========================================================= */
+
+:root {
+  --snapup-premium-gold: #b58a2a;
+  --snapup-premium-gold-hover: #9a7422;
+  --snapup-premium-gold-deep: #8a681f;
+  --snapup-premium-gold-border: #d3bc7a;
+  --snapup-premium-gold-soft: #fff9ec;
+  --snapup-premium-gold-soft-2: #fbf3df;
+}
+
+/* Premium card gets a warm, upscale identity without looking flashy. */
+.package-card:nth-child(4) {
+  background: #fffdf8;
+  border-color: var(--snapup-premium-gold-border);
+  box-shadow: 0 12px 28px rgba(138, 104, 31, 0.07);
+}
+
+.package-card:nth-child(4)::before {
+  background: var(--snapup-premium-gold);
+}
+
+.package-card:nth-child(4):hover {
+  background: #fffdf8;
+  border-color: #c3a85f;
+  box-shadow: 0 18px 38px rgba(138, 104, 31, 0.11);
+}
+
+/* Premium title */
+.package-card:nth-child(4) .package-card-head strong {
+  color: var(--snapup-premium-gold-deep);
+}
+
+/* Premium storage/fit pills */
+.package-card:nth-child(4) .package-meta span {
+  color: var(--snapup-premium-gold-deep);
+  background: var(--snapup-premium-gold-soft);
+  border-color: #ead9aa;
+}
+
+.package-card:nth-child(4) .package-meta span:last-child {
+  color: #6f5419;
+  background: var(--snapup-premium-gold-soft-2);
+  border-color: #e3cd92;
+}
+
+/* Feature bullets subtly pick up the gold identity. */
+.package-card:nth-child(4) .package-features li::before {
+  background: var(--snapup-premium-gold);
+}
+
+/* Price area */
+.package-card:nth-child(4) .package-price-row {
+  background: var(--snapup-premium-gold-soft);
+  border-color: #ead9aa;
+}
+
+.package-card:nth-child(4) .package-price-row span {
+  color: #88744a;
+}
+
+.package-card:nth-child(4) .package-price-row strong {
+  color: var(--snapup-premium-gold-deep);
+}
+
+/* Premium radio */
+.package-card:nth-child(4) .package-card__radio {
+  border-color: #d8c48f;
+}
+
+/* Selected Premium uses gold instead of the standard purple selected state. */
+.package-card:nth-child(4):has(input:checked) {
+  background: #fffdf8;
+  border-color: var(--snapup-premium-gold);
+  box-shadow:
+    0 0 0 3px rgba(181, 138, 42, 0.13),
+    0 18px 42px rgba(138, 104, 31, 0.10);
+}
+
+.package-card:nth-child(4):has(input:checked)::before {
+  background: var(--snapup-premium-gold);
+}
+
+.package-card:nth-child(4):has(input:checked) .package-card__radio {
+  background: var(--snapup-premium-gold);
+  border-color: var(--snapup-premium-gold);
+}
+
+.package-card:nth-child(4):has(input:checked) .package-price-row {
+  background: #fff5da;
+  border-color: #e2c979;
+}
+
+.package-card:nth-child(4):has(input:checked) .package-price-row strong {
+  color: var(--snapup-premium-gold-deep);
+}
+
+.package-card:nth-child(4):has(input:focus-visible) {
+  outline-color: rgba(181, 138, 42, 0.20);
+}
+
+/* Dark mode keeps the same premium hierarchy with muted gold. */
+html[data-theme="dark"] .package-card:nth-child(4) {
+  background: #1d1912;
+  border-color: rgba(181, 138, 42, 0.50);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4):hover {
+  background: #1d1912;
+  border-color: rgba(205, 165, 73, 0.66);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.30);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4)::before {
+  background: #c39a3b;
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-card-head strong {
+  color: #e0bd6a;
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-meta span {
+  color: #e2c787;
+  background: rgba(181, 138, 42, 0.12);
+  border-color: rgba(205, 165, 73, 0.24);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-meta span:last-child {
+  color: #ead393;
+  background: rgba(181, 138, 42, 0.09);
+  border-color: rgba(205, 165, 73, 0.20);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-price-row {
+  background: rgba(181, 138, 42, 0.10);
+  border-color: rgba(205, 165, 73, 0.22);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-price-row span {
+  color: #bca66f;
+}
+
+html[data-theme="dark"] .package-card:nth-child(4) .package-price-row strong {
+  color: #e4c269;
+}
+
+html[data-theme="dark"] .package-card:nth-child(4):has(input:checked) {
+  border-color: #c39a3b;
+  box-shadow:
+    0 0 0 3px rgba(195, 154, 59, 0.14),
+    0 18px 42px rgba(0, 0, 0, 0.30);
+}
+
+html[data-theme="dark"] .package-card:nth-child(4):has(input:checked) .package-card__radio {
+  background: #c39a3b;
+  border-color: #c39a3b;
+}
+
+html[data-theme="dark"] .package-card:nth-child(4):has(input:checked) .package-price-row {
+  background: rgba(181, 138, 42, 0.16);
+  border-color: rgba(205, 165, 73, 0.30);
+}
+

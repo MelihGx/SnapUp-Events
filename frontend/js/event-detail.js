@@ -389,6 +389,54 @@ const eventArchiveIncludeInfo = document.getElementById(
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
+
+const detailNoticePopup = document.getElementById("detailNoticePopup");
+const detailNoticeBackdrop = document.getElementById("detailNoticeBackdrop");
+const detailNoticeMessage = document.getElementById("detailNoticeMessage");
+const detailNoticeClose = document.getElementById("detailNoticeClose");
+
+let detailNoticeTimer = null;
+
+function closeDetailNotice() {
+  if (!detailNoticePopup) return;
+
+  if (detailNoticeTimer) {
+    window.clearTimeout(detailNoticeTimer);
+    detailNoticeTimer = null;
+  }
+
+  detailNoticePopup.classList.remove("active");
+  detailNoticePopup.setAttribute("aria-hidden", "true");
+}
+
+function showDetailNotice(message, type = "success") {
+  if (!detailNoticePopup || !detailNoticeMessage) return;
+
+  if (detailNoticeTimer) {
+    window.clearTimeout(detailNoticeTimer);
+  }
+
+  detailNoticeMessage.textContent = String(message || "");
+  detailNoticePopup.dataset.type = type === "error" ? "error" : "success";
+  detailNoticePopup.classList.add("active");
+  detailNoticePopup.setAttribute("aria-hidden", "false");
+
+  window.setTimeout(() => detailNoticeClose?.focus(), 20);
+
+  detailNoticeTimer = window.setTimeout(
+    closeDetailNotice,
+    type === "error" ? 5200 : 3600,
+  );
+}
+
+detailNoticeBackdrop?.addEventListener("click", closeDetailNotice);
+detailNoticeClose?.addEventListener("click", closeDetailNotice);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && detailNoticePopup?.classList.contains("active")) {
+    closeDetailNotice();
+  }
+});
 const mobileDetailNav = document.querySelector(".mobile-detail-nav");
 const mobileDetailNavLinks = Array.from(
   mobileDetailNav?.querySelectorAll('a[href^="#"]') || [],
@@ -2248,6 +2296,19 @@ function renderMediaCards() {
         </div>
       `;
 
+      const uploaderWithStatusHtml = `
+        <div class="media-card-meta">
+          <div class="media-uploader">
+            <span>${escapeHtml(t("Uploaded by"))}</span>
+            <strong>${escapeHtml(guestName)}</strong>
+            ${uploadedAt ? `<small>${escapeHtml(uploadedAt)}</small>` : ""}
+          </div>
+          <span class="media-inline-status ${escapeHtml(status)}">
+            ${escapeHtml(getStatusLabel(status))}
+          </span>
+        </div>
+      `;
+
       const badgeHtml = `
         <div class="media-badge-row">
           <span class="media-type-badge ${escapeHtml(mediaKind)}">
@@ -2255,6 +2316,14 @@ function renderMediaCards() {
           </span>
           <span class="media-status-badge ${escapeHtml(status)}">
             ${escapeHtml(getStatusLabel(status))}
+          </span>
+        </div>
+      `;
+
+      const previewBadgeHtml = `
+        <div class="media-badge-row">
+          <span class="media-type-badge ${escapeHtml(mediaKind)}">
+            ${escapeHtml(getTypeLabel(mediaKind))}
           </span>
         </div>
       `;
@@ -2275,7 +2344,7 @@ function renderMediaCards() {
         return `
           <article class="media-card admin-media-card">
             <div class="media-preview-wrap admin-video-preview" data-video-shell>
-              ${badgeHtml}
+              ${previewBadgeHtml}
               <video
                 src="${escapeHtml(videoUrl)}"
                 playsinline
@@ -2301,7 +2370,7 @@ function renderMediaCards() {
             </div>
 
             <div class="media-card-body">
-              ${uploaderHtml}
+              ${uploaderWithStatusHtml}
               <p>${escapeHtml(message || t("Video memory"))}</p>
               ${renderAdminActions(mediaId, status)}
             </div>
@@ -2328,7 +2397,7 @@ function renderMediaCards() {
         return `
           <article class="media-card admin-media-card">
             <div class="media-preview-wrap">
-              ${badgeHtml}
+              ${previewBadgeHtml}
               <button
                 type="button"
                 class="media-lightbox-trigger"
@@ -2349,7 +2418,7 @@ function renderMediaCards() {
             </div>
 
             <div class="media-card-body">
-              ${uploaderHtml}
+              ${uploaderWithStatusHtml}
               <p>${escapeHtml(message || t("Photo memory"))}</p>
               ${renderAdminActions(mediaId, status)}
             </div>
@@ -4240,7 +4309,7 @@ async function handleMediaAdminAction(action, mediaId) {
     }
   } catch (error) {
     console.error("Media admin action error:", error);
-    alert(t(error.message || "Media action failed."));
+    showDetailNotice(t(error.message || "Media action failed."), "error");
   }
 }
 
@@ -5484,14 +5553,15 @@ async function approveAllImages() {
       );
     }
 
-    alert(
+    showDetailNotice(
       data.message || t("All pending photos approved successfully."),
+      "success",
     );
 
     activeMediaFilter = "pending";
     await loadEventDetail();
   } catch (error) {
-    alert(t(error.message || "Photos could not be approved."));
+    showDetailNotice(t(error.message || "Photos could not be approved."), "error");
     console.error("Approve all photos error:", error);
   } finally {
     approveAllImagesButton.disabled = false;
