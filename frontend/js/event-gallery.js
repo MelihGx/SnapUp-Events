@@ -65,6 +65,55 @@ const galleryUploadActions = Array.from(
   document.querySelectorAll("[data-gallery-upload-action]"),
 );
 
+
+galleryFilterButtons.forEach((button) => {
+  if (!button.dataset.baseLabel) {
+    button.dataset.baseLabel = button.textContent.trim();
+  }
+});
+
+gallerySortButtons.forEach((button) => {
+  if (!button.dataset.baseLabel) {
+    button.dataset.baseLabel = button.textContent.trim();
+  }
+});
+
+function updateGalleryFilterCountBadges() {
+  const counts = {
+    all: approvedFeedItems.length,
+    image: approvedFeedItems.filter((item) => item.feed_type === "image").length,
+    video: approvedFeedItems.filter((item) => item.feed_type === "video").length,
+    message: approvedFeedItems.filter((item) => item.feed_type === "message").length,
+  };
+
+  galleryFilterButtons.forEach((button) => {
+    const filter = button.dataset.galleryFilter;
+    const baseLabel = button.dataset.baseLabel || button.textContent.trim();
+    const count = counts[filter] ?? 0;
+
+    let labelNode = button.querySelector(".gallery-control-text");
+    let countNode = button.querySelector(".gallery-control-count");
+
+    if (!labelNode) {
+      labelNode = document.createElement("span");
+      labelNode.className = "gallery-control-text";
+    }
+
+    if (!countNode) {
+      countNode = document.createElement("span");
+      countNode.className = "gallery-control-count";
+      countNode.setAttribute("aria-hidden", "true");
+    }
+
+    labelNode.textContent = baseLabel;
+    countNode.textContent = String(count);
+
+    button.textContent = "";
+    button.append(labelNode, countNode);
+  });
+}
+
+
 function closeGalleryCustomComboboxes(except = null) {
   galleryCustomComboboxes.forEach((combobox) => {
     if (combobox === except) return;
@@ -802,6 +851,8 @@ function scheduleMobileStickyToolbarUpdate() {
 }
 
 function syncGalleryControlState() {
+  updateGalleryFilterCountBadges();
+
   galleryFilterButtons.forEach((button) => {
     const active = button.dataset.galleryFilter === activeGalleryFilter;
     button.classList.toggle("active", active);
@@ -955,6 +1006,8 @@ function renderApprovedFeed(media, messages) {
     })),
     ...messageItems.map((item) => ({ ...item, feed_type: "message" })),
   ];
+
+  updateGalleryFilterCountBadges();
 
   if (approvedFeedItems.length === 0) {
     memoryCountBadge.textContent = t("{count} memories", { count: 0 });
