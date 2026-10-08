@@ -2222,3 +2222,924 @@ html[data-theme="dark"] #passwordSaveButton:hover:not(:disabled) {
   border-color: #8f2add !important;
 }
 
+
+
+/* =========================================================
+   Account — mobile-first navigation and dashboard refinement
+   Desktop sidebar remains unchanged.
+   ========================================================= */
+
+.account-mobile-header,
+.account-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body {
+    background: var(--account-bg);
+  }
+
+  .account-page {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .account-sidebar {
+    display: none;
+  }
+
+  .account-mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding:
+      calc(9px + env(safe-area-inset-top))
+      14px
+      9px;
+    background: color-mix(in srgb, var(--account-bg) 92%, transparent);
+    border-bottom: 1px solid var(--account-line);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .account-mobile-brand {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--account-text);
+    text-decoration: none;
+  }
+
+  .account-mobile-brand img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+  }
+
+  .account-mobile-brand strong {
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .account-mobile-brand strong span {
+    color: #7808d0;
+  }
+
+  .account-mobile-profile {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .account-mobile-profile__trigger {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: #ffffff;
+    background: #7808d0;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .account-mobile-profile__trigger:hover,
+  .account-mobile-profile__trigger:focus-visible {
+    background: #6607b2;
+  }
+
+  .account-mobile-profile__trigger:focus-visible {
+    outline: 3px solid rgba(120, 8, 208, 0.18);
+    outline-offset: 2px;
+  }
+
+  .account-mobile-profile__menu {
+    position: absolute;
+    z-index: 90;
+    top: calc(100% + 9px);
+    right: 0;
+    width: min(250px, calc(100vw - 28px));
+    padding: 12px;
+    color: var(--account-text);
+    background: var(--account-surface-solid);
+    border: 1px solid var(--account-line);
+    border-radius: 15px;
+    box-shadow: 0 18px 44px rgba(25, 19, 31, 0.16);
+  }
+
+  .account-mobile-profile__menu[hidden] {
+    display: none;
+  }
+
+  .account-mobile-profile__identity {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    padding: 4px 4px 11px;
+    border-bottom: 1px solid var(--account-line);
+  }
+
+  .account-mobile-profile__identity strong,
+  .account-mobile-profile__identity span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .account-mobile-profile__identity strong {
+    font-size: 13px;
+  }
+
+  .account-mobile-profile__identity span {
+    color: var(--account-text-faint);
+    font-size: 10px;
+    font-weight: 650;
+  }
+
+  .account-mobile-profile__logout {
+    width: 100%;
+    min-height: 39px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 8px;
+    padding: 8px 9px;
+    color: var(--account-danger);
+    background: transparent;
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .account-mobile-profile__logout:hover,
+  .account-mobile-profile__logout:focus-visible {
+    background: color-mix(
+      in srgb,
+      var(--account-danger) 8%,
+      transparent
+    );
+    outline: none;
+  }
+
+  .account-mobile-profile__logout svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .account-content {
+    width: 100%;
+    padding:
+      14px
+      12px
+      calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .account-topbar {
+    min-height: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 0 12px;
+    padding: 8px 2px 12px;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--account-line);
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .account-topbar::after {
+    display: none;
+  }
+
+  .account-topbar__copy {
+    min-width: 0;
+  }
+
+  .account-topbar .account-eyebrow,
+  .account-topbar p {
+    display: none;
+  }
+
+  .account-topbar h1 {
+    margin: 0;
+    font-size: 29px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+  }
+
+  .topbar-create-btn {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: #7808d0 !important;
+    border: 1px solid #7808d0 !important;
+    border-radius: 12px;
+    box-shadow: none !important;
+  }
+
+  .topbar-create-btn:hover {
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+    transform: none;
+  }
+
+  .topbar-create-btn span {
+    display: none;
+  }
+
+  .topbar-create-btn svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  #eventsPanel .panel-head {
+    min-height: 34px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0 0 10px;
+  }
+
+  #eventsPanel .panel-head > div:first-child {
+    display: none;
+  }
+
+  #eventsPanel .event-count-box {
+    min-width: 0;
+    gap: 7px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  #eventsPanel .event-count-box__icon {
+    width: 30px;
+    height: 30px;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.08);
+    border: 0;
+    border-radius: 9px;
+  }
+
+  #eventsPanel .event-count-box strong {
+    font-size: 18px;
+  }
+
+  #eventsPanel .event-count-box div > span {
+    margin-top: 0;
+    font-size: 9px;
+  }
+
+  .events-list {
+    gap: 10px;
+  }
+
+  .sweet-event-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    background: var(--account-surface-solid);
+    background-image: none;
+    border-radius: 17px;
+    box-shadow: none;
+  }
+
+  .sweet-event-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .sweet-event-cover {
+    min-height: 112px;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .sweet-event-cover::after {
+    display: none;
+  }
+
+  .sweet-event-cover > span {
+    padding: 0 7px 7px;
+    font-size: 7.5px;
+  }
+
+  .sweet-event-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 112px;
+  }
+
+  .sweet-event-head {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 7px;
+    margin-bottom: 9px;
+  }
+
+  .sweet-event-head > div:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .sweet-event-kicker {
+    display: none;
+  }
+
+  .sweet-event-head h3 {
+    font-size: 17px;
+    line-height: 1.18;
+  }
+
+  .sweet-event-code {
+    width: auto;
+    min-width: 70px;
+    flex: 0 0 auto;
+    padding: 6px 7px;
+    border-radius: 9px;
+  }
+
+  .sweet-event-code small {
+    display: none;
+  }
+
+  .sweet-event-code strong {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  .sweet-event-info {
+    display: none;
+  }
+
+  .sweet-event-bottom {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .sweet-status {
+    display: none;
+  }
+
+  .sweet-storage-usage {
+    width: 100%;
+    order: 0;
+  }
+
+  .sweet-storage-usage__meta {
+    margin-bottom: 5px;
+    font-size: 8.5px;
+  }
+
+  .sweet-storage-usage__meta b {
+    min-width: 28px;
+    min-height: 16px;
+    margin-left: 4px;
+    font-size: 8px;
+  }
+
+  .sweet-storage-usage__track {
+    height: 5px;
+  }
+
+  .sweet-gallery-btn {
+    align-self: end;
+    gap: 0;
+    min-width: 34px;
+    min-height: 34px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: #ffffff;
+    background: #7808d0;
+    border-radius: 10px;
+    box-shadow: none;
+    font-size: 0;
+  }
+
+  .sweet-gallery-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  #detailsPanel .panel-head {
+    margin-bottom: 12px;
+  }
+
+  #detailsPanel .panel-head h2 {
+    font-size: 27px;
+  }
+
+  #detailsPanel .panel-head p {
+    font-size: 12px;
+  }
+
+  .account-mobile-nav {
+    position: fixed;
+    z-index: 75;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    height: 67px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
+    padding: 5px;
+    background: color-mix(
+      in srgb,
+      var(--account-surface-solid) 96%,
+      transparent
+    );
+    border: 1px solid var(--account-line);
+    border-radius: 18px;
+    box-shadow: 0 14px 38px rgba(24, 18, 29, 0.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .account-mobile-nav__item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 2px;
+    color: var(--account-text-faint);
+    background: transparent;
+    border: 0;
+    border-radius: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    font: inherit;
+    font-size: 8.5px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .account-mobile-nav__item svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .account-mobile-nav__item:hover,
+  .account-mobile-nav__item:focus-visible {
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.05);
+    outline: none;
+  }
+
+  .account-mobile-nav__item.active {
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.08);
+  }
+
+  .account-mobile-nav__item--create {
+    color: #ffffff;
+    background: #7808d0;
+  }
+
+  .account-mobile-nav__item--create:hover,
+  .account-mobile-nav__item--create:focus-visible {
+    color: #ffffff;
+    background: #6607b2;
+  }
+
+  .theme-toggle {
+    right: 70px !important;
+    bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .snapup-language {
+    right: 12px !important;
+    bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .snapup-language__trigger {
+    width: 50px !important;
+    height: 40px !important;
+  }
+
+  html[data-theme="dark"] .account-mobile-header {
+    background: color-mix(in srgb, #121015 92%, transparent);
+  }
+
+  html[data-theme="dark"] .account-mobile-nav {
+    background: color-mix(in srgb, #1b181f 96%, transparent);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.32);
+  }
+}
+
+@media (max-width: 390px) {
+  .account-content {
+    padding-inline: 10px;
+  }
+
+  .account-mobile-brand strong {
+    font-size: 15px;
+  }
+
+  .account-topbar h1 {
+    font-size: 27px;
+  }
+
+  .sweet-event-card {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .sweet-event-cover {
+    min-height: 106px;
+  }
+
+  .sweet-event-head h3 {
+    font-size: 16px;
+  }
+
+  .account-mobile-nav__item {
+    font-size: 8px;
+  }
+}
+
+
+
+/* =========================================================
+   Account — mobile dashboard polish
+   Calmer header, remove duplicate event-count block,
+   and turn event cards into compact management cards.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  /* Cleaner title row */
+  .account-topbar {
+    margin-bottom: 10px;
+    padding: 7px 2px 11px;
+    border-bottom-color: rgba(56, 45, 64, 0.09);
+  }
+
+  .account-topbar h1 {
+    font-size: 28px;
+  }
+
+  /* Create button becomes a compact text CTA instead of a large square. */
+  .topbar-create-btn {
+    width: auto;
+    min-width: 0;
+    height: 38px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 11px;
+    border-radius: 10px;
+  }
+
+  .topbar-create-btn span {
+    display: inline;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9.5px;
+    font-weight: 850;
+  }
+
+  .topbar-create-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+  }
+
+  /* The "Total events" summary is redundant on a phone. */
+  #eventsPanel .panel-head {
+    display: none;
+  }
+
+  .events-list {
+    gap: 11px;
+  }
+
+  /* Compact, information-first event card */
+  .sweet-event-card {
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 142px;
+    padding: 11px;
+    background: #ffffff;
+    border: 1px solid #e4dfe6;
+    border-radius: 16px;
+    box-shadow: 0 5px 16px rgba(34, 27, 39, 0.045);
+  }
+
+  .sweet-event-card:hover {
+    border-color: #d7d0da;
+    box-shadow: 0 7px 18px rgba(34, 27, 39, 0.06);
+  }
+
+  .sweet-event-cover {
+    min-height: 120px;
+    height: 100%;
+    border-radius: 11px;
+  }
+
+  .sweet-event-cover > span {
+    padding: 0 7px 7px;
+    font-size: 7px;
+    letter-spacing: 0.04em;
+  }
+
+  .sweet-event-body {
+    min-height: 120px;
+  }
+
+  .sweet-event-head {
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+
+  .sweet-event-head h3 {
+    font-size: 16.5px;
+    line-height: 1.2;
+  }
+
+  /* Event code becomes a neutral utility badge instead of another CTA. */
+  .sweet-event-code {
+    min-width: 64px;
+    padding: 5px 7px;
+    color: #625a68;
+    background: #f5f2f6;
+    border: 1px solid #e1dce3;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+
+  .sweet-event-code strong {
+    color: #625a68;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Show only the event date on mobile. */
+  .sweet-event-info {
+    display: block;
+    margin: 0 0 9px;
+  }
+
+  .sweet-event-info .sweet-info-chip {
+    display: none;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) {
+    min-height: 0;
+    display: flex;
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) > span {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    color: #8c8490;
+    background: transparent;
+    border: 0;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) > span svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) div {
+    display: block;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) small {
+    display: none;
+  }
+
+  .sweet-event-info .sweet-info-chip:nth-child(2) strong {
+    color: #857d89;
+    font-size: 9.5px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .sweet-event-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "storage storage"
+      ". manage";
+    gap: 8px 8px;
+    margin-top: auto;
+  }
+
+  .sweet-storage-usage {
+    grid-area: storage;
+    width: 100%;
+  }
+
+  .sweet-storage-usage__meta {
+    margin-bottom: 5px;
+    font-size: 8.5px;
+  }
+
+  .sweet-storage-usage__meta > span {
+    color: #7808d0;
+  }
+
+  .sweet-storage-usage__meta strong {
+    color: #504956;
+  }
+
+  .sweet-storage-usage__track {
+    height: 4px;
+    background: #eee9f0;
+  }
+
+  .sweet-storage-usage__track span {
+    background: #7808d0;
+  }
+
+  /* "Manage Event →" is now a subtle text action, not a square icon. */
+  .sweet-gallery-btn {
+    grid-area: manage;
+    width: auto;
+    min-width: 0;
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    padding: 0 8px;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.06);
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    font-size: 9.5px;
+    font-weight: 850;
+    white-space: nowrap;
+  }
+
+  .sweet-gallery-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .event-item-link:hover .sweet-gallery-btn,
+  .sweet-gallery-btn:hover {
+    color: #6607b2;
+    background: rgba(120, 8, 208, 0.10);
+  }
+
+  html[data-theme="dark"] .sweet-event-card {
+    background: #1b181f;
+    border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  }
+
+  html[data-theme="dark"] .sweet-event-code {
+    color: #c7bfca;
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+
+  html[data-theme="dark"] .sweet-event-code strong {
+    color: #c7bfca;
+  }
+
+  html[data-theme="dark"]
+    .sweet-event-info
+    .sweet-info-chip:nth-child(2)
+    strong {
+    color: #aaa2ae;
+  }
+
+  html[data-theme="dark"] .sweet-storage-usage__track {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  html[data-theme="dark"] .sweet-gallery-btn {
+    color: #d3a5f4;
+    background: rgba(120, 8, 208, 0.13);
+  }
+
+  html[data-theme="dark"] .event-item-link:hover .sweet-gallery-btn,
+  html[data-theme="dark"] .sweet-gallery-btn:hover {
+    color: #ead7fa;
+    background: rgba(120, 8, 208, 0.20);
+  }
+}
+
+@media (max-width: 390px) {
+  .account-topbar h1 {
+    font-size: 26px;
+  }
+
+  .topbar-create-btn {
+    padding-inline: 9px;
+  }
+
+  .topbar-create-btn span {
+    max-width: 96px;
+    font-size: 9px;
+  }
+
+  .sweet-event-card {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 136px;
+    padding: 10px;
+  }
+
+  .sweet-event-cover,
+  .sweet-event-body {
+    min-height: 116px;
+  }
+
+  .sweet-event-head h3 {
+    font-size: 16px;
+  }
+
+  .sweet-event-code {
+    min-width: 60px;
+    padding-inline: 6px;
+  }
+
+  .sweet-gallery-btn {
+    font-size: 9px;
+  }
+}
+
+
+
+/* =========================================================
+   Account — center event code badge content on mobile
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .sweet-event-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-inline: 10px;
+  }
+
+  .sweet-event-code strong {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+}
+

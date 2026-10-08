@@ -34,7 +34,7 @@
     </script>
 
     <link rel="stylesheet" href="css/theme.css?v=account-dashboard-1" />
-    <link rel="stylesheet" href="css/account.css?v=account-purple-forms-1" />
+    <link rel="stylesheet" href="css/account.css?v=account-mobile-code-center-1" />
     <link rel="stylesheet" href="css/i18n.css?v=global-languages-3" />
     <script
       src="js/email-verification-i18n.js?v=email-verification-1"
@@ -66,6 +66,61 @@
         <p id="accountBootLoaderText">Loading events...</p>
       </div>
     </div>
+
+
+    <header class="account-mobile-header">
+      <a
+        href="index.html"
+        class="account-mobile-brand"
+        aria-label="SnapUp Events home"
+      >
+        <img
+          src="icon/snapup-brand-mark-fixed-v3.png"
+          alt=""
+          width="38"
+          height="38"
+        />
+        <strong>SnapUp<span>Events</span></strong>
+      </a>
+
+      <div class="account-mobile-profile">
+        <button
+          type="button"
+          class="account-mobile-profile__trigger"
+          id="accountMobileProfileTrigger"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-label="Account menu"
+        >
+          <span id="accountMobileUserInitial">S</span>
+        </button>
+
+        <div
+          class="account-mobile-profile__menu"
+          id="accountMobileProfileMenu"
+          hidden
+        >
+          <div class="account-mobile-profile__identity">
+            <strong id="accountMobileUserName">User</strong>
+            <span id="accountMobileUserMail">user@mail.com</span>
+          </div>
+
+          <button
+            type="button"
+            class="account-mobile-profile__logout"
+            id="accountMobileLogout"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10"
+              ></path>
+              <path d="M13 8l4 4-4 4M17 12H8"></path>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
 
     <div class="account-page">
       <aside class="account-sidebar" aria-label="Account menu">
@@ -416,6 +471,51 @@
       </main>
     </div>
 
+
+    <nav class="account-mobile-nav" aria-label="Account mobile navigation">
+      <button
+        type="button"
+        class="account-mobile-nav__item active"
+        data-panel="events"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="15" rx="3"></rect>
+          <path d="M8 3v4M16 3v4M4 10h16"></path>
+        </svg>
+        <span>My Events</span>
+      </button>
+
+      <a
+        href="create-event.html"
+        class="account-mobile-nav__item account-mobile-nav__item--create"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        <span>Create Event</span>
+      </a>
+
+      <button
+        type="button"
+        class="account-mobile-nav__item"
+        data-panel="details"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5"></circle>
+          <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"></path>
+        </svg>
+        <span>Account</span>
+      </button>
+
+      <a href="index.html" class="account-mobile-nav__item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m4 11 8-7 8 7"></path>
+          <path d="M6.5 10v10h11V10M10 20v-6h4v6"></path>
+        </svg>
+        <span>Home</span>
+      </a>
+    </nav>
+
     <div
       class="account-delete-modal"
       id="deleteAccountModal"
@@ -528,7 +628,7 @@
       </section>
     </div>
 
-    <script type="module" src="js/account.js?v=account-loading-1"></script>
+    <script type="module" src="js/account.js?v=account-mobile-ux-1"></script>
     <script src="js/theme.js?v=account-dashboard-1"></script>
   </body>
 </html>

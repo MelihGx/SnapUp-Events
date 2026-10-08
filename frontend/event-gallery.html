@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="css/theme.css?v=gallery-without-book-2" />
     <link
       rel="stylesheet"
-      href="css/event-gallery.css?v=guest-scroll-1"
+      href="css/event-gallery.css?v=mobile-view-switch-polish-1"
     />
     <link
       rel="stylesheet"
@@ -191,16 +191,6 @@
 
         </section>
 
-        <section class="participants-panel">
-          <div class="section-head">
-            <span class="section-kicker">Participants</span>
-            <h2 id="guestCountTitle">Event guests</h2>
-            <p>Everyone who has joined this shared event album.</p>
-          </div>
-
-          <div class="participant-list" id="participantList"></div>
-        </section>
-
         <div class="gallery-upload-action-row gallery-upload-action-row--mobile">
           <button
             type="button"
@@ -218,6 +208,53 @@
             <span>Upload your memory</span>
           </button>
         </div>
+
+        <section class="participants-panel" id="participantsPanel">
+          <button
+            type="button"
+            class="participants-mobile-toggle"
+            id="participantsMobileToggle"
+            aria-expanded="false"
+            aria-controls="participantList"
+          >
+            <span class="participants-mobile-toggle__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 19v-1.5c0-2-1.8-3.5-4-3.5s-4 1.5-4 3.5V19"></path>
+                <circle cx="12" cy="8" r="3"></circle>
+                <path d="M18.5 13.5c1.6.5 2.5 1.7 2.5 3.3V18"></path>
+                <path d="M17.2 5.4a2.5 2.5 0 0 1 0 4.8"></path>
+                <path d="M5.5 13.5C3.9 14 3 15.2 3 16.8V18"></path>
+                <path d="M6.8 5.4a2.5 2.5 0 0 0 0 4.8"></path>
+              </svg>
+            </span>
+            <span
+              class="participants-mobile-toggle__label"
+              id="participantsMobileToggleLabel"
+            >Event guests</span>
+            <svg
+              class="participants-mobile-toggle__chevron"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                d="m6.5 8 3.5 3.5L13.5 8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+          </button>
+
+          <div class="section-head">
+            <span class="section-kicker">Participants</span>
+            <h2 id="guestCountTitle">Event guests</h2>
+            <p>Everyone who has joined this shared event album.</p>
+          </div>
+
+          <div class="participant-list" id="participantList"></div>
+        </section>
 
         <section class="approved-gallery-panel">
           <div class="gallery-panel-head">
@@ -305,49 +342,49 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <div
-            class="gallery-mobile-view-switcher"
-            id="galleryMobileViewSwitcher"
-            role="group"
-            aria-label="Gallery view"
-          >
-            <button
-              type="button"
-              class="gallery-mobile-view-btn"
-              data-gallery-view="grid"
-              aria-pressed="false"
-              aria-label="Grid view"
-              title="Grid view"
+          
+            <div
+              class="gallery-mobile-view-switcher"
+              id="galleryMobileViewSwitcher"
+              role="group"
+              aria-label="Gallery view"
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="3" width="5" height="5" rx="1"></rect>
-                <rect x="9.5" y="3" width="5" height="5" rx="1"></rect>
-                <rect x="16" y="3" width="5" height="5" rx="1"></rect>
-                <rect x="3" y="9.5" width="5" height="5" rx="1"></rect>
-                <rect x="9.5" y="9.5" width="5" height="5" rx="1"></rect>
-                <rect x="16" y="9.5" width="5" height="5" rx="1"></rect>
-                <rect x="3" y="16" width="5" height="5" rx="1"></rect>
-                <rect x="9.5" y="16" width="5" height="5" rx="1"></rect>
-                <rect x="16" y="16" width="5" height="5" rx="1"></rect>
-              </svg>
-            </button>
+              <button
+                type="button"
+                class="gallery-mobile-view-btn"
+                data-gallery-view="grid"
+                aria-pressed="false"
+                aria-label="Grid view"
+                title="Grid view"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="3" width="5" height="5" rx="1"></rect>
+                  <rect x="9.5" y="3" width="5" height="5" rx="1"></rect>
+                  <rect x="16" y="3" width="5" height="5" rx="1"></rect>
+                  <rect x="3" y="9.5" width="5" height="5" rx="1"></rect>
+                  <rect x="9.5" y="9.5" width="5" height="5" rx="1"></rect>
+                  <rect x="16" y="9.5" width="5" height="5" rx="1"></rect>
+                  <rect x="3" y="16" width="5" height="5" rx="1"></rect>
+                  <rect x="9.5" y="16" width="5" height="5" rx="1"></rect>
+                  <rect x="16" y="16" width="5" height="5" rx="1"></rect>
+                </svg>
+              </button>
 
-            <button
-              type="button"
-              class="gallery-mobile-view-btn active"
-              data-gallery-view="feed"
-              aria-pressed="true"
-              aria-label="Feed view"
-              title="Feed view"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="4" y="3" width="16" height="7" rx="2"></rect>
-                <rect x="4" y="14" width="16" height="7" rx="2"></rect>
-              </svg>
-            </button>
-          </div>
+              <button
+                type="button"
+                class="gallery-mobile-view-btn active"
+                data-gallery-view="feed"
+                aria-pressed="true"
+                aria-label="Feed view"
+                title="Feed view"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="4" y="3" width="16" height="7" rx="2"></rect>
+                  <rect x="4" y="14" width="16" height="7" rx="2"></rect>
+                </svg>
+              </button>
+            </div>
+</div>
 
           <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
         </section>
@@ -662,7 +699,7 @@
 
     <script
       type="module"
-      src="js/event-gallery.js?v=gallery-tabs-purple-mobile-2"
+      src="js/event-gallery.js?v=mobile-view-switch-polish-1"
     ></script>
     <script src="js/theme.js?v=gallery-without-book-2"></script>
   </body>

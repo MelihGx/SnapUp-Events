@@ -441,6 +441,22 @@ const mobileDetailNav = document.querySelector(".mobile-detail-nav");
 const mobileDetailNavLinks = Array.from(
   mobileDetailNav?.querySelectorAll('a[href^="#"]') || [],
 );
+const mobileDetailSettingsButton = document.getElementById(
+  "mobileDetailSettingsButton",
+);
+const mobileDetailMoreButton = document.getElementById(
+  "mobileDetailMoreButton",
+);
+const mobileDetailMoreMenu = document.getElementById("mobileDetailMoreMenu");
+const mobileCoverChangeButton = document.getElementById(
+  "mobileCoverChangeButton",
+);
+const mobileCoverChangeLabel = document.getElementById(
+  "mobileCoverChangeLabel",
+);
+const mobileCoverRemoveButton = document.getElementById(
+  "mobileCoverRemoveButton",
+);
 
 const openSettingsButton = document.getElementById("openSettingsButton");
 const settingsModal = document.getElementById("settingsModal");
@@ -681,6 +697,64 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function closeMobileDetailMoreMenu() {
+  if (!mobileDetailMoreMenu || !mobileDetailMoreButton) return;
+
+  mobileDetailMoreMenu.hidden = true;
+  mobileDetailMoreButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleMobileDetailMoreMenu() {
+  if (!mobileDetailMoreMenu || !mobileDetailMoreButton) return;
+
+  const shouldOpen = mobileDetailMoreMenu.hidden;
+  mobileDetailMoreMenu.hidden = !shouldOpen;
+  mobileDetailMoreButton.setAttribute(
+    "aria-expanded",
+    shouldOpen ? "true" : "false",
+  );
+}
+
+mobileDetailMoreButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleMobileDetailMoreMenu();
+});
+
+mobileDetailMoreMenu?.addEventListener("click", (event) => {
+  if (event.target.closest("a")) {
+    closeMobileDetailMoreMenu();
+  }
+});
+
+mobileCoverChangeButton?.addEventListener("click", () => {
+  closeMobileDetailMoreMenu();
+  eventCoverChangeButton?.click();
+});
+
+mobileCoverRemoveButton?.addEventListener("click", () => {
+  closeMobileDetailMoreMenu();
+  eventCoverRemoveButton?.click();
+});
+
+document.addEventListener("click", (event) => {
+  if (
+    mobileDetailMoreMenu?.hidden === false &&
+    !event.target.closest(".mobile-detail-more")
+  ) {
+    closeMobileDetailMoreMenu();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    mobileDetailMoreMenu?.hidden === false
+  ) {
+    closeMobileDetailMoreMenu();
+    mobileDetailMoreButton?.focus();
+  }
+});
+
 function setActiveMobileSection(sectionId) {
   mobileDetailNavLinks.forEach((link) => {
     const isActive = link.getAttribute("href") === `#${sectionId}`;
@@ -915,14 +989,24 @@ function setEventCoverBackground(eventOrUrl) {
     eventCoverMedia.style.removeProperty("background-image");
   }
 
+  const coverActionLabel = t(
+    hasCover ? "Change Photo" : "Add Photo",
+  );
+
   if (eventCoverChangeLabel) {
-    eventCoverChangeLabel.textContent = t(
-      hasCover ? "Change Photo" : "Add Photo",
-    );
+    eventCoverChangeLabel.textContent = coverActionLabel;
+  }
+
+  if (mobileCoverChangeLabel) {
+    mobileCoverChangeLabel.textContent = coverActionLabel;
   }
 
   if (eventCoverRemoveButton) {
     eventCoverRemoveButton.hidden = !hasCover;
+  }
+
+  if (mobileCoverRemoveButton) {
+    mobileCoverRemoveButton.hidden = !hasCover;
   }
 }
 
@@ -4566,6 +4650,11 @@ eventDeleteSuccessButton?.addEventListener(
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);
 }
+
+mobileDetailSettingsButton?.addEventListener("click", () => {
+  closeMobileDetailMoreMenu();
+  openSettingsModal();
+});
 
 if (liveSlideshowOpen) {
   liveSlideshowOpen.addEventListener("click", () => {

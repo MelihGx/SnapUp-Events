@@ -7,6 +7,23 @@ const sidebarUserInitial = document.getElementById("sidebarUserInitial");
 const sidebarUserName = document.getElementById("sidebarUserName");
 const sidebarUserMail = document.getElementById("sidebarUserMail");
 
+const accountMobileUserInitial = document.getElementById(
+  "accountMobileUserInitial",
+);
+const accountMobileUserName = document.getElementById(
+  "accountMobileUserName",
+);
+const accountMobileUserMail = document.getElementById(
+  "accountMobileUserMail",
+);
+const accountMobileProfileTrigger = document.getElementById(
+  "accountMobileProfileTrigger",
+);
+const accountMobileProfileMenu = document.getElementById(
+  "accountMobileProfileMenu",
+);
+const accountMobileLogout = document.getElementById("accountMobileLogout");
+
 const accountTitle = document.getElementById("accountTitle");
 
 const sidebarButtons = document.querySelectorAll("[data-panel]");
@@ -254,6 +271,60 @@ function closeDeleteAccountModal() {
   deleteAccountLastFocusedElement?.focus?.();
 }
 
+function syncMobileAccountUser(user = {}) {
+  const name = user.user_name || t("User");
+  const mail = user.user_mail || "-";
+  const initial = String(name || "U").trim().charAt(0).toUpperCase() || "U";
+
+  if (accountMobileUserName) accountMobileUserName.textContent = name;
+  if (accountMobileUserMail) accountMobileUserMail.textContent = mail;
+  if (accountMobileUserInitial) accountMobileUserInitial.textContent = initial;
+}
+
+function closeMobileAccountProfileMenu() {
+  if (!accountMobileProfileMenu || !accountMobileProfileTrigger) return;
+
+  accountMobileProfileMenu.hidden = true;
+  accountMobileProfileTrigger.setAttribute("aria-expanded", "false");
+}
+
+function toggleMobileAccountProfileMenu() {
+  if (!accountMobileProfileMenu || !accountMobileProfileTrigger) return;
+
+  const nextOpen = accountMobileProfileMenu.hidden;
+  accountMobileProfileMenu.hidden = !nextOpen;
+  accountMobileProfileTrigger.setAttribute(
+    "aria-expanded",
+    nextOpen ? "true" : "false",
+  );
+}
+
+accountMobileProfileTrigger?.addEventListener(
+  "click",
+  toggleMobileAccountProfileMenu,
+);
+
+accountMobileLogout?.addEventListener("click", logout);
+
+document.addEventListener("click", (event) => {
+  if (
+    accountMobileProfileMenu?.hidden === false &&
+    !event.target.closest(".account-mobile-profile")
+  ) {
+    closeMobileAccountProfileMenu();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    accountMobileProfileMenu?.hidden === false
+  ) {
+    closeMobileAccountProfileMenu();
+    accountMobileProfileTrigger?.focus();
+  }
+});
+
 function getAuthHeaders() {
   return {
     "Content-Type": "application/json",
@@ -303,6 +374,11 @@ function setActivePanel(panelName) {
 sidebarButtons.forEach((button) => {
   button.addEventListener("click", () => {
     setActivePanel(button.dataset.panel);
+    closeMobileAccountProfileMenu();
+
+    if (button.classList.contains("account-mobile-nav__item")) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   });
 });
 
@@ -340,6 +416,8 @@ async function loadProfile() {
     sidebarUserInitial.textContent = user.user_name
       ? user.user_name.charAt(0).toUpperCase()
       : "S";
+
+    syncMobileAccountUser(user);
 
     accountName.value = user.user_name || "";
     accountMail.value = user.user_mail || "";
@@ -799,6 +877,8 @@ accountForm.addEventListener("submit", async (event) => {
     sidebarUserInitial.textContent = data.user.user_name
       ? data.user.user_name.charAt(0).toUpperCase()
       : "S";
+
+    syncMobileAccountUser(data.user);
 
     setResult(accountResult, "Account updated successfully.", "success");
     await loadEmailVerificationStatus();

@@ -3336,3 +3336,451 @@ html[data-theme="dark"] .package-card:nth-child(4):has(input:checked) .package-p
   border-color: rgba(205, 165, 73, 0.30);
 }
 
+
+
+/* =========================================================
+   Create Event — compact mobile package selector
+   Mobile package choice is reduced to the information users actually
+   need to compare: plan, short description, capacity/storage and price.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .package-grid {
+    gap: 10px;
+  }
+
+  .package-card {
+    min-height: 0;
+    padding: 15px 15px 14px;
+    overflow: visible;
+    border-radius: 16px;
+    box-shadow: 0 5px 14px rgba(31, 24, 38, 0.045);
+    transform: none;
+  }
+
+  .package-card::before {
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .package-card:hover {
+    transform: none;
+    box-shadow: 0 7px 18px rgba(31, 24, 38, 0.065);
+  }
+
+  /* Selection moves beside the plan name instead of floating by itself. */
+  .package-card__radio {
+    top: 16px;
+    right: auto;
+    left: 15px;
+    width: 21px;
+    height: 21px;
+    border-width: 1.5px;
+  }
+
+  .package-card__radio::after {
+    width: 7px;
+    height: 7px;
+  }
+
+  .package-card-content {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head price"
+      "description price"
+      "meta meta";
+    column-gap: 12px;
+    row-gap: 7px;
+    padding-top: 0;
+    padding-left: 32px;
+  }
+
+  .package-card-head {
+    grid-area: head;
+    min-width: 0;
+  }
+
+  .package-card-head strong {
+    font-size: 17px;
+    line-height: 1.15;
+  }
+
+  .package-card p {
+    grid-area: description;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--create-text-soft);
+    font-size: 11.5px;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  /* Full feature lists are intentionally hidden in the mobile chooser.
+     Capacity, storage and price provide the fast comparison here. */
+  .package-features {
+    display: none;
+  }
+
+  .package-meta {
+    grid-area: meta;
+    flex-wrap: nowrap;
+    gap: 6px;
+    min-width: 0;
+    margin-top: 3px;
+  }
+
+  .package-meta span {
+    min-width: 0;
+    max-width: 100%;
+    padding: 6px 8px;
+    overflow: hidden;
+    border-radius: 8px;
+    font-size: 9.5px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .package-meta span:first-child {
+    flex: 1 1 auto;
+  }
+
+  .package-meta span:last-child {
+    flex: 0 0 auto;
+  }
+
+  /* Price becomes a compact right-aligned value. */
+  .package-price-row {
+    grid-area: price;
+    min-width: max-content;
+    min-height: 0;
+    align-self: start;
+    display: block;
+    margin: 0;
+    padding: 1px 0 0;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0;
+  }
+
+  .package-price-row span {
+    display: none;
+  }
+
+  .package-price-row strong {
+    display: block;
+    color: var(--create-text);
+    font-size: 21px;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .package-card.recommended b {
+    top: auto;
+    right: 14px;
+    bottom: calc(100% - 28px);
+    max-width: 118px;
+    padding: 5px 7px;
+    border-radius: 999px;
+    font-size: 7.5px;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  /* Give the recommended plan enough room for its badge. */
+  .package-card.recommended .package-card-content {
+    padding-top: 22px;
+  }
+
+  .package-card:has(input:checked) {
+    transform: none;
+    border-width: 1.5px;
+    box-shadow:
+      0 0 0 2px rgba(120, 8, 208, 0.08),
+      0 8px 20px rgba(120, 8, 208, 0.07);
+  }
+
+  .package-card:has(input:checked)::before {
+    height: 3px;
+  }
+
+  .package-card:has(input:checked) .package-price-row {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .package-card:has(input:checked) .package-price-row strong {
+    color: #7808d0;
+  }
+
+  /* Premium keeps its restrained gold identity in the compact view. */
+  .package-card:nth-child(4) {
+    background: #fffdf9;
+  }
+
+  .package-card:nth-child(4) .package-price-row {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .package-card:nth-child(4) .package-price-row strong {
+    color: var(--snapup-premium-gold-deep);
+  }
+
+  .package-card:nth-child(4):has(input:checked) {
+    box-shadow:
+      0 0 0 2px rgba(181, 138, 42, 0.09),
+      0 8px 20px rgba(138, 104, 31, 0.08);
+  }
+
+  .package-card:nth-child(4):has(input:checked) .package-price-row strong {
+    color: var(--snapup-premium-gold-deep);
+  }
+
+  /* Dark mode compact cards */
+  html[data-theme="dark"] .package-card {
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
+  }
+
+  html[data-theme="dark"] .package-price-row,
+  html[data-theme="dark"] .package-card:nth-child(4) .package-price-row {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  html[data-theme="dark"] .package-price-row strong {
+    color: #f2edf8;
+  }
+
+  html[data-theme="dark"] .package-card:has(input:checked) .package-price-row strong {
+    color: #dfcbff;
+  }
+
+  html[data-theme="dark"] .package-card:nth-child(4) .package-price-row strong,
+  html[data-theme="dark"] .package-card:nth-child(4):has(input:checked)
+    .package-price-row strong {
+    color: #e4c269;
+  }
+}
+
+@media (max-width: 390px) {
+  .package-card {
+    padding: 14px 13px 13px;
+  }
+
+  .package-card__radio {
+    top: 15px;
+    left: 13px;
+  }
+
+  .package-card-content {
+    column-gap: 9px;
+    padding-left: 30px;
+  }
+
+  .package-card-head strong {
+    font-size: 16px;
+  }
+
+  .package-card p {
+    font-size: 11px;
+  }
+
+  .package-price-row strong {
+    font-size: 19px;
+  }
+
+  .package-meta span {
+    padding: 6px 7px;
+    font-size: 9px;
+  }
+}
+
+
+
+/* =========================================================
+   Create Event — mobile package benefits expander
+   Keeps compact package cards while letting users inspect full contents.
+   ========================================================= */
+
+.package-details-toggle {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .package-card-content {
+    grid-template-areas:
+      "head price"
+      "description price"
+      "meta meta"
+      "details details"
+      "features features";
+  }
+
+  .package-details-toggle {
+    grid-area: details;
+    width: max-content;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    padding: 0;
+    color: #7808d0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 10.5px;
+    font-weight: 850;
+    line-height: 1.15;
+    user-select: none;
+  }
+
+  .package-details-toggle:hover,
+  .package-details-toggle:focus-visible {
+    color: #6607b2;
+  }
+
+  .package-details-toggle:focus-visible {
+    outline: 2px solid rgba(120, 8, 208, 0.18);
+    outline-offset: 3px;
+    border-radius: 5px;
+  }
+
+  .package-details-toggle svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    transition: transform 160ms ease;
+  }
+
+  .package-card.is-details-open .package-details-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .package-features {
+    grid-area: features;
+    display: none;
+    gap: 8px;
+    margin: 2px 0 0;
+    padding: 11px 0 0;
+    border-top: 1px solid var(--create-line);
+  }
+
+  .package-card.is-details-open .package-features {
+    display: grid;
+  }
+
+  .package-card.is-details-open .package-features li {
+    padding-left: 18px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .package-card.is-details-open .package-features li::before {
+    top: 4px;
+    width: 6px;
+    height: 6px;
+  }
+
+  /* The open card should remain calm rather than becoming a large glowing panel. */
+  .package-card.is-details-open {
+    box-shadow: 0 8px 22px rgba(31, 24, 38, 0.065);
+  }
+
+  .package-card:has(input:checked).is-details-open {
+    box-shadow:
+      0 0 0 2px rgba(120, 8, 208, 0.08),
+      0 9px 24px rgba(120, 8, 208, 0.075);
+  }
+
+  .package-card:nth-child(4) .package-details-toggle {
+    color: var(--snapup-premium-gold-deep);
+  }
+
+  .package-card:nth-child(4) .package-details-toggle:hover,
+  .package-card:nth-child(4) .package-details-toggle:focus-visible {
+    color: var(--snapup-premium-gold-hover);
+  }
+
+  html[data-theme="dark"] .package-details-toggle {
+    color: #d8baff;
+  }
+
+  html[data-theme="dark"] .package-details-toggle:hover,
+  html[data-theme="dark"] .package-details-toggle:focus-visible {
+    color: #ebdcff;
+  }
+
+  html[data-theme="dark"] .package-card:nth-child(4) .package-details-toggle {
+    color: #e4c269;
+  }
+}
+
+@media (max-width: 390px) {
+  .package-details-toggle {
+    font-size: 10px;
+  }
+
+  .package-card.is-details-open .package-features li {
+    font-size: 10.5px;
+  }
+}
+
+
+
+/* =========================================================
+   Create Event — remove mobile package top strips
+   Package hierarchy now comes from borders, selection and typography.
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .package-card::before,
+  .package-card:has(input:checked)::before,
+  .package-card:nth-child(2)::before,
+  .package-card:nth-child(3)::before,
+  .package-card:nth-child(4)::before,
+  .package-card:nth-child(4):has(input:checked)::before {
+    display: none !important;
+  }
+
+  /* Slightly refine borders now that the top strips are gone. */
+  .package-card {
+    border-width: 1px;
+  }
+
+  .package-card.recommended {
+    border-color: rgba(120, 8, 208, 0.28);
+  }
+
+  .package-card:has(input:checked) {
+    border-color: #7808d0;
+  }
+
+  .package-card:nth-child(4) {
+    border-color: #d3bc7a;
+  }
+
+  .package-card:nth-child(4):has(input:checked) {
+    border-color: #b58a2a;
+  }
+
+  html[data-theme="dark"] .package-card.recommended {
+    border-color: rgba(143, 70, 223, 0.34);
+  }
+
+  html[data-theme="dark"] .package-card:nth-child(4) {
+    border-color: rgba(181, 138, 42, 0.44);
+  }
+
+  html[data-theme="dark"] .package-card:nth-child(4):has(input:checked) {
+    border-color: #c39a3b;
+  }
+}
+

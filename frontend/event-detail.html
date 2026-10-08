@@ -36,14 +36,14 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=detail-notice-popup-1"
+      href="css/event-detail.css?v=mobile-admin-ux-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
     <link rel="stylesheet" href="css/upload-progress.css?v=upload-progress-1" />
     <link
       rel="stylesheet"
-      href="css/invitation-studio.css?v=detail-notice-popup-1"
+      href="css/invitation-studio.css?v=mobile-admin-ux-1"
     />
     <link
       rel="stylesheet"
@@ -113,6 +113,81 @@
             <span>Home</span>
           </a>
         </nav>
+
+        <div class="mobile-detail-more">
+          <button
+            type="button"
+            class="mobile-detail-more__trigger"
+            id="mobileDetailMoreButton"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-label="More"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.6"></circle>
+              <circle cx="12" cy="12" r="1.6"></circle>
+              <circle cx="19" cy="12" r="1.6"></circle>
+            </svg>
+          </button>
+
+          <div
+            class="mobile-detail-more__menu"
+            id="mobileDetailMoreMenu"
+            role="menu"
+            hidden
+          >
+            <a href="account.html" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5"></circle>
+                <path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"></path>
+              </svg>
+              <span>My Account</span>
+            </a>
+
+            <a href="create-event.html" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+              <span>Create Event</span>
+            </a>
+
+            <a href="index.html" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1Z"></path>
+              </svg>
+              <span>Home</span>
+            </a>
+
+            <span class="mobile-detail-more__divider"></span>
+
+            <button
+              type="button"
+              id="mobileCoverChangeButton"
+              role="menuitem"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h2l1.3-2h4.4l1.3 2h2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"></path>
+                <circle cx="12" cy="12.5" r="3.2"></circle>
+              </svg>
+              <span id="mobileCoverChangeLabel">Change Photo</span>
+            </button>
+
+            <button
+              type="button"
+              id="mobileCoverRemoveButton"
+              class="mobile-detail-more__danger"
+              role="menuitem"
+              hidden
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16"></path>
+                <path d="M9 7V4h6v3"></path>
+                <path d="m7 7 1 13h8l1-13"></path>
+              </svg>
+              <span>Remove Photo</span>
+            </button>
+          </div>
+        </div>
       </header>
 
       <section
@@ -485,6 +560,18 @@
             </svg>
             <span>Event Code</span>
           </a>
+
+          <button
+            type="button"
+            id="mobileDetailSettingsButton"
+            aria-label="Settings"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19 13.2c.04-.4.06-.8.06-1.2s-.02-.8-.06-1.2l2-1.55-2-3.45-2.4.96a8 8 0 0 0-2.08-1.2L14.16 3h-4.32l-.36 2.56a8 8 0 0 0-2.08 1.2L5 5.8 3 9.25l2 1.55c-.04.4-.06.8-.06 1.2s.02.8.06 1.2L3 14.75l2 3.45 2.4-.96a8 8 0 0 0 2.08 1.2L9.84 21h4.32l.36-2.56a8 8 0 0 0 2.08-1.2l2.4.96 2-3.45Z"></path>
+            </svg>
+            <span>Settings</span>
+          </button>
         </nav>
 
         <section class="detail-info-grid" id="eventInfoSection">
@@ -2860,7 +2947,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=detail-notice-popup-1"
+      src="js/event-detail.js?v=mobile-admin-ux-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

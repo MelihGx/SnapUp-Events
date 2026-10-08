@@ -5126,3 +5126,551 @@ html[data-theme="dark"] body.event-gallery-shell .gallery-mobile-view-btn.active
 html[data-theme="dark"] body.event-gallery-shell .gallery-mobile-view-btn.active::after {
   background: #b46dff;
 }
+
+
+
+/* =========================================================
+   Event Gallery — mobile-first usability refinement
+   Compact hero, immediate upload CTA, collapsible guests, cleaner controls.
+   Desktop is intentionally unchanged.
+   ========================================================= */
+
+.participants-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Page and header */
+  .public-gallery-page {
+    width: min(100% - 16px, 1240px);
+    padding-top: 8px;
+    padding-bottom: 96px;
+  }
+
+  .gallery-header {
+    min-height: 56px;
+    margin-bottom: 10px;
+    padding: 7px 8px 7px 10px;
+    border-radius: 16px;
+  }
+
+  .gallery-brand {
+    gap: 7px;
+  }
+
+  .gallery-brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-brand strong {
+    font-size: 15px;
+  }
+
+  .gallery-back-link {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .gallery-back-link span {
+    display: none;
+  }
+
+  .gallery-back-link svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* Smaller event cover so memories appear much sooner. */
+  .gallery-hero {
+    --gallery-hero-radius: 18px;
+    min-height: 210px;
+    max-height: 230px;
+    align-items: flex-end;
+    gap: 0;
+    margin-bottom: 10px;
+    padding: 18px 16px;
+    border-radius: var(--gallery-hero-radius);
+  }
+
+  .gallery-hero-copy {
+    width: 100%;
+  }
+
+  .gallery-kicker {
+    min-height: 24px;
+    margin-bottom: 9px;
+    padding: 5px 8px;
+    font-size: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  .gallery-kicker i {
+    width: 6px;
+    height: 6px;
+  }
+
+  .gallery-hero h1 {
+    max-width: 100%;
+    margin-bottom: 7px;
+    font-size: clamp(28px, 9vw, 36px);
+    line-height: 1.02;
+  }
+
+  .gallery-event-meta {
+    max-width: 100%;
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+
+  .gallery-event-description {
+    display: none;
+  }
+
+  /* Primary action comes immediately after hero. */
+  .gallery-upload-action-row--mobile {
+    display: block;
+    margin: 0 0 10px;
+    padding: 0;
+  }
+
+  .gallery-upload-action--mobile {
+    width: 100%;
+    min-height: 48px;
+    gap: 9px;
+    padding: 10px 16px;
+    border-radius: 13px;
+    box-shadow: 0 9px 22px rgba(120, 8, 208, 0.16);
+    font-size: 12px;
+  }
+
+  .gallery-upload-action--mobile .gallery-upload-action__icon {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+    border-radius: 8px;
+  }
+
+  /* Participants collapse to one clean row by default. */
+  .participants-panel {
+    margin-bottom: 12px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .participants-panel > .section-head {
+    display: none;
+  }
+
+  .participants-mobile-toggle {
+    width: 100%;
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    color: var(--gallery-text);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    text-align: start;
+    font: inherit;
+  }
+
+  .participants-mobile-toggle__icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.08);
+    border-radius: 10px;
+  }
+
+  .participants-mobile-toggle__icon svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .participants-mobile-toggle__label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--gallery-text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 850;
+  }
+
+  .participants-mobile-toggle__chevron {
+    width: 19px;
+    height: 19px;
+    color: var(--gallery-text-faint);
+    transition: transform 160ms ease;
+  }
+
+  .participants-panel.is-mobile-open
+    .participants-mobile-toggle__chevron {
+    transform: rotate(180deg);
+  }
+
+  .participants-panel:not(.is-mobile-open) .participant-list {
+    display: none;
+  }
+
+  .participants-panel .participant-list {
+    max-height: 176px;
+    gap: 8px;
+    margin: 0;
+    padding: 0 13px 13px;
+  }
+
+  .participant-chip {
+    min-height: 36px;
+    padding: 5px 10px 5px 5px;
+    border-radius: 999px;
+    font-size: 11px;
+  }
+
+  .participant-chip i {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+    font-size: 10px;
+  }
+
+  /* Memories becomes the visual focus of the screen. */
+  .approved-gallery-panel {
+    margin-inline: -8px;
+    padding-top: 0;
+  }
+
+  .approved-gallery-panel .gallery-panel-head {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px 8px;
+  }
+
+  .approved-gallery-panel .gallery-panel-head .section-head {
+    min-width: 0;
+  }
+
+  .approved-gallery-panel .gallery-panel-head .section-kicker,
+  .approved-gallery-panel .gallery-panel-head .section-head p {
+    display: none;
+  }
+
+  .approved-gallery-panel .gallery-panel-head h2 {
+    margin: 0;
+    font-size: 23px;
+    line-height: 1.08;
+  }
+
+  .gallery-panel-actions {
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .gallery-count-badge {
+    margin: 0;
+    padding: 7px 9px;
+    font-size: 10px;
+  }
+
+  /* One compact controls area:
+     Row 1 = filter tabs
+     Row 2 = sort selector + Grid/Feed buttons. */
+  .approved-gallery-panel .gallery-feed-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "filter filter"
+      "sort view";
+    align-items: center;
+    gap: 9px 10px;
+    margin: 0 12px 12px;
+    padding: 0 0 11px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--gallery-line);
+    border-radius: 0;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort) {
+    grid-area: filter;
+  }
+
+  .gallery-control-set--sort {
+    grid-area: sort;
+    min-width: 0;
+  }
+
+  .gallery-control-label {
+    display: none;
+  }
+
+  /* Mobile filters use the same simple underline language as desktop. */
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-buttons {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 17px;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-select-wrap {
+    display: none;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-btn {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 5px 0 9px;
+    font-size: 11.5px;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-count {
+    min-width: 19px;
+    height: 19px;
+    padding-inline: 5px;
+    font-size: 9px;
+  }
+
+  /* Sort stays as one compact dropdown. */
+  .gallery-control-set--sort .gallery-control-buttons {
+    display: none;
+  }
+
+  .gallery-control-set--sort .gallery-control-select-wrap {
+    width: min(100%, 170px);
+    display: block;
+  }
+
+  .gallery-control-set--sort .gallery-custom-combobox__trigger {
+    min-height: 40px;
+    padding: 8px 10px 8px 12px;
+    background: var(--gallery-surface-solid);
+    border: 1px solid var(--gallery-line);
+    border-radius: 11px;
+    box-shadow: none;
+    font-size: 10px;
+  }
+
+  .gallery-control-set--sort
+    .gallery-custom-combobox.is-open
+    .gallery-custom-combobox__trigger {
+    border-color: #7808d0;
+    box-shadow: 0 0 0 3px rgba(120, 8, 208, 0.08);
+  }
+
+  .gallery-control-set--sort .gallery-custom-combobox__menu {
+    min-width: 160px;
+  }
+
+  /* Grid / Feed becomes a compact segmented control in the same row. */
+  .gallery-mobile-view-switcher {
+    grid-area: view;
+    width: 88px;
+    display: grid;
+    grid-template-columns: repeat(2, 44px);
+    gap: 4px;
+    margin: 0;
+    padding: 3px;
+    background: var(--gallery-surface-raised);
+    border: 1px solid var(--gallery-line);
+    border-radius: 12px;
+  }
+
+  .gallery-mobile-view-btn {
+    min-height: 36px;
+    border-radius: 9px;
+  }
+
+  .gallery-mobile-view-btn::after {
+    display: none;
+  }
+
+  .gallery-mobile-view-btn svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .gallery-mobile-view-btn.active {
+    color: #ffffff;
+    background: #7808d0;
+  }
+
+  .gallery-mobile-view-btn:focus-visible {
+    outline: 2px solid rgba(120, 8, 208, 0.25);
+    outline-offset: 1px;
+  }
+
+  /* Sticky duplicate controls add clutter on a narrow phone. */
+  .gallery-mobile-sticky-toolbar {
+    display: none !important;
+  }
+
+  /* Keep grid dense and easy to scan. */
+  .approved-gallery-grid {
+    gap: 3px;
+  }
+
+  .approved-gallery-grid.is-mobile-grid-view {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .approved-gallery-grid.is-mobile-grid-view .approved-card {
+    border-radius: 0;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .participants-mobile-toggle__icon {
+    color: #d7adff;
+    background: rgba(180, 109, 255, 0.12);
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-view-btn.active {
+    color: #ffffff;
+    background: #7808d0;
+  }
+}
+
+@media (max-width: 380px) {
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-buttons {
+    gap: 13px;
+  }
+
+  .gallery-control-set:not(.gallery-control-set--sort)
+    .gallery-control-btn {
+    font-size: 11px;
+  }
+
+  .gallery-mobile-view-switcher {
+    width: 82px;
+    grid-template-columns: repeat(2, 41px);
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — cleaner mobile Grid / Feed switch
+   Softer segmented control: active state is a white tile with purple icon,
+   rather than a large solid-purple block.
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .gallery-mobile-view-switcher {
+    width: auto;
+    min-width: 82px;
+    grid-template-columns: repeat(2, 36px);
+    gap: 3px;
+    padding: 3px;
+    background: #f3eff5;
+    border: 0;
+    border-radius: 11px;
+    box-shadow: inset 0 0 0 1px rgba(73, 59, 82, 0.06);
+  }
+
+  .gallery-mobile-view-btn {
+    width: 36px;
+    min-height: 36px;
+    height: 36px;
+    color: #918997;
+    background: transparent;
+    border: 0;
+    border-radius: 9px;
+    box-shadow: none;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      box-shadow 150ms ease,
+      transform 150ms ease;
+  }
+
+  .gallery-mobile-view-btn:hover {
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.06);
+  }
+
+  .gallery-mobile-view-btn.active {
+    color: #7808d0;
+    background: #ffffff;
+    box-shadow:
+      0 2px 7px rgba(38, 28, 45, 0.09),
+      inset 0 0 0 1px rgba(120, 8, 208, 0.08);
+  }
+
+  .gallery-mobile-view-btn.active:hover {
+    color: #6607b2;
+    background: #ffffff;
+  }
+
+  .gallery-mobile-view-btn:active {
+    transform: scale(0.97);
+  }
+
+  .gallery-mobile-view-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.8;
+  }
+
+  .gallery-mobile-view-btn:focus-visible {
+    outline: 2px solid rgba(120, 8, 208, 0.24);
+    outline-offset: 1px;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-view-switcher {
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-view-btn {
+    color: #968e9e;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-view-btn:hover {
+    color: #d9b5f4;
+    background: rgba(120, 8, 208, 0.12);
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-view-btn.active {
+    color: #c98af4;
+    background: #211a28;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.22),
+      inset 0 0 0 1px rgba(201, 138, 244, 0.12);
+  }
+}
+

@@ -1139,3 +1139,39 @@ window.addEventListener("beforeunload", () => {
 });
 
 updateLiveCard();
+
+
+// Mobile package benefit expander.
+const packageDetailToggles = Array.from(
+  document.querySelectorAll("[data-package-details-toggle]"),
+);
+
+function setPackageDetailsExpanded(toggle, expanded) {
+  const card = toggle?.closest(".package-card");
+  if (!card) return;
+
+  card.classList.toggle("is-details-open", expanded);
+  toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+}
+
+function togglePackageDetails(toggle) {
+  const expanded = toggle.getAttribute("aria-expanded") === "true";
+  setPackageDetailsExpanded(toggle, !expanded);
+}
+
+packageDetailToggles.forEach((toggle) => {
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    togglePackageDetails(toggle);
+  });
+
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    togglePackageDetails(toggle);
+  });
+});
+

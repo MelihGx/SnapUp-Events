@@ -31,6 +31,13 @@ const galleryEventDescription = document.getElementById(
 );
 const guestCountTitle = document.getElementById("guestCountTitle");
 const participantList = document.getElementById("participantList");
+const participantsPanel = document.getElementById("participantsPanel");
+const participantsMobileToggle = document.getElementById(
+  "participantsMobileToggle",
+);
+const participantsMobileToggleLabel = document.getElementById(
+  "participantsMobileToggleLabel",
+);
 const memoryCountBadge = document.getElementById("memoryCountBadge");
 const approvedGalleryGrid = document.getElementById("approvedGalleryGrid");
 const galleryFilterButtons = Array.from(
@@ -279,9 +286,9 @@ const GALLERY_VIEW_STORAGE_KEY = "snapup_gallery_view";
 function readSavedGalleryView() {
   try {
     const saved = localStorage.getItem(GALLERY_VIEW_STORAGE_KEY);
-    return saved === "grid" || saved === "feed" ? saved : "feed";
+    return saved === "grid" || saved === "feed" ? saved : "grid";
   } catch (_) {
-    return "feed";
+    return "grid";
   }
 }
 
@@ -476,9 +483,30 @@ function renderEvent(event) {
   }
 }
 
+function setMobileParticipantsExpanded(expanded) {
+  if (!participantsPanel || !participantsMobileToggle) return;
+
+  participantsPanel.classList.toggle("is-mobile-open", expanded);
+  participantsMobileToggle.setAttribute(
+    "aria-expanded",
+    expanded ? "true" : "false",
+  );
+}
+
+participantsMobileToggle?.addEventListener("click", () => {
+  const expanded =
+    participantsMobileToggle.getAttribute("aria-expanded") === "true";
+  setMobileParticipantsExpanded(!expanded);
+});
+
 function renderGuests(guests) {
   const list = guests || [];
-  guestCountTitle.textContent = `${t("Event guests")} (${list.length})`;
+  const guestCountLabel = `${t("Event guests")} (${list.length})`;
+  guestCountTitle.textContent = guestCountLabel;
+
+  if (participantsMobileToggleLabel) {
+    participantsMobileToggleLabel.textContent = guestCountLabel;
+  }
 
   if (list.length === 0) {
     participantList.innerHTML = `
