@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=approve-all-popup-1"
+      href="css/event-detail.css?v=event-time-editor-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -411,6 +411,39 @@
                 View Gallery
               </button>
 
+            </div>
+
+            <div class="share-card-settings-slot">
+              <button
+                type="button"
+                id="openSettingsButton"
+                class="settings-action-button"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                  <path
+                    d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.8 12 8.8C10.2327 8.8 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                  />
+                  <path
+                    d="M19.4 13.4C19.46 12.94 19.5 12.48 19.5 12C19.5 11.52 19.46 11.06 19.4 10.6L21.25 9.15L19.25 5.7L17.05 6.6C16.31 6.03 15.5 5.56 14.6 5.28L14.25 3H9.75L9.4 5.28C8.5 5.56 7.69 6.03 6.95 6.6L4.75 5.7L2.75 9.15L4.6 10.6C4.54 11.06 4.5 11.52 4.5 12C4.5 12.48 4.54 12.94 4.6 13.4L2.75 14.85L4.75 18.3L6.95 17.4C7.69 17.97 8.5 18.44 9.4 18.72L9.75 21H14.25L14.6 18.72C15.5 18.44 16.31 17.97 17.05 17.4L19.25 18.3L21.25 14.85L19.4 13.4Z"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                Settings
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <aside
+          class="detail-card desktop-event-tools-panel"
+          id="desktopEventToolsPanel"
+          aria-label="Event tools"
+        >
+          <div class="desktop-event-tools-grid" id="desktopEventToolsPanelInner">
               <button
                 type="button"
                 id="invitationStudioOpen"
@@ -504,30 +537,8 @@
                   <small>Display approved photos on the event screen</small>
                 </span>
               </button>
-
-              <button
-                type="button"
-                id="openSettingsButton"
-                class="settings-action-button"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                  <path
-                    d="M12 15.2C13.7673 15.2 15.2 13.7673 15.2 12C15.2 10.2327 13.7673 8.8 12 8.8C10.2327 8.8 8.8 10.2327 8.8 12C8.8 13.7673 10.2327 15.2 12 15.2Z"
-                    stroke="currentColor"
-                    stroke-width="1.9"
-                  />
-                  <path
-                    d="M19.4 13.4C19.46 12.94 19.5 12.48 19.5 12C19.5 11.52 19.46 11.06 19.4 10.6L21.25 9.15L19.25 5.7L17.05 6.6C16.31 6.03 15.5 5.56 14.6 5.28L14.25 3H9.75L9.4 5.28C8.5 5.56 7.69 6.03 6.95 6.6L4.75 5.7L2.75 9.15L4.6 10.6C4.54 11.06 4.5 11.52 4.5 12C4.5 12.48 4.54 12.94 4.6 13.4L2.75 14.85L4.75 18.3L6.95 17.4C7.69 17.97 8.5 18.44 9.4 18.72L9.75 21H14.25L14.6 18.72C15.5 18.44 16.31 17.97 17.05 17.4L19.25 18.3L21.25 14.85L19.4 13.4Z"
-                    stroke="currentColor"
-                    stroke-width="1.9"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                Settings
-              </button>
-            </div>
-          </aside>
-        </section>
+          </div>
+        </aside>
 
         <nav
           class="mobile-detail-nav"
@@ -2552,6 +2563,26 @@
               />
             </label>
 
+            <div class="event-basic-editor-time-fields">
+              <label>
+                <span>Start time</span>
+                <input
+                  type="time"
+                  id="eventBasicEditorStartTime"
+                  step="60"
+                />
+              </label>
+
+              <label>
+                <span>Finish time</span>
+                <input
+                  type="time"
+                  id="eventBasicEditorFinishTime"
+                  step="60"
+                />
+              </label>
+            </div>
+
             <label class="event-basic-editor-description">
               <span>Description</span>
               <textarea
@@ -3048,7 +3079,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=approve-all-popup-1"
+      src="js/event-detail.js?v=overnight-time-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

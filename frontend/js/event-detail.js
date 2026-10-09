@@ -275,6 +275,12 @@ const eventBasicEditorCancel = document.getElementById("eventBasicEditorCancel")
 const eventBasicEditorForm = document.getElementById("eventBasicEditorForm");
 const eventBasicEditorName = document.getElementById("eventBasicEditorName");
 const eventBasicEditorDate = document.getElementById("eventBasicEditorDate");
+const eventBasicEditorStartTime = document.getElementById(
+  "eventBasicEditorStartTime",
+);
+const eventBasicEditorFinishTime = document.getElementById(
+  "eventBasicEditorFinishTime",
+);
 const eventBasicEditorDescription = document.getElementById(
   "eventBasicEditorDescription",
 );
@@ -485,6 +491,46 @@ const mobileCoverRemoveButton = document.getElementById(
 );
 
 const openSettingsButton = document.getElementById("openSettingsButton");
+const desktopEventToolsPanelInner = document.getElementById(
+  "desktopEventToolsPanelInner",
+);
+const eventShareActionGrid = document.querySelector(
+  "#eventShareSection .detail-actions",
+);
+const desktopEventToolIds = [
+  "invitationStudioOpen",
+  "memoryBookOpen",
+  "eventArchiveOpen",
+  "eventHighlightsOpen",
+  "liveSlideshowOpen",
+];
+const desktopEventToolsMediaQuery = window.matchMedia("(min-width: 1200px)");
+
+function syncDesktopEventToolPlacement() {
+  const target = desktopEventToolsMediaQuery.matches
+    ? desktopEventToolsPanelInner
+    : eventShareActionGrid;
+
+  if (!target) return;
+
+  desktopEventToolIds.forEach((id) => {
+    const button = document.getElementById(id);
+    if (button && button.parentElement !== target) {
+      target.appendChild(button);
+    }
+  });
+}
+
+syncDesktopEventToolPlacement();
+
+if (typeof desktopEventToolsMediaQuery.addEventListener === "function") {
+  desktopEventToolsMediaQuery.addEventListener(
+    "change",
+    syncDesktopEventToolPlacement,
+  );
+} else {
+  desktopEventToolsMediaQuery.addListener(syncDesktopEventToolPlacement);
+}
 const settingsModal = document.getElementById("settingsModal");
 const settingsModalClose = document.getElementById("settingsModalClose");
 const settingsForm = document.getElementById("settingsForm");
@@ -3380,6 +3426,8 @@ function openEventBasicEditor(preferredField = "name") {
   eventBasicEditorLastFocusedElement = document.activeElement;
   eventBasicEditorName.value = currentEvent.event_name || "";
   eventBasicEditorDate.value = currentEvent.event_date || "";
+  eventBasicEditorStartTime.value = formatTime(currentEvent.event_start_time) || "";
+  eventBasicEditorFinishTime.value = formatTime(currentEvent.event_finish_time) || "";
   eventBasicEditorDescription.value = currentEvent.description || "";
   setEventBasicEditorResult();
 
@@ -4572,6 +4620,8 @@ eventBasicEditorForm?.addEventListener("submit", async (event) => {
 
   const nextName = eventBasicEditorName.value.trim();
   const nextDate = eventBasicEditorDate.value || null;
+  const nextStartTime = eventBasicEditorStartTime.value || null;
+  const nextFinishTime = eventBasicEditorFinishTime.value || null;
   const nextDescription = eventBasicEditorDescription.value.trim() || null;
 
   if (!nextName) {
@@ -4579,6 +4629,9 @@ eventBasicEditorForm?.addEventListener("submit", async (event) => {
     eventBasicEditorName.focus();
     return;
   }
+
+  // A finish time earlier than the start time is valid and means
+  // the event continues after midnight into the following day.
 
   try {
     eventBasicEditorSave.disabled = true;
@@ -4588,6 +4641,8 @@ eventBasicEditorForm?.addEventListener("submit", async (event) => {
     const updatedEvent = await updateCurrentEventBasicInfo({
       event_name: nextName,
       event_date: nextDate,
+      event_start_time: nextStartTime,
+      event_finish_time: nextFinishTime,
       description: nextDescription,
     });
 

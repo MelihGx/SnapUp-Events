@@ -11973,3 +11973,452 @@ body.approve-all-confirm-open {
   }
 }
 
+
+
+/* =========================================================
+   Event Detail — right column tools + guests layout
+   Desktop only:
+   - Event tools move to the top-right card.
+   - Guests move below them in the right column.
+   - Mobile keeps the original Share-card tool placement.
+   ========================================================= */
+
+.desktop-event-tools-panel {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .detail-content {
+    grid-template-areas:
+      "share cover tools"
+      "share gallery guests"
+      "manage manage manage";
+  }
+
+  #desktopEventToolsPanel {
+    grid-area: tools;
+    min-width: 0;
+    display: block;
+    align-self: start;
+    padding: 12px;
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(31, 24, 37, 0.07);
+  }
+
+  .desktop-event-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .desktop-event-tools-grid > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 9px 10px;
+    overflow: hidden;
+    color: #ffffff;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    box-shadow: none !important;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease,
+      opacity 150ms ease;
+  }
+
+  .desktop-event-tools-grid > button:hover:not(:disabled),
+  .desktop-event-tools-grid > button:focus-visible:not(:disabled) {
+    outline: none;
+    transform: translateY(-1px);
+  }
+
+  .desktop-event-tools-grid > button > svg {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .desktop-event-tools-grid > button > span {
+    min-width: 0;
+    display: block;
+  }
+
+  .desktop-event-tools-grid > button strong {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    font-size: 9.5px;
+    font-weight: 850;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-event-tools-grid > button small {
+    display: none !important;
+  }
+
+  .desktop-event-tools-grid .event-archive-title-row,
+  .desktop-event-tools-grid .event-highlights-title-row {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .desktop-event-tools-grid .event-archive-title-row em,
+  .desktop-event-tools-grid .event-highlights-title-row em {
+    min-height: 14px;
+    padding: 2px 4px;
+    font-size: 5.5px;
+    line-height: 1;
+    box-shadow: none;
+  }
+
+  /* Keep the same functional color language, but in a compact tool grid. */
+  .desktop-event-tools-grid .invitation-studio-open {
+    grid-column: 1 / -1;
+    min-height: 52px;
+    background: #7808d0 !important;
+    border-color: #7808d0 !important;
+  }
+
+  .desktop-event-tools-grid .invitation-studio-open:hover:not(:disabled) {
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+  }
+
+  .desktop-event-tools-grid .memory-book-open {
+    background: #6b4a8e !important;
+    border-color: #6b4a8e !important;
+  }
+
+  .desktop-event-tools-grid .memory-book-open:hover:not(:disabled) {
+    background: #593d77 !important;
+    border-color: #593d77 !important;
+  }
+
+  .desktop-event-tools-grid .event-archive-open {
+    background: #49536e !important;
+    border-color: #49536e !important;
+  }
+
+  .desktop-event-tools-grid .event-archive-open:hover:not(:disabled) {
+    background: #3c455d !important;
+    border-color: #3c455d !important;
+  }
+
+  .desktop-event-tools-grid .event-highlights-open {
+    background: #9b5269 !important;
+    border-color: #9b5269 !important;
+  }
+
+  .desktop-event-tools-grid .event-highlights-open:hover:not(:disabled) {
+    background: #87465b !important;
+    border-color: #87465b !important;
+  }
+
+  .desktop-event-tools-grid .live-slideshow-open {
+    background: #242127 !important;
+    border-color: #242127 !important;
+  }
+
+  .desktop-event-tools-grid .live-slideshow-open:hover:not(:disabled) {
+    background: #151318 !important;
+    border-color: #151318 !important;
+  }
+
+  .desktop-event-tools-grid .settings-action-button {
+    grid-column: 1 / -1;
+    min-height: 40px;
+    justify-content: center;
+    color: var(--detail-text-soft);
+    background: var(--detail-surface-raised) !important;
+    border-color: var(--detail-line) !important;
+  }
+
+  .desktop-event-tools-grid .settings-action-button:hover {
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.06) !important;
+    border-color: rgba(120, 8, 208, 0.18) !important;
+  }
+
+  .desktop-event-tools-grid > button:disabled {
+    cursor: wait;
+    opacity: 0.52;
+    transform: none;
+  }
+
+  /* Guests now live in the blue area below the tools card. */
+  #eventGuestsSection.guests-panel {
+    grid-area: guests;
+    position: sticky;
+    top: 100px;
+    min-height: 500px;
+    max-height: calc(100vh - 116px);
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    overflow: hidden;
+  }
+
+  #eventGuestsSection .guest-list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  /* Left share card now keeps only QR/share/stat/storage controls. */
+  #eventShareSection .detail-actions {
+    margin-top: 2px;
+  }
+
+  html[data-theme="dark"] #desktopEventToolsPanel {
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1450px) {
+  #desktopEventToolsPanel {
+    padding: 10px;
+  }
+
+  .desktop-event-tools-grid {
+    gap: 7px;
+  }
+
+  .desktop-event-tools-grid > button {
+    min-height: 52px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .desktop-event-tools-grid > button > svg {
+    width: 17px;
+    height: 17px;
+    flex-basis: 17px;
+  }
+
+  .desktop-event-tools-grid > button strong {
+    font-size: 8.5px;
+  }
+
+  #eventGuestsSection.guests-panel {
+    min-height: 460px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — fill right tools area + settings in QR card
+   Desktop only.
+   ========================================================= */
+@media (min-width: 1200px) {
+  /* Fill the complete top-right dashboard cell with the five colored tools. */
+  #desktopEventToolsPanel {
+    align-self: stretch;
+    height: 100%;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .desktop-event-tools-grid {
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .desktop-event-tools-grid > button {
+    min-height: 0;
+    height: 100%;
+    padding: 10px 11px;
+    border-radius: 12px;
+  }
+
+  .desktop-event-tools-grid .invitation-studio-open {
+    grid-column: 1 / -1;
+    min-height: 0;
+  }
+
+  .desktop-event-tools-grid > button strong {
+    font-size: 10px;
+  }
+
+  .desktop-event-tools-grid > button > svg {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  /* Settings is now permanently anchored at the bottom of the QR/share card. */
+  #eventShareSection {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #eventShareSection .share-card-settings-slot {
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  #eventShareSection .share-card-settings-slot .settings-action-button {
+    width: 100%;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    color: var(--detail-text-soft);
+    background: var(--detail-surface-raised) !important;
+    border: 1px solid var(--detail-line) !important;
+    border-radius: 10px;
+    box-shadow: none !important;
+    cursor: pointer;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  #eventShareSection .share-card-settings-slot .settings-action-button:hover,
+  #eventShareSection .share-card-settings-slot .settings-action-button:focus-visible {
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.06) !important;
+    border-color: rgba(120, 8, 208, 0.20) !important;
+    outline: none;
+  }
+
+  #eventShareSection .share-card-settings-slot .settings-action-button svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1450px) {
+  #desktopEventToolsPanel {
+    padding: 10px;
+  }
+
+  .desktop-event-tools-grid {
+    gap: 7px;
+  }
+
+  .desktop-event-tools-grid > button {
+    padding: 8px;
+  }
+
+  .desktop-event-tools-grid > button strong {
+    font-size: 9px;
+  }
+}
+
+/* On mobile/tablet the colored tools are still moved back into the Share action grid;
+   settings remains the final full-width Share action. */
+@media (max-width: 1199px) {
+  #eventShareSection .share-card-settings-slot {
+    margin-top: 8px;
+  }
+
+  #eventShareSection .share-card-settings-slot .settings-action-button {
+    width: 100%;
+  }
+}
+
+
+
+/* =========================================================
+   Right-side colored Event Tools — exactly 5 buttons / 5 rows
+   Only the five colored buttons are changed.
+   Settings remains at the bottom of the QR/share card.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  #desktopEventToolsPanel .desktop-event-tools-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: repeat(5, minmax(52px, auto));
+    gap: 9px !important;
+  }
+
+  #desktopEventToolsPanel .desktop-event-tools-grid > button {
+    grid-column: 1 !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    padding: 10px 13px !important;
+    border-radius: 11px !important;
+  }
+
+  #desktopEventToolsPanel .desktop-event-tools-grid > button > svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 19px !important;
+  }
+
+  #desktopEventToolsPanel .desktop-event-tools-grid > button strong {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Keep Premium tag visible without breaking the single-row layout. */
+  #desktopEventToolsPanel .event-archive-title-row,
+  #desktopEventToolsPanel .event-highlights-title-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    min-width: 0;
+  }
+
+  #desktopEventToolsPanel .event-archive-title-row em,
+  #desktopEventToolsPanel .event-highlights-title-row em {
+    flex: 0 0 auto;
+  }
+}
+
+
+
+/* =========================================================
+   Event basic editor — start / finish time fields
+   ========================================================= */
+.event-basic-editor-time-fields {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.event-basic-editor-time-fields input[type="time"] {
+  min-width: 0;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .event-basic-editor-time-fields input[type="time"] {
+  color-scheme: dark;
+}
+
+@media (max-width: 620px) {
+  .event-basic-editor-time-fields {
+    grid-template-columns: 1fr;
+  }
+}

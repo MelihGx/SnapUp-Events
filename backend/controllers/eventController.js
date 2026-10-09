@@ -94,6 +94,40 @@ function normalizeEditableEventDate(value) {
 }
 
 
+function normalizeEditableEventTime(value) {
+  if (value === null || value === undefined || value === "") {
+    return { value: null, minutes: null, error: null };
+  }
+
+  if (typeof value !== "string") {
+    return {
+      value: null,
+      minutes: null,
+      error: "Invalid event time.",
+    };
+  }
+
+  const match = value.trim().match(/^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/);
+
+  if (!match) {
+    return {
+      value: null,
+      minutes: null,
+      error: "Invalid event time.",
+    };
+  }
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  return {
+    value: `${match[1]}:${match[2]}:00`,
+    minutes: hours * 60 + minutes,
+    error: null,
+  };
+}
+
+
 function normalizeEventCoordinates(latitudeValue, longitudeValue) {
   const latitudeMissing =
     latitudeValue === null ||
@@ -963,7 +997,16 @@ const updateEventBasicInfo = async (req, res) => {
   try {
     const userId = req.user.user_id;
     const { eventId } = req.params;
-    const { event_name, eventName, event_date, description } = req.body || {};
+    const {
+      event_name,
+      eventName,
+      event_date,
+      event_start_time,
+      eventStartTime,
+      event_finish_time,
+      eventFinishTime,
+      description,
+    } = req.body || {};
 
     if (!eventId) {
       return res.status(400).json({
@@ -994,6 +1037,12 @@ const updateEventBasicInfo = async (req, res) => {
     }
 
     const normalizedDate = normalizeEditableEventDate(event_date);
+    const normalizedStartTime = normalizeEditableEventTime(
+      event_start_time ?? eventStartTime,
+    );
+    const normalizedFinishTime = normalizeEditableEventTime(
+      event_finish_time ?? eventFinishTime,
+    );
     const normalizedDescription =
       typeof description === "string"
         ? description.trim() || null
@@ -1008,6 +1057,17 @@ const updateEventBasicInfo = async (req, res) => {
         code: "INVALID_EVENT_DATE",
       });
     }
+
+    if (normalizedStartTime.error || normalizedFinishTime.error) {
+      return res.status(400).json({
+        success: false,
+        message: normalizedStartTime.error || normalizedFinishTime.error,
+        code: "INVALID_EVENT_TIME",
+      });
+    }
+
+    // Finish time may be earlier than the start time. In that case the
+    // event is understood to continue past midnight into the following day.
 
     const { data: event, error: eventError } = await supabase
       .from("event")
@@ -1040,12 +1100,14 @@ const updateEventBasicInfo = async (req, res) => {
       .update({
         event_name: finalEventName,
         event_date: normalizedDate.value,
+        event_start_time: normalizedStartTime.value,
+        event_finish_time: normalizedFinishTime.value,
         description: normalizedDescription,
       })
       .eq("event_id", eventId)
       .eq("user_id", userId)
       .select(
-        "event_id, event_name, event_date, description, event_slug, event_code",
+        "event_id, event_name, event_date, event_start_time, event_finish_time, description, event_slug, event_code",
       )
       .single();
 
