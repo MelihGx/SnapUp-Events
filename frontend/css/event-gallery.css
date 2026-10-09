@@ -5674,3 +5674,643 @@ html[data-theme="dark"] body.event-gallery-shell .gallery-mobile-view-btn.active
   }
 }
 
+/* =========================================================
+   Event Gallery — mobile following Shared Memories navbar
+   Keeps the exact Shared memories + filters + sort/view block
+   visible while the user scrolls through the gallery.
+   ========================================================= */
+
+.gallery-mobile-follow-nav {
+  display: contents;
+}
+
+@media (max-width: 768px) {
+  .gallery-mobile-follow-nav {
+    position: sticky;
+    top: 78px;
+    z-index: 28;
+    display: block;
+    margin: 0 -1px 0;
+    padding: 0;
+    background: color-mix(
+      in srgb,
+      var(--gallery-surface-solid) 95%,
+      transparent
+    );
+    border-bottom: 1px solid var(--gallery-line);
+    box-shadow: 0 8px 18px rgba(41, 31, 49, 0.06);
+    backdrop-filter: blur(14px) saturate(125%);
+    -webkit-backdrop-filter: blur(14px) saturate(125%);
+  }
+
+  /* Keep the existing visual structure, but remove the duplicate
+     lower border because the sticky wrapper owns it now. */
+  .gallery-mobile-follow-nav .gallery-panel-head {
+    margin-bottom: 0;
+    background: transparent;
+  }
+
+  .gallery-mobile-follow-nav .gallery-feed-controls {
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    background: transparent;
+    border-bottom: 0;
+  }
+
+  /* Keep menus above media cards while the navbar is sticky. */
+  .gallery-mobile-follow-nav .gallery-custom-combobox__menu {
+    z-index: 45;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-follow-nav {
+    background: color-mix(
+      in srgb,
+      var(--gallery-surface-solid) 95%,
+      transparent
+    );
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.20);
+  }
+}
+
+/* Very small screens: tuck it slightly closer to the sticky site header. */
+@media (max-width: 420px) {
+  .gallery-mobile-follow-nav {
+    top: 74px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — pin Shared Memories navbar to viewport top
+   ========================================================= */
+@media (max-width: 768px) {
+  .gallery-mobile-follow-nav {
+    top: 0 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .gallery-mobile-follow-nav {
+    top: 0 !important;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — video playback inside public lightbox
+   ========================================================= */
+.public-lightbox-frame > video {
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(86vh - 84px);
+  min-height: 0;
+  display: block;
+  object-fit: contain;
+  background: #06040b;
+}
+
+.public-lightbox-frame > video[hidden] {
+  display: none !important;
+}
+
+.public-lightbox-frame > img[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .public-lightbox-frame > video {
+    width: 100%;
+    max-height: calc(100vh - 180px);
+    object-fit: contain;
+    background: #06040b;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — event name inside mobile sticky memories nav
+   ========================================================= */
+.gallery-follow-event-name {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .gallery-mobile-follow-nav .gallery-follow-event-name {
+    max-width: min(72vw, 260px);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 5px;
+    color: #7808d0;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.035em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gallery-mobile-follow-nav .gallery-follow-event-name::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 999px;
+    background: #7808d0;
+  }
+
+  /* The dynamic event name replaces the generic mobile kicker. */
+  .gallery-mobile-follow-nav .section-kicker {
+    display: none !important;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-follow-nav
+    .gallery-follow-event-name {
+    color: #c88cf3;
+  }
+
+  html[data-theme="dark"] body.event-gallery-shell
+    .gallery-mobile-follow-nav
+    .gallery-follow-event-name::before {
+    background: #c88cf3;
+  }
+}
+
+@media (max-width: 420px) {
+  .gallery-mobile-follow-nav .gallery-follow-event-name {
+    max-width: 220px;
+    font-size: 9.5px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — mobile upload event preview card polish
+   Compact horizontal layout for event identity + address,
+   with Map / Gallery actions aligned on the footer row.
+   ========================================================= */
+@media (max-width: 640px) {
+  .join-event-preview {
+    grid-template-columns: 74px minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 10px 12px !important;
+    align-items: center !important;
+    padding: 13px !important;
+    background: #eef7f0 !important;
+    border: 1px solid rgba(97, 160, 113, 0.28) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 22px rgba(40, 28, 50, 0.05) !important;
+  }
+
+  .join-event-cover {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 74px !important;
+    height: 74px !important;
+    aspect-ratio: 1 !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(120, 8, 208, 0.10) !important;
+    background: #f4effa !important;
+  }
+
+  .join-event-cover img {
+    object-fit: cover !important;
+  }
+
+  .join-event-preview__details {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    min-width: 0 !important;
+    padding-top: 0 !important;
+    align-self: center !important;
+  }
+
+  .join-event-preview__details > strong {
+    margin: 0 !important;
+    color: #241a31 !important;
+    font-size: 15px !important;
+    font-weight: 850 !important;
+    line-height: 1.2 !important;
+  }
+
+  .join-event-preview__details > #joinEventMeta {
+    display: block !important;
+    margin-top: 4px !important;
+    color: #655d70 !important;
+    font-size: 11px !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+  }
+
+  .join-event-preview .join-event-address {
+    display: -webkit-box !important;
+    margin-top: 4px !important;
+    max-width: 100% !important;
+    color: #81788b !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    overflow-wrap: normal !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .join-event-map-link {
+    width: fit-content !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+    padding: 8px 11px !important;
+    color: #4c4560 !important;
+    background: #eff0fb !important;
+    border: 1px solid rgba(120, 8, 208, 0.14) !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    box-shadow: none !important;
+  }
+
+  body.event-gallery-shell .join-event-gallery-link {
+    grid-column: 3 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: center !important;
+    min-width: 132px !important;
+    min-height: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 18px !important;
+    border-radius: 18px !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: #17122b !important;
+    border: 1px solid #17122b !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 14px 28px rgba(23, 18, 43, 0.16) !important;
+  }
+
+  body.event-gallery-shell .join-event-gallery-link:hover,
+  body.event-gallery-shell .join-event-gallery-link:active {
+    background: #0f0b20 !important;
+    border-color: #0f0b20 !important;
+    transform: none !important;
+  }
+
+  .join-event-map-link svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview {
+    background: #1e2a21 !important;
+    border-color: rgba(121, 189, 137, 0.22) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16) !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview__details > strong {
+    color: #f5eff8 !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview__details > #joinEventMeta {
+    color: #d2cad8 !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview .join-event-address {
+    color: #b5afb9 !important;
+  }
+
+  html[data-theme="dark"] .join-event-map-link {
+    color: #e4daf1 !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(194, 133, 237, 0.18) !important;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — mobile event preview vertical card
+   Matches the requested upload-modal layout:
+   large cover, event info, Maps action, full-width Gallery CTA.
+   ========================================================= */
+@media (max-width: 640px) {
+  .join-event-preview {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+    background: #eef8f1 !important;
+    border: 1px solid rgba(89, 161, 110, 0.28) !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+  }
+
+  .join-event-cover {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    height: 132px !important;
+    aspect-ratio: auto !important;
+    margin: 0 0 11px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(84, 154, 104, 0.24) !important;
+    border-radius: 14px !important;
+    background: #e6f3e9 !important;
+  }
+
+  .join-event-cover img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  .join-event-preview__details {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+  }
+
+  .join-event-preview__details > strong {
+    margin: 0 !important;
+    color: #2a2037 !important;
+    font-size: 16px !important;
+    font-weight: 850 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.015em !important;
+  }
+
+  .join-event-preview__details > #joinEventMeta {
+    display: block !important;
+    margin-top: 5px !important;
+    color: #726a7a !important;
+    font-size: 11.5px !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+  }
+
+  .join-event-preview .join-event-address {
+    display: -webkit-box !important;
+    width: 100% !important;
+    margin-top: 5px !important;
+    color: #7f7885 !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.45 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 3 !important;
+  }
+
+  .join-event-map-link {
+    width: fit-content !important;
+    min-height: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin: 9px 0 0 !important;
+    padding: 7px 11px !important;
+    color: #7808d0 !important;
+    background: rgba(120, 8, 208, 0.045) !important;
+    border: 1px solid rgba(120, 8, 208, 0.17) !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+  }
+
+  .join-event-map-link:hover,
+  .join-event-map-link:active {
+    color: #6607b2 !important;
+    background: rgba(120, 8, 208, 0.08) !important;
+    border-color: rgba(120, 8, 208, 0.24) !important;
+    transform: none !important;
+  }
+
+  .join-event-map-link svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Gallery CTA becomes the strong full-width action at the bottom. */
+  body.event-gallery-shell .join-event-gallery-link {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    margin: 11px 0 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 16px !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: #17122b !important;
+    border: 1px solid #17122b !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+  }
+
+  body.event-gallery-shell .join-event-gallery-link:hover,
+  body.event-gallery-shell .join-event-gallery-link:active {
+    background: #0f0b20 !important;
+    border-color: #0f0b20 !important;
+    transform: none !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview {
+    background: #1c2a20 !important;
+    border-color: rgba(117, 190, 137, 0.22) !important;
+  }
+
+  html[data-theme="dark"] .join-event-cover {
+    background: #23372a !important;
+    border-color: rgba(117, 190, 137, 0.20) !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview__details > strong {
+    color: #f5eff8 !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview__details > #joinEventMeta {
+    color: #d1c8d6 !important;
+  }
+
+  html[data-theme="dark"] .join-event-preview .join-event-address {
+    color: #b9b0bd !important;
+  }
+
+  html[data-theme="dark"] .join-event-map-link {
+    color: #d4aaf2 !important;
+    background: rgba(120, 8, 208, 0.12) !important;
+    border-color: rgba(196, 136, 238, 0.20) !important;
+  }
+}
+
+
+
+/* =========================================================
+   Event Gallery — compact mobile upload controls
+   Keeps the vertical event card, but reduces the lower form height.
+   ========================================================= */
+@media (max-width: 640px) {
+  .join-upload-form {
+    gap: 11px !important;
+  }
+
+  /* Choose Media: 3 equal buttons on one row. */
+  .join-media-type {
+    gap: 7px !important;
+  }
+
+  .join-media-type > span {
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+  }
+
+  .join-media-type div {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .join-media-type button {
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 7px 6px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  .join-media-type button:hover,
+  .join-media-type button.active {
+    transform: none !important;
+  }
+
+  /* Message section: less vertical space. */
+  .join-message-field label {
+    gap: 7px !important;
+    font-size: 15px !important;
+  }
+
+  .join-upload-form textarea,
+  #joinMessageText {
+    min-height: 92px !important;
+    height: 92px !important;
+    padding: 12px 13px !important;
+    border-radius: 13px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  /* File picker follows the same compact rhythm for Image/Video. */
+  .join-upload-form .join-file-picker {
+    min-height: 64px !important;
+    grid-template-columns: 40px minmax(0, 1fr) auto !important;
+    gap: 9px !important;
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .join-file-picker__icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 11px !important;
+    box-shadow: none !important;
+  }
+
+  .join-file-picker__icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .join-file-picker__copy strong {
+    font-size: 12px !important;
+  }
+
+  .join-file-picker__copy span {
+    margin-top: 2px !important;
+    font-size: 10px !important;
+  }
+
+  .join-file-picker__count {
+    min-width: 38px !important;
+    padding: 5px 7px !important;
+    font-size: 10px !important;
+  }
+
+  .join-file-helper-text {
+    margin: 6px 0 0 !important;
+    font-size: 9.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Turnstile: tighter shell, no oversized empty padding. */
+  #joinTurnstileField.turnstile-field {
+    margin: 1px 0 0 !important;
+    padding: 8px 9px !important;
+    border-radius: 13px !important;
+  }
+
+  #joinTurnstileWidget.turnstile-widget {
+    min-height: 64px !important;
+  }
+
+  #joinTurnstileMessage.turnstile-message {
+    min-height: 0 !important;
+    margin-top: 2px !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Main CTA: compact but still easy to tap. */
+  .join-submit-button {
+    min-height: 46px !important;
+    border-radius: 13px !important;
+    background: #7808d0 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+  }
+
+  .join-submit-button:not(:disabled):active {
+    background: #6607b2 !important;
+  }
+
+  .join-upload-result {
+    min-height: 0 !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+  }
+
+  /* Reduce the gap after the green event preview card. */
+  .join-event-preview {
+    margin-bottom: 1px !important;
+  }
+}
+

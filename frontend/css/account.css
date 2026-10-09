@@ -3143,3 +3143,53 @@ html[data-theme="dark"] #passwordSaveButton:hover:not(:disabled) {
   }
 }
 
+
+
+/* =========================================================
+   Account — clean mobile My Events header
+   Removes the dark-mode gradient panel behind the title.
+   ========================================================= */
+@media (max-width: 760px) {
+  .account-topbar,
+  html[data-theme="dark"] .account-topbar {
+    min-height: 48px;
+    margin: 0 0 12px;
+    padding: 7px 2px 11px;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(78, 64, 88, 0.10) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .account-topbar::before,
+  .account-topbar::after,
+  html[data-theme="dark"] .account-topbar::before,
+  html[data-theme="dark"] .account-topbar::after {
+    display: none !important;
+  }
+
+  .account-topbar h1 {
+    color: var(--account-text);
+    font-size: 28px;
+    font-weight: 850;
+    letter-spacing: -0.045em;
+  }
+
+  html[data-theme="dark"] .account-topbar {
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  html[data-theme="dark"] .account-topbar h1 {
+    color: #f4eef7;
+  }
+
+  /* Keep the Create New Event CTA visually separate from the title. */
+  .account-topbar .topbar-create-btn {
+    box-shadow: none !important;
+  }
+}
+

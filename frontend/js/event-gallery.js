@@ -55,6 +55,9 @@ const galleryMobileStickyToolbar = document.getElementById(
 const galleryStickyEventTitle = document.getElementById(
   "galleryStickyEventTitle",
 );
+const galleryFollowEventTitle = document.getElementById(
+  "galleryFollowEventTitle",
+);
 const galleryStickyCount = document.getElementById("galleryStickyCount");
 const galleryStickyFilterSelect = document.getElementById(
   "galleryStickyFilterSelect",
@@ -207,6 +210,7 @@ const publicLightboxClose = document.getElementById("publicLightboxClose");
 const publicLightboxPrev = document.getElementById("publicLightboxPrev");
 const publicLightboxNext = document.getElementById("publicLightboxNext");
 const publicLightboxImage = document.getElementById("publicLightboxImage");
+const publicLightboxVideo = document.getElementById("publicLightboxVideo");
 const publicLightboxTitle = document.getElementById("publicLightboxTitle");
 const publicLightboxMeta = document.getElementById("publicLightboxMeta");
 
@@ -243,10 +247,12 @@ const localeByLanguage = {
 };
 
 let approvedPhotos = [];
+let approvedLightboxItems = [];
 let approvedFeedItems = [];
 let activeGalleryFilter = "all";
 let activeGallerySort = "newest";
 let activePhotoIndex = 0;
+let activeLightboxIndex = 0;
 let lightboxReturnTarget = null;
 let touchStartX = null;
 let gallerySettings = {
@@ -453,6 +459,7 @@ function renderEvent(event) {
   document.title = `${eventTitle} — SnapUp Events`;
   galleryEventTitle.textContent = eventTitle;
   if (galleryStickyEventTitle) galleryStickyEventTitle.textContent = eventTitle;
+  if (galleryFollowEventTitle) galleryFollowEventTitle.textContent = eventTitle;
 
   const locationText = [event.event_location, event.event_address]
     .map((value) => String(value || "").trim())
@@ -640,7 +647,7 @@ function getPhotoCardHtml(item, photoIndex) {
         <button
           type="button"
           class="approved-media-button"
-          data-photo-index="${photoIndex}"
+          data-lightbox-index="${photoIndex}"
           aria-label="${escapeHtml(openLabel)}"
         >
           <img
@@ -696,7 +703,7 @@ function formatVideoDuration(value) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function getVideoCardHtml(item) {
+function getVideoCardHtml(item, lightboxIndex) {
   const guestName = item.guest_name || t("Unknown Guest");
   const message = item.message || t("Approved video");
   const uploadedAt = item.media_created_at
@@ -755,6 +762,7 @@ function getVideoCardHtml(item) {
           type="button"
           class="approved-video-play"
           data-video-play
+          data-lightbox-index="${lightboxIndex}"
           aria-label="${escapeHtml(t("Play video"))}"
         >
           <span class="approved-video-play-icon" aria-hidden="true">
@@ -959,9 +967,12 @@ function renderGalleryFeedView() {
 
   const visibleFeed = getVisibleGalleryFeed();
   approvedPhotos = visibleFeed.filter((item) => item.feed_type === "image");
+  approvedLightboxItems = visibleFeed.filter((item) =>
+    ["image", "video"].includes(item.feed_type),
+  );
 
-  const photoIndexById = new Map(
-    approvedPhotos.map((item, index) => [String(item.media_id), index]),
+  const lightboxIndexById = new Map(
+    approvedLightboxItems.map((item, index) => [String(item.media_id), index]),
   );
 
   const countLabel = t(
@@ -987,12 +998,15 @@ function renderGalleryFeedView() {
       }
 
       if (item.feed_type === "video") {
-        return getVideoCardHtml(item);
+        return getVideoCardHtml(
+          item,
+          lightboxIndexById.get(String(item.media_id)) ?? 0,
+        );
       }
 
       return getPhotoCardHtml(
         item,
-        photoIndexById.get(String(item.media_id)) ?? 0,
+        lightboxIndexById.get(String(item.media_id)) ?? 0,
       );
     })
     .join("");
@@ -1040,6 +1054,7 @@ function renderApprovedFeed(media, messages) {
   if (approvedFeedItems.length === 0) {
     memoryCountBadge.textContent = t("{count} memories", { count: 0 });
     approvedPhotos = [];
+    approvedLightboxItems = [];
     approvedGalleryGrid.innerHTML = `
       <div class="empty-box">
         ${escapeHtml(
@@ -1055,26 +1070,69 @@ function renderApprovedFeed(media, messages) {
   renderGalleryFeedView();
 }
 
-function showLightboxItem(index) {
-  if (!approvedPhotos.length) return;
+function stopLightboxVideo() {
+  if (!publicLightboxVideo) return;
+
+  try {
+    publicLightboxVideo.pause();
+  } catch (_) {}
+
+  publicLightboxVideo.removeAttribute("src");
+  publicLightboxVideo.removeAttribute("poster");
+  publicLightboxVideo.load();
+  publicLightboxVideo.hidden = true;
+}
+
+async function showLightboxItem(index, { autoplay = true } = {}) {
+  if (!approvedLightboxItems.length) return;
 
   if (index < 0) {
-    activePhotoIndex = approvedPhotos.length - 1;
-  } else if (index >= approvedPhotos.length) {
-    activePhotoIndex = 0;
+    activeLightboxIndex = approvedLightboxItems.length - 1;
+  } else if (index >= approvedLightboxItems.length) {
+    activeLightboxIndex = 0;
   } else {
-    activePhotoIndex = index;
+    activeLightboxIndex = index;
   }
 
-  const item = approvedPhotos[activePhotoIndex];
+  stopLightboxVideo();
+
+  const item = approvedLightboxItems[activeLightboxIndex];
   const guestName = item.guest_name || t("Unknown Guest");
   const uploadedAt = item.media_created_at
     ? formatDateTime(item.media_created_at)
     : "";
   const uploadedBy = t("Uploaded by {name}", { name: guestName });
+  const isVideo = item.feed_type === "video";
 
-  publicLightboxImage.src = getImageDeliveryUrl(item, "display");
-  publicLightboxImage.alt = uploadedBy;
+  if (isVideo) {
+    publicLightboxImage.hidden = true;
+    publicLightboxImage.src = "";
+
+    publicLightboxVideo.hidden = false;
+    publicLightboxVideo.poster = getVideoPosterUrl(item) || "";
+    publicLightboxVideo.src = getVideoPlaybackUrl(item);
+    publicLightboxVideo.setAttribute(
+      "aria-label",
+      t("Approved video uploaded by {name}", { name: guestName }),
+    );
+    publicLightboxVideo.load();
+
+    if (autoplay) {
+      try {
+        await publicLightboxVideo.play();
+      } catch (error) {
+        // Browser autoplay policies can still block playback.
+        // Native controls remain visible so the user can start it manually.
+        console.debug("Lightbox video autoplay blocked:", error);
+      }
+    }
+  } else {
+    publicLightboxVideo.hidden = true;
+    publicLightboxImage.hidden = false;
+    publicLightboxImage.src = getImageDeliveryUrl(item, "display");
+    publicLightboxImage.alt = uploadedBy;
+  }
+
   publicLightboxTitle.textContent = uploadedBy;
 
   const likeText = gallerySettings.allow_likes
@@ -1084,25 +1142,30 @@ function showLightboxItem(index) {
   const metaParts = [item.message || "", uploadedAt, likeText].filter(Boolean);
   publicLightboxMeta.textContent = metaParts.join(" · ");
 
-  const hasMultiplePhotos = approvedPhotos.length > 1;
-  publicLightboxPrev.hidden = !hasMultiplePhotos;
-  publicLightboxNext.hidden = !hasMultiplePhotos;
+  const hasMultipleItems = approvedLightboxItems.length > 1;
+  publicLightboxPrev.hidden = !hasMultipleItems;
+  publicLightboxNext.hidden = !hasMultipleItems;
 }
 
 function openLightbox(index, trigger) {
   lightboxReturnTarget = trigger || document.activeElement;
-  showLightboxItem(index);
 
   publicLightbox.classList.add("active");
   publicLightbox.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+
+  showLightboxItem(index, { autoplay: true });
   publicLightboxClose.focus();
 }
 
 function closeLightbox() {
   publicLightbox.classList.remove("active");
   publicLightbox.setAttribute("aria-hidden", "true");
+
+  stopLightboxVideo();
+
   publicLightboxImage.src = "";
+  publicLightboxImage.hidden = false;
   document.body.style.overflow = "";
 
   if (lightboxReturnTarget instanceof HTMLElement) {
@@ -1187,6 +1250,18 @@ async function handleLikeClick(button) {
       };
     });
 
+    approvedLightboxItems = approvedLightboxItems.map((item) => {
+      if (String(item.media_id) !== String(mediaId)) {
+        return item;
+      }
+
+      return {
+        ...item,
+        likes_count: data.likes_count,
+        user_liked: data.liked,
+      };
+    });
+
     if (activeGallerySort === "liked") {
       renderGalleryFeedView();
     } else {
@@ -1195,9 +1270,10 @@ async function handleLikeClick(button) {
 
     if (
       publicLightbox.classList.contains("active") &&
-      String(approvedPhotos[activePhotoIndex]?.media_id) === String(mediaId)
+      String(approvedLightboxItems[activeLightboxIndex]?.media_id) ===
+        String(mediaId)
     ) {
-      showLightboxItem(activePhotoIndex);
+      showLightboxItem(activeLightboxIndex, { autoplay: false });
     }
   } catch (error) {
     console.error("Like error:", error);
@@ -1320,31 +1396,13 @@ approvedGalleryGrid.addEventListener("click", async (event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const shell = videoPlayButton.closest("[data-video-shell]");
-    const video = shell?.querySelector("[data-premium-video]");
-
-    if (getEffectiveGalleryView() === "grid") {
-      setGalleryView("feed");
-      videoPlayButton.closest("[data-media-id]")?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    const lightboxIndex = Number(videoPlayButton.dataset.lightboxIndex);
+    if (Number.isFinite(lightboxIndex)) {
+      openLightbox(lightboxIndex, videoPlayButton);
     }
-
-    if (!video) return;
-
-    video.controls = true;
-
-    try {
-      await video.play();
-      shell.classList.add("is-playing");
-    } catch (error) {
-      video.controls = false;
-      console.error("Video playback error:", error);
-    }
-
     return;
   }
+
   const likeButton = event.target.closest("[data-like-media-id]");
 
   if (likeButton) {
@@ -1354,13 +1412,13 @@ approvedGalleryGrid.addEventListener("click", async (event) => {
     return;
   }
 
-  const button = event.target.closest("[data-photo-index]");
+  const button = event.target.closest("[data-lightbox-index]");
 
   if (!button) {
     return;
   }
 
-  openLightbox(Number(button.dataset.photoIndex), button);
+  openLightbox(Number(button.dataset.lightboxIndex), button);
 });
 
 approvedGalleryGrid.addEventListener(
@@ -1382,11 +1440,11 @@ publicLightboxClose.addEventListener("click", closeLightbox);
 publicLightboxBackdrop.addEventListener("click", closeLightbox);
 
 publicLightboxPrev.addEventListener("click", () => {
-  showLightboxItem(activePhotoIndex - 1);
+  showLightboxItem(activeLightboxIndex - 1);
 });
 
 publicLightboxNext.addEventListener("click", () => {
-  showLightboxItem(activePhotoIndex + 1);
+  showLightboxItem(activeLightboxIndex + 1);
 });
 
 publicLightbox.addEventListener(
@@ -1400,7 +1458,7 @@ publicLightbox.addEventListener(
 publicLightbox.addEventListener(
   "touchend",
   (event) => {
-    if (touchStartX === null || approvedPhotos.length < 2) return;
+    if (touchStartX === null || approvedLightboxItems.length < 2) return;
 
     const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
     const distance = touchEndX - touchStartX;
@@ -1408,7 +1466,7 @@ publicLightbox.addEventListener(
 
     if (Math.abs(distance) < 50) return;
     showLightboxItem(
-      distance > 0 ? activePhotoIndex - 1 : activePhotoIndex + 1,
+      distance > 0 ? activeLightboxIndex - 1 : activeLightboxIndex + 1,
     );
   },
   { passive: true },
@@ -1424,11 +1482,11 @@ window.addEventListener("keydown", (event) => {
   }
 
   if (event.key === "ArrowLeft") {
-    showLightboxItem(activePhotoIndex - 1);
+    showLightboxItem(activeLightboxIndex - 1);
   }
 
   if (event.key === "ArrowRight") {
-    showLightboxItem(activePhotoIndex + 1);
+    showLightboxItem(activeLightboxIndex + 1);
   }
 });
 

@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="css/theme.css?v=gallery-without-book-2" />
     <link
       rel="stylesheet"
-      href="css/event-gallery.css?v=mobile-view-switch-polish-1"
+      href="css/event-gallery.css?v=mobile-upload-compact-1"
     />
     <link
       rel="stylesheet"
@@ -53,6 +53,7 @@
     <script src="js/upload-progress-i18n.js?v=upload-progress-50-languages-1" defer></script>
     <script src="js/ui-additions-i18n.js?v=approval-note-1" defer></script>
     <script src="js/i18n.js?v=global-languages-3" defer></script>
+    <link rel="stylesheet" href="css/join-upload-unified.css?v=unified-upload-1" />
   </head>
 
   <body class="event-gallery-shell">
@@ -257,8 +258,16 @@
         </section>
 
         <section class="approved-gallery-panel">
+          <div class="gallery-mobile-follow-nav">
           <div class="gallery-panel-head">
             <div class="section-head">
+              <span
+                class="gallery-follow-event-name"
+                id="galleryFollowEventTitle"
+                aria-label="Event name"
+              >
+                Event name
+              </span>
               <span class="section-kicker">Memories</span>
               <h2>Shared memories</h2>
               <p>Photos, videos and guest messages shared by guests come together here.</p>
@@ -385,6 +394,7 @@
               </button>
             </div>
 </div>
+          </div>
 
           <div class="approved-gallery-grid" id="approvedGalleryGrid"></div>
         </section>
@@ -681,6 +691,14 @@
 
       <figure class="public-lightbox-frame">
         <img id="publicLightboxImage" alt="Approved gallery preview" />
+        <video
+          id="publicLightboxVideo"
+          playsinline
+          controls
+          preload="metadata"
+          hidden
+          aria-label="Approved gallery video preview"
+        ></video>
         <figcaption>
           <strong id="publicLightboxTitle">Uploaded by Guest</strong>
           <span id="publicLightboxMeta"></span>
@@ -699,7 +717,7 @@
 
     <script
       type="module"
-      src="js/event-gallery.js?v=mobile-view-switch-polish-1"
+      src="js/event-gallery.js?v=sticky-event-name-1"
     ></script>
     <script src="js/theme.js?v=gallery-without-book-2"></script>
   </body>
