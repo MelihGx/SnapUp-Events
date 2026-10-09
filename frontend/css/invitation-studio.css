@@ -1720,3 +1720,154 @@ html[data-theme="dark"] body.event-detail-shell
   box-shadow: none !important;
 }
 
+
+/* =========================================================
+   Invitation Studio — refined SnapUp accents
+   Removes bright pink/multicolor gradients from the editor UI.
+   Invitation template artwork itself is intentionally untouched.
+   ========================================================= */
+
+/* Clean modal header: no pink glow. */
+.invitation-studio-header {
+  background: var(--detail-surface) !important;
+}
+
+/* Step numbers: flat brand purple instead of gradient. */
+.invitation-control-section legend span {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0;
+  box-shadow: none !important;
+}
+
+/* Output-format selection: subtle rather than luminous. */
+.invitation-format-grid input:checked + span {
+  color: #6607b2 !important;
+  background: rgba(120, 8, 208, 0.055) !important;
+  border-color: rgba(120, 8, 208, 0.42) !important;
+  box-shadow: none !important;
+}
+
+.invitation-format-grid input:focus-visible + span {
+  box-shadow: 0 0 0 2px rgba(120, 8, 208, 0.12) !important;
+}
+
+/* Category pills: active state is one flat brand color. */
+.invitation-category-filter button.active {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border-color: #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.invitation-category-filter button.active:hover {
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+}
+
+.invitation-category-filter button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(120, 8, 208, 0.12) !important;
+}
+
+/* Template selection follows the same restrained language. */
+.invitation-template-grid button.active {
+  color: #6607b2 !important;
+  background: rgba(120, 8, 208, 0.05) !important;
+  border-color: rgba(120, 8, 208, 0.38) !important;
+  box-shadow: none !important;
+}
+
+/* Primary editor actions: flat brand purple, no glow. */
+.invitation-download-button {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.invitation-download-button:hover:not(:disabled) {
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+}
+
+.invitation-download-button.secondary {
+  color: #7808d0 !important;
+  background: rgba(120, 8, 208, 0.055) !important;
+  border-color: rgba(120, 8, 208, 0.22) !important;
+  box-shadow: none !important;
+}
+
+.invitation-photo-actions button:not(.secondary) {
+  color: #ffffff !important;
+  background: #7808d0 !important;
+  background-image: none !important;
+  border: 1px solid #7808d0 !important;
+  box-shadow: none !important;
+}
+
+.invitation-photo-actions button:not(.secondary):hover:not(:disabled) {
+  background: #6607b2 !important;
+  border-color: #6607b2 !important;
+}
+
+/* Dark mode keeps the same hierarchy without bright glow. */
+html[data-theme="dark"] .invitation-format-grid input:checked + span,
+html[data-theme="dark"] .invitation-template-grid button.active {
+  color: #d5a6f2 !important;
+  background: rgba(120, 8, 208, 0.13) !important;
+  border-color: rgba(213, 166, 242, 0.22) !important;
+}
+
+
+
+/* =========================================================
+   Invitation Studio — additional curated templates
+   ========================================================= */
+.template-swatch.wedding-ivory-gold {
+  background: url("../assets/invitations/wedding-ivory-gold.svg") center / cover;
+}
+
+.template-swatch.wedding-modern-vows {
+  background: url("../assets/invitations/wedding-modern-vows.svg") center / cover;
+}
+
+.template-swatch.wedding-rose-garden {
+  background: url("../assets/invitations/wedding-rose-garden.svg") center / cover;
+}
+
+.template-swatch.graduation-midnight-diploma {
+  background: url("../assets/invitations/graduation-midnight-diploma.svg") center / cover;
+}
+
+.template-swatch.birthday-confetti-pop {
+  background: url("../assets/invitations/birthday-confetti-pop.svg") center / cover;
+}
+
+.template-swatch.birthday-soft-celebration {
+  background: url("../assets/invitations/birthday-soft-celebration.svg") center / cover;
+}
+
+.template-swatch.travel-summer-escape {
+  background: url("../assets/invitations/travel-summer-escape.svg") center / cover;
+}
+
+.template-swatch.house-city-lights {
+  background: url("../assets/invitations/house-city-lights.svg") center / cover;
+}
+
+.template-swatch:is(
+  .wedding-ivory-gold,
+  .wedding-modern-vows,
+  .wedding-rose-garden,
+  .graduation-midnight-diploma,
+  .birthday-confetti-pop,
+  .birthday-soft-celebration,
+  .travel-summer-escape,
+  .house-city-lights
+)::after {
+  opacity: 0.72;
+}
+

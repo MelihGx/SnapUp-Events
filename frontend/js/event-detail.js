@@ -1,7 +1,7 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
 import { buildEventGalleryUrl } from "./event-url.js?v=event-slug-1";
 import { createMemoryBookPdf } from "./memory-book-pdf.js?v=r2-memory-book-direct-1";
-import { setInvitationStudioEvent } from "./invitation-studio.js?v=cloudinary-bandwidth-1";
+import { setInvitationStudioEvent } from "./invitation-studio.js?v=templates-20-1";
 import {
   buildEventMapUrl,
   createLocationMapPicker,
