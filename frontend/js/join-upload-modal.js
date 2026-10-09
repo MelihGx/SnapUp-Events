@@ -18,6 +18,38 @@ let selectedFilePreviewUrls = [];
 let successPopupHideTimer = null;
 let joinTurnstileControllerPromise = null;
 
+function getJoinTurnstileField() {
+  return document.getElementById("joinTurnstileField");
+}
+
+function hideJoinTurnstileUntilEvent() {
+  const field = getJoinTurnstileField();
+  if (!field) return;
+
+  field.hidden = true;
+}
+
+async function ensureJoinTurnstileMounted() {
+  const field = getJoinTurnstileField();
+
+  if (!joinTurnstileControllerPromise) {
+    joinTurnstileControllerPromise = mountTurnstile({
+      fieldId: "joinTurnstileField",
+      widgetId: "joinTurnstileWidget",
+      messageId: "joinTurnstileMessage",
+      action: "guest_join",
+    });
+  }
+
+  const controller = await joinTurnstileControllerPromise;
+
+  if (field && controller?.enabled) {
+    field.hidden = false;
+  }
+
+  return controller;
+}
+
 function translate(message) {
   return window.SnapUpI18n?.t?.(message) || message;
 }
@@ -785,6 +817,7 @@ function renderEventPreview(event) {
 
   if (!event) {
     preview.hidden = true;
+    hideJoinTurnstileUntilEvent();
     name.textContent = "";
     meta.textContent = "";
     addressElement.textContent = "";
@@ -863,6 +896,11 @@ function renderEventPreview(event) {
   }
 
   preview.hidden = false;
+
+  // Security verification belongs to a resolved event, not to the empty form.
+  void ensureJoinTurnstileMounted().catch(() => {
+    // mountTurnstile renders its own localized error state after an event exists.
+  });
 }
 
 async function findEventByCode(eventCode) {
@@ -1220,7 +1258,7 @@ function initFormSubmit() {
         return;
       }
 
-      turnstileController = await joinTurnstileControllerPromise;
+      turnstileController = await ensureJoinTurnstileMounted();
       const turnstileToken = turnstileController.getToken();
       turnstileTokenWasUsed = Boolean(turnstileToken);
 
@@ -1334,12 +1372,10 @@ function initUploadSuccessPopup() {
 }
 
 export function initJoinUploadModal() {
-  joinTurnstileControllerPromise = mountTurnstile({
-    fieldId: "joinTurnstileField",
-    widgetId: "joinTurnstileWidget",
-    messageId: "joinTurnstileMessage",
-    action: "guest_join",
-  });
+  // Do not request Turnstile configuration before the user has entered
+  // a valid event code. This also prevents an empty/error security card
+  // from appearing in the home upload modal.
+  hideJoinTurnstileUntilEvent();
 
   initOpenClose();
   initMediaTypeButtons();

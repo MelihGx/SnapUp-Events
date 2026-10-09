@@ -1413,3 +1413,134 @@ body.event-gallery-shell .join-event-gallery-link:hover {
     line-height: 1.45 !important;
   }
 }
+
+
+
+/* =========================================================
+   Unified upload — keep Cloudflare Turnstile inside narrow cards
+   Flexible Turnstile is already enabled in turnstile.js.
+   These rules ensure the iframe follows the actual inner width.
+   ========================================================= */
+.join-upload-modal .turnstile-field,
+.join-upload-panel .turnstile-field,
+#joinTurnstileField.turnstile-field {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.join-upload-modal .turnstile-widget,
+.join-upload-panel .turnstile-widget,
+#joinTurnstileWidget.turnstile-widget {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+#joinTurnstileWidget > div,
+#joinTurnstileWidget iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* On very narrow phones, give the widget almost the full card width. */
+@media (max-width: 420px) {
+  #joinTurnstileField.turnstile-field {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  #joinTurnstileWidget.turnstile-widget {
+    margin-inline: auto !important;
+  }
+}
+
+
+
+/* =========================================================
+   Unified upload — Turnstile narrow-phone scale fix
+   Cloudflare's inner challenge can keep a ~300px intrinsic width.
+   Scale the generated widget itself so it fits inside the card.
+   ========================================================= */
+@media (max-width: 420px) {
+  #joinTurnstileField.turnstile-field {
+    padding: 6px !important;
+    overflow: hidden !important;
+  }
+
+  #joinTurnstileWidget.turnstile-widget {
+    min-height: 58px !important;
+    height: 58px !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+  }
+
+  #joinTurnstileWidget > div {
+    width: 113.64% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    transform: scale(0.88) !important;
+    transform-origin: top left !important;
+  }
+
+  #joinTurnstileWidget > div iframe {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+
+  #joinTurnstileMessage.turnstile-message {
+    margin-top: 1px !important;
+  }
+}
+
+/* Extra safety for very narrow devices (<= 360px CSS viewport). */
+@media (max-width: 360px) {
+  #joinTurnstileWidget.turnstile-widget {
+    min-height: 55px !important;
+    height: 55px !important;
+  }
+
+  #joinTurnstileWidget > div {
+    width: 117.65% !important;
+    transform: scale(0.85) !important;
+  }
+}
+
+
+
+/* =========================================================
+   Unified upload — respect JS hidden state on every viewport
+   Prevent mobile !important layout rules from exposing empty UI.
+   ========================================================= */
+.join-upload-panel .join-event-preview[hidden],
+.join-upload-panel .join-event-map-link[hidden],
+.join-upload-panel .join-event-gallery-link[hidden],
+.join-upload-panel .turnstile-field[hidden],
+.join-upload-panel .join-message-field[hidden],
+.join-upload-panel .join-file-field[hidden],
+.join-upload-panel .join-file-preview[hidden],
+.join-upload-panel .join-event-cover img[hidden],
+.join-upload-panel .join-event-cover span[hidden] {
+  display: none !important;
+}
+
+
+
+/* =========================================================
+   Unified upload — tiny gap between Maps and Gallery actions
+   ========================================================= */
+@media (max-width: 640px) {
+  .join-event-preview > .join-event-gallery-link {
+    margin-top: 6px !important;
+  }
+}
+
