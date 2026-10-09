@@ -11790,3 +11790,186 @@ html[data-theme="dark"] #eventGallerySection .media-filter-bar button.active spa
   justify-self: center;
   text-align: center;
 }
+
+
+
+/* =========================================================
+   Approve all photos — custom confirmation popup
+   ========================================================= */
+body.approve-all-confirm-open {
+  overflow: hidden;
+}
+
+.approve-all-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1680;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.approve-all-confirm-overlay.active {
+  display: flex;
+}
+
+.approve-all-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: rgba(10, 6, 18, 0.68);
+  border: 0;
+  cursor: default;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.approve-all-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(440px, calc(100vw - 32px));
+  padding: 30px;
+  color: var(--detail-text);
+  background: color-mix(in srgb, var(--detail-surface-solid) 97%, transparent);
+  border: 1px solid var(--detail-line);
+  border-radius: 26px;
+  box-shadow: 0 32px 105px rgba(8, 4, 16, 0.44);
+  text-align: center;
+  animation: eventCoverEditorIn 220ms ease both;
+}
+
+.approve-all-confirm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--detail-text-soft);
+  background: var(--detail-surface-raised);
+  border: 1px solid var(--detail-line);
+  border-radius: 50%;
+  cursor: pointer;
+  font: inherit;
+  font-size: 21px;
+  line-height: 1;
+  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.approve-all-confirm-close:hover {
+  color: #7808d0;
+  border-color: rgba(120, 8, 208, 0.28);
+  transform: rotate(5deg) scale(1.04);
+}
+
+.approve-all-confirm-icon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  margin: 3px auto 16px;
+  color: #178a57;
+  background: rgba(23, 138, 87, 0.09);
+  border: 1px solid rgba(23, 138, 87, 0.18);
+  border-radius: 20px;
+}
+
+.approve-all-confirm-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.approve-all-confirm-kicker {
+  display: block;
+  color: #178a57;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.approve-all-confirm-dialog h2 {
+  margin: 8px 0 10px;
+  color: var(--detail-text);
+  font-size: clamp(25px, 4vw, 31px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.approve-all-confirm-dialog > p {
+  max-width: 340px;
+  margin: 0 auto;
+  color: var(--detail-text-soft);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.approve-all-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.approve-all-confirm-actions button {
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 13px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.approve-all-confirm-cancel {
+  color: var(--detail-text);
+  background: var(--detail-field);
+  border: 1px solid var(--detail-line);
+}
+
+.approve-all-confirm-approve {
+  color: #ffffff;
+  background: #178a57;
+  border: 1px solid #178a57;
+  box-shadow: 0 11px 25px rgba(23, 138, 87, 0.20);
+}
+
+.approve-all-confirm-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.approve-all-confirm-approve:hover {
+  background: #126f47;
+  border-color: #126f47;
+  box-shadow: 0 13px 29px rgba(23, 138, 87, 0.24);
+}
+
+@media (max-width: 560px) {
+  .approve-all-confirm-overlay {
+    padding: 16px;
+  }
+
+  .approve-all-confirm-dialog {
+    width: min(100%, 410px);
+    padding: 27px 20px 20px;
+    border-radius: 23px;
+  }
+
+  .approve-all-confirm-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+

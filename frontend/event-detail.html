@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=cumulative-svg-status-icons-1"
+      href="css/event-detail.css?v=approve-all-popup-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -2031,6 +2031,64 @@
     ></div>
 
     <div
+      class="approve-all-confirm-overlay"
+      id="approveAllConfirmModal"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="approve-all-confirm-backdrop"
+        id="approveAllConfirmBackdrop"
+        aria-label="Cancel"
+        tabindex="-1"
+      ></button>
+
+      <section
+        class="approve-all-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="approveAllConfirmTitle"
+        aria-describedby="approveAllConfirmDescription"
+      >
+        <button
+          type="button"
+          class="approve-all-confirm-close"
+          id="approveAllConfirmClose"
+          aria-label="Cancel"
+        >
+          ×
+        </button>
+
+        <span class="approve-all-confirm-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="m6.5 12.5 3.4 3.4 7.8-8.1"></path>
+          </svg>
+        </span>
+
+        <span class="approve-all-confirm-kicker" id="approveAllConfirmKicker">Pending</span>
+        <h2 id="approveAllConfirmTitle">Approve All Photos</h2>
+        <p id="approveAllConfirmDescription"></p>
+
+        <div class="approve-all-confirm-actions">
+          <button
+            type="button"
+            class="approve-all-confirm-cancel"
+            id="approveAllConfirmCancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="approve-all-confirm-approve"
+            id="approveAllConfirmApprove"
+          >
+            Approve All Photos
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div
       class="media-delete-confirm-overlay"
       id="mediaDeleteConfirmModal"
       aria-hidden="true"
@@ -2990,7 +3048,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=guest-stats-icons-only-1"
+      src="js/event-detail.js?v=approve-all-popup-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>

@@ -389,6 +389,30 @@ const eventArchiveIncludeInfo = document.getElementById(
 const approveAllImagesButton = document.getElementById(
   "approveAllImagesButton",
 );
+const approveAllConfirmModal = document.getElementById(
+  "approveAllConfirmModal",
+);
+const approveAllConfirmBackdrop = document.getElementById(
+  "approveAllConfirmBackdrop",
+);
+const approveAllConfirmClose = document.getElementById(
+  "approveAllConfirmClose",
+);
+const approveAllConfirmCancel = document.getElementById(
+  "approveAllConfirmCancel",
+);
+const approveAllConfirmApprove = document.getElementById(
+  "approveAllConfirmApprove",
+);
+const approveAllConfirmKicker = document.getElementById(
+  "approveAllConfirmKicker",
+);
+const approveAllConfirmTitle = document.getElementById(
+  "approveAllConfirmTitle",
+);
+const approveAllConfirmDescription = document.getElementById(
+  "approveAllConfirmDescription",
+);
 
 const detailNoticePopup = document.getElementById("detailNoticePopup");
 const detailNoticeBackdrop = document.getElementById("detailNoticeBackdrop");
@@ -396,6 +420,8 @@ const detailNoticeMessage = document.getElementById("detailNoticeMessage");
 const detailNoticeClose = document.getElementById("detailNoticeClose");
 
 let detailNoticeTimer = null;
+let approveAllConfirmResolver = null;
+let approveAllConfirmLastFocusedElement = null;
 
 function closeDetailNotice() {
   if (!detailNoticePopup) return;
@@ -5665,6 +5691,96 @@ if (uploadMediaBtn) {
 setActiveUploadType("photo");
 updateMemoryMessageCount();
 
+function closeApproveAllConfirm(confirmed = false, { restoreFocus = true } = {}) {
+  if (!approveAllConfirmModal?.classList.contains("active")) {
+    return;
+  }
+
+  approveAllConfirmModal.classList.remove("active");
+  approveAllConfirmModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("approve-all-confirm-open");
+
+  const resolver = approveAllConfirmResolver;
+  approveAllConfirmResolver = null;
+
+  if (resolver) {
+    resolver(Boolean(confirmed));
+  }
+
+  if (restoreFocus && approveAllConfirmLastFocusedElement?.focus) {
+    approveAllConfirmLastFocusedElement.focus();
+  }
+
+  approveAllConfirmLastFocusedElement = null;
+}
+
+function requestApproveAllConfirmation(count) {
+  if (!approveAllConfirmModal) {
+    return Promise.resolve(
+      window.confirm(
+        t("Are you sure you want to approve {count} pending photo(s)?", {
+          count,
+        }),
+      ),
+    );
+  }
+
+  if (approveAllConfirmResolver) {
+    return Promise.resolve(false);
+  }
+
+  approveAllConfirmLastFocusedElement = document.activeElement;
+
+  if (approveAllConfirmKicker) {
+    approveAllConfirmKicker.textContent = t("Pending");
+  }
+
+  if (approveAllConfirmTitle) {
+    approveAllConfirmTitle.textContent = t("Approve All Photos");
+  }
+
+  if (approveAllConfirmDescription) {
+    approveAllConfirmDescription.textContent = t(
+      "Are you sure you want to approve {count} pending photo(s)?",
+      { count },
+    );
+  }
+
+  if (approveAllConfirmCancel) {
+    approveAllConfirmCancel.textContent = t("Cancel");
+  }
+
+  if (approveAllConfirmApprove) {
+    approveAllConfirmApprove.textContent = t("Approve All Photos");
+  }
+
+  approveAllConfirmModal.classList.add("active");
+  approveAllConfirmModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("approve-all-confirm-open");
+
+  window.requestAnimationFrame(() => approveAllConfirmCancel?.focus());
+
+  return new Promise((resolve) => {
+    approveAllConfirmResolver = resolve;
+  });
+}
+
+approveAllConfirmBackdrop?.addEventListener("click", () => {
+  closeApproveAllConfirm(false);
+});
+
+approveAllConfirmClose?.addEventListener("click", () => {
+  closeApproveAllConfirm(false);
+});
+
+approveAllConfirmCancel?.addEventListener("click", () => {
+  closeApproveAllConfirm(false);
+});
+
+approveAllConfirmApprove?.addEventListener("click", () => {
+  closeApproveAllConfirm(true);
+});
+
 async function approveAllImages() {
   if (!eventId || !token || !approveAllImagesButton) {
     return;
@@ -5679,11 +5795,7 @@ async function approveAllImages() {
     return;
   }
 
-  const confirmed = confirm(
-    t("Are you sure you want to approve {count} pending photo(s)?", {
-      count: pendingImageCount,
-    }),
-  );
+  const confirmed = await requestApproveAllConfirmation(pendingImageCount);
 
   if (!confirmed) {
     return;
@@ -5732,6 +5844,15 @@ async function approveAllImages() {
     updateApproveAllImagesButtonVisibility(currentRenderedMediaList);
   }
 }
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    approveAllConfirmModal?.classList.contains("active")
+  ) {
+    closeApproveAllConfirm(false);
+  }
+});
+
 if (approveAllImagesButton) {
   approveAllImagesButton.addEventListener("click", approveAllImages);
 }
