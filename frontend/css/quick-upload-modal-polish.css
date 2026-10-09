@@ -1,0 +1,393 @@
+
+/* =========================================================
+   SnapUp Events — Quick Upload modal / guest-upload visual style
+   Matches the larger, friendlier upload modal shown on the public flow.
+   Desktop only; mobile/tablet behavior remains unchanged.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  .desktop-quick-upload-backdrop {
+    background: rgba(15, 12, 20, 0.60) !important;
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+  }
+
+  #desktopQuickUploadPanel.is-desktop-modal-open {
+    width: min(620px, calc(100vw - 44px)) !important;
+    max-height: min(92vh, 830px) !important;
+    padding: 28px 28px 24px !important;
+    border: 1px solid rgba(47, 37, 58, 0.10) !important;
+    border-radius: 30px !important;
+    background: #ffffff !important;
+    box-shadow:
+      0 30px 90px rgba(16, 10, 23, 0.30),
+      0 2px 10px rgba(16, 10, 23, 0.08) !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(67, 57, 79, 0.35) transparent;
+  }
+
+  #desktopQuickUploadPanel.is-desktop-modal-open::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #desktopQuickUploadPanel.is-desktop-modal-open::-webkit-scrollbar-thumb {
+    background: rgba(67, 57, 79, 0.32);
+    border-radius: 999px;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header {
+    position: relative;
+    margin: 0 0 24px !important;
+    padding: 0 52px 0 0 !important;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header .upload-kicker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 14px !important;
+    color: #7b3ff2 !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1 !important;
+    text-transform: uppercase;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header .upload-kicker::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 999px;
+    background: #7b3ff2;
+    box-shadow: 0 0 0 7px rgba(123, 63, 242, 0.10);
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header h2 {
+    margin: 0 !important;
+    color: #1f1730 !important;
+    font-size: 39px !important;
+    font-weight: 900 !important;
+    line-height: 1.03 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header p {
+    max-width: 510px !important;
+    margin: 14px 0 0 !important;
+    color: #7c7388 !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+
+  .desktop-quick-upload-close {
+    top: -4px !important;
+    right: 0 !important;
+    width: 42px !important;
+    height: 42px !important;
+    display: grid !important;
+    place-items: center !important;
+    color: #7a7282 !important;
+    background: #f3f1f4 !important;
+    border: 1px solid #ece7ef !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+  }
+
+  .desktop-quick-upload-close:hover,
+  .desktop-quick-upload-close:focus-visible {
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    border-color: #7808d0 !important;
+  }
+
+  #desktopQuickUploadPanel .upload-form {
+    gap: 14px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-form > label,
+  #desktopQuickUploadPanel .upload-file-label,
+  #desktopQuickUploadPanel #messageUploadPanel > label {
+    margin: 0 !important;
+    color: #2b2237 !important;
+    font-size: 14px !important;
+    font-weight: 850 !important;
+    line-height: 1.2 !important;
+  }
+
+  #desktopQuickUploadPanel #guestName {
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 0 16px !important;
+    color: #2b2237 !important;
+    background: #f4efff !important;
+    border: 1px solid #ddd1f4 !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+  }
+
+  #desktopQuickUploadPanel #guestName:focus {
+    background: #ffffff !important;
+    border-color: #9255f4 !important;
+    box-shadow:
+      0 0 0 4px rgba(120, 8, 208, 0.10),
+      0 0 0 7px rgba(82, 226, 210, 0.18) !important;
+    outline: none !important;
+  }
+
+  /* Public-upload style media selection cards. */
+  #desktopQuickUploadPanel .upload-type-switch {
+    min-height: 58px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  #desktopQuickUploadPanel .upload-type-button {
+    min-height: 54px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    padding: 10px 12px !important;
+    color: #30273d !important;
+    background: #f2ecff !important;
+    border: 1px solid #d9cdf0 !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+  }
+
+  #desktopQuickUploadPanel .upload-type-button svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-type-button.active {
+    color: #ffffff !important;
+    background: #21172f !important;
+    border-color: #21172f !important;
+  }
+
+  #desktopQuickUploadPanel .upload-type-button:hover:not(.active) {
+    color: #4f2a80 !important;
+    background: #eee5ff !important;
+    border-color: #cdb8ef !important;
+    transform: none !important;
+  }
+
+  /* Message editor / file picker now visually match the public upload modal. */
+  #desktopQuickUploadPanel #memoryMessageInput {
+    min-height: 122px !important;
+    padding: 15px 16px !important;
+    color: #2c2338 !important;
+    background: #f3edff !important;
+    border: 1px solid #d9ccef !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+
+  #desktopQuickUploadPanel #memoryMessageInput:focus {
+    background: #ffffff !important;
+    border-color: #9255f4 !important;
+    box-shadow: 0 0 0 4px rgba(120, 8, 208, 0.09) !important;
+    outline: none !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker {
+    min-height: 88px !important;
+    padding: 14px 16px !important;
+    background: #fbf9ff !important;
+    border: 1px dashed #b983ee !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker:hover {
+    background: #f7f2ff !important;
+    border-color: #7808d0 !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker__icon {
+    width: 42px !important;
+    height: 42px !important;
+    flex: 0 0 42px !important;
+    color: #7808d0 !important;
+    background: #f1e8ff !important;
+    border: 1px solid #d5c1f1 !important;
+    border-radius: 13px !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker__copy strong {
+    color: #2a2135 !important;
+    font-size: 13px !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker__copy span {
+    color: #777080 !important;
+    font-size: 11px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-file-helper {
+    color: #8c8495 !important;
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+  }
+
+  #desktopQuickUploadPanel .upload-message-counter {
+    color: #8c8495 !important;
+    font-size: 10px !important;
+  }
+
+  /* Keep the Turnstile area visible, like the public upload modal. */
+  #desktopQuickUploadPanel #eventDetailTurnstileField,
+  #desktopQuickUploadPanel #eventDetailTurnstileField.is-verified {
+    width: 100% !important;
+    margin: 3px 0 0 !important;
+    padding: 12px 14px !important;
+    background: #f0fbfa !important;
+    border: 1px solid #aee2dc !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+  }
+
+  #desktopQuickUploadPanel
+    #eventDetailTurnstileField.is-verified
+    #eventDetailTurnstileWidget {
+    display: block !important;
+  }
+
+  #desktopQuickUploadPanel #eventDetailTurnstileWidget {
+    min-height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #desktopQuickUploadPanel #eventDetailTurnstileMessage {
+    min-height: 0 !important;
+    margin-top: 4px !important;
+    color: #23826c !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+  }
+
+  #desktopQuickUploadPanel .snapup-upload-progress {
+    margin: 0 !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  #desktopQuickUploadPanel #uploadMediaBtn {
+    min-height: 52px !important;
+    height: 52px !important;
+    margin-top: 2px !important;
+    padding: 0 18px !important;
+    color: #ffffff !important;
+    background: #7808d0 !important;
+    background-image: none !important;
+    border: 1px solid #7808d0 !important;
+    border-radius: 15px !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+  }
+
+  #desktopQuickUploadPanel #uploadMediaBtn:hover:not(:disabled),
+  #desktopQuickUploadPanel #uploadMediaBtn:focus-visible:not(:disabled) {
+    background: #6607b2 !important;
+    border-color: #6607b2 !important;
+    transform: none !important;
+  }
+
+  #desktopQuickUploadPanel .upload-message {
+    min-height: 0 !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel.is-desktop-modal-open {
+    background: #201a27 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-panel-header h2,
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-form > label,
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-file-label,
+  html[data-theme="dark"] #desktopQuickUploadPanel #messageUploadPanel > label {
+    color: #f6f0fa !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-panel-header p {
+    color: #b7adbd !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel #guestName,
+  html[data-theme="dark"] #desktopQuickUploadPanel #memoryMessageInput,
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-type-button:not(.active) {
+    color: #eee7f2 !important;
+    background: #2d2535 !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel .detail-file-picker {
+    background: #292230 !important;
+    border-color: rgba(190, 136, 238, 0.55) !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel .detail-file-picker__copy strong {
+    color: #f5eff8 !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel .detail-file-picker__copy span,
+  html[data-theme="dark"] #desktopQuickUploadPanel .upload-file-helper {
+    color: #aaa0b0 !important;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel #eventDetailTurnstileField,
+  html[data-theme="dark"]
+    #desktopQuickUploadPanel
+    #eventDetailTurnstileField.is-verified {
+    background: rgba(31, 126, 105, 0.08) !important;
+    border-color: rgba(79, 180, 158, 0.24) !important;
+  }
+}
+
+@media (min-width: 1200px) and (max-height: 760px) {
+  #desktopQuickUploadPanel.is-desktop-modal-open {
+    max-height: calc(100vh - 22px) !important;
+    padding: 22px 24px 20px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header {
+    margin-bottom: 18px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header h2 {
+    font-size: 34px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header p {
+    margin-top: 9px !important;
+  }
+
+  #desktopQuickUploadPanel .upload-form {
+    gap: 11px !important;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker {
+    min-height: 76px !important;
+  }
+}

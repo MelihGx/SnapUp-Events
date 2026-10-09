@@ -1,4 +1,8 @@
 import { API_URL } from "./config.js?v=runtime-api-2";
+import {
+  initJoinUploadModal,
+  openJoinUploadModalForEvent,
+} from "./join-upload-modal.js?v=approval-note-1";
 import { buildEventGalleryUrl } from "./event-url.js?v=event-slug-1";
 import { createMemoryBookPdf } from "./memory-book-pdf.js?v=r2-memory-book-direct-1";
 import { setInvitationStudioEvent } from "./invitation-studio.js?v=templates-20-1";
@@ -4771,10 +4775,15 @@ function closeDesktopQuickUploadModal({ restoreFocus = true } = {}) {
   }
 }
 
-desktopQuickUploadOpen?.addEventListener(
-  "click",
-  openDesktopQuickUploadModal,
-);
+desktopQuickUploadOpen?.addEventListener("click", async () => {
+  if (!currentEvent) return;
+
+  try {
+    await openJoinUploadModalForEvent(currentEvent);
+  } catch (error) {
+    console.error("Shared upload modal could not be opened:", error);
+  }
+});
 
 desktopQuickUploadClose?.addEventListener("click", () => {
   closeDesktopQuickUploadModal();
@@ -5913,5 +5922,16 @@ if (approveAllImagesButton) {
 }
 
 setupMobileSectionNavigation();
+initJoinUploadModal();
 hydrateAccountNameForUpload();
+
+window.addEventListener("snapup:upload-success", (event) => {
+  const uploadedEventCode = String(event.detail?.eventCode || "").trim().toUpperCase();
+  const currentEventCode = String(currentEvent?.event_code || "").trim().toUpperCase();
+
+  if (uploadedEventCode && uploadedEventCode === currentEventCode) {
+    loadEventDetail();
+  }
+});
+
 loadEventDetail();
