@@ -556,6 +556,18 @@ const memoryMessageInput = document.getElementById("memoryMessageInput");
 const memoryMessageCount = document.getElementById("memoryMessageCount");
 const uploadMediaBtn = document.getElementById("uploadMediaBtn");
 const uploadMessage = document.getElementById("uploadMessage");
+const desktopQuickUploadOpen = document.getElementById(
+  "desktopQuickUploadOpen",
+);
+const desktopQuickUploadPanel = document.getElementById(
+  "desktopQuickUploadPanel",
+);
+const desktopQuickUploadClose = document.getElementById(
+  "desktopQuickUploadClose",
+);
+const desktopQuickUploadBackdrop = document.getElementById(
+  "desktopQuickUploadBackdrop",
+);
 const eventUploadProgress = document.getElementById("eventUploadProgress");
 const eventUploadProgressStatus = document.getElementById(
   "eventUploadProgressStatus",
@@ -3149,15 +3161,9 @@ function renderGuests() {
           </button>
 
           <div class="guest-stats">
-            <span class="approved">${escapeHtml(
-              t("{count} approved", { count: approvedUploads }),
-            )}</span>
-            <span class="pending">${escapeHtml(
-              t("{count} pending", { count: pendingUploads }),
-            )}</span>
-            <span class="rejected">${escapeHtml(
-              t("{count} rejected", { count: rejectedUploads }),
-            )}</span>
+            <span class="approved" title="${escapeHtml(t("Approved"))}" aria-label="${escapeHtml(t("{count} approved", { count: approvedUploads }))}">${escapeHtml(String(approvedUploads))}</span>
+            <span class="pending" title="${escapeHtml(t("Pending"))}" aria-label="${escapeHtml(t("{count} pending", { count: pendingUploads }))}">${escapeHtml(String(pendingUploads))}</span>
+            <span class="rejected" title="${escapeHtml(t("Rejected"))}" aria-label="${escapeHtml(t("{count} rejected", { count: rejectedUploads }))}">${escapeHtml(String(rejectedUploads))}</span>
           </div>
         </article>
       `;
@@ -4646,6 +4652,74 @@ eventDeleteSuccessButton?.addEventListener(
   "click",
   returnToAccountAfterDelete,
 );
+
+
+function isDesktopQuickUploadLayout() {
+  return window.matchMedia("(min-width: 1200px)").matches;
+}
+
+function openDesktopQuickUploadModal() {
+  if (
+    !isDesktopQuickUploadLayout() ||
+    !desktopQuickUploadPanel ||
+    !desktopQuickUploadBackdrop
+  ) {
+    return;
+  }
+
+  desktopQuickUploadBackdrop.hidden = false;
+  desktopQuickUploadPanel.classList.add("is-desktop-modal-open");
+  desktopQuickUploadPanel.setAttribute("aria-modal", "true");
+  document.body.classList.add("desktop-quick-upload-open");
+
+  window.setTimeout(() => {
+    guestName?.focus();
+  }, 40);
+}
+
+function closeDesktopQuickUploadModal({ restoreFocus = true } = {}) {
+  if (!desktopQuickUploadPanel || !desktopQuickUploadBackdrop) return;
+
+  desktopQuickUploadPanel.classList.remove("is-desktop-modal-open");
+  desktopQuickUploadPanel.setAttribute("aria-modal", "false");
+  desktopQuickUploadBackdrop.hidden = true;
+  document.body.classList.remove("desktop-quick-upload-open");
+
+  if (restoreFocus && isDesktopQuickUploadLayout()) {
+    desktopQuickUploadOpen?.focus();
+  }
+}
+
+desktopQuickUploadOpen?.addEventListener(
+  "click",
+  openDesktopQuickUploadModal,
+);
+
+desktopQuickUploadClose?.addEventListener("click", () => {
+  closeDesktopQuickUploadModal();
+});
+
+desktopQuickUploadBackdrop?.addEventListener("click", () => {
+  closeDesktopQuickUploadModal();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Escape" &&
+    desktopQuickUploadPanel?.classList.contains("is-desktop-modal-open")
+  ) {
+    closeDesktopQuickUploadModal();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (
+    !isDesktopQuickUploadLayout() &&
+    desktopQuickUploadPanel?.classList.contains("is-desktop-modal-open")
+  ) {
+    closeDesktopQuickUploadModal({ restoreFocus: false });
+  }
+});
 
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);

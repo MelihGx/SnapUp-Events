@@ -5475,18 +5475,18 @@ html[data-theme="dark"] body.event-detail-shell :is(
   }
 
   .guest-card {
-    grid-template-columns: 43px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr);
   }
 
   .guest-avatar {
-    width: 43px;
-    height: 43px;
+    width: 46px;
+    height: 46px;
   }
 
   .guest-stats {
-    grid-column: 1 / -1;
+    grid-column: 2;
     justify-content: flex-start;
-    padding-left: 56px;
+    padding-left: 0;
   }
 
   .gallery-grid {
@@ -9611,4 +9611,2182 @@ html[data-theme="dark"] .detail-notice-message {
     display: block;
     text-align: center !important;
   }
+}
+
+
+
+/* =========================================================
+   Event Detail — desktop three-column dashboard
+   Left: QR/share
+   Center: cover + gallery
+   Right: guests
+   Mobile/tablet layout remains unchanged.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  .event-detail-page {
+    width: min(1680px, calc(100% - 24px));
+    padding-top: 16px;
+  }
+
+  .detail-header {
+    margin-bottom: 14px;
+  }
+
+  .detail-content {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr) 290px;
+    grid-template-areas:
+      "share cover guests"
+      "share gallery guests"
+      "info info info"
+      "manage manage manage";
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* Promote the two hero children into the main desktop grid. */
+  .detail-hero {
+    display: contents;
+  }
+
+  .detail-cover {
+    grid-area: cover;
+    min-height: 350px;
+    --detail-cover-radius: 24px;
+    border-radius: var(--detail-cover-radius);
+  }
+
+  #eventShareSection {
+    grid-area: share;
+  }
+
+  #eventGuestsSection {
+    grid-area: guests;
+  }
+
+  #eventGallerySection {
+    grid-area: gallery;
+  }
+
+  #eventInfoSection {
+    grid-area: info;
+  }
+
+  #eventManageSection {
+    grid-area: manage;
+  }
+
+  /* -----------------------------------------
+     Center top: event cover
+     ----------------------------------------- */
+  .detail-cover-copy--hero-text {
+    top: 76px;
+    right: 28px;
+    left: 28px;
+    max-width: none;
+    text-align: center;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row {
+    justify-content: center;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    max-width: 760px;
+    margin-inline: auto;
+    font-size: clamp(38px, 4.2vw, 58px);
+    line-height: 0.98;
+  }
+
+  .detail-cover-copy--hero-text > p {
+    max-width: 720px;
+    margin: 9px auto 0;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .detail-cover-badge {
+    top: 18px;
+    left: 18px;
+  }
+
+  .event-cover-actions {
+    top: 16px;
+    right: 16px;
+  }
+
+  .event-cover-change-button,
+  .event-cover-remove-button {
+    min-height: 36px;
+    padding: 8px 11px;
+    border-radius: 11px;
+    box-shadow: none;
+    font-size: 10px;
+  }
+
+  /* Keep stats in the cover, but make them a thin bottom strip
+     so the gallery can start immediately underneath. */
+  .detail-cover-dashboard--stats-only {
+    right: 14px;
+    bottom: 12px;
+    left: 14px;
+    width: auto;
+    padding: 7px 9px 8px;
+    border-radius: 15px;
+  }
+
+  .event-title-edit-button--card {
+    position: absolute;
+    z-index: 3;
+    top: 8px;
+    left: 8px;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    min-height: 30px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border-radius: 9px;
+    box-shadow: none;
+  }
+
+  .event-title-edit-button--card span {
+    display: none;
+  }
+
+  .event-title-edit-button--card svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-statistics-quick {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .detail-cover-dashboard--stats-only .event-statistics-quick-head {
+    min-height: 30px;
+    justify-content: flex-end;
+    margin: 0 0 4px 38px;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-head
+    > div {
+    display: none;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-head
+    button {
+    min-height: 28px;
+    padding: 5px 9px;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.07);
+    background-image: none;
+    border: 1px solid rgba(120, 8, 208, 0.14);
+    border-radius: 8px;
+    box-shadow: none;
+    font-size: 8px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-statistics-quick-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--detail-cover-panel-border-soft);
+    border-radius: 10px;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-grid
+    article {
+    min-height: 43px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 5px 7px;
+    background: transparent;
+    border: 0;
+    border-left: 1px solid var(--detail-cover-panel-border-soft);
+    border-radius: 0;
+    box-shadow: none;
+    text-align: center;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-grid
+    article:first-child {
+    border-left: 0;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-grid
+    article
+    > svg {
+    display: none;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-grid
+    article
+    > strong {
+    order: 1;
+    grid-column: auto;
+    align-self: auto;
+    flex: 0 0 auto;
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .detail-cover-dashboard--stats-only
+    .event-statistics-quick-grid
+    article
+    > span {
+    order: 2;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: 8px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detail-cover-dashboard--stats-only .event-storage-quick {
+    margin-top: 4px;
+    padding: 5px 2px 0;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--detail-cover-panel-border-soft);
+    border-radius: 0;
+  }
+
+  .detail-cover-dashboard--stats-only .event-storage-quick__meta {
+    margin-bottom: 3px;
+    font-size: 7.5px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-storage-quick__meta strong {
+    font-size: 7.5px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-storage-quick__meta b {
+    min-width: 29px;
+    min-height: 15px;
+    padding: 0 5px;
+    font-size: 7.5px;
+  }
+
+  .detail-cover-dashboard--stats-only .event-storage-quick__track {
+    height: 4px;
+  }
+
+  /* -----------------------------------------
+     Left: QR/share card
+     ----------------------------------------- */
+  .detail-side-card {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 116px);
+    overflow-y: auto;
+    padding: 16px;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(31, 24, 37, 0.07);
+    scrollbar-width: thin;
+  }
+
+  .detail-side-card .side-label {
+    margin-bottom: 7px;
+    font-size: 9px;
+  }
+
+  body.event-detail-shell button.event-code-box {
+    margin-bottom: 10px;
+    padding: 12px 8px;
+    border-radius: 13px;
+    box-shadow: none;
+    font-size: 22px;
+    letter-spacing: 3px;
+  }
+
+  .qr-box {
+    min-height: 186px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 15px;
+  }
+
+  .qr-click-link {
+    width: min(158px, 100%);
+    border-radius: 12px;
+  }
+
+  .qr-box img {
+    border-radius: 10px;
+  }
+
+  .qr-helper-text {
+    font-size: 9px;
+  }
+
+  .detail-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .detail-actions button {
+    min-height: 36px;
+    padding: 7px 8px;
+    border-radius: 9px;
+    box-shadow: none !important;
+    font-size: 9px;
+  }
+
+  .detail-actions
+    :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) {
+    grid-column: auto;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: none !important;
+  }
+
+  .detail-actions
+    :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    )
+    > svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  .detail-actions
+    :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    )
+    > span {
+    min-width: 0;
+  }
+
+  .detail-actions
+    :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    )
+    strong {
+    overflow: hidden;
+    font-size: 8.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detail-actions
+    :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    )
+    small {
+    display: none;
+  }
+
+  .detail-actions
+    :is(.event-archive-title-row, .event-highlights-title-row)
+    em {
+    display: none;
+  }
+
+  .detail-actions .settings-action-button {
+    grid-column: 1 / -1;
+    min-height: 36px;
+  }
+
+  /* -----------------------------------------
+     Right: guests
+     ----------------------------------------- */
+  .guests-panel {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 116px);
+    overflow: hidden;
+    padding: 16px;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(31, 24, 37, 0.07);
+  }
+
+  .guests-panel-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .guests-panel .section-head > span {
+    margin-bottom: 4px;
+    font-size: 9px;
+  }
+
+  .guests-panel .section-head h2 {
+    font-size: 18px;
+  }
+
+  .guests-panel .gallery-helper-text {
+    display: none;
+  }
+
+  .guest-total-badge {
+    margin-left: 5px;
+    font-size: 8px;
+  }
+
+  .guest-search-box {
+    width: 100%;
+  }
+
+  .guest-search-box > span {
+    margin-bottom: 4px;
+    font-size: 8px;
+  }
+
+  .guest-search-box input {
+    min-height: 37px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+
+  .guest-result-count {
+    margin: 9px 0 7px;
+    font-size: 9px;
+  }
+
+  .guest-list-scroll {
+    max-height: calc(100vh - 285px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* -----------------------------------------
+     Center bottom: gallery
+     ----------------------------------------- */
+  .gallery-only-section {
+    min-width: 0;
+  }
+
+  .gallery-admin-card {
+    padding: 18px;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(31, 24, 37, 0.055);
+  }
+
+  .gallery-admin-head {
+    margin-bottom: 12px;
+  }
+
+  .gallery-admin-head .section-head > span {
+    margin-bottom: 4px;
+    font-size: 9px;
+  }
+
+  .gallery-admin-head .section-head h2 {
+    font-size: 21px;
+  }
+
+  .gallery-admin-head .gallery-helper-text {
+    margin-top: 4px;
+    font-size: 10px;
+  }
+
+  .media-filter-bar {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .media-filter-bar button {
+    min-height: 33px;
+    padding: 6px 9px;
+    border-radius: 8px;
+    font-size: 9.5px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .media-card {
+    border-radius: 14px;
+  }
+
+  .media-preview-wrap {
+    min-height: 155px;
+  }
+
+  .media-preview-wrap video,
+  .media-lightbox-trigger,
+  .media-lightbox-trigger img {
+    height: 175px;
+  }
+
+  /* The remaining management areas stay below the three-column dashboard. */
+  .detail-info-grid {
+    gap: 10px;
+  }
+
+  .admin-workspace-grid {
+    gap: 14px;
+  }
+
+  html[data-theme="dark"] .detail-side-card,
+  html[data-theme="dark"] .guests-panel,
+  html[data-theme="dark"] .gallery-admin-card {
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1450px) {
+  .event-detail-page {
+    width: min(1380px, calc(100% - 20px));
+  }
+
+  .detail-content {
+    grid-template-columns: 250px minmax(0, 1fr) 250px;
+    gap: 12px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    font-size: clamp(36px, 4vw, 50px);
+  }
+}
+
+
+/* =========================================================
+   Event Detail — desktop share card enhancement
+   Moves statistics + storage into the left QR column and
+   gives both blocks a cleaner, more modern appearance.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  .event-cover-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .event-title-edit-button--cover {
+    min-height: 36px;
+    padding: 8px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 11px;
+    background: rgba(22, 14, 39, 0.72);
+    color: #ffffff;
+    box-shadow: none;
+    backdrop-filter: blur(10px);
+  }
+
+  .event-title-edit-button--cover:hover {
+    transform: translateY(-1px);
+    background: rgba(46, 26, 78, 0.84);
+  }
+
+  .event-title-edit-button--cover svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.9;
+  }
+
+  .detail-side-card {
+    padding: 14px;
+  }
+
+  .detail-side-card .event-statistics-quick--side,
+  .detail-side-card .event-storage-quick--side {
+    margin: 0 0 10px;
+    border: 1px solid rgba(132, 94, 247, 0.16);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 244, 255, 0.96));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 10px 22px rgba(103, 73, 145, 0.08);
+  }
+
+  .detail-side-card .event-statistics-quick--side {
+    padding: 12px;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-head > div > span {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #7c3aed;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-head h2 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.1;
+    color: #251b43;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-head button {
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(124, 58, 237, 0.16);
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    box-shadow: none;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article {
+    min-height: 72px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(137, 107, 214, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 240, 252, 0.95));
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 8px;
+    align-items: center;
+    box-shadow: none;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > svg {
+    width: 15px;
+    height: 15px;
+    grid-row: 1 / span 2;
+    color: #7c3aed;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > span {
+    margin: 0;
+    font-size: 8.5px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #7f7697;
+  }
+
+  .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > strong {
+    grid-column: 2;
+    align-self: start;
+    font-size: 24px;
+    line-height: 1;
+    color: #22173d;
+  }
+
+  .detail-side-card .event-storage-quick--side {
+    padding: 12px;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__meta {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__plan {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .detail-side-card .event-storage-quick--side #eventStoragePackage {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-add {
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(124, 58, 237, 0.18);
+    background: #ffffff;
+    color: #6d28d9;
+    font-size: 9px;
+    box-shadow: none;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__meta strong {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: #40345f;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__meta i {
+    opacity: 0.55;
+    font-style: normal;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__meta b {
+    min-width: 38px;
+    min-height: 22px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.12);
+    color: #6d28d9;
+    font-size: 9px;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__track {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(238, 232, 255, 0.95), rgba(245, 242, 252, 0.95));
+    border: 1px solid rgba(132, 94, 247, 0.12);
+    overflow: hidden;
+  }
+
+  .detail-side-card .event-storage-quick--side .event-storage-quick__track > span {
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7c3aed 0%, #a855f7 55%, #7dd3fc 100%);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.32);
+  }
+
+  .detail-side-card .detail-actions {
+    margin-top: 2px;
+  }
+
+  .detail-side-card .detail-actions button:nth-child(-n + 4) {
+    min-height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(132, 94, 247, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 255, 0.98));
+    color: #5c5377;
+  }
+
+  html[data-theme="dark"] .detail-side-card .event-statistics-quick--side,
+  html[data-theme="dark"] .detail-side-card .event-storage-quick--side {
+    background: linear-gradient(180deg, rgba(34, 27, 53, 0.96), rgba(24, 19, 39, 0.98));
+    border-color: rgba(133, 94, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  html[data-theme="dark"] .detail-side-card .event-statistics-quick--side .event-statistics-quick-head h2,
+  html[data-theme="dark"] .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > strong,
+  html[data-theme="dark"] .detail-side-card .event-storage-quick--side .event-storage-quick__meta strong {
+    color: #f5f1ff;
+  }
+
+  html[data-theme="dark"] .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article,
+  html[data-theme="dark"] .detail-side-card .detail-actions button:nth-child(-n + 4) {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  html[data-theme="dark"] .detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > span {
+    color: rgba(233, 226, 255, 0.72);
+  }
+
+  html[data-theme="dark"] .detail-side-card .event-storage-quick--side .event-storage-quick__track {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* =========================================================
+   Event Detail — remove inline Event Permissions panel
+   Settings remain accessible from the existing Settings action/modal.
+   ========================================================= */
+
+.settings-workspace-card {
+  display: none !important;
+}
+
+.admin-workspace-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.upload-panel {
+  width: 100%;
+  max-width: none;
+}
+
+
+
+/* =========================================================
+   Event Detail — compact event info strip above Gallery
+   Desktop only.
+   Moves the existing Location / Date / Time / Created /
+   Status / Privacy cards into the compact strip area
+   immediately above the Gallery heading.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  /* Remove the old dedicated full-width information row. */
+  .detail-content {
+    grid-template-areas:
+      "share cover guests"
+      "share gallery guests"
+      "manage manage manage";
+  }
+
+  /* Gallery and event info occupy the same grid area.
+     The info strip floats in the card's top reserved space. */
+  #eventInfoSection {
+    grid-area: gallery;
+    position: relative;
+    z-index: 4;
+    align-self: start;
+    width: auto;
+    margin: 12px 14px 0;
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1.55fr)
+      minmax(0, 1.05fr)
+      minmax(0, 0.9fr)
+      minmax(0, 1.15fr)
+      minmax(0, 0.78fr)
+      minmax(0, 0.78fr);
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  /* Reserve only a slim top band for the compact cards. */
+  #eventGallerySection .gallery-admin-card {
+    position: relative;
+    padding-top: 92px;
+  }
+
+  #eventInfoSection .info-card {
+    position: relative;
+    min-width: 0;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 9px 10px;
+    overflow: hidden;
+    color: #2b2331;
+    background: #faf8fc;
+    border: 1px solid #e7e0ec;
+    border-radius: 11px;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: auto;
+  }
+
+  #eventInfoSection .info-card:hover {
+    background: #f8f4fb;
+    border-color: rgba(120, 8, 208, 0.18);
+  }
+
+  #eventInfoSection .info-card > span {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: #92889b;
+    font-size: 7.5px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    line-height: 1;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  #eventInfoSection .info-card > strong {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: #2a2230;
+    font-size: 10.5px;
+    font-weight: 850;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Long address is unnecessary in the compact summary strip. */
+  #eventInfoSection .event-address {
+    display: none !important;
+  }
+
+  /* Location keeps its map/edit actions as tiny icon buttons. */
+  #eventInfoSection .info-card--location {
+    padding-right: 63px;
+  }
+
+  #eventInfoSection .event-map-link,
+  #eventInfoSection .event-location-edit-button {
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    color: #7808d0;
+    background: #ffffff;
+    border: 1px solid #e4daeb;
+    border-radius: 7px;
+    box-shadow: none;
+    transform: translateY(-50%);
+  }
+
+  #eventInfoSection .event-map-link {
+    right: 34px;
+  }
+
+  #eventInfoSection .event-location-edit-button {
+    right: 6px;
+  }
+
+  #eventInfoSection .event-map-link:hover,
+  #eventInfoSection .event-location-edit-button:hover {
+    color: #ffffff;
+    background: #7808d0;
+    border-color: #7808d0;
+    transform: translateY(-50%);
+  }
+
+  #eventInfoSection .event-map-link svg,
+  #eventInfoSection .event-location-edit-button svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  #eventInfoSection .event-map-link span,
+  #eventInfoSection .event-location-edit-button span {
+    display: none;
+  }
+
+  /* Date uses a single compact calendar button on the right. */
+  #eventInfoSection .info-card--date {
+    display: flex;
+    padding-right: 37px;
+  }
+
+  #eventInfoSection .info-card--date > #eventDate {
+    margin: 0;
+  }
+
+  #eventInfoSection .info-card--date .event-date-edit-button {
+    top: 50%;
+    right: 6px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 0;
+    border-radius: 7px;
+    transform: translateY(-50%);
+  }
+
+  #eventInfoSection .info-card--date .event-date-edit-button:hover {
+    transform: translateY(-50%);
+  }
+
+  #eventInfoSection .info-card--date .event-date-edit-button svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Keep the actual Gallery title clean directly below the strip. */
+  #eventGallerySection .gallery-admin-head {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head > span {
+    margin-bottom: 3px;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head h2 {
+    font-size: 20px;
+  }
+
+  html[data-theme="dark"] #eventInfoSection .info-card {
+    color: #f2edf5;
+    background: #242027;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  html[data-theme="dark"] #eventInfoSection .info-card:hover {
+    background: #29242d;
+    border-color: rgba(202, 151, 238, 0.18);
+  }
+
+  html[data-theme="dark"] #eventInfoSection .info-card > span {
+    color: #a79fac;
+  }
+
+  html[data-theme="dark"] #eventInfoSection .info-card > strong {
+    color: #f1ebf4;
+  }
+
+  html[data-theme="dark"] #eventInfoSection .event-map-link,
+  html[data-theme="dark"] #eventInfoSection .event-location-edit-button {
+    color: #d6a7f4;
+    background: #302a34;
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+}
+
+/* Slightly tighter version for medium desktop widths. */
+@media (min-width: 1200px) and (max-width: 1450px) {
+  #eventInfoSection {
+    margin-inline: 12px;
+    gap: 5px;
+  }
+
+  #eventInfoSection .info-card {
+    min-height: 58px;
+    padding: 8px;
+  }
+
+  #eventInfoSection .info-card > span {
+    font-size: 7px;
+  }
+
+  #eventInfoSection .info-card > strong {
+    font-size: 9.5px;
+  }
+
+  #eventGallerySection .gallery-admin-card {
+    padding-top: 88px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — desktop Quick Upload modal
+   The full upload form is removed from the desktop document
+   flow and opened from the compact Gallery header action.
+   Mobile remains unchanged.
+   ========================================================= */
+
+.desktop-quick-upload-open,
+.desktop-quick-upload-close,
+.desktop-quick-upload-backdrop {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  body.desktop-quick-upload-open {
+    overflow: hidden;
+  }
+
+  /* The information strip + gallery now uses the former red empty area
+     for a compact upload CTA. */
+  #eventGallerySection .gallery-admin-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .gallery-admin-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .desktop-quick-upload-open {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 13px;
+    color: #ffffff;
+    background: #7808d0;
+    border: 1px solid #7808d0;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(120, 8, 208, 0.14);
+    cursor: pointer;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 850;
+    white-space: nowrap;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .desktop-quick-upload-open:hover,
+  .desktop-quick-upload-open:focus-visible {
+    background: #6607b2;
+    border-color: #6607b2;
+    outline: none;
+    transform: translateY(-1px);
+  }
+
+  .desktop-quick-upload-open svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .gallery-admin-actions .approve-all-images-button {
+    min-height: 38px;
+    margin: 0;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  /* Remove Quick Upload from normal desktop flow completely. */
+  #eventManageSection {
+    display: contents;
+  }
+
+  #eventManageSection > .settings-workspace-card {
+    display: none !important;
+  }
+
+  #desktopQuickUploadPanel {
+    display: none;
+  }
+
+  /* Modal backdrop */
+  .desktop-quick-upload-backdrop {
+    position: fixed;
+    z-index: 230;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    padding: 0;
+    background: rgba(19, 14, 24, 0.48);
+    border: 0;
+    cursor: default;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+
+  .desktop-quick-upload-backdrop[hidden] {
+    display: none !important;
+  }
+
+  /* Existing form becomes a centered dialog only while open. */
+  #desktopQuickUploadPanel.is-desktop-modal-open {
+    position: fixed;
+    z-index: 240;
+    top: 50%;
+    left: 50%;
+    width: min(760px, calc(100vw - 48px));
+    max-height: min(88vh, 860px);
+    display: block;
+    overflow-y: auto;
+    margin: 0;
+    padding: 22px;
+    color: var(--detail-text);
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 20px;
+    box-shadow: 0 28px 80px rgba(26, 18, 31, 0.24);
+    transform: translate(-50%, -50%);
+    scrollbar-width: thin;
+  }
+
+  #desktopQuickUploadPanel.is-desktop-modal-open::before {
+    display: none;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header {
+    position: relative;
+    padding-right: 48px;
+    margin-bottom: 17px;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header .upload-kicker {
+    margin-bottom: 5px;
+    color: #7808d0;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header h2 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  #desktopQuickUploadPanel .upload-panel-header p {
+    max-width: 590px;
+    margin-top: 7px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .desktop-quick-upload-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: #6f6576;
+    background: #f8f5fa;
+    border: 1px solid #e6deea;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .desktop-quick-upload-close:hover,
+  .desktop-quick-upload-close:focus-visible {
+    color: #ffffff;
+    background: #7808d0;
+    border-color: #7808d0;
+    outline: none;
+  }
+
+  .desktop-quick-upload-close svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  /* Slightly denser modal controls so the form fits comfortably. */
+  #desktopQuickUploadPanel .upload-form {
+    gap: 11px;
+  }
+
+  #desktopQuickUploadPanel .upload-type-switch {
+    min-height: 48px;
+  }
+
+  #desktopQuickUploadPanel .detail-file-picker {
+    min-height: 78px;
+  }
+
+  #desktopQuickUploadPanel .turnstile-shell {
+    min-height: 94px;
+  }
+
+  html[data-theme="dark"] #desktopQuickUploadPanel.is-desktop-modal-open {
+    box-shadow: 0 30px 84px rgba(0, 0, 0, 0.48);
+  }
+
+  html[data-theme="dark"] .desktop-quick-upload-close {
+    color: #c9c0ce;
+    background: #2b2630;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — Change Name button at cover bottom-right
+   Desktop only. Keeps mobile/tablet behavior clean.
+   ========================================================= */
+
+.event-title-edit-button--cover-bottom {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .event-title-edit-button--cover {
+    display: none !important;
+  }
+
+  .event-title-edit-button--cover-bottom {
+    position: absolute;
+    z-index: 8;
+    right: 16px;
+    bottom: 16px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 12px;
+    color: #ffffff;
+    background: rgba(24, 16, 34, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 11px;
+    box-shadow: 0 8px 20px rgba(12, 8, 18, 0.16);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .event-title-edit-button--cover-bottom:hover,
+  .event-title-edit-button--cover-bottom:focus-visible {
+    color: #ffffff;
+    background: #7808d0;
+    border-color: #7808d0;
+    outline: none;
+    transform: translateY(-1px);
+  }
+
+  .event-title-edit-button--cover-bottom svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .event-title-edit-button--cover-bottom span {
+    display: inline;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — Change Name visual fix
+   Prevents the inherited 34px square button styles from
+   squeezing the desktop cover action text.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  .event-title-edit-button.event-title-edit-button--cover-bottom {
+    width: auto !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    margin: 0 !important;
+    padding: 0 12px 0 10px !important;
+    color: #ffffff;
+    background: rgba(24, 17, 32, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 10px;
+    box-shadow: 0 7px 18px rgba(12, 8, 18, 0.16);
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    overflow: visible !important;
+  }
+
+  .event-title-edit-button.event-title-edit-button--cover-bottom svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex: 0 0 14px !important;
+    margin: 0 !important;
+  }
+
+  .event-title-edit-button.event-title-edit-button--cover-bottom span {
+    width: auto !important;
+    max-width: none !important;
+    display: block !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    color: inherit;
+    font-size: 10px !important;
+    font-weight: 800;
+    line-height: 1 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  .event-title-edit-button.event-title-edit-button--cover-bottom:hover,
+  .event-title-edit-button.event-title-edit-button--cover-bottom:focus-visible {
+    color: #ffffff;
+    background: #7808d0;
+    border-color: #7808d0;
+    box-shadow: 0 8px 20px rgba(120, 8, 208, 0.22);
+    transform: translateY(-1px);
+  }
+}
+
+
+
+/* =========================================================
+   Guest sidebar — keep guest names clearly visible
+   ========================================================= */
+.guest-card {
+  grid-template-columns: 50px minmax(0, 1fr) !important;
+  align-items: start;
+}
+
+.guest-avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 50px;
+  height: 50px;
+}
+
+.guest-main {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  align-self: center;
+}
+
+.guest-filter-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 44px;
+  padding: 2px 0 0;
+}
+
+.guest-main strong {
+  display: block;
+  color: var(--detail-text);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guest-main span {
+  display: block;
+  margin-top: 4px;
+  color: var(--detail-text-faint);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guest-stats {
+  grid-column: 2;
+  grid-row: 2;
+  justify-content: flex-start;
+  padding-left: 0 !important;
+  margin-top: 6px;
+}
+
+.guest-stats span {
+  padding: 4px 8px;
+  font-size: 9px;
+}
+
+@media (max-width: 1024px) {
+  .guest-card {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+  }
+
+  .guest-avatar {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+
+/* =========================================================
+   Guest sidebar — fit status pills neatly into one row
+   ========================================================= */
+.guest-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.guest-stats span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  padding: 4px 4px;
+  font-size: 8px;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+
+/* =========================================================
+   Guest sidebar — equal-width, compact, icon badges
+   ========================================================= */
+.guest-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.guest-stats span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  min-height: 24px;
+  padding: 4px 5px;
+  border-radius: 999px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: 7.5px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 800;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.guest-stats span::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 900;
+  flex: 0 0 13px;
+}
+
+.guest-stats .approved {
+  color: #1f8f68;
+  background: rgba(31, 143, 104, 0.10);
+  border-color: rgba(31, 143, 104, 0.18);
+}
+
+.guest-stats .approved::before {
+  content: "✓";
+  color: #ffffff;
+  background: #1f8f68;
+}
+
+.guest-stats .pending {
+  color: #b9721c;
+  background: rgba(185, 114, 28, 0.10);
+  border-color: rgba(185, 114, 28, 0.18);
+}
+
+.guest-stats .pending::before {
+  content: "⏳";
+  color: #ffffff;
+  background: #d38a2f;
+  font-size: 7px;
+}
+
+.guest-stats .rejected {
+  color: #d45078;
+  background: rgba(212, 80, 120, 0.10);
+  border-color: rgba(212, 80, 120, 0.18);
+}
+
+.guest-stats .rejected::before {
+  content: "✕";
+  color: #ffffff;
+  background: #d45078;
+}
+
+
+/* =========================================================
+   Guest sidebar — visual cleanup for compact status badges
+   ========================================================= */
+.guest-card {
+  row-gap: 8px;
+}
+
+.guest-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.guest-stats span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  min-height: 26px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-weight: 800;
+  border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.guest-stats span::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 999px;
+  font-size: 7px;
+  line-height: 1;
+  font-weight: 900;
+  background: transparent;
+}
+
+.guest-stats .approved {
+  color: #187b5a;
+  background: rgba(31, 143, 104, 0.10);
+  border-color: rgba(31, 143, 104, 0.18);
+}
+
+.guest-stats .approved::before {
+  content: "✓";
+  color: #187b5a;
+}
+
+.guest-stats .pending {
+  color: #ab6c1c;
+  background: rgba(211, 138, 47, 0.10);
+  border-color: rgba(211, 138, 47, 0.18);
+}
+
+.guest-stats .pending::before {
+  content: "•";
+  color: #ab6c1c;
+  font-size: 12px;
+}
+
+.guest-stats .rejected {
+  color: #c94e73;
+  background: rgba(212, 80, 120, 0.10);
+  border-color: rgba(212, 80, 120, 0.18);
+}
+
+.guest-stats .rejected::before {
+  content: "✕";
+  color: #c94e73;
+}
+
+
+
+/* =========================================================
+   Guest sidebar — soft modern status chips
+   ========================================================= */
+.guest-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.guest-stats span {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+  min-height: 26px;
+  padding: 5px 6px;
+  border-radius: 9px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.guest-stats span::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Approved */
+.guest-stats .approved {
+  color: #2d8a68;
+  background: rgba(45, 138, 104, 0.08);
+  border-color: rgba(45, 138, 104, 0.14);
+}
+
+/* Pending */
+.guest-stats .pending {
+  color: #b77a2b;
+  background: rgba(183, 122, 43, 0.08);
+  border-color: rgba(183, 122, 43, 0.14);
+}
+
+/* Rejected */
+.guest-stats .rejected {
+  color: #c65b79;
+  background: rgba(198, 91, 121, 0.08);
+  border-color: rgba(198, 91, 121, 0.14);
+}
+
+/* Remove the previous icon glyphs from the prior variant. */
+.guest-stats .approved::before,
+.guest-stats .pending::before,
+.guest-stats .rejected::before {
+  content: "";
+  color: inherit;
+  background: currentColor;
+  font-size: 0;
+}
+
+/* Small responsive tightening without breaking the single row. */
+@media (max-width: 1280px) {
+  .guest-stats {
+    gap: 5px;
+  }
+
+  .guest-stats span {
+    min-height: 25px;
+    padding-inline: 5px;
+    font-size: 7.5px;
+  }
+}
+
+html[data-theme="dark"] .guest-stats .approved {
+  color: #72c5a5;
+  background: rgba(60, 165, 125, 0.10);
+  border-color: rgba(114, 197, 165, 0.14);
+}
+
+html[data-theme="dark"] .guest-stats .pending {
+  color: #d9a45e;
+  background: rgba(203, 143, 66, 0.10);
+  border-color: rgba(217, 164, 94, 0.14);
+}
+
+html[data-theme="dark"] .guest-stats .rejected {
+  color: #e18aa2;
+  background: rgba(210, 95, 129, 0.10);
+  border-color: rgba(225, 138, 162, 0.14);
+}
+
+
+
+/* =========================================================
+   Guest sidebar — icon + count only status chips
+   Uses consistent outline SVG masks instead of text glyphs.
+   ========================================================= */
+.guest-stats span {
+  gap: 5px;
+  min-height: 28px;
+  padding: 5px 7px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.guest-stats .approved::before,
+.guest-stats .pending::before,
+.guest-stats .rejected::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.guest-stats .approved::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.4 8.4 6.4 11.3 12.6 4.8' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.4 8.4 6.4 11.3 12.6 4.8' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.guest-stats .pending::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='5.5' stroke='black' stroke-width='1.7'/%3E%3Cpath d='M8 4.8v3.4l2.4 1.5' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='5.5' stroke='black' stroke-width='1.7'/%3E%3Cpath d='M8 4.8v3.4l2.4 1.5' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.guest-stats .rejected::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 1280px) {
+  .guest-stats span {
+    min-height: 26px;
+    font-size: 9px;
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .guest-stats .approved::before,
+  .guest-stats .pending::before,
+  .guest-stats .rejected::before {
+    width: 11px;
+    height: 11px;
+    flex-basis: 11px;
+  }
+}
+
+
+/* =========================================================
+   Event Detail — desktop gallery 3 columns
+   ========================================================= */
+@media (min-width: 1200px) {
+  #eventGallerySection .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — desktop text readability
+   Slightly larger typography for the compact info strip and
+   gallery controls without increasing layout height heavily.
+   ========================================================= */
+
+@media (min-width: 1200px) {
+  /* Compact event information cards */
+  #eventInfoSection .info-card > span {
+    font-size: 8.5px;
+    line-height: 1.1;
+    letter-spacing: 0.075em;
+  }
+
+  #eventInfoSection .info-card > strong {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  /* Gallery heading */
+  #eventGallerySection .gallery-admin-head .section-head > span {
+    font-size: 9.5px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head h2 {
+    font-size: 22px;
+    line-height: 1.15;
+  }
+
+  #eventGallerySection .gallery-admin-head .gallery-helper-text {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  /* Quick Upload CTA */
+  #eventGallerySection .desktop-quick-upload-open {
+    min-height: 40px;
+    padding-inline: 14px;
+    font-size: 11px;
+  }
+
+  /* Gallery filter tabs */
+  #eventGallerySection .media-filter-bar button {
+    min-height: 35px;
+    padding: 7px 10px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  #eventGallerySection .media-filter-bar button > span {
+    min-width: 21px;
+    height: 21px;
+    padding-inline: 6px;
+    font-size: 9px;
+  }
+}
+
+/* Keep medium desktop readable as well. */
+@media (min-width: 1200px) and (max-width: 1450px) {
+  #eventInfoSection .info-card > span {
+    font-size: 8px;
+  }
+
+  #eventInfoSection .info-card > strong {
+    font-size: 11px;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head h2 {
+    font-size: 21px;
+  }
+
+  #eventGallerySection .media-filter-bar button {
+    font-size: 10px;
+  }
+}
+
+
+
+/* =========================================================
+   Gallery filters — more elegant / lighter tab typography
+   Softens the tab labels and count badges for a refined look.
+   ========================================================= */
+
+#eventGallerySection .media-filter-bar {
+  gap: 18px;
+}
+
+#eventGallerySection .media-filter-bar button {
+  min-height: 40px;
+  padding: 0 2px 10px;
+  color: #6f6878;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+#eventGallerySection .media-filter-bar button:hover {
+  color: #32284a;
+}
+
+#eventGallerySection .media-filter-bar button::after {
+  height: 1.5px;
+}
+
+#eventGallerySection .media-filter-bar button span {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  color: #8c8495;
+  background: #f3f0f5;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+#eventGallerySection .media-filter-bar button.active {
+  color: #5d22c8;
+  font-weight: 700;
+}
+
+#eventGallerySection .media-filter-bar button.active::after {
+  background: #8b3fe6;
+}
+
+#eventGallerySection .media-filter-bar button.active span {
+  color: #6b2fd3;
+  background: rgba(120, 8, 208, 0.08);
+}
+
+html[data-theme="dark"] #eventGallerySection .media-filter-bar button {
+  color: #beb6c8;
+}
+
+html[data-theme="dark"] #eventGallerySection .media-filter-bar button:hover {
+  color: #f5f2fa;
+}
+
+html[data-theme="dark"] #eventGallerySection .media-filter-bar button span {
+  color: #b8b0c3;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme="dark"] #eventGallerySection .media-filter-bar button.active {
+  color: #d6b2ff;
+}
+
+html[data-theme="dark"] #eventGallerySection .media-filter-bar button.active span {
+  color: #ddc0ff;
+  background: rgba(155, 54, 221, 0.16);
+}
+
+@media (max-width: 640px) {
+  #eventGallerySection .media-filter-bar {
+    gap: 14px;
+  }
+
+  #eventGallerySection .media-filter-bar button {
+    min-height: 36px;
+    padding-bottom: 9px;
+    font-size: 10.5px;
+  }
+
+  #eventGallerySection .media-filter-bar button span {
+    min-width: 17px;
+    height: 17px;
+    font-size: 7.5px;
+  }
+}
+
+
+/* =========================================================
+   Restore larger desktop Quick Upload button
+   Keeps the previous stronger CTA size and presence.
+   ========================================================= */
+@media (min-width: 1200px) {
+  #eventGallerySection .desktop-quick-upload-open {
+    min-height: 48px;
+    gap: 9px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(120, 8, 208, 0.18);
+  }
+
+  #eventGallerySection .desktop-quick-upload-open svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .gallery-admin-actions .approve-all-images-button {
+    min-height: 48px;
+    border-radius: 14px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1450px) {
+  #eventGallerySection .desktop-quick-upload-open {
+    min-height: 46px;
+    padding-inline: 17px;
+    font-size: 12.5px;
+  }
+}
+
+
+/* =========================================================
+   Center statistic card labels in the left overview panel
+   ========================================================= */
+.detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 12px 10px;
+}
+
+.detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > svg {
+  grid-row: auto;
+  width: 16px;
+  height: 16px;
+  margin: 0 auto;
+}
+
+.detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > span {
+  width: 100%;
+  text-align: center;
+  justify-self: center;
+}
+
+.detail-side-card .event-statistics-quick--side .event-statistics-quick-grid article > strong {
+  grid-column: auto;
+  align-self: auto;
+  justify-self: center;
+  text-align: center;
 }

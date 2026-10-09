@@ -36,7 +36,7 @@
     />
     <link
       rel="stylesheet"
-      href="css/event-detail.css?v=mobile-admin-ux-1"
+      href="css/event-detail.css?v=cumulative-svg-status-icons-1"
     />
     <link rel="stylesheet" href="css/extra-storage.css?v=extra-storage-2" />
     <link rel="stylesheet" href="css/turnstile.css?v=turnstile-mobile-3" />
@@ -253,6 +253,20 @@
               hidden
             />
 
+            <button
+              type="button"
+              class="event-title-edit-button event-title-edit-button--cover-bottom"
+              id="eventNameEditButton"
+              aria-label="Change event name"
+              title="Change event name"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
+                <path d="m13.8 7.2 3 3"></path>
+              </svg>
+              <span>Change name</span>
+            </button>
+
             <div class="detail-cover-overlay">
               <div class="detail-cover-badge">
                 <span class="rec-chip"><i></i> EVENT DETAIL</span>
@@ -265,117 +279,7 @@
                 <p id="eventDescription">Event description</p>
               </div>
 
-              <div class="detail-cover-dashboard detail-cover-dashboard--stats-only">
-                <button
-                  type="button"
-                  class="event-title-edit-button event-title-edit-button--card"
-                  id="eventNameEditButton"
-                  aria-label="Change event name"
-                  title="Change event name"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m4 20 4.2-1 10.7-10.7a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z"></path>
-                    <path d="m13.8 7.2 3 3"></path>
-                  </svg>
-                  <span>Change name</span>
-                </button>
-                <section
-                  class="event-statistics-quick"
-                  aria-labelledby="eventStatisticsQuickTitle"
-                >
-                  <div class="event-statistics-quick-head">
-                    <div>
-                      <span>By the numbers</span>
-                      <h2 id="eventStatisticsQuickTitle">Event Statistics</h2>
-                    </div>
-                    <button
-                      type="button"
-                      id="eventStatisticsOpen"
-                      aria-haspopup="dialog"
-                      aria-controls="eventStatisticsModal"
-                      disabled
-                    >
-                      <span>Summary</span>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="m9 6 6 6-6 6"></path>
-                      </svg>
-                    </button>
-                  </div>
 
-                  <div class="event-statistics-quick-grid" aria-live="polite">
-                    <article>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="9" cy="8" r="3"></circle>
-                        <path d="M3.5 19c.5-3.5 2.3-5.2 5.5-5.2s5 1.7 5.5 5.2"></path>
-                        <path d="M15 6.5a2.7 2.7 0 0 1 0 5.2M16.2 14.3c2.4.5 3.8 2 4.3 4.7"></path>
-                      </svg>
-                      <span>Participants</span>
-                      <strong id="eventStatisticsParticipants">—</strong>
-                    </article>
-                    <article>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="3" y="4" width="18" height="16" rx="3"></rect>
-                        <circle cx="9" cy="9" r="2"></circle>
-                        <path d="m5 17 4-4 3 3 2-2 5 3"></path>
-                      </svg>
-                      <span>Photos</span>
-                      <strong id="eventStatisticsPhotos">—</strong>
-                    </article>
-                    <article>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="3" y="5" width="14" height="14" rx="3"></rect>
-                        <path d="m17 10 4-2v8l-4-2z"></path>
-                      </svg>
-                      <span>Videos</span>
-                      <strong id="eventStatisticsVideos">—</strong>
-                    </article>
-                    <article>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 5.5h16v11H9l-5 3z"></path>
-                        <path d="M8 10h8M8 13h5"></path>
-                      </svg>
-                      <span>Comments</span>
-                      <strong id="eventStatisticsComments">—</strong>
-                    </article>
-                  </div>
-
-                  <div
-                    class="event-storage-quick"
-                    id="eventStorageQuick"
-                    data-state="normal"
-                    aria-label="Event storage usage"
-                  >
-                    <div class="event-storage-quick__meta">
-                      <span class="event-storage-quick__plan">
-                        <span id="eventStoragePackage">Free</span>
-                        <button
-                          type="button"
-                          class="event-storage-add"
-                          id="eventStorageAdd"
-                        >
-                          Add 5 GB
-                        </button>
-                      </span>
-                      <strong>
-                        <span id="eventStorageUsed">—</span>
-                        <i>/</i>
-                        <span id="eventStorageLimit">—</span>
-                        <b id="eventStoragePercent">0%</b>
-                      </strong>
-                    </div>
-                    <div
-                      class="event-storage-quick__track"
-                      id="eventStorageProgress"
-                      role="progressbar"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                      aria-valuenow="0"
-                    >
-                      <span id="eventStorageFill"></span>
-                    </div>
-                  </div>
-                </section>
-              </div>
             </div>
           </div>
 
@@ -395,6 +299,103 @@
             <div class="qr-box" id="qrBox">
               <span>QR code will appear here.</span>
             </div>
+
+            <section
+              class="event-statistics-quick event-statistics-quick--side"
+              aria-labelledby="eventStatisticsQuickTitle"
+            >
+              <div class="event-statistics-quick-head">
+                <div>
+                  <span>Overview</span>
+                  <h2 id="eventStatisticsQuickTitle">Event Statistics</h2>
+                </div>
+                <button
+                  type="button"
+                  id="eventStatisticsOpen"
+                  aria-haspopup="dialog"
+                  aria-controls="eventStatisticsModal"
+                  disabled
+                >
+                  <span>Summary</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="event-statistics-quick-grid" aria-live="polite">
+                <article>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="9" cy="8" r="3"></circle>
+                    <path d="M3.5 19c.5-3.5 2.3-5.2 5.5-5.2s5 1.7 5.5 5.2"></path>
+                    <path d="M15 6.5a2.7 2.7 0 0 1 0 5.2M16.2 14.3c2.4.5 3.8 2 4.3 4.7"></path>
+                  </svg>
+                  <span>Participants</span>
+                  <strong id="eventStatisticsParticipants">—</strong>
+                </article>
+                <article>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+                    <circle cx="9" cy="9" r="2"></circle>
+                    <path d="m5 17 4-4 3 3 2-2 5 3"></path>
+                  </svg>
+                  <span>Photos</span>
+                  <strong id="eventStatisticsPhotos">—</strong>
+                </article>
+                <article>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="5" width="14" height="14" rx="3"></rect>
+                    <path d="m17 10 4-2v8l-4-2z"></path>
+                  </svg>
+                  <span>Videos</span>
+                  <strong id="eventStatisticsVideos">—</strong>
+                </article>
+                <article>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 5.5h16v11H9l-5 3z"></path>
+                    <path d="M8 10h8M8 13h5"></path>
+                  </svg>
+                  <span>Comments</span>
+                  <strong id="eventStatisticsComments">—</strong>
+                </article>
+              </div>
+            </section>
+
+            <section
+              class="event-storage-quick event-storage-quick--side"
+              id="eventStorageQuick"
+              data-state="normal"
+              aria-label="Event storage usage"
+            >
+              <div class="event-storage-quick__meta">
+                <span class="event-storage-quick__plan">
+                  <span id="eventStoragePackage">Free</span>
+                  <button
+                    type="button"
+                    class="event-storage-add"
+                    id="eventStorageAdd"
+                  >
+                    Add 5 GB
+                  </button>
+                </span>
+                <strong>
+                  <span id="eventStorageUsed">—</span>
+                  <i>/</i>
+                  <span id="eventStorageLimit">—</span>
+                  <b id="eventStoragePercent">0%</b>
+                </strong>
+              </div>
+              <div
+                class="event-storage-quick__track"
+                id="eventStorageProgress"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <span id="eventStorageFill"></span>
+              </div>
+            </section>
 
             <div class="detail-actions">
               <button type="button" id="copyCodeButton">Copy Code</button>
@@ -648,14 +649,39 @@
         </section>
 
         <section class="admin-workspace-grid" id="eventManageSection">
-          <section class="upload-panel">
+          <button
+            type="button"
+            class="desktop-quick-upload-backdrop"
+            id="desktopQuickUploadBackdrop"
+            aria-label="Close"
+            hidden
+          ></button>
+
+          <section
+            class="upload-panel"
+            id="desktopQuickUploadPanel"
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby="desktopQuickUploadTitle"
+          >
             <div class="upload-panel-header">
               <span class="upload-kicker">Quick Upload</span>
-              <h2>Share your moment</h2>
+              <h2 id="desktopQuickUploadTitle">Share your moment</h2>
               <p>
                 Upload a photo, video or message to this event album from the
                 dashboard.
               </p>
+
+              <button
+                type="button"
+                class="desktop-quick-upload-close"
+                id="desktopQuickUploadClose"
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18"></path>
+                </svg>
+              </button>
             </div>
 
             <div class="upload-form">
@@ -1003,14 +1029,31 @@
                 </p>
               </div>
 
-              <button
-                type="button"
-                id="approveAllImagesButton"
-                class="approve-all-images-button"
-                hidden
-              >
-                Approve All Photos
-              </button>
+              <div class="gallery-admin-actions">
+                <button
+                  type="button"
+                  class="desktop-quick-upload-open"
+                  id="desktopQuickUploadOpen"
+                  aria-haspopup="dialog"
+                  aria-controls="desktopQuickUploadPanel"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 16V4"></path>
+                    <path d="m7.5 8.5 4.5-4.5 4.5 4.5"></path>
+                    <path d="M5 13.5v4A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-4"></path>
+                  </svg>
+                  <span>Quick Upload</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="approveAllImagesButton"
+                  class="approve-all-images-button"
+                  hidden
+                >
+                  Approve All Photos
+                </button>
+              </div>
             </div>
 
             <div
@@ -2947,7 +2990,7 @@
     ></script>
     <script
       type="module"
-      src="js/event-detail.js?v=mobile-admin-ux-1"
+      src="js/event-detail.js?v=guest-stats-icons-only-1"
     ></script>
     <script src="js/theme.js?v=browser-memory-book-2"></script>
   </body>
