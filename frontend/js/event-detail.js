@@ -215,6 +215,22 @@ const eventStorageLimit = document.getElementById("eventStorageLimit");
 const eventStoragePercent = document.getElementById("eventStoragePercent");
 const eventStorageProgress = document.getElementById("eventStorageProgress");
 const eventStorageFill = document.getElementById("eventStorageFill");
+const mobileEventDate = document.getElementById("mobileEventDate");
+const mobileEventTime = document.getElementById("mobileEventTime");
+const mobileEventStatus = document.getElementById("mobileEventStatus");
+const mobileEventCode = document.getElementById("mobileEventCode");
+const mobileEventCodeButton = document.getElementById("mobileEventCodeButton");
+const mobileStatsParticipants = document.getElementById("mobileStatsParticipants");
+const mobileStatsPhotos = document.getElementById("mobileStatsPhotos");
+const mobileStatsVideos = document.getElementById("mobileStatsVideos");
+const mobileStatsComments = document.getElementById("mobileStatsComments");
+const mobileEventStorage = document.getElementById("mobileEventStorage");
+const mobileStoragePackage = document.getElementById("mobileStoragePackage");
+const mobileStorageUsed = document.getElementById("mobileStorageUsed");
+const mobileStorageLimit = document.getElementById("mobileStorageLimit");
+const mobileStoragePercent = document.getElementById("mobileStoragePercent");
+const mobileStorageProgress = document.getElementById("mobileStorageProgress");
+const mobileStorageFill = document.getElementById("mobileStorageFill");
 const eventStatisticsUploaderAvatar = document.getElementById(
   "eventStatisticsUploaderAvatar",
 );
@@ -480,10 +496,28 @@ const mobileDetailNavLinks = Array.from(
 const mobileDetailSettingsButton = document.getElementById(
   "mobileDetailSettingsButton",
 );
+const mobileQuickUploadButton = document.getElementById("mobileQuickUploadButton");
+const mobileQrShareButton = document.getElementById("mobileQrShareButton");
+const mobileGuestsQuickButton = document.getElementById("mobileGuestsQuickButton");
+const mobileSettingsQuickButton = document.getElementById("mobileSettingsQuickButton");
+const mobileShareBackdrop = document.getElementById("mobileShareBackdrop");
+const mobileShareCloseButton = document.getElementById("mobileShareCloseButton");
 const mobileDetailMoreButton = document.getElementById(
   "mobileDetailMoreButton",
 );
 const mobileDetailMoreMenu = document.getElementById("mobileDetailMoreMenu");
+const mobileCoverActionsButton = document.getElementById(
+  "mobileCoverActionsButton",
+);
+const mobileCoverActionsBackdrop = document.getElementById(
+  "mobileCoverActionsBackdrop",
+);
+const mobileCoverActionsSheet = document.getElementById(
+  "mobileCoverActionsSheet",
+);
+const mobileCoverActionsClose = document.getElementById(
+  "mobileCoverActionsClose",
+);
 const mobileCoverChangeButton = document.getElementById(
   "mobileCoverChangeButton",
 );
@@ -494,6 +528,7 @@ const mobileCoverRemoveButton = document.getElementById(
   "mobileCoverRemoveButton",
 );
 
+const eventShareSection = document.getElementById("eventShareSection");
 const openSettingsButton = document.getElementById("openSettingsButton");
 const desktopEventToolsPanelInner = document.getElementById(
   "desktopEventToolsPanelInner",
@@ -814,13 +849,47 @@ mobileDetailMoreMenu?.addEventListener("click", (event) => {
   }
 });
 
-mobileCoverChangeButton?.addEventListener("click", () => {
+function closeMobileCoverActions({ restoreFocus = false } = {}) {
+  if (!mobileCoverActionsSheet || !mobileCoverActionsBackdrop) return;
+
+  mobileCoverActionsSheet.hidden = true;
+  mobileCoverActionsBackdrop.hidden = true;
+  mobileCoverActionsButton?.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("mobile-cover-actions-open");
+
+  if (restoreFocus) {
+    mobileCoverActionsButton?.focus();
+  }
+}
+
+function openMobileCoverActions() {
+  if (!mobileCoverActionsSheet || !mobileCoverActionsBackdrop) return;
   closeMobileDetailMoreMenu();
+  mobileCoverActionsSheet.hidden = false;
+  mobileCoverActionsBackdrop.hidden = false;
+  mobileCoverActionsButton?.setAttribute("aria-expanded", "true");
+  document.body.classList.add("mobile-cover-actions-open");
+
+  requestAnimationFrame(() => {
+    mobileCoverActionsClose?.focus();
+  });
+}
+
+mobileCoverActionsButton?.addEventListener("click", openMobileCoverActions);
+mobileCoverActionsClose?.addEventListener("click", () => {
+  closeMobileCoverActions({ restoreFocus: true });
+});
+mobileCoverActionsBackdrop?.addEventListener("click", () => {
+  closeMobileCoverActions({ restoreFocus: true });
+});
+
+mobileCoverChangeButton?.addEventListener("click", () => {
+  closeMobileCoverActions();
   eventCoverChangeButton?.click();
 });
 
 mobileCoverRemoveButton?.addEventListener("click", () => {
-  closeMobileDetailMoreMenu();
+  closeMobileCoverActions();
   eventCoverRemoveButton?.click();
 });
 
@@ -834,10 +903,14 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (
-    event.key === "Escape" &&
-    mobileDetailMoreMenu?.hidden === false
-  ) {
+  if (event.key !== "Escape") return;
+
+  if (mobileCoverActionsSheet?.hidden === false) {
+    closeMobileCoverActions({ restoreFocus: true });
+    return;
+  }
+
+  if (mobileDetailMoreMenu?.hidden === false) {
     closeMobileDetailMoreMenu();
     mobileDetailMoreButton?.focus();
   }
@@ -855,49 +928,60 @@ function setActiveMobileSection(sectionId) {
   });
 }
 
+function getMobileSectionName(sectionId) {
+  if (sectionId === "eventGuestsSection") return "guests";
+  if (sectionId === "eventInfoSection") return "details";
+  return "gallery";
+}
+
+function applyMobileSection(sectionId, { scroll = false } = {}) {
+  if (!detailContent) return;
+
+  const sectionName = getMobileSectionName(sectionId);
+  detailContent.dataset.mobileSection = sectionName;
+  setActiveMobileSection(sectionId);
+
+  if (scroll && window.innerWidth <= 760) {
+    requestAnimationFrame(() => {
+      mobileDetailNav?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+}
+
 function setupMobileSectionNavigation() {
   if (!mobileDetailNav || !mobileDetailNavLinks.length) {
     return;
   }
 
-  mobileDetailNavLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      const sectionId = link.getAttribute("href")?.slice(1);
+  if (!detailContent.dataset.mobileSection) {
+    detailContent.dataset.mobileSection = "gallery";
+  }
 
-      if (sectionId) {
+  mobileDetailNavLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const sectionId = link.getAttribute("href")?.slice(1);
+      if (!sectionId) return;
+
+      if (window.innerWidth <= 760) {
+        event.preventDefault();
+        applyMobileSection(sectionId, { scroll: true });
+      } else {
         setActiveMobileSection(sectionId);
       }
     });
   });
 
-  if (!("IntersectionObserver" in window)) {
-    return;
-  }
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 760) {
+      delete detailContent.dataset.mobileSection;
+      return;
+    }
 
-  const observedSections = mobileDetailNavLinks
-    .map((link) => {
-      const sectionId = link.getAttribute("href")?.slice(1);
-      return sectionId ? document.getElementById(sectionId) : null;
-    })
-    .filter(Boolean);
-
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      const visibleSection = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0];
-
-      if (visibleSection?.target?.id) {
-        setActiveMobileSection(visibleSection.target.id);
-      }
-    },
-    {
-      rootMargin: "-18% 0px -57% 0px",
-      threshold: [0, 0.15, 0.35],
-    },
-  );
-
-  observedSections.forEach((section) => sectionObserver.observe(section));
+    if (!detailContent.dataset.mobileSection) {
+      detailContent.dataset.mobileSection = "gallery";
+      setActiveMobileSection("eventGallerySection");
+    }
+  });
 }
 
 function formatDate(dateValue) {
@@ -1535,6 +1619,18 @@ function renderEventStorageUsage(storage = null) {
     eventStorageProgress.setAttribute("aria-valuenow", String(roundedPercentage));
   }
   if (eventStorageFill) eventStorageFill.style.width = `${percentage.toFixed(2)}%`;
+
+  if (mobileEventStorage) mobileEventStorage.dataset.state = state;
+  if (mobileStoragePackage) mobileStoragePackage.textContent = packageLabel;
+  if (mobileStorageUsed) mobileStorageUsed.textContent = formatStorageBytes(usedBytes);
+  if (mobileStorageLimit) {
+    mobileStorageLimit.textContent = limitBytes > 0 ? formatStorageBytes(limitBytes) : "—";
+  }
+  if (mobileStoragePercent) mobileStoragePercent.textContent = `${roundedPercentage}%`;
+  if (mobileStorageProgress) {
+    mobileStorageProgress.setAttribute("aria-valuenow", String(roundedPercentage));
+  }
+  if (mobileStorageFill) mobileStorageFill.style.width = `${percentage.toFixed(2)}%`;
 }
 
 function resetEventStorageUsage() {
@@ -1557,6 +1653,15 @@ function resetEventStorageUsage() {
   if (eventStoragePercent) eventStoragePercent.textContent = "—";
   if (eventStorageProgress) eventStorageProgress.setAttribute("aria-valuenow", "0");
   if (eventStorageFill) eventStorageFill.style.width = "0%";
+  if (mobileEventStorage) mobileEventStorage.dataset.state = "normal";
+  if (mobileStoragePackage) {
+    mobileStoragePackage.textContent = getStoragePackageLabel(currentEvent?.package_key);
+  }
+  if (mobileStorageUsed) mobileStorageUsed.textContent = "—";
+  if (mobileStorageLimit) mobileStorageLimit.textContent = "—";
+  if (mobileStoragePercent) mobileStoragePercent.textContent = "—";
+  if (mobileStorageProgress) mobileStorageProgress.setAttribute("aria-valuenow", "0");
+  if (mobileStorageFill) mobileStorageFill.style.width = "0%";
 }
 
 function getStatisticsInitials(name) {
@@ -1591,20 +1696,32 @@ function renderEventStatistics(data) {
       summary.participants_count,
     );
   }
+  if (mobileStatsParticipants) {
+    mobileStatsParticipants.textContent = formatStatisticNumber(summary.participants_count);
+  }
   if (eventStatisticsPhotos) {
     eventStatisticsPhotos.textContent = formatStatisticNumber(
       summary.photos_count,
     );
+  }
+  if (mobileStatsPhotos) {
+    mobileStatsPhotos.textContent = formatStatisticNumber(summary.photos_count);
   }
   if (eventStatisticsVideos) {
     eventStatisticsVideos.textContent = formatStatisticNumber(
       summary.videos_count,
     );
   }
+  if (mobileStatsVideos) {
+    mobileStatsVideos.textContent = formatStatisticNumber(summary.videos_count);
+  }
   if (eventStatisticsComments) {
     eventStatisticsComments.textContent = formatStatisticNumber(
       summary.comments_count,
     );
+  }
+  if (mobileStatsComments) {
+    mobileStatsComments.textContent = formatStatisticNumber(summary.comments_count);
   }
   if (eventStatisticsTotalUploads) {
     eventStatisticsTotalUploads.textContent = formatStatisticNumber(
@@ -1848,6 +1965,14 @@ if (liveSlideshowOpen) {
   eventCreatedAt.textContent = formatDateTime(event.event_created_at);
   eventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
   eventPrivacy.textContent = t(event.is_event_private ? "Private" : "Public");
+
+  if (mobileEventDate) mobileEventDate.textContent = formatDate(event.event_date);
+  if (mobileEventTime) mobileEventTime.textContent = getEventTimeText(event);
+  if (mobileEventStatus) {
+    mobileEventStatus.textContent = t(event.is_event_active ? "Active" : "Passive");
+    mobileEventStatus.dataset.active = event.is_event_active === false ? "false" : "true";
+  }
+  if (mobileEventCode) mobileEventCode.textContent = event.event_code || "------";
 
   setEventCoverBackground(event);
 
@@ -2253,6 +2378,14 @@ function applyGuestMediaFilter(guest) {
   const reduceMotion = window.matchMedia?.(
     "(prefers-reduced-motion: reduce)",
   ).matches;
+
+  if (window.innerWidth <= 760) {
+    // In the mobile control-center layout the gallery is hidden while the
+    // Guests tab is active. Switch to Memories so the filtered result is
+    // immediately visible after tapping a guest.
+    applyMobileSection("eventGallerySection", { scroll: true });
+    return;
+  }
 
   eventGallerySection?.scrollIntoView({
     behavior: reduceMotion ? "auto" : "smooth",
@@ -3219,7 +3352,10 @@ function renderGuests() {
       const rejectedUploads = guest.rejected_uploads || 0;
 
       return `
-        <article class="guest-card ${isSelected ? "is-selected" : ""}">
+        <article
+          class="guest-card ${isSelected ? "is-selected" : ""}"
+          data-guest-filter-id="${escapeHtml(guest.guest_id || "")}"
+        >
           <div class="guest-avatar">
             ${escapeHtml(guestName.charAt(0).toUpperCase())}
           </div>
@@ -4811,6 +4947,56 @@ window.addEventListener("resize", () => {
   }
 });
 
+function openMobileShareSheet() {
+  if (!eventShareSection || window.innerWidth > 760) return;
+
+  eventShareSection.classList.add("is-mobile-share-open");
+  mobileShareBackdrop.hidden = false;
+  document.body.classList.add("mobile-share-sheet-open");
+  window.setTimeout(() => mobileShareCloseButton?.focus(), 20);
+}
+
+function closeMobileShareSheet({ restoreFocus = true } = {}) {
+  if (!eventShareSection) return;
+
+  eventShareSection.classList.remove("is-mobile-share-open");
+  if (mobileShareBackdrop) mobileShareBackdrop.hidden = true;
+  document.body.classList.remove("mobile-share-sheet-open");
+
+  if (restoreFocus) {
+    mobileQrShareButton?.focus();
+  }
+}
+
+mobileQuickUploadButton?.addEventListener("click", () => {
+  desktopQuickUploadOpen?.click();
+});
+
+mobileQrShareButton?.addEventListener("click", openMobileShareSheet);
+mobileEventCodeButton?.addEventListener("click", openMobileShareSheet);
+mobileShareCloseButton?.addEventListener("click", () => closeMobileShareSheet());
+mobileShareBackdrop?.addEventListener("click", () => closeMobileShareSheet());
+
+mobileGuestsQuickButton?.addEventListener("click", () => {
+  applyMobileSection("eventGuestsSection", { scroll: true });
+});
+
+mobileSettingsQuickButton?.addEventListener("click", () => {
+  openSettingsButton?.click();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && eventShareSection?.classList.contains("is-mobile-share-open")) {
+    closeMobileShareSheet();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 760 && eventShareSection?.classList.contains("is-mobile-share-open")) {
+    closeMobileShareSheet({ restoreFocus: false });
+  }
+});
+
 if (openSettingsButton) {
   openSettingsButton.addEventListener("click", openSettingsModal);
 }
@@ -5037,13 +5223,13 @@ if (guestSearchInput) {
 
 if (guestList) {
   guestList.addEventListener("click", (event) => {
-    const guestButton = event.target.closest("[data-guest-filter-id]");
+    const guestTarget = event.target.closest("[data-guest-filter-id]");
 
-    if (!guestButton) {
+    if (!guestTarget) {
       return;
     }
 
-    const guestId = guestButton.dataset.guestFilterId;
+    const guestId = guestTarget.dataset.guestFilterId;
     const guest = allGuests.find((item) =>
       getGuestFilterIds(item).includes(String(guestId)),
     );

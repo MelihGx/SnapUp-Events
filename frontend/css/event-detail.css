@@ -9070,6 +9070,14 @@ html[data-theme="dark"] .detail-notice-message {
   display: none;
 }
 
+/* Event photo controls stay contextual: desktop uses the existing cover actions,
+   while mobile gets a single camera trigger and an action sheet. */
+.mobile-cover-actions-trigger,
+.mobile-cover-actions-backdrop,
+.mobile-cover-actions-sheet {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .event-detail-page {
     width: min(100% - 16px, 1240px);
@@ -9238,6 +9246,244 @@ html[data-theme="dark"] .detail-notice-message {
 
   .event-cover-actions {
     display: none;
+  }
+
+  .mobile-cover-actions-trigger {
+    position: absolute;
+    z-index: 7;
+    top: 13px;
+    right: 13px;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: #ffffff;
+    background: rgba(18, 12, 31, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(10, 5, 19, 0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: pointer;
+  }
+
+  .mobile-cover-actions-trigger:hover,
+  .mobile-cover-actions-trigger:focus-visible {
+    background: rgba(120, 8, 208, 0.9);
+    border-color: rgba(255, 255, 255, 0.44);
+    outline: none;
+  }
+
+  .mobile-cover-actions-trigger:focus-visible {
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.82),
+      0 0 0 6px rgba(120, 8, 208, 0.34),
+      0 10px 24px rgba(10, 5, 19, 0.22);
+  }
+
+  .mobile-cover-actions-trigger svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-cover-actions-backdrop {
+    position: fixed;
+    z-index: 118;
+    inset: 0;
+    display: block;
+    padding: 0;
+    background: rgba(18, 12, 31, 0.38);
+    border: 0;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .mobile-cover-actions-backdrop[hidden],
+  .mobile-cover-actions-sheet[hidden] {
+    display: none !important;
+  }
+
+  .mobile-cover-actions-sheet {
+    position: fixed;
+    z-index: 119;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    display: block;
+    padding: 8px 12px 14px;
+    color: var(--detail-text);
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 24px;
+    box-shadow: 0 24px 70px rgba(27, 18, 40, 0.24);
+    animation: mobileCoverSheetIn 180ms ease-out both;
+  }
+
+  .mobile-cover-actions-sheet__handle {
+    width: 38px;
+    height: 4px;
+    margin: 2px auto 10px;
+    background: rgba(103, 91, 117, 0.24);
+    border-radius: 999px;
+  }
+
+  .mobile-cover-actions-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0 3px 11px;
+  }
+
+  .mobile-cover-actions-sheet__head > div {
+    min-width: 0;
+  }
+
+  .mobile-cover-actions-sheet__head span {
+    display: block;
+    margin-bottom: 3px;
+    color: #7808d0;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+  }
+
+  .mobile-cover-actions-sheet__head h2 {
+    margin: 0;
+    color: var(--detail-text);
+    font-size: 17px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .mobile-cover-actions-sheet__close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--detail-text-soft);
+    background: var(--detail-surface-raised);
+    border: 1px solid var(--detail-line);
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .mobile-cover-actions-sheet__close svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  .mobile-cover-actions-sheet__actions {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mobile-cover-actions-sheet__action {
+    width: 100%;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    color: var(--detail-text);
+    background: var(--detail-surface-raised);
+    border: 1px solid var(--detail-line);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-cover-actions-sheet__action:hover,
+  .mobile-cover-actions-sheet__action:focus-visible {
+    border-color: rgba(120, 8, 208, 0.3);
+    background: rgba(120, 8, 208, 0.055);
+    outline: none;
+  }
+
+  .mobile-cover-actions-sheet__icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.09);
+    border-radius: 13px;
+  }
+
+  .mobile-cover-actions-sheet__icon svg,
+  .mobile-cover-actions-sheet__chevron {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-cover-actions-sheet__copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .mobile-cover-actions-sheet__copy strong {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .mobile-cover-actions-sheet__copy small {
+    overflow: hidden;
+    color: var(--detail-text-soft);
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-cover-actions-sheet__chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--detail-text-soft);
+  }
+
+  .mobile-cover-actions-sheet__action--danger {
+    color: #b54756;
+  }
+
+  .mobile-cover-actions-sheet__action--danger .mobile-cover-actions-sheet__icon {
+    color: #b54756;
+    background: rgba(181, 71, 86, 0.09);
+  }
+
+  body.mobile-cover-actions-open {
+    overflow: hidden;
+  }
+
+  @keyframes mobileCoverSheetIn {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .detail-cover-badge {
@@ -12420,5 +12666,1244 @@ html[data-theme="dark"] .event-basic-editor-time-fields input[type="time"] {
 @media (max-width: 620px) {
   .event-basic-editor-time-fields {
     grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* =========================================================
+   Event Detail — mobile control-center redesign
+   Desktop remains unchanged. Mobile hierarchy:
+   hero -> quick actions -> stats/storage -> sticky section tabs.
+   ========================================================= */
+.mobile-event-command-center,
+.mobile-share-backdrop,
+.mobile-share-close {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body.event-detail-shell {
+    padding-bottom: 22px !important;
+  }
+
+  body.mobile-share-sheet-open {
+    overflow: hidden !important;
+  }
+
+  .event-detail-page {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 10px 24px !important;
+  }
+
+  .detail-header {
+    min-height: 58px !important;
+    margin: 8px 0 10px !important;
+    padding: 8px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .detail-brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .detail-brand strong {
+    font-size: 16px !important;
+  }
+
+  /* Compact cover: the event identity stays visual without taking a full screen. */
+  .detail-hero {
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  .detail-cover,
+  .detail-cover-overlay {
+    min-height: 216px !important;
+    height: 216px !important;
+    border-radius: 20px !important;
+  }
+
+  .detail-cover-copy--hero-text {
+    top: auto !important;
+    right: 16px !important;
+    bottom: 20px !important;
+    left: 16px !important;
+    max-width: calc(100% - 32px) !important;
+    text-align: left !important;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row {
+    justify-content: flex-start !important;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  .detail-cover-copy--hero-text > p {
+    display: -webkit-box !important;
+    max-width: 92% !important;
+    margin: 7px 0 0 !important;
+    overflow: hidden !important;
+    color: rgba(255,255,255,.86) !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+  }
+
+  .detail-cover-badge {
+    top: 12px !important;
+    left: 12px !important;
+  }
+
+  .detail-cover-badge .rec-chip {
+    min-height: 28px !important;
+    padding: 6px 9px !important;
+    font-size: 8px !important;
+  }
+
+  /* Cover management already exists in the mobile more menu. */
+  .event-cover-actions {
+    display: none !important;
+  }
+
+  .event-title-edit-button--cover-bottom {
+    right: 12px !important;
+    bottom: 12px !important;
+    min-height: 34px !important;
+    padding: 7px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .event-title-edit-button--cover-bottom span {
+    font-size: 9px !important;
+  }
+
+  /* Mobile dashboard immediately under the cover. */
+  .mobile-event-command-center {
+    display: grid !important;
+    gap: 10px;
+    margin: 10px 0 10px;
+  }
+
+  .mobile-event-meta-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .mobile-event-meta-chip,
+  .mobile-event-code-chip {
+    min-width: 0;
+    min-height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 7px 9px;
+    overflow: hidden;
+    color: #5f5668;
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 10px;
+    box-shadow: none;
+    font: inherit;
+    text-align: left;
+  }
+
+  .mobile-event-meta-chip svg {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    fill: none;
+    stroke: #7808d0;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-event-meta-chip b,
+  .mobile-event-code-chip span {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--detail-text);
+    font-size: 10px;
+    font-weight: 850;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-event-status-chip {
+    justify-content: center;
+    color: #178a57;
+    background: rgba(23,138,87,.08);
+    border-color: rgba(23,138,87,.14);
+    font-size: 10px;
+    font-weight: 850;
+  }
+
+  .mobile-event-status-chip[data-active="false"] {
+    color: #a05252;
+    background: rgba(160,82,82,.08);
+    border-color: rgba(160,82,82,.14);
+  }
+
+  .mobile-event-code-chip {
+    justify-content: center;
+    color: #7808d0;
+    background: rgba(120,8,208,.05);
+    border-color: rgba(120,8,208,.14);
+    cursor: pointer;
+  }
+
+  .mobile-event-code-chip span {
+    color: #7808d0;
+    letter-spacing: .08em;
+  }
+
+  .mobile-event-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .mobile-event-quick-actions button {
+    min-width: 0;
+    min-height: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 3px;
+    color: #6f6675;
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 13px;
+    box-shadow: none;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-event-quick-actions button:first-child {
+    color: #fff;
+    background: #7808d0;
+    border-color: #7808d0;
+  }
+
+  .mobile-event-quick-actions button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-event-quick-actions button span {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 8.5px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-event-overview {
+    padding: 10px;
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 15px;
+  }
+
+  .mobile-event-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .mobile-event-stat-grid article {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 7px 3px;
+    text-align: center;
+    border-right: 1px solid var(--detail-line);
+  }
+
+  .mobile-event-stat-grid article:last-child {
+    border-right: 0;
+  }
+
+  .mobile-event-stat-grid strong {
+    color: var(--detail-text);
+    font-size: 19px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .mobile-event-stat-grid span {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--detail-muted);
+    font-size: 8px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-event-storage {
+    margin-top: 7px;
+    padding-top: 8px;
+    border-top: 1px solid var(--detail-line);
+  }
+
+  .mobile-event-storage__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    color: var(--detail-muted);
+    font-size: 9px;
+  }
+
+  .mobile-event-storage__meta > span > b {
+    color: #7808d0;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .mobile-event-storage__meta strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--detail-text);
+    font-size: 9px;
+    font-style: normal;
+  }
+
+  .mobile-event-storage__meta i {
+    color: var(--detail-muted);
+    font-style: normal;
+  }
+
+  .mobile-event-storage__meta strong > b {
+    min-width: 30px;
+    padding: 3px 5px;
+    color: #7808d0;
+    background: rgba(120,8,208,.07);
+    border-radius: 999px;
+    text-align: center;
+  }
+
+  .mobile-event-storage__track {
+    height: 5px;
+    overflow: hidden;
+    background: rgba(120,8,208,.08);
+    border-radius: 999px;
+  }
+
+  .mobile-event-storage__track > span {
+    width: 0;
+    height: 100%;
+    display: block;
+    background: #7808d0;
+    border-radius: inherit;
+    transition: width .25s ease;
+  }
+
+  .mobile-event-storage[data-state="warning"] .mobile-event-storage__track > span {
+    background: #b58a2a;
+  }
+
+  .mobile-event-storage[data-state="critical"] .mobile-event-storage__track > span {
+    background: #b14960;
+  }
+
+  /* Sticky section navigation replaces the previous floating bottom dock. */
+  .mobile-detail-nav {
+    position: sticky !important;
+    z-index: 68 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    margin: 0 0 10px !important;
+    padding: 5px !important;
+    background: rgba(255,255,255,.96) !important;
+    border: 1px solid rgba(63,50,72,.09) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 22px rgba(24,18,29,.08) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+  }
+
+  .mobile-detail-nav a {
+    min-height: 38px !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 6px !important;
+    color: #857c8b !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+  }
+
+  .mobile-detail-nav a span {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  .mobile-detail-nav a[aria-current="true"] {
+    color: #7808d0 !important;
+    background: rgba(120,8,208,.08) !important;
+  }
+
+  /* Section-as-tab behavior on phones. */
+  .detail-content[data-mobile-section="gallery"] #eventGuestsSection,
+  .detail-content[data-mobile-section="gallery"] #eventInfoSection,
+  .detail-content[data-mobile-section="guests"] #eventGallerySection,
+  .detail-content[data-mobile-section="guests"] #eventInfoSection,
+  .detail-content[data-mobile-section="details"] #eventGallerySection,
+  .detail-content[data-mobile-section="details"] #eventGuestsSection {
+    display: none !important;
+  }
+
+  .detail-content[data-mobile-section="gallery"] #eventGallerySection,
+  .detail-content[data-mobile-section="guests"] #eventGuestsSection,
+  .detail-content[data-mobile-section="details"] #eventInfoSection {
+    display: block !important;
+  }
+
+  #eventManageSection {
+    display: none !important;
+  }
+
+  /* Gallery first: remove duplicate title bulk and keep actions accessible. */
+  #eventGallerySection {
+    margin: 0 !important;
+  }
+
+  #eventGallerySection .gallery-admin-card {
+    padding: 11px !important;
+    border-radius: 16px !important;
+  }
+
+  #eventGallerySection .gallery-admin-head {
+    align-items: center !important;
+    margin-bottom: 8px !important;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head > span {
+    display: none !important;
+  }
+
+  #eventGallerySection .gallery-admin-head .section-head h2 {
+    font-size: 18px !important;
+  }
+
+  #eventGallerySection .gallery-admin-head .gallery-helper-text {
+    display: none !important;
+  }
+
+  #eventGallerySection .desktop-quick-upload-open {
+    display: none !important;
+  }
+
+  #eventGallerySection .media-filter-bar {
+    margin-bottom: 9px !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #eventGallerySection .media-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Guests become a full-width mobile list instead of a narrow side card. */
+  #eventGuestsSection.guests-panel {
+    position: static !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    overflow: visible !important;
+    border-radius: 16px !important;
+  }
+
+  #eventGuestsSection .guests-panel-head {
+    gap: 8px !important;
+  }
+
+  #eventGuestsSection .gallery-helper-text {
+    display: none !important;
+  }
+
+  #eventGuestsSection .guest-list-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Details are intentionally quiet and compact. */
+  #eventInfoSection.detail-info-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  #eventInfoSection .info-card {
+    min-width: 0 !important;
+    min-height: 92px !important;
+    padding: 10px !important;
+    border-radius: 13px !important;
+  }
+
+  #eventInfoSection .info-card--location {
+    grid-column: 1 / -1 !important;
+  }
+
+  #eventInfoSection .info-card > span {
+    font-size: 8px !important;
+  }
+
+  #eventInfoSection .info-card > strong {
+    font-size: 11px !important;
+  }
+
+  /* QR / share is a focused bottom sheet instead of a permanent column. */
+  #eventShareSection {
+    display: none !important;
+  }
+
+  #eventShareSection.is-mobile-share-open {
+    position: fixed !important;
+    z-index: 120 !important;
+    right: 10px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    top: auto !important;
+    width: auto !important;
+    max-height: min(82vh, 680px) !important;
+    display: block !important;
+    padding: 18px 14px 14px !important;
+    overflow-y: auto !important;
+    background: var(--detail-surface-solid) !important;
+    border: 1px solid var(--detail-line) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 28px 80px rgba(20,14,24,.28) !important;
+  }
+
+  .mobile-share-backdrop:not([hidden]) {
+    position: fixed;
+    z-index: 115;
+    inset: 0;
+    display: block !important;
+    background: rgba(14,10,18,.52);
+    border: 0;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .mobile-share-close {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    display: grid !important;
+    place-items: center;
+    padding: 0;
+    color: var(--detail-muted);
+    background: rgba(120,8,208,.05);
+    border: 1px solid var(--detail-line);
+    border-radius: 10px;
+  }
+
+  .mobile-share-close svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  #eventShareSection .side-label {
+    padding-right: 44px !important;
+  }
+
+  #eventShareSection .event-statistics-quick--side,
+  #eventShareSection .event-storage-quick--side,
+  #eventShareSection .share-card-settings-slot {
+    display: none !important;
+  }
+
+  #eventShareSection .qr-box {
+    min-height: 210px !important;
+  }
+
+  #eventShareSection .detail-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 7px !important;
+  }
+
+  #eventShareSection .detail-actions button {
+    min-height: 42px !important;
+  }
+
+  /* No bottom dock anymore: floaters can return to the real bottom edge. */
+  .theme-toggle {
+    right: 68px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .snapup-language {
+    right: 10px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  html[data-theme="dark"] .mobile-detail-nav {
+    background: rgba(28,24,31,.96) !important;
+    border-color: rgba(255,255,255,.08) !important;
+    box-shadow: 0 9px 24px rgba(0,0,0,.22) !important;
+  }
+
+  html[data-theme="dark"] .mobile-event-meta-chip,
+  html[data-theme="dark"] .mobile-event-code-chip,
+  html[data-theme="dark"] .mobile-event-quick-actions button,
+  html[data-theme="dark"] .mobile-event-overview {
+    border-color: rgba(255,255,255,.08) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .detail-cover,
+  .detail-cover-overlay {
+    min-height: 200px !important;
+    height: 200px !important;
+  }
+
+  .detail-cover-copy--hero-text .event-title-row h1 {
+    font-size: 27px !important;
+  }
+
+  .mobile-event-quick-actions button span {
+    font-size: 8px !important;
+  }
+
+  .mobile-event-stat-grid strong {
+    font-size: 17px !important;
+  }
+}
+
+
+
+/* =========================================================
+   Mobile Event Detail — guest card filters gallery
+   ========================================================= */
+@media (max-width: 760px) {
+  #eventGuestsSection .guest-card[data-guest-filter-id] {
+    cursor: pointer;
+    transition:
+      border-color 0.16s ease,
+      background 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  #eventGuestsSection .guest-card[data-guest-filter-id]:active {
+    transform: scale(0.992);
+  }
+
+  #eventGuestsSection .guest-card.is-selected {
+    border-color: #7808d0 !important;
+    background: rgba(120, 8, 208, 0.055) !important;
+  }
+}
+
+
+
+/* =========================================================
+   Event cover photo actions — desktop/browser parity
+   Desktop now uses the same contextual camera trigger +
+   action sheet pattern as mobile. Existing upload/remove
+   handlers remain the source of truth.
+   ========================================================= */
+@media (min-width: 761px) {
+  .event-cover-actions {
+    display: none !important;
+  }
+
+  .mobile-cover-actions-trigger {
+    position: absolute;
+    z-index: 7;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: #ffffff;
+    background: rgba(18, 12, 31, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(10, 5, 19, 0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: pointer;
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .mobile-cover-actions-trigger:hover,
+  .mobile-cover-actions-trigger:focus-visible {
+    background: rgba(120, 8, 208, 0.9);
+    border-color: rgba(255, 255, 255, 0.44);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .mobile-cover-actions-trigger:focus-visible {
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.82),
+      0 0 0 6px rgba(120, 8, 208, 0.34),
+      0 10px 24px rgba(10, 5, 19, 0.22);
+  }
+
+  .mobile-cover-actions-trigger svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-cover-actions-backdrop {
+    position: fixed;
+    z-index: 118;
+    inset: 0;
+    display: block;
+    padding: 0;
+    background: rgba(18, 12, 31, 0.38);
+    border: 0;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .mobile-cover-actions-backdrop[hidden],
+  .mobile-cover-actions-sheet[hidden] {
+    display: none !important;
+  }
+
+  .mobile-cover-actions-sheet {
+    position: fixed;
+    z-index: 119;
+    right: 50%;
+    bottom: 24px;
+    left: auto;
+    width: min(430px, calc(100vw - 40px));
+    display: block;
+    padding: 9px 13px 15px;
+    color: var(--detail-text);
+    background: var(--detail-surface-solid);
+    border: 1px solid var(--detail-line);
+    border-radius: 24px;
+    box-shadow: 0 28px 80px rgba(27, 18, 40, 0.28);
+    transform: translateX(50%);
+    animation: desktopCoverSheetIn 180ms ease-out both;
+  }
+
+  .mobile-cover-actions-sheet__handle {
+    width: 38px;
+    height: 4px;
+    margin: 2px auto 10px;
+    background: rgba(103, 91, 117, 0.24);
+    border-radius: 999px;
+  }
+
+  .mobile-cover-actions-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0 3px 11px;
+  }
+
+  .mobile-cover-actions-sheet__head > div {
+    min-width: 0;
+  }
+
+  .mobile-cover-actions-sheet__head span {
+    display: block;
+    margin-bottom: 3px;
+    color: #7808d0;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+  }
+
+  .mobile-cover-actions-sheet__head h2 {
+    margin: 0;
+    color: var(--detail-text);
+    font-size: 17px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .mobile-cover-actions-sheet__close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--detail-text-soft);
+    background: var(--detail-surface-raised);
+    border: 1px solid var(--detail-line);
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .mobile-cover-actions-sheet__close svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+
+  .mobile-cover-actions-sheet__actions {
+    display: grid;
+    gap: 8px;
+  }
+
+  .mobile-cover-actions-sheet__action {
+    width: 100%;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    color: var(--detail-text);
+    background: var(--detail-surface-raised);
+    border: 1px solid var(--detail-line);
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-cover-actions-sheet__action:hover,
+  .mobile-cover-actions-sheet__action:focus-visible {
+    border-color: rgba(120, 8, 208, 0.3);
+    background: rgba(120, 8, 208, 0.055);
+    outline: none;
+  }
+
+  .mobile-cover-actions-sheet__icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: #7808d0;
+    background: rgba(120, 8, 208, 0.09);
+    border-radius: 13px;
+  }
+
+  .mobile-cover-actions-sheet__icon svg,
+  .mobile-cover-actions-sheet__chevron {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-cover-actions-sheet__copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .mobile-cover-actions-sheet__copy strong {
+    color: inherit;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .mobile-cover-actions-sheet__copy small {
+    overflow: hidden;
+    color: var(--detail-text-soft);
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-cover-actions-sheet__chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--detail-text-soft);
+  }
+
+  .mobile-cover-actions-sheet__action--danger {
+    color: #b54756;
+  }
+
+  .mobile-cover-actions-sheet__action--danger .mobile-cover-actions-sheet__icon {
+    color: #b54756;
+    background: rgba(181, 71, 86, 0.09);
+  }
+
+  body.mobile-cover-actions-open {
+    overflow: hidden;
+  }
+
+  @keyframes desktopCoverSheetIn {
+    from {
+      opacity: 0;
+      transform: translateX(50%) translateY(18px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(50%) translateY(0) scale(1);
+    }
+  }
+}
+
+
+/* =========================================================
+   Event cover actions modal — centered on every viewport
+   Keeps the contextual camera trigger, but presents the
+   actions as a true centered dialog on mobile and desktop.
+   ========================================================= */
+.mobile-cover-actions-sheet {
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 50% !important;
+  width: min(430px, calc(100vw - 24px)) !important;
+  max-height: min(560px, calc(100dvh - 32px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 24px !important;
+  animation: eventCoverActionsModalIn 180ms ease-out both !important;
+}
+
+.mobile-cover-actions-sheet__handle {
+  display: none !important;
+}
+
+.mobile-cover-actions-sheet__head {
+  align-items: center;
+  padding-top: 2px;
+}
+
+.mobile-cover-actions-sheet__head h2 {
+  font-size: 18px;
+}
+
+.mobile-cover-actions-sheet__copy small {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 760px) {
+  .mobile-cover-actions-sheet {
+    width: min(400px, calc(100vw - 24px)) !important;
+    max-height: calc(100dvh - 28px);
+    padding: 10px 12px 14px;
+  }
+
+  .mobile-cover-actions-sheet__action {
+    min-height: 66px;
+  }
+}
+
+@keyframes eventCoverActionsModalIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   Event Detail — mobile colored tools stacked layout
+   Mobile only. Keeps the four QR/share controls in 2 columns,
+   while the five colored event tools become 5 full-width rows.
+   ========================================================= */
+@media (max-width: 760px) {
+  #eventShareSection .detail-actions > :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 58px !important;
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    overflow: hidden !important;
+    border-radius: 10px !important;
+    text-align: left !important;
+    box-shadow: none !important;
+  }
+
+  #eventShareSection .detail-actions > :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) > svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex: 0 0 18px !important;
+  }
+
+  #eventShareSection .detail-actions > :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) > span {
+    min-width: 0 !important;
+    display: block !important;
+  }
+
+  #eventShareSection .detail-actions > :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) strong {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: inherit !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #eventShareSection .detail-actions > :is(
+      .invitation-studio-open,
+      .memory-book-open,
+      .event-archive-open,
+      .event-highlights-open,
+      .live-slideshow-open
+    ) small {
+    display: none !important;
+  }
+
+  #eventShareSection .event-archive-title-row,
+  #eventShareSection .event-highlights-title-row {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  #eventShareSection .event-archive-title-row strong,
+  #eventShareSection .event-highlights-title-row strong {
+    flex: 0 1 auto !important;
+  }
+
+  #eventShareSection .event-archive-title-row em,
+  #eventShareSection .event-highlights-title-row em {
+    flex: 0 0 auto !important;
+    min-height: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 2px 5px !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    font-size: 5.5px !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+  }
+}
+
+/* =========================================================
+   Mobile Event Code popup — close button spacing
+   Keep a little breathing room between the top-right close
+   control and the gradient event-code card.
+   ========================================================= */
+@media (max-width: 760px) {
+  #eventShareSection .event-code-box {
+    margin-top: 10px !important;
+  }
+}
+
+
+/* =========================================================
+   Event Detail — mobile Date + Time combined card
+   Desktop keeps the original independent cards via display: contents.
+   ========================================================= */
+.info-card-datetime-group {
+  display: contents;
+}
+
+@media (max-width: 760px) {
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: var(--detail-surface) !important;
+    border: 1px solid var(--detail-line) !important;
+    border-radius: 13px !important;
+    box-shadow: var(--detail-shadow-soft) !important;
+  }
+
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group
+    > .info-card {
+    min-width: 0 !important;
+    min-height: 108px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group
+    > .info-card--date {
+    border-right: 1px solid var(--detail-line) !important;
+  }
+
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group
+    .event-date-edit-button {
+    min-height: 34px !important;
+    padding: 7px 8px !important;
+    gap: 5px !important;
+    border-radius: 9px !important;
+    font-size: 9px !important;
+  }
+
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group
+    .event-date-edit-button svg {
+    width: 12px !important;
+    height: 12px !important;
+    flex-basis: 12px !important;
+  }
+
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card--time {
+    justify-content: flex-start !important;
+  }
+}
+
+/* =========================================================
+   Event Detail — Date + Time as one shared card on all screens
+   The date and time keep their own labels/values, but visually
+   belong to a single card in desktop, tablet and mobile layouts.
+   ========================================================= */
+.info-card-datetime-group {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-column: span 2;
+  align-items: stretch !important;
+  min-width: 0;
+  overflow: hidden !important;
+  background: var(--detail-surface) !important;
+  border: 1px solid var(--detail-line) !important;
+  border-radius: 21px !important;
+  box-shadow: var(--detail-shadow-soft) !important;
+}
+
+.info-card-datetime-group > .info-card {
+  min-width: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.info-card-datetime-group > .info-card--date {
+  border-right: 1px solid var(--detail-line) !important;
+}
+
+/* Compact browser/desktop info strip. */
+@media (min-width: 1200px) {
+  #eventInfoSection .info-card-datetime-group {
+    border-radius: 11px !important;
+    box-shadow: none !important;
+  }
+
+  #eventInfoSection .info-card-datetime-group > .info-card {
+    min-height: 60px !important;
+  }
+}
+
+/* Mobile keeps the combined card full-width in the two-column details grid. */
+@media (max-width: 760px) {
+  .detail-content[data-mobile-section="details"]
+    #eventInfoSection
+    .info-card-datetime-group {
+    grid-column: 1 / -1 !important;
+    border-radius: 13px !important;
   }
 }

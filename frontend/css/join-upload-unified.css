@@ -482,7 +482,8 @@ html[data-theme="dark"] .join-event-map-link:hover {
   font-weight: inherit;
 }
 
-body.event-gallery-shell .join-event-gallery-link {
+body.event-gallery-shell .join-event-gallery-link,
+body.event-detail-shell .join-event-gallery-link {
   grid-column: 3;
   grid-row: 1 / span 2;
   min-width: 132px;
@@ -503,7 +504,8 @@ body.event-gallery-shell .join-event-gallery-link {
     opacity 0.2s ease;
 }
 
-body.event-gallery-shell .join-event-gallery-link:hover {
+body.event-gallery-shell .join-event-gallery-link:hover,
+body.event-detail-shell .join-event-gallery-link:hover {
   transform: translateY(-2px);
 }
 
@@ -1169,7 +1171,8 @@ body.event-gallery-shell .join-event-gallery-link:hover {
   }
 
   /* Gallery CTA becomes the strong full-width action at the bottom. */
-  body.event-gallery-shell .join-event-gallery-link {
+  body.event-gallery-shell .join-event-gallery-link,
+body.event-detail-shell .join-event-gallery-link {
     grid-column: 1 !important;
     grid-row: 3 !important;
     width: 100% !important;
@@ -1192,7 +1195,9 @@ body.event-gallery-shell .join-event-gallery-link:hover {
   }
 
   body.event-gallery-shell .join-event-gallery-link:hover,
-  body.event-gallery-shell .join-event-gallery-link:active {
+  body.event-gallery-shell .join-event-gallery-link:active,
+  body.event-detail-shell .join-event-gallery-link:hover,
+  body.event-detail-shell .join-event-gallery-link:active {
     background: #0f0b20 !important;
     border-color: #0f0b20 !important;
     transform: none !important;
