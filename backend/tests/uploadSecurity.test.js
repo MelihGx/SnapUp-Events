@@ -64,6 +64,10 @@ test("PATCH 1 isolated HTTP integration", { timeout: 120000 }, async (t) => {
     },
     "../services/videoProcessingService": { async probeVideoFile() { return { duration: 1, width: 16, height: 16 }; }, validateVideoMetadata: (value) => value },
     "../services/videoProcessingQueueService": { wakeVideoProcessingWorker() { workerWakes++; } },
+    // PATCH 1 regression isolates admission; PATCH 2 has separate real-service tests.
+    "../services/uploadAdmissionService": { createUploadAdmissionService: () => ({
+      async acquire() { return { assertValid() {}, async release() {} }; },
+    }) },
     os: { ...os, tmpdir: () => temporaryRoot },
   };
   const originalLoad = Module._load;

@@ -87,6 +87,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id", "X-Turnstile-Token"],
     exposedHeaders: [
+      "Retry-After",
       "Content-Disposition",
       "X-SnapUp-PDF-Engine",
       "X-SnapUp-PDF-Design",

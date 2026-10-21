@@ -9,6 +9,8 @@ const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
 const optionalAuth = require("../middlewares/optionalAuth");
 const { createUploadAuthorization, runBoundedMultipart, assertUploadIdentity } = require("../middlewares/uploadSecurity");
+const { withUploadAdmission } = require("../middlewares/uploadAdmission");
+const { createUploadAdmissionService } = require("../services/uploadAdmissionService");
 const {
   validateUploadedMediaFilesPreserveOriginal,
 } = require("../middlewares/fileValidation");
@@ -38,6 +40,7 @@ const {
 } = require("../services/registeredUserAccessService");
 
 const router = express.Router();
+const uploadAdmission = createUploadAdmissionService({ supabase });
 
 const MAX_MEDIA_FILES_PER_REQUEST = 15;
 const MAX_MEDIA_FILE_BYTES = 50 * 1024 * 1024;
@@ -853,6 +856,7 @@ router.post(
   createUploadAuthorization({ verifyGuestToken, hashGuestToken, getGuestSecurity,
     getUploadStatusForEvent, assertRegisteredUserAccess }),
   enforceMediaRequestSize,
+  withUploadAdmission(uploadAdmission, [
   handleMediaUpload,
   validateUploadedMediaFilesPreserveOriginal,
   async (req, res) => {
@@ -1029,6 +1033,7 @@ router.post(
       // Files are intentionally handled one by one. A single request can carry
       // up to 15 files and serial work keeps memory/disk pressure predictable.
       for (const file of files) {
+        req.uploadLease.assertValid();
         const mediaKind = getMediaKindFromMime(file.mimetype);
 
         if (!mediaKind) {
@@ -1062,6 +1067,7 @@ router.post(
             cloudinary: null,
           });
 
+          req.uploadLease.assertValid();
           continue;
         }
 
@@ -1071,6 +1077,7 @@ router.post(
         const videoMetadata = validateVideoMetadata(
           await probeVideoFile(file.path),
         );
+        req.uploadLease.assertValid();
 
         // Only the original video is stored during the request. FFmpeg and
         // poster generation happen after HTTP 202 through the persistent queue.
@@ -1102,6 +1109,7 @@ router.post(
         });
       }
 
+      req.uploadLease.assertValid();
       const imageItems = uploadedItems.filter(
         (item) => item.media_kind === "image",
       );
@@ -1154,6 +1162,7 @@ router.post(
         insertedMediaIds.push(
           ...insertedMedia.map((row) => row.media_id).filter(Boolean),
         );
+        req.uploadLease.assertValid();
       }
 
       const videoJobRows = videoItems.map((item) => ({
@@ -1208,6 +1217,7 @@ router.post(
         insertedJobIds.push(
           ...queuedJobs.map((row) => row.job_id).filter(Boolean),
         );
+        req.uploadLease.assertValid();
       }
 
       const consumedBytes = uploadedItems.reduce(
@@ -1295,6 +1305,7 @@ router.post(
       await cleanupTemporaryFiles(files);
     }
   },
+  ], cleanupTemporaryFiles),
 );
 
 router.post("/message", uploadLimiter, optionalAuth, async (req, res) => {
