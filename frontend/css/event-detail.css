@@ -13036,8 +13036,9 @@ html[data-theme="dark"] .event-basic-editor-time-fields input[type="time"] {
   /* Sticky section navigation replaces the previous floating bottom dock. */
   .mobile-detail-nav {
     position: sticky !important;
-    z-index: 68 !important;
-    top: 0 !important;
+    /* Keep the section tabs below the sticky mobile header instead of overlapping it. */
+    z-index: 38 !important;
+    top: 72px !important;
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
