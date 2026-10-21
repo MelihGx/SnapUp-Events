@@ -85,7 +85,7 @@ app.use(
       return callback(corsError);
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id", "X-Turnstile-Token"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Guest-Token", "X-Like-Key", "X-Request-Id", "X-Turnstile-Token", "Idempotency-Key"],
     exposedHeaders: [
       "Retry-After",
       "Content-Disposition",

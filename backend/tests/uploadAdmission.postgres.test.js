@@ -69,7 +69,7 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
   async function take(service, e, g) { const lease = await service.acquire({ eventId: e, guestId: g }); held.push(lease); return lease; }
   async function rejected(promise, scope) { await assert.rejects(promise, (error) => error.statusCode === 429 && error.scope === scope && error.retryAfter > 0); }
   try {
-    await exec(exe("initdb"), ["-D", dataDir, "-U", user, "-A", "trust", "--no-locale", "--encoding=UTF8"], options);
+    await exec(exe("initdb"), ["-D", dataDir, "-U", user, "-A", "trust", "--no-locale", "--encoding=UTF8", "--no-sync"], options);
     await exec(exe("pg_ctl"), ["-D", dataDir, "-l", path.join(root, "postgres.log"), "-w", "-t", "20", "-o", `-h 127.0.0.1 -p ${port} -c max_connections=60`, "start"], options);
     started = true;
     await sql("create role anon; create role authenticated; create role service_role;");
@@ -264,6 +264,9 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
       failHandler = false;
       await request({ abort: true }); await settled();
     });
+    if (process.env.PATCH3_QUOTA_TESTS === "1") {
+      await require("./fixtures/uploadQuotaScenarios")({ t, sql, root });
+    }
   } finally {
     if (server) { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
     await Promise.all(held.map((lease) => lease.release()));

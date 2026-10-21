@@ -189,7 +189,8 @@ async function uploadImagePair(file, eventId, options = {}) {
 
   const objectKind = options.kind === "cover" ? "cover" : "media";
   const buckets = getR2Buckets();
-  const assetId = crypto.randomUUID();
+  const assetId = options.assetId || crypto.randomUUID();
+  if (!/^[a-f0-9-]{36}$/i.test(assetId)) throw new Error("Invalid R2 asset id.");
   const originalExtension = sanitizeExtension(
     file.detectedFormat || path.extname(file.originalname),
     ["jpg", "png", "webp"],
@@ -284,8 +285,9 @@ async function uploadImagePair(file, eventId, options = {}) {
 }
 
 
-function buildVideoObjectKeys(file, eventId) {
-  const assetId = crypto.randomUUID();
+function buildVideoObjectKeys(file, eventId, options = {}) {
+  const assetId = options.assetId || crypto.randomUUID();
+  if (!/^[a-f0-9-]{36}$/i.test(assetId)) throw new Error("Invalid R2 asset id.");
   const originalExtension = sanitizeExtension(
     file?.detectedFormat || path.extname(file?.originalname || ""),
     ["mp4", "webm", "mov"],
@@ -300,13 +302,13 @@ function buildVideoObjectKeys(file, eventId) {
   };
 }
 
-async function uploadVideoOriginal(file, eventId) {
+async function uploadVideoOriginal(file, eventId, options = {}) {
   if (!file?.path) {
     throw new Error("R2 video upload requires a temporary file path.");
   }
 
   const buckets = getR2Buckets();
-  const keys = buildVideoObjectKeys(file, eventId);
+  const keys = buildVideoObjectKeys(file, eventId, options);
   const originalBytes = Math.max(0, Number(file.size) || 0);
   const originalContentType = String(
     file.detectedMime || file.mimetype || "application/octet-stream",

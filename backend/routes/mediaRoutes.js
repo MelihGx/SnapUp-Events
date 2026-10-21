@@ -11,6 +11,7 @@ const optionalAuth = require("../middlewares/optionalAuth");
 const { createUploadAuthorization, runBoundedMultipart, assertUploadIdentity } = require("../middlewares/uploadSecurity");
 const { withUploadAdmission } = require("../middlewares/uploadAdmission");
 const { createUploadAdmissionService } = require("../services/uploadAdmissionService");
+const { createUploadQuotaService } = require("../services/uploadQuotaService");
 const {
   validateUploadedMediaFilesPreserveOriginal,
 } = require("../middlewares/fileValidation");
@@ -41,6 +42,7 @@ const {
 
 const router = express.Router();
 const uploadAdmission = createUploadAdmissionService({ supabase });
+const uploadQuota = createUploadQuotaService({ supabase });
 
 const MAX_MEDIA_FILES_PER_REQUEST = 15;
 const MAX_MEDIA_FILE_BYTES = 50 * 1024 * 1024;
@@ -849,6 +851,21 @@ router.post(
   },
 );
 
+function sendAcceptedUpload(res, result) {
+  const media = result.media || [];
+  const jobs = result.video_jobs || [];
+  if (jobs.length) wakeVideoProcessingWorker();
+  if (res.destroyed) return;
+  return res.status(jobs.length ? 202 : 201).json({
+    success: true,
+    message: jobs.length ? "Upload completed. Video processing will continue in the background."
+      : `${media.length} media file uploaded successfully.`,
+    uploaded_count: media.length + jobs.length,
+    queued_video_count: jobs.length,
+    media, video_jobs: jobs, storage_assets: result.storage_assets || [],
+  });
+}
+
 router.post(
   "/upload",
   uploadLimiter,
@@ -861,23 +878,7 @@ router.post(
   validateUploadedMediaFilesPreserveOriginal,
   async (req, res) => {
     const uploadedItems = [];
-    const insertedMediaIds = [];
-    const insertedJobIds = [];
     const files = Object.values(req.files || {}).flat();
-
-    async function rollbackDatabaseWrites() {
-      await Promise.allSettled([
-        insertedMediaIds.length
-          ? supabase.from("media").delete().in("media_id", insertedMediaIds)
-          : null,
-        insertedJobIds.length
-          ? supabase
-              .from("video_processing_jobs")
-              .delete()
-              .in("job_id", insertedJobIds)
-          : null,
-      ]);
-    }
 
     try {
       const { event_id, guest_id, message } = req.body;
@@ -957,14 +958,7 @@ router.post(
         });
       }
 
-      const {
-        mediaStatus,
-        maxStoragePerGuest,
-        onlyUsers,
-        packageKey,
-        eventStorageLimitBytes,
-        eventStorageUsedBytes,
-      } = await getUploadStatusForEvent(event_id);
+      const { mediaStatus, onlyUsers } = await getUploadStatusForEvent(event_id);
 
       assertRegisteredUserAccess({
         onlyUsers,
@@ -973,62 +967,14 @@ router.post(
         guestClaims,
       });
 
-      await checkGuestUploadLimit(event_id, guest_id, files.length);
-
-      const [{ data: guestUsageRows, error: usageError }, pendingVideoUsage] =
-        await Promise.all([
-          supabase
-            .from("media")
-            .select("bytes")
-            .eq("event_id", event_id)
-            .eq("guest_id", guest_id),
-          getPendingVideoUsage(event_id, guest_id),
-        ]);
-
-      if (usageError) {
-        throw createHttpError("Storage usage could not be checked.", 500);
-      }
-
-      // Event quota is cumulative: deleting media does not return event storage
-      // quota. A video begins consuming quota as soon as its original has been
-      // accepted into R2, before FFmpeg starts in the background.
-      const eventUsedBytes = eventStorageUsedBytes;
-      const guestUsedBytes =
-        (guestUsageRows || []).reduce(
-          (sum, row) => sum + Math.max(0, Number(row?.bytes) || 0),
-          0,
-        ) + pendingVideoUsage.bytes;
-
-      if (eventUsedBytes + incomingBytes > eventStorageLimitBytes) {
-        return res.status(413).json({
-          success: false,
-          message: "Event storage quota exceeded.",
-          code: "EVENT_STORAGE_QUOTA_EXCEEDED",
-          package: packageKey,
-          used_bytes: eventUsedBytes,
-          limit_bytes: eventStorageLimitBytes,
-          remaining_bytes: Math.max(
-            0,
-            eventStorageLimitBytes - eventUsedBytes,
-          ),
-        });
-      }
-
-      if (
-        guestUsedBytes + incomingBytes >
-        maxStoragePerGuest * 1024 * 1024
-      ) {
-        return res.status(413).json({
-          success: false,
-          message: "Guest storage quota exceeded.",
-          code: "GUEST_STORAGE_QUOTA_EXCEEDED",
-        });
-      }
-
       const cleanMessage =
         message && message.trim() !== ""
           ? cleanText(message, { max: 2000, field: "message" })
           : null;
+
+      const reservation = await uploadQuota.reserve({ req, files, message: cleanMessage });
+      if (reservation.state === "committed") return sendAcceptedUpload(res, reservation.result);
+      req.uploadLease.assertValid();
 
       // Files are intentionally handled one by one. A single request can carry
       // up to 15 files and serial work keeps memory/disk pressure predictable.
@@ -1043,7 +989,7 @@ router.post(
         const mediaTypeId = await getMediaTypeId(mediaKind);
 
         if (mediaKind === "image") {
-          const r2Result = await uploadImagePair(file, event_id);
+          const r2Result = await uploadImagePair(file, event_id, { assetId: file.uploadAssetId });
 
           uploadedItems.push({
             event_id,
@@ -1081,7 +1027,7 @@ router.post(
 
         // Only the original video is stored during the request. FFmpeg and
         // poster generation happen after HTTP 202 through the persistent queue.
-        const r2Video = await uploadVideoOriginal(file, event_id);
+        const r2Video = await uploadVideoOriginal(file, event_id, { assetId: file.uploadAssetId });
 
         uploadedItems.push({
           event_id,
@@ -1142,29 +1088,6 @@ router.post(
         format: "webp",
       }));
 
-      let insertedMedia = [];
-
-      if (mediaRows.length > 0) {
-        const { data, error } = await supabase
-          .from("media")
-          .insert(mediaRows)
-          .select();
-
-        if (error) {
-          throw createHttpError(
-            `Media database insert failed: ${error.message}`,
-            500,
-            "MEDIA_DATABASE_INSERT_FAILED",
-          );
-        }
-
-        insertedMedia = data || [];
-        insertedMediaIds.push(
-          ...insertedMedia.map((row) => row.media_id).filter(Boolean),
-        );
-        req.uploadLease.assertValid();
-      }
-
       const videoJobRows = videoItems.map((item) => ({
         event_id: item.event_id,
         guest_id: item.guest_id,
@@ -1182,100 +1105,25 @@ router.post(
         video_height: Number(item.r2.video_height) || null,
       }));
 
-      let queuedJobs = [];
-
-      if (videoJobRows.length > 0) {
-        const { data, error } = await supabase
-          .from("video_processing_jobs")
-          .insert(videoJobRows)
-          .select(
-            "job_id, status, event_id, guest_id, original_bytes, created_at",
-          );
-
-        if (error) {
-          console.error(
-            JSON.stringify({
-              level: "error",
-              event: "video_queue_insert_failed",
-              request_id: req.requestId || null,
-              event_id,
-              code: error.code || null,
-              message: error.message || null,
-              details: error.details || null,
-              hint: error.hint || null,
-            }),
-          );
-
-          throw createHttpError(
-            "Video could not be queued for processing.",
-            500,
-            "VIDEO_QUEUE_INSERT_FAILED",
-          );
-        }
-
-        queuedJobs = data || [];
-        insertedJobIds.push(
-          ...queuedJobs.map((row) => row.job_id).filter(Boolean),
-        );
-        req.uploadLease.assertValid();
-      }
-
-      const consumedBytes = uploadedItems.reduce(
-        (sum, item) => sum + Math.max(0, Number(item.bytes) || 0),
-        0,
-      );
-
-      if (consumedBytes > 0) {
-        const { error: storageCounterError } = await supabase.rpc(
-          "increment_event_storage_consumed",
-          {
-            p_event_id: event_id,
-            p_bytes: Math.round(consumedBytes),
-          },
-        );
-
-        if (storageCounterError) {
-          throw createHttpError(
-            "Event storage usage could not be recorded.",
-            500,
-            "EVENT_STORAGE_COUNTER_FAILED",
-          );
-        }
-      }
-
-      if (queuedJobs.length > 0) {
-        // This only nudges the single-concurrency worker. The job itself is
-        // already durable in Postgres, so closing the browser cannot cancel it.
-        wakeVideoProcessingWorker();
-      }
-
-      return res.status(queuedJobs.length > 0 ? 202 : 201).json({
-        success: true,
-        message:
-          queuedJobs.length > 0
-            ? "Upload completed. Video processing will continue in the background."
-            : `${insertedMedia.length} media file uploaded successfully.`,
-        uploaded_count: insertedMedia.length + queuedJobs.length,
-        queued_video_count: queuedJobs.length,
-        media: insertedMedia,
-        video_jobs: queuedJobs,
-        storage_assets: uploadedItems.map((item) => ({
-          provider: item.storage_provider,
-          original_key: item.r2?.original_key || null,
-          display_key:
-            item.media_kind === "image" ? item.r2?.display_key || null : null,
-          poster_key: null,
-          processing_status:
-            item.media_kind === "video" ? "queued" : "ready",
-          cloudinary_public_id: item.cloudinary?.public_id || null,
-        })),
-      });
+      req.uploadLease.assertValid();
+      const result = await req.uploadQuota.finalize(mediaRows, videoJobRows);
+      return sendAcceptedUpload(res, result);
     } catch (error) {
-      await rollbackDatabaseWrites();
-
-      await Promise.allSettled(
-        uploadedItems.map((item) => cleanupUploadedItem(item)),
-      );
+      // A failed HTTP reply does NOT prove the finalize transaction rolled back.
+      // Resolve that ambiguity under the same DB lock before deleting anything.
+      if (req.uploadQuota) {
+        try {
+          const outcome = await req.uploadQuota.cancel();
+          if (outcome.state === "committed") return sendAcceptedUpload(res, outcome.result);
+          if (outcome.state === "cancelled") {
+            await Promise.allSettled(req.uploadQuota.assets.map((asset) => deleteMediaAssets({
+              originalKey: asset.original_key, displayKey: asset.display_key, posterKey: asset.poster_key,
+            })));
+          }
+        } catch (recoveryError) {
+          console.error("Upload quota outcome unresolved; preserving R2 assets for recovery:", recoveryError.code);
+        }
+      }
 
       console.error(
         JSON.stringify({

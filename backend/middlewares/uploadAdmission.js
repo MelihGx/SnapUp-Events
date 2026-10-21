@@ -12,7 +12,7 @@ function withUploadAdmission(service, stages, cleanup) {
     res.once("close", onDisconnect);
     try {
       lease = await service.acquire(req.uploadIdentity, () => req.destroy());
-      req.uploadLease = { assertValid() {
+      req.uploadLease = { ownership: lease.ownership, assertValid() {
         lease.assertValid();
         if (disconnected || req.aborted) throw admissionError("UPLOAD_ADMISSION_LOST");
       } };

@@ -68,6 +68,18 @@ test("PATCH 1 isolated HTTP integration", { timeout: 120000 }, async (t) => {
     "../services/uploadAdmissionService": { createUploadAdmissionService: () => ({
       async acquire() { return { assertValid() {}, async release() {} }; },
     }) },
+    "../services/uploadQuotaService": { createUploadQuotaService: () => ({
+      async reserve({ req }) {
+        const session = { state: "reserved", assets: [],
+          async finalize(media, jobs) {
+            return { media: media.length ? (await db.from("media").insert(media).select()).data : [],
+              video_jobs: jobs.length ? (await db.from("video_processing_jobs").insert(jobs).select()).data : [], storage_assets: [] };
+          }, async cancel() { return { state: "cancelled" }; },
+        };
+        req.uploadQuota = session;
+        return session;
+      },
+    }) },
     os: { ...os, tmpdir: () => temporaryRoot },
   };
   const originalLoad = Module._load;

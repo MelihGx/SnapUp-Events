@@ -92,6 +92,7 @@ function createUploadAdmissionService({ supabase, localLimit = () => Number(proc
         throw error;
       }
       return {
+        ownership: Object.freeze({ ...ownership }),
         assertValid,
         async release() {
           if (stopped) return;
