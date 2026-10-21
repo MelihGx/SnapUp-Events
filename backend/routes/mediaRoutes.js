@@ -8,6 +8,7 @@ const cloudinary = require("../config/cloudinary");
 const supabase = require("../config/supabaseClient");
 const authMiddleware = require("../middlewares/authMiddleware");
 const optionalAuth = require("../middlewares/optionalAuth");
+const { createUploadAuthorization, runBoundedMultipart, assertUploadIdentity } = require("../middlewares/uploadSecurity");
 const {
   validateUploadedMediaFilesPreserveOriginal,
 } = require("../middlewares/fileValidation");
@@ -52,6 +53,24 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, MEDIA_UPLOAD_DIRECTORY),
   filename: (_req, _file, cb) => cb(null, crypto.randomUUID()),
 });
+
+// A storage write can fail before Multer adds the file to req.files. Remove
+// that partial file after the disk engine has closed its write stream too.
+const writeTemporaryFile = storage._handleFile.bind(storage);
+storage._handleFile = (req, file, callback) => {
+  writeTemporaryFile(req, file, async (error, info) => {
+    if (error && file.path) {
+      try {
+        await fs.promises.unlink(file.path);
+      } catch (cleanupError) {
+        if (cleanupError.code !== "ENOENT") {
+          console.error("Temporary upload cleanup failed:", cleanupError.message);
+        }
+      }
+    }
+    callback(error, info);
+  });
+};
 
 const allowedTypes = [
   "image/jpeg",
@@ -99,7 +118,13 @@ const mediaUploadFields = upload.fields([
 ]);
 
 function handleMediaUpload(req, _res, next) {
-  mediaUploadFields(req, _res, async (error) => {
+  runBoundedMultipart(req, _res, mediaUploadFields, MAX_MEDIA_MULTIPART_BYTES, async (error) => {
+    if (!error) {
+      try { assertUploadIdentity(req); } catch (identityError) { error = identityError; }
+    }
+    if (!error && Object.values(req.files || {}).flat().reduce((sum, file) => sum + file.size, 0) > MAX_MEDIA_REQUEST_BYTES) {
+      error = createHttpError("The selected files must be 200 MB or smaller in total.", 413, "MEDIA_REQUEST_TOO_LARGE");
+    }
     if (!error) {
       return next();
     }
@@ -825,6 +850,8 @@ router.post(
   "/upload",
   uploadLimiter,
   optionalAuth,
+  createUploadAuthorization({ verifyGuestToken, hashGuestToken, getGuestSecurity,
+    getUploadStatusForEvent, assertRegisteredUserAccess }),
   enforceMediaRequestSize,
   handleMediaUpload,
   validateUploadedMediaFilesPreserveOriginal,
