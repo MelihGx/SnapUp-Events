@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 require("dotenv").config();
+const { assertSafeEnvironment } = require("./config/environmentSafety");
+assertSafeEnvironment();
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -18,45 +20,7 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
 
-const configuredOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-const productionOrigins = new Set([
-  "https://snapupevents.com",
-  "https://www.snapupevents.com",
-  ...configuredOrigins,
-]);
-const developmentOrigins = new Set([
-  ...productionOrigins,
-  "https://snapup-events.pages.dev",
-  "https://snapup-events.netlify.app",
-]);
-
-function isAllowedOrigin(origin) {
-  // Postman, curl and server-to-server requests usually do not send Origin.
-  if (!origin) {
-    return true;
-  }
-
-  const allowedOrigins = process.env.NODE_ENV === "production"
-    ? productionOrigins
-    : developmentOrigins;
-
-  if (allowedOrigins.has(origin)) {
-    return true;
-  }
-
-  if (process.env.NODE_ENV !== "production" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
-    return true;
-  }
-
-  // Allow Cloudflare Pages preview deployment addresses such as:
-  // https://a09a7da4.snapup-events.pages.dev
-  return process.env.NODE_ENV !== "production" &&
-    /^https:\/\/[a-z0-9-]+\.snapup-events\.pages\.dev$/i.test(origin);
-}
+const isAllowedOrigin = require("./config/originPolicy").createOriginValidator();
 
 app.use(requestContext);
 app.use(helmet({

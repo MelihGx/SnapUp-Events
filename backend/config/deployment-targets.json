@@ -1,0 +1,14 @@
+﻿{
+  "version": 1,
+  "production": {
+    "frontendOrigins": ["https://snapupevents.com", "https://www.snapupevents.com", "https://snapup-events.pages.dev", "https://snapup-events.netlify.app"],
+    "apiOrigin": "https://snapup-events-api.onrender.com",
+    "additionalApiOrigins": ["https://api.snapupevents.com"],
+    "mediaOrigins": ["https://media.snapupevents.com", "https://res.cloudinary.com"],
+    "supabaseProjectRef": null,
+    "r2AccountId": null,
+    "r2Buckets": null,
+    "renderServiceIds": []
+  },
+  "staging": null
+}

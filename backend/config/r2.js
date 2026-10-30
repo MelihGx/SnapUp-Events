@@ -1,3 +1,5 @@
+const { assertSafeEnvironment } = require("./environmentSafety");
+assertSafeEnvironment();
 const { S3Client } = require("@aws-sdk/client-s3");
 
 function requiredEnv(name) {
@@ -33,6 +35,7 @@ function getR2Endpoint() {
 }
 
 function getR2Client() {
+  assertSafeEnvironment();
   if (client) return client;
 
   const accessKeyId = requiredEnv("R2_ACCESS_KEY_ID");
@@ -51,6 +54,7 @@ function getR2Client() {
 }
 
 function getR2Buckets() {
+  assertSafeEnvironment();
   return {
     originals: requiredEnv("R2_ORIGINAL_BUCKET"),
     display: requiredEnv("R2_DISPLAY_BUCKET"),

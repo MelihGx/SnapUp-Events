@@ -2,6 +2,7 @@
 const { createVideoWorker } = require("./videoWorkerService");
 let worker, pollTimer, loop, stopped = false;
 function getWorker() {
+  require("../config/environmentSafety").assertSafeEnvironment();
   if (!worker) {
     const supabase = require("../config/supabaseClient");
     let mediaTypeId;

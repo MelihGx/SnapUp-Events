@@ -1,31 +1,19 @@
-"use strict";
+﻿"use strict";
+import { DEPLOYMENT } from "./deployment-policy.js";
+import { resolveFrontendTarget } from "./runtime-target.js";
 
-const PRODUCTION_API_URL = "https://snapup-events-api.onrender.com";
-const LOCAL_API_URL = "http://localhost:3000";
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
-
-function isLocalFrontend() {
-  return (
-    window.location.protocol === "file:" ||
-    LOCAL_HOSTS.has(window.location.hostname)
-  );
-}
-
-export const API_URL = isLocalFrontend()
-  ? LOCAL_API_URL
-  : PRODUCTION_API_URL;
-
-const nativeFetch = window.fetch.bind(window);
-window.fetch = function snapUpFetch(input, init = {}) {
-  const target = typeof input === "string" ? input : input?.url || "";
-  if (!String(target).startsWith(API_URL)) return nativeFetch(input, init);
-  return nativeFetch(input, { ...init, credentials: "include" });
+const target=resolveFrontendTarget(window.location,DEPLOYMENT);
+export const API_URL=target.apiOrigin;
+const nativeFetch=window.fetch.bind(window);
+window.fetch=function snapUpFetch(input,init={}) {
+  const raw=typeof input==="string" ? input : input instanceof URL ? input.href : input?.url;
+  let origin;
+  try {origin=new URL(raw,window.location.href).origin;} catch(_){return nativeFetch(input,init);}
+  if(target.mode==="staging" && target.blockedOrigins.includes(origin)) {
+    return Promise.reject(Object.assign(new Error("STAGING_PRODUCTION_TARGET_BLOCKED"),{code:"STAGING_PRODUCTION_TARGET_BLOCKED"}));
+  }
+  return nativeFetch(input,origin===API_URL ? {...init,credentials:"include"} : init);
 };
-
-export function apiUrl(path = "") {
-  const normalizedPath = path
-    ? `/${String(path).replace(/^\/+/, "")}`
-    : "";
-
-  return `${API_URL}${normalizedPath}`;
+export function apiUrl(path="") {
+  return `${API_URL}${path ? `/${String(path).replace(/^\/+/,"")}` : ""}`;
 }

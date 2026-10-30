@@ -15,3 +15,5 @@ Thumbs.db
 # ini archives
 desktop.ini
 Thumbs.db
+# Generated frontend deployment artifacts
+artifacts/

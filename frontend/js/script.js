@@ -321,15 +321,8 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 /* BACKEND CONNECTION TEST */
 (async function testBackendConnection() {
-  const API_URL =
-    window.location.protocol === "file:" ||
-    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(
-      window.location.hostname,
-    )
-      ? "http://localhost:3000"
-      : "https://snapup-events-api.onrender.com";
-
   try {
+    const { API_URL } = await import("./config.js?v=runtime-api-2");
     const response = await fetch(`${API_URL}/api/health`);
     const data = await response.json();
 
@@ -340,20 +333,15 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 })();
 
 /* CREATE EVENT FROM FRONTEND */
-(function initCreateEvent() {
+(async function initCreateEvent() {
   const form = document.querySelector("#eventCreateForm");
   const input = document.querySelector("#eventNameInput");
   const result = document.querySelector("#eventCreateResult");
 
-  const API_URL =
-    window.location.protocol === "file:" ||
-    ["localhost", "127.0.0.1", "[::1]", "::1"].includes(
-      window.location.hostname,
-    )
-      ? "http://localhost:3000"
-      : "https://snapup-events-api.onrender.com";
-
   if (!form || !input || !result) return;
+  let API_URL;
+  try { ({ API_URL } = await import("./config.js?v=runtime-api-2")); }
+  catch (_) { return; }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
