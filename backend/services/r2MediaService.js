@@ -141,6 +141,7 @@ async function listBucketObjects({
 
   const objects = [];
   let continuationToken;
+  const seenTokens = new Set();
 
   do {
     const response = await getR2Client().send(
@@ -157,7 +158,8 @@ async function listBucketObjects({
 
       objects.push({
         key: item.Key,
-        size: Math.max(0, Number(item.Size) || 0),
+        // Unknown size must not become a valid zero-byte cleanup candidate.
+        size: Number.isSafeInteger(item.Size) && item.Size >= 0 ? item.Size : null,
         lastModified: item.LastModified
           ? new Date(item.LastModified)
           : null,
@@ -167,6 +169,10 @@ async function listBucketObjects({
     continuationToken = response.IsTruncated
       ? response.NextContinuationToken
       : undefined;
+    if (response.IsTruncated && (!continuationToken || seenTokens.has(continuationToken))) {
+      throw new Error("R2 listing pagination is incomplete; refusing reconciliation.");
+    }
+    if (continuationToken) seenTokens.add(continuationToken);
   } while (continuationToken);
 
   return objects;

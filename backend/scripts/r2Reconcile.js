@@ -1,359 +1,178 @@
-"use strict";
+﻿"use strict";
 
-require("dotenv").config();
-
-const supabase = require("../config/supabaseClient");
-const {
-  deleteBucketObject,
-  listBucketObjects,
-} = require("../services/r2MediaService");
-const { getR2Buckets } = require("../config/r2");
-
-const DEFAULT_MIN_AGE_HOURS = 24;
+// Importing this module never loads .env, an R2 client or an application client.
 const PAGE_SIZE = 500;
+const TABLES = [
+  ["media", "media_id", ["r2_original_key", "r2_display_key", "r2_poster_key"], "storage_provider"],
+  ["event", "event_id", ["event_cover_r2_original_key", "event_cover_r2_display_key"], "event_cover_storage_provider"],
+  ["video_processing_jobs", "job_id", ["original_key", "display_key", "poster_key"], "status"],
+  ["upload_quota_reservations", "reservation_id", [], "state,assets"],
+  ["upload_admission_leases", "lease_id", [], "expires_at"],
+];
+const JOB_STATES = new Set(["queued", "processing", "ready", "failed"]);
+const RESERVATION_STATES = new Set(["reserved", "committed", "cancelled"]);
 
-function parseArgs(argv) {
-  const args = new Set(argv.slice(2));
-
-  return {
-    apply: args.has("--apply"),
-    verbose: args.has("--verbose"),
-  };
+function uncertain() { throw new Error("R2 reference state is uncertain; refusing deletion."); }
+function timestamp(value) {
+  if (!value) return NaN;
+  return new Date(value).getTime();
+}
+function identity(object) {
+  const modified = timestamp(object.lastModified);
+  if (!object.key?.startsWith("events/") || !Number.isFinite(modified) ||
+      !Number.isSafeInteger(object.size) || object.size < 0) return null;
+  return { key: object.key, size: object.size, lastModified: new Date(modified).toISOString() };
+}
+function sameObject(a, b) {
+  return a && b && a.key === b.key && a.size === b.size && a.lastModified === b.lastModified;
 }
 
-function getMinAgeHours() {
-  const value = Number.parseInt(
-    String(process.env.R2_RECONCILE_MIN_AGE_HOURS || ""),
-    10,
-  );
-
-  if (!Number.isFinite(value)) return DEFAULT_MIN_AGE_HOURS;
-  return Math.min(24 * 30, Math.max(1, value));
+async function loadReferences(supabase, now) {
+  const keys = new Set();
+  const published = { originals: new Set(), display: new Set() };
+  let busy = false;
+  function add(key) {
+    if (key === null) return;
+    if (typeof key !== "string" || !key.length) uncertain();
+    keys.add(key);
+  }
+  // Sequential reads fail closed; keyset pagination does not skip rows on deletion.
+  // This is not a cross-table snapshot: apply additionally requires stopped writers.
+  for (const [table, pk, columns, extra] of TABLES) {
+    let after = null;
+    while (true) {
+      let query = supabase.from(table).select([pk, ...columns, extra].filter(Boolean).join(","))
+        .order(pk, { ascending: true }).limit(PAGE_SIZE);
+      if (after) query = query.gt(pk, after);
+      const { data, error } = await query;
+      if (error || !Array.isArray(data)) uncertain();
+      for (const row of data) {
+        if (!row || typeof row[pk] !== "string" || (after && row[pk] <= after)) uncertain();
+        after = row[pk];
+        for (const column of columns) {
+          add(row[column]);
+          if (["media", "event"].includes(table) && row[column]) {
+            published[column.includes("original") ? "originals" : "display"].add(row[column]);
+          }
+        }
+        if ((table === "media" && row.storage_provider === "r2" &&
+            (!row.r2_original_key || !row.r2_display_key)) ||
+            (table === "event" && row.event_cover_storage_provider === "r2" &&
+            (!row.event_cover_r2_original_key || !row.event_cover_r2_display_key))) uncertain();
+        if (table === "video_processing_jobs") {
+          if (!JOB_STATES.has(row.status) || columns.some((column) => !row[column])) uncertain();
+          if (row.status === "processing") busy = true;
+        }
+        if (table === "upload_quota_reservations") {
+          if (!RESERVATION_STATES.has(row.state) || !Array.isArray(row.assets) || !row.assets.length) uncertain();
+          // Preserve even expired/cancelled manifests: late PUTs and recovery are
+          // handled by the separate quota cleanup protocol, never by age alone.
+          for (const asset of row.assets) {
+            if (!asset || !["image", "video"].includes(asset.kind) ||
+                typeof asset.original_key !== "string" || typeof asset.display_key !== "string" ||
+                (asset.kind === "video" && typeof asset.poster_key !== "string")) uncertain();
+            add(asset.original_key); add(asset.display_key);
+            if (asset.poster_key != null) add(asset.poster_key);
+          }
+        }
+        if (table === "upload_admission_leases") {
+          const expiry = timestamp(row.expires_at);
+          if (!Number.isFinite(expiry)) uncertain();
+          if (expiry > now) busy = true;
+        }
+      }
+      if (data.length < PAGE_SIZE) break;
+    }
+  }
+  return { keys, busy, published };
 }
 
-async function loadAllRows(createQuery) {
-  const rows = [];
-  let from = 0;
-
-  while (true) {
-    const to = from + PAGE_SIZE - 1;
-    const { data, error } = await createQuery().range(from, to);
-
-    if (error) {
-      throw new Error(error.message);
+async function runReconcile({ supabase, listObjects, deleteObject, buckets, apply = false,
+  writersStopped = false, previousAudit = null, minAgeMs = 86400000, now = Date.now() }) {
+  if (!Number.isFinite(now) || !Number.isFinite(minAgeMs) || minAgeMs < 3600000) uncertain();
+  if (!buckets?.originals || !buckets?.display || buckets.originals === buckets.display) uncertain();
+  if (apply && !writersStopped) throw new Error("Apply requires --writers-stopped: stop and drain ALL writers/workers first.");
+  if (apply && (!previousAudit || previousAudit.version !== 1 ||
+      !Number.isFinite(previousAudit.observedAt) || previousAudit.observedAt > now - minAgeMs ||
+      previousAudit.buckets?.originals !== buckets.originals || previousAudit.buckets?.display !== buckets.display ||
+      !Array.isArray(previousAudit.candidates))) throw new Error("Apply requires a matching, aged dry-run audit.");
+  const references = await loadReferences(supabase, now);
+  if (apply && references.busy) throw new Error("Live admission lease or processing video exists; refusing deletion.");
+  const candidates = [], protectedObjects = [], missing = [];
+  for (const bucket of [buckets.originals, buckets.display]) {
+    const objects = await listObjects({ bucket, prefix: "events/" });
+    if (!Array.isArray(objects)) uncertain();
+    const seen = new Set();
+    for (const object of objects) {
+      if (!object || seen.has(object.key)) uncertain();
+      seen.add(object.key);
+      const item = identity(object);
+      if (!item || references.keys.has(object.key) || now - timestamp(item.lastModified) < minAgeMs) {
+        protectedObjects.push({ bucket, key: object.key });
+      } else candidates.push({ bucket, ...item });
     }
-
-    rows.push(...(data || []));
-
-    if (!data || data.length < PAGE_SIZE) {
-      return rows;
-    }
-
-    from += PAGE_SIZE;
+    const published = references.published[bucket === buckets.originals ? "originals" : "display"];
+    for (const key of published) if (!seen.has(key)) missing.push({ bucket, key });
   }
-}
-
-async function loadExpectedR2References() {
-  const [mediaRows, coverRows] = await Promise.all([
-    loadAllRows(() =>
-      supabase
-        .from("media")
-        .select(
-          "media_id, event_id, r2_original_key, r2_display_key, r2_poster_key",
-        )
-        .eq("storage_provider", "r2"),
-    ),
-    loadAllRows(() =>
-      supabase
-        .from("event")
-        .select(
-          "event_id, event_cover_r2_original_key, event_cover_r2_display_key",
-        )
-        .eq("event_cover_storage_provider", "r2"),
-    ),
-  ]);
-
-  const originals = new Map();
-  const display = new Map();
-
-  for (const row of mediaRows) {
-    if (row.r2_original_key) {
-      originals.set(row.r2_original_key, {
-        kind: "media",
-        id: row.media_id,
-        eventId: row.event_id,
-      });
-    }
-
-    if (row.r2_display_key) {
-      display.set(row.r2_display_key, {
-        kind: "media",
-        id: row.media_id,
-        eventId: row.event_id,
-      });
-    }
-
-    if (row.r2_poster_key) {
-      display.set(row.r2_poster_key, {
-        kind: "media-poster",
-        id: row.media_id,
-        eventId: row.event_id,
-      });
+  if (apply && missing.length) throw new Error("Published media/cover objects are missing; refusing deletion.");
+  const audit = { version: 1, observedAt: now, buckets: { ...buckets }, candidates };
+  let deleted = 0, skipped = 0;
+  if (apply) {
+    for (const candidate of candidates) {
+      const old = previousAudit.candidates.find((item) => item.bucket === candidate.bucket && sameObject(item, candidate));
+      if (!old) { skipped++; continue; }
+      // Fresh R2 identity first, then fresh references immediately before DELETE.
+      const current = await listObjects({ bucket: candidate.bucket, prefix: candidate.key });
+      if (!Array.isArray(current)) uncertain();
+      const matches = current.filter((item) => item.key === candidate.key);
+      if (matches.length > 1) uncertain();
+      if (matches.length !== 1 || !sameObject(identity(matches[0]), candidate)) { skipped++; continue; }
+      const fresh = await loadReferences(supabase, now);
+      if (fresh.busy) throw new Error("Writer activity detected during apply; stopping deletion.");
+      if (fresh.keys.has(candidate.key)) { skipped++; continue; }
+      // No online atomicity claim: the maintenance window is mandatory. No
+      // reference reader can fence an uncooperative DB/R2 writer by itself.
+      await deleteObject({ bucket: candidate.bucket, key: candidate.key });
+      deleted++;
     }
   }
-
-  for (const row of coverRows) {
-    if (row.event_cover_r2_original_key) {
-      originals.set(row.event_cover_r2_original_key, {
-        kind: "cover",
-        id: row.event_id,
-        eventId: row.event_id,
-      });
-    }
-
-    if (row.event_cover_r2_display_key) {
-      display.set(row.event_cover_r2_display_key, {
-        kind: "cover",
-        id: row.event_id,
-        eventId: row.event_id,
-      });
-    }
-  }
-
-  return {
-    originals,
-    display,
-    mediaRowCount: mediaRows.length,
-    coverRowCount: coverRows.length,
-  };
-}
-
-function analyzeBucket({
-  objects,
-  expected,
-  minAgeMs,
-  now,
-}) {
-  const actual = new Map(objects.map((item) => [item.key, item]));
-
-  const missing = [];
-  for (const [key, reference] of expected.entries()) {
-    if (!actual.has(key)) {
-      missing.push({
-        key,
-        reference,
-      });
-    }
-  }
-
-  const orphan = [];
-  const protectedRecent = [];
-
-  for (const item of objects) {
-    if (expected.has(item.key)) continue;
-
-    const ageMs = item.lastModified
-      ? now - item.lastModified.getTime()
-      : Number.POSITIVE_INFINITY;
-
-    if (ageMs >= minAgeMs) {
-      orphan.push(item);
-    } else {
-      protectedRecent.push(item);
-    }
-  }
-
-  return {
-    missing,
-    orphan,
-    protectedRecent,
-    actualCount: objects.length,
-  };
-}
-
-function printKeyList(title, rows, keySelector, verbose) {
-  if (!rows.length) return;
-
-  const limit = verbose ? rows.length : Math.min(rows.length, 25);
-
-  console.log(`\n${title} (${rows.length})`);
-
-  for (const row of rows.slice(0, limit)) {
-    console.log(`  - ${keySelector(row)}`);
-  }
-
-  if (!verbose && rows.length > limit) {
-    console.log(
-      `  ... ${rows.length - limit} more (use --verbose to show all)`,
-    );
-  }
-}
-
-async function deleteOrphans(bucket, rows) {
-  const failures = [];
-
-  for (const item of rows) {
-    try {
-      await deleteBucketObject({
-        bucket,
-        key: item.key,
-      });
-    } catch (error) {
-      failures.push({
-        key: item.key,
-        error: error.message,
-      });
-    }
-  }
-
-  return failures;
+  return { apply, deleted, skipped, protected: protectedObjects.length, missing, audit };
 }
 
 async function main() {
-  const { apply, verbose } = parseArgs(process.argv);
-  const minAgeHours = getMinAgeHours();
-  const minAgeMs = minAgeHours * 60 * 60 * 1000;
-  const now = Date.now();
-  const buckets = getR2Buckets();
-
-  console.log("SnapUp R2 reconciliation");
-  console.log("========================");
-  console.log(`Mode: ${apply ? "APPLY" : "DRY RUN"}`);
-  console.log(`Orphan safety age: ${minAgeHours} hour(s)`);
-  console.log(`Original bucket: ${buckets.originals}`);
-  console.log(`Display bucket: ${buckets.display}`);
-
-  const expected = await loadExpectedR2References();
-
-  const [originalObjects, displayObjects] = await Promise.all([
-    listBucketObjects({
-      bucket: buckets.originals,
-      prefix: "events/",
-    }),
-    listBucketObjects({
-      bucket: buckets.display,
-      prefix: "events/",
-    }),
-  ]);
-
-  const originalAnalysis = analyzeBucket({
-    objects: originalObjects,
-    expected: expected.originals,
-    minAgeMs,
-    now,
-  });
-
-  const displayAnalysis = analyzeBucket({
-    objects: displayObjects,
-    expected: expected.display,
-    minAgeMs,
-    now,
-  });
-
-  console.log("\nDatabase references");
-  console.log(`  R2 media rows: ${expected.mediaRowCount}`);
-  console.log(`  R2 cover rows: ${expected.coverRowCount}`);
-  console.log(`  Expected originals: ${expected.originals.size}`);
-  console.log(`  Expected display objects: ${expected.display.size}`);
-
-  console.log("\nR2 objects");
-  console.log(`  Actual originals: ${originalAnalysis.actualCount}`);
-  console.log(`  Actual display objects: ${displayAnalysis.actualCount}`);
-
-  console.log("\nIntegrity");
-  console.log(`  Missing originals: ${originalAnalysis.missing.length}`);
-  console.log(`  Missing display objects: ${displayAnalysis.missing.length}`);
-  console.log(`  Orphan originals eligible: ${originalAnalysis.orphan.length}`);
-  console.log(`  Orphan display eligible: ${displayAnalysis.orphan.length}`);
-  console.log(
-    `  Recent unreferenced objects protected: ${
-      originalAnalysis.protectedRecent.length +
-      displayAnalysis.protectedRecent.length
-    }`,
-  );
-
-  printKeyList(
-    "Missing original objects",
-    originalAnalysis.missing,
-    (item) =>
-      `${item.key} [${item.reference.kind}:${item.reference.id}]`,
-    verbose,
-  );
-
-  printKeyList(
-    "Missing display objects",
-    displayAnalysis.missing,
-    (item) =>
-      `${item.key} [${item.reference.kind}:${item.reference.id}]`,
-    verbose,
-  );
-
-  printKeyList(
-    "Eligible orphan originals",
-    originalAnalysis.orphan,
-    (item) => item.key,
-    verbose,
-  );
-
-  printKeyList(
-    "Eligible orphan display objects",
-    displayAnalysis.orphan,
-    (item) => item.key,
-    verbose,
-  );
-
-  if (!apply) {
-    console.log(
-      "\nNo objects were deleted. Re-run with --apply only after reviewing this report.",
-    );
-  } else {
-    const [originalFailures, displayFailures] = await Promise.all([
-      deleteOrphans(buckets.originals, originalAnalysis.orphan),
-      deleteOrphans(buckets.display, displayAnalysis.orphan),
-    ]);
-
-    const failures = [
-      ...originalFailures.map((item) => ({
-        ...item,
-        bucket: buckets.originals,
-      })),
-      ...displayFailures.map((item) => ({
-        ...item,
-        bucket: buckets.display,
-      })),
-    ];
-
-    console.log("\nDeletion result");
-    console.log(
-      `  Deleted: ${
-        originalAnalysis.orphan.length +
-        displayAnalysis.orphan.length -
-        failures.length
-      }`,
-    );
-    console.log(`  Failed: ${failures.length}`);
-
-    printKeyList(
-      "Deletion failures",
-      failures,
-      (item) => `${item.bucket}/${item.key} — ${item.error}`,
-      true,
-    );
+  const fs = require("node:fs/promises");
+  const args = process.argv.slice(2);
+  const allowed = new Set(["--apply", "--writers-stopped", "--audit-file", "--audit-out", "--verbose"]);
+  for (let i = 0; i < args.length; i++) {
+    if (!allowed.has(args[i])) throw new Error("Unknown argument.");
+    if (["--audit-file", "--audit-out"].includes(args[i])) {
+      if (!args[++i] || args[i].startsWith("--")) throw new Error("Audit path is required.");
+    }
   }
-
-  if (
-    originalAnalysis.missing.length ||
-    displayAnalysis.missing.length
-  ) {
-    console.error(
-      "\nWARNING: database rows reference R2 objects that do not exist. Do not auto-repair these rows without investigating the affected events.",
-    );
-    process.exitCode = 2;
+  const option = (name) => args.includes(name) ? args[args.indexOf(name) + 1] : null;
+  const apply = args.includes("--apply");
+  if (apply && (!args.includes("--writers-stopped") || !option("--audit-file"))) {
+    throw new Error("Apply requires --writers-stopped and --audit-file; no services were contacted.");
   }
+  if (apply && option("--audit-out")) throw new Error("Apply cannot overwrite an audit.");
+  const previousAudit = option("--audit-file") ? JSON.parse(await fs.readFile(option("--audit-file"), "utf8")) : null;
+  require("dotenv").config();
+  const hours = Number(process.env.R2_RECONCILE_MIN_AGE_HOURS || 24);
+  if (!Number.isInteger(hours) || hours < 1 || hours > 720) throw new Error("Invalid R2_RECONCILE_MIN_AGE_HOURS.");
+  const { listBucketObjects, deleteBucketObject } = require("../services/r2MediaService");
+  const result = await runReconcile({ supabase: require("../config/supabaseClient"),
+    listObjects: listBucketObjects, deleteObject: deleteBucketObject,
+    buckets: require("../config/r2").getR2Buckets(), apply,
+    writersStopped: args.includes("--writers-stopped"), previousAudit, minAgeMs: hours * 3600000 });
+  if (!apply && option("--audit-out")) {
+    await fs.writeFile(option("--audit-out"), JSON.stringify(result.audit, null, 2), { flag: "wx", mode: 0o600 });
+  }
+  console.log(JSON.stringify(args.includes("--verbose") ? result : {
+    apply, deleted: result.deleted, skipped: result.skipped, protected: result.protected,
+    candidates: result.audit.candidates.length, missing: result.missing.length,
+  }, null, 2));
+  if (result.missing.length) process.exitCode = 2;
 }
 
-main().catch((error) => {
-  console.error("\nR2 reconciliation failed:");
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) main().catch((error) => { console.error(error.message); process.exitCode = 1; });
+module.exports = { loadReferences, runReconcile };

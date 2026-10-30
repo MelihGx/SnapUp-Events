@@ -25,7 +25,7 @@ const event1 = "10000000-0000-0000-0000-000000000001";
 const event2 = "10000000-0000-0000-0000-000000000002";
 const guest = (n) => `20000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
 
-test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeout: 120000 }, async (t) => {
+test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeout: process.env.PATCH5_R2_TESTS === "1" ? 180000 : 120000 }, async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "snapup-patch2-pg-"));
   const dataDir = path.join(root, "data");
   const filesDir = path.join(root, "uploads");
@@ -266,6 +266,9 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
     });
     if (process.env.PATCH3_QUOTA_TESTS === "1") {
       await require("./fixtures/uploadQuotaScenarios")({ t, sql, root });
+      if (process.env.PATCH5_R2_TESTS === "1") {
+        await require("./fixtures/r2ReconcileScenarios")({ t, sql });
+      }
     }
   } finally {
     if (server) { server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
