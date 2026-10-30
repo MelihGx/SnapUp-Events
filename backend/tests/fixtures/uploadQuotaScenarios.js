@@ -6,7 +6,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { createUploadQuotaService } = require("../../services/uploadQuotaService");
 
-module.exports = async function quotaScenarios({ t, sql, root }) {
+module.exports = async function quotaScenarios({ t, sql, root, connect }) {
   const event = "30000000-0000-0000-0000-000000000001";
   const guest = (n) => `40000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
   const q = (value) => value === null ? "null" : `'${String(value).replaceAll("'", "''")}'`;
@@ -38,13 +38,16 @@ module.exports = async function quotaScenarios({ t, sql, root }) {
     return { kind, bytes, asset_id: id, original_key: `${prefix}/original.${kind === "image" ? "png" : "mp4"}`,
       display_key: `${prefix}/display.${kind === "image" ? "webp" : "mp4"}`, poster_key: kind === "image" ? null : `${prefix}/poster.webp` };
   }
-  async function reservation({ bytes = 10, kind = "image", g = 1, key = crypto.randomUUID(), assets } = {}) {
+  async function prepareReservation({ bytes = 10, kind = "image", g = 1, key = crypto.randomUUID(), assets } = {}) {
     assets ||= [asset(bytes, kind)];
     const owner = "a".repeat(64), lease = crypto.randomUUID(), id = crypto.randomUUID();
     await call("acquire_upload_admission", { lease, owner, event, guest: guest(g) });
     const args = { id, lease, owner, event, guest: guest(g), key, fingerprint: "b".repeat(64), bytes, count: assets.length, assets };
-    const result = await call("reserve_upload_quota", args);
-    return { args, result, assets, id, owner, lease, g };
+    return { args, assets, id, owner, lease, g };
+  }
+  async function reservation(options) {
+    const r = await prepareReservation(options);
+    return { ...r, result: await call("reserve_upload_quota", r.args) };
   }
   function rows(r) {
     return {
@@ -58,6 +61,8 @@ module.exports = async function quotaScenarios({ t, sql, root }) {
   async function finalize(r, override) { const data = override || rows(r); return call("finalize_upload_quota", { id: r.id, owner: r.owner, media: data.media, jobs: data.jobs }); }
   async function consumed() { return Number(await sql(`select storage_consumed_bytes from public.event where event_id='${event}'`)); }
   async function usage() { return JSON.parse(await sql(`select row_to_json(u)::text from public.upload_quota_guest_usage('${event}','${guest(1)}') u`)); }
+  const deadlock = await require("./quotaDeadlockScenarios")({ t, sql, connect, reset,
+    prepareReservation, reservation, finalize, rows, consumed, usage, event, guest, q });
   await reset();
   await t.test("PATCH 3 migration replay fails transactionally and preserves existing data", async () => {
     await sql(`update public.event set storage_consumed_bytes=1234 where event_id='${event}'`);
@@ -155,15 +160,7 @@ module.exports = async function quotaScenarios({ t, sql, root }) {
     assert.equal(await sql(`select state from public.upload_quota_reservations where reservation_id='${queued.id}'`), "committed");
   });
   await t.test("PATCH 3 worker holding guest lock and quota reservation do not deadlock", async () => {
-    await reset(); await finalize(await reservation({ kind: "video", bytes: 10 }));
-    const worker = sql(`begin; select 1 from public.event_guests where guest_id='${guest(1)}' for update;
-      select pg_sleep(0.1); insert into public.media(media_id,event_id,guest_id,media_type_id,bytes,storage_provider,r2_original_key,r2_display_key)
-      select job_id,event_id,guest_id,2,original_bytes,'r2',original_key,display_key from public.video_processing_jobs;
-      commit;`);
-    const results = await Promise.all([worker, reservation({ bytes: 10 })]);
-    await finalize(results[1]);
-    assert.equal(await consumed(), 20);
-    assert.deepEqual(await usage(), { bytes: 20, items: 2 });
+    await deadlock.race({ mode: "reserve" });
   });
   await t.test("PATCH 3 an external long lock times out without changing quota", async () => {
     await reset(); const r = await reservation();

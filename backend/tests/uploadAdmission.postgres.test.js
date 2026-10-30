@@ -25,7 +25,7 @@ const event1 = "10000000-0000-0000-0000-000000000001";
 const event2 = "10000000-0000-0000-0000-000000000002";
 const guest = (n) => `20000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
 
-test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeout: process.env.PATCH5_R2_TESTS === "1" ? 180000 : 120000 }, async (t) => {
+test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeout: 300000 }, async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "snapup-patch2-pg-"));
   const dataDir = path.join(root, "data");
   const filesDir = path.join(root, "uploads");
@@ -44,6 +44,8 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
     const { stdout } = await exec(exe("psql"), ["-X", "-w", "-h", "127.0.0.1", "-p", String(port), "-U", user, "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At", "-c", command], options);
     return stdout.trim();
   }
+  const connect = () => require("./fixtures/postgresSession")({ executable: exe("psql"), env,
+    args: ["-h", "127.0.0.1", "-p", String(port), "-U", user, "-d", "postgres"] });
   const quote = (value) => `'${String(value).replaceAll("'", "''")}'`;
   let started = false, server;
   const held = [];
@@ -265,7 +267,7 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
       await request({ abort: true }); await settled();
     });
     if (process.env.PATCH3_QUOTA_TESTS === "1") {
-      await require("./fixtures/uploadQuotaScenarios")({ t, sql, root });
+      await require("./fixtures/uploadQuotaScenarios")({ t, sql, root, connect });
       if (process.env.PATCH5_R2_TESTS === "1") {
         await require("./fixtures/r2ReconcileScenarios")({ t, sql });
       }
