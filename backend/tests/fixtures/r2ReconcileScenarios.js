@@ -14,7 +14,7 @@ module.exports = async function reconcileScenarios({ t, sql }) {
   const poster = key.replace("original.mp4", "poster.webp");
   const quote = (value) => `'${String(value).replaceAll("'", "''")}'`;
   const db = { from(table) {
-    assert.ok(["media", "event", "video_processing_jobs", "upload_quota_reservations", "upload_admission_leases"].includes(table));
+    assert.ok(["media", "event", "video_processing_jobs", "upload_quota_reservations", "upload_admission_leases", "video_worker_attempts"].includes(table));
     let columns, order, limit, after;
     const query = { select(value) { columns = value; return query; }, order(value) { order = value; return query; },
       limit(value) { limit = value; return query; }, gt(column, value) { assert.equal(column, order); after = value; return query; },

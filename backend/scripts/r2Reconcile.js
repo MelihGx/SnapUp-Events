@@ -8,6 +8,7 @@ const TABLES = [
   ["video_processing_jobs", "job_id", ["original_key", "display_key", "poster_key"], "status"],
   ["upload_quota_reservations", "reservation_id", [], "state,assets"],
   ["upload_admission_leases", "lease_id", [], "expires_at"],
+  ["video_worker_attempts", "attempt_id", ["original_key", "display_key", "poster_key"], "state"],
 ];
 const JOB_STATES = new Set(["queued", "processing", "ready", "failed"]);
 const RESERVATION_STATES = new Set(["reserved", "committed", "cancelled"]);
@@ -62,6 +63,10 @@ async function loadReferences(supabase, now) {
         if (table === "video_processing_jobs") {
           if (!JOB_STATES.has(row.status) || columns.some((column) => !row[column])) uncertain();
           if (row.status === "processing") busy = true;
+        }
+        if (table === "video_worker_attempts") {
+          if (!["processing", "committed", "failed", "abandoned"].includes(row.state) ||
+              columns.some((column) => !row[column])) uncertain();
         }
         if (table === "upload_quota_reservations") {
           if (!RESERVATION_STATES.has(row.state) || !Array.isArray(row.assets) || !row.assets.length) uncertain();

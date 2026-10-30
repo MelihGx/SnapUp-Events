@@ -6,7 +6,7 @@ const now = Date.UTC(2026, 9, 30), age = 86400000;
 const buckets = { originals: "fake-originals", display: "fake-display" };
 const key = "events/test/media/orphan/original.png";
 function fixture() {
-  const rows = { media: [], event: [], video_processing_jobs: [], upload_quota_reservations: [], upload_admission_leases: [] };
+  const rows = { media: [], event: [], video_processing_jobs: [], upload_quota_reservations: [], upload_admission_leases: [], video_worker_attempts: [] };
   const deleted = [];
   let calls = 0;
   const options = { now, minAgeMs: age, buckets,

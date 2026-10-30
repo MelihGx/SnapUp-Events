@@ -356,6 +356,9 @@ async function processStoredVideoOriginal({
   displayKey,
   posterKey,
   originalContentType = "application/octet-stream",
+  preserveOnError = false,
+  assertValid = () => {},
+  signal,
 }) {
   if (!eventId || !originalKey || !displayKey || !posterKey) {
     throw new Error("Stored video processing requires event and R2 object keys.");
@@ -375,11 +378,13 @@ async function processStoredVideoOriginal({
   let posterUploaded = false;
 
   try {
+    assertValid();
     const originalObject = await getOriginalObjectStream(originalKey);
 
     await pipeline(
       originalObject.body,
       fs.createWriteStream(sourcePath, { mode: 0o600 }),
+      ...(signal ? [{ signal }] : []),
     );
 
     const sourceStat = await fs.promises.stat(sourcePath);
@@ -392,6 +397,7 @@ async function processStoredVideoOriginal({
       detectedFormat: extension,
       originalname: `original.${extension}`,
     });
+    assertValid();
 
     const buckets = getR2Buckets();
 
@@ -410,6 +416,7 @@ async function processStoredVideoOriginal({
         },
       });
       displayUploaded = true;
+      assertValid();
     } catch (error) {
       throw wrapR2VideoUploadError(error, {
         code: "R2_VIDEO_DISPLAY_UPLOAD_FAILED",
@@ -433,6 +440,7 @@ async function processStoredVideoOriginal({
         },
       });
       posterUploaded = true;
+      assertValid();
     } catch (error) {
       throw wrapR2VideoUploadError(error, {
         code: "R2_VIDEO_POSTER_UPLOAD_FAILED",
@@ -459,10 +467,12 @@ async function processStoredVideoOriginal({
   } catch (error) {
     const buckets = getR2Buckets();
 
-    await Promise.allSettled([
-      displayUploaded ? deleteObject(buckets.display, displayKey) : null,
-      posterUploaded ? deleteObject(buckets.display, posterKey) : null,
-    ]);
+    if (!preserveOnError) {
+      await Promise.allSettled([
+        displayUploaded ? deleteObject(buckets.display, displayKey) : null,
+        posterUploaded ? deleteObject(buckets.display, posterKey) : null,
+      ]);
+    }
 
     throw error;
   } finally {

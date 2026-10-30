@@ -180,7 +180,7 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
 
   startVideoProcessingWorker().catch((error) => {
@@ -193,3 +193,18 @@ app.listen(PORT, () => {
     );
   });
 });
+
+let shuttingDown = false;
+async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  const force = setTimeout(() => { server.closeAllConnections(); process.exit(0); }, 25000);
+  force.unref();
+  const httpClosed = new Promise((resolve) => server.close(resolve));
+  await require("./services/videoProcessingQueueService").stopVideoProcessingWorker({ timeoutMs: 10000 });
+  await httpClosed;
+  clearTimeout(force);
+  process.exit(0);
+}
+process.once("SIGTERM", () => { shutdown().catch(() => process.exit(1)); });
+process.once("SIGINT", () => { shutdown().catch(() => process.exit(1)); });

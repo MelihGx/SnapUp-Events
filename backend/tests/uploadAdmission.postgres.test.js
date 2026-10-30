@@ -44,8 +44,9 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
     const { stdout } = await exec(exe("psql"), ["-X", "-w", "-h", "127.0.0.1", "-p", String(port), "-U", user, "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-At", "-c", command], options);
     return stdout.trim();
   }
-  const connect = () => require("./fixtures/postgresSession")({ executable: exe("psql"), env,
-    args: ["-h", "127.0.0.1", "-p", String(port), "-U", user, "-d", "postgres"] });
+  const workerConnection = { executable: exe("psql"),
+    args: ["-h", "127.0.0.1", "-p", String(port), "-U", user, "-d", "postgres"] };
+  const connect = () => require("./fixtures/postgresSession")({ ...workerConnection, env });
   const quote = (value) => `'${String(value).replaceAll("'", "''")}'`;
   let started = false, server;
   const held = [];
@@ -268,6 +269,7 @@ test("PATCH 2 real PostgreSQL admission and HTTP lifecycle", { skip: !bin, timeo
     });
     if (process.env.PATCH3_QUOTA_TESTS === "1") {
       await require("./fixtures/uploadQuotaScenarios")({ t, sql, root, connect });
+      await require("./fixtures/videoWorkerScenarios")({ t, sql, connect, workerConnection, testEnv: env });
       if (process.env.PATCH5_R2_TESTS === "1") {
         await require("./fixtures/r2ReconcileScenarios")({ t, sql });
       }
