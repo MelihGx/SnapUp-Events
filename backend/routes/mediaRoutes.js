@@ -11,7 +11,7 @@ const optionalAuth = require("../middlewares/optionalAuth");
 const { createUploadAuthorization, runBoundedMultipart, assertUploadIdentity } = require("../middlewares/uploadSecurity");
 const { withUploadAdmission } = require("../middlewares/uploadAdmission");
 const { createUploadAdmissionService } = require("../services/uploadAdmissionService");
-const { createUploadQuotaService } = require("../services/uploadQuotaService");
+const { createUploadQuotaService, mapUploadQuotaError } = require("../services/uploadQuotaService");
 const {
   validateUploadedMediaFilesPreserveOriginal,
 } = require("../middlewares/fileValidation");
@@ -476,6 +476,7 @@ async function checkGuestUploadLimit(eventId, guestId, incomingFileCount) {
     throw createHttpError(
       `Upload limit exceeded. This guest can upload maximum ${maxUploadPerGuest} item(s).`,
       400,
+      "GUEST_UPLOAD_LIMIT_EXCEEDED",
     );
   }
 }
@@ -1219,11 +1220,10 @@ router.post("/message", uploadLimiter, optionalAuth, async (req, res) => {
       .single();
 
     if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Message could not be saved.",
-        error: error.message,
-      });
+      if (["GUEST_UPLOAD_LIMIT_EXCEEDED", "GUEST_STORAGE_QUOTA_EXCEEDED"].includes(error.message)) {
+        throw mapUploadQuotaError(error);
+      }
+      throw createHttpError("Message could not be saved.", 500);
     }
 
     return res.status(201).json({
@@ -1232,14 +1232,13 @@ router.post("/message", uploadLimiter, optionalAuth, async (req, res) => {
       media: data,
     });
   } catch (error) {
-    return res.status(error.statusCode || 500).json({
+    const status = error.statusCode || 500;
+    const message = status < 500 ? error.message : "Message save failed.";
+    return res.status(status).json({
       success: false,
-      message:
-        error.statusCode && error.statusCode < 500
-          ? error.message
-          : "Message save failed.",
-      code: error.code || "MESSAGE_SAVE_FAILED",
-      error: error.message,
+      code: status < 500 ? error.code || "MESSAGE_SAVE_FAILED" : "MESSAGE_SAVE_FAILED",
+      message,
+      error: message,
     });
   }
 });

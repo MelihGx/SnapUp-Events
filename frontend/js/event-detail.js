@@ -19,6 +19,7 @@ import {
 } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 import { openExtraStorage } from "./extra-storage.js?v=extra-storage-2";
 import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
+import { getUploadErrorMessage } from "./upload-error-message.js?v=quota-errors-1";
 
 const token = localStorage.getItem("snapup_token");
 const API_BASE_URL = API_URL;
@@ -64,7 +65,7 @@ function t(value, replacements = {}) {
 }
 
 function createApiError(response, data, fallbackMessage) {
-  const error = new Error(data.message || data.error || fallbackMessage);
+  const error = new Error(getUploadErrorMessage(response, data, fallbackMessage));
   error.code = data.code || "";
   error.status = response.status;
   return error;
@@ -4255,6 +4256,36 @@ const eventDetailTurnstileControllerPromise = mountTurnstile({
   action: "guest_join",
 });
 
+async function handleGuestUploadUnauthorized(data, guestToken) {
+  if (["INVALID_GUEST_SESSION", "GUEST_SESSION_REVOKED"].includes(data.code)) {
+    // Remove only the rejected credential, never a newly refreshed guest token
+    // or the independent account session. Storage can be unavailable in browsers.
+    if (guestToken) {
+      try {
+        for (const key of Object.keys(sessionStorage)) {
+          if (!key.startsWith(`snapup_guest_${eventId}_`)) continue;
+          try {
+            const cached = JSON.parse(sessionStorage.getItem(key) || "null");
+            if (cached?.guest_access_token === guestToken) sessionStorage.removeItem(key);
+          } catch (_error) {}
+        }
+      } catch (_error) {}
+    }
+    return;
+  }
+
+  // Guest endpoints use optionalAuth: their 401 alone cannot prove that the
+  // account expired. Confirm using an endpoint protected by account auth.
+  try {
+    const accountResponse = await fetch(`${API_BASE_URL}/api/users/me`, {
+      headers: getAuthHeaders(),
+    });
+    if (accountResponse.status === 401) await logout();
+  } catch (_error) {
+    // A network/server failure is not evidence that the account is invalid.
+  }
+}
+
 async function createGuestForUpload(guestName, turnstileToken = "") {
   const sessionKey = `snapup_guest_${eventId}_${guestName.trim().toLocaleLowerCase("tr-TR")}`;
   let cached = null;
@@ -4281,7 +4312,7 @@ async function createGuestForUpload(guestName, turnstileToken = "") {
   const data = await response.json();
 
   if (response.status === 401) {
-    await logout();
+    await handleGuestUploadUnauthorized(data, cached?.guest_access_token);
     throw createApiError(response, data, "Session is no longer valid.");
   }
 
@@ -4364,7 +4395,7 @@ async function uploadFilesToEvent(guestId, guestToken, files) {
 
       if (xhr.status === 401) {
         markEventUploadFailed(totalFileBytes);
-        await logout();
+        await handleGuestUploadUnauthorized(data, guestToken);
         reject(createApiError(xhr, data, "Session is no longer valid."));
         return;
       }
@@ -4410,7 +4441,7 @@ async function sendMessageToEvent(guestId, guestToken, message) {
   const data = await response.json();
 
   if (response.status === 401) {
-    await logout();
+    await handleGuestUploadUnauthorized(data, guestToken);
     throw createApiError(response, data, "Session is no longer valid.");
   }
 

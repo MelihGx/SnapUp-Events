@@ -2,6 +2,34 @@
 const fs=require("node:fs"),path=require("node:path");
 const {readPolicy,targets}=require("../backend/config/environmentSafety");
 const root=path.resolve(__dirname,"..");
+const privatePathSegments = new Set([
+  "node_modules", "test-results", "playwright-report", "playwright-results",
+  "playwright-traces", "playwright-screenshots", "blob-report", "browser-results",
+  "test-reports", "test-screenshots", "coverage", "screenshots", "__tests__",
+  ".git", ".github", ".vscode", ".idea",
+  ".cache", ".tmp", "tmp", "temp", ".npmrc", ".netrc", ".ds_store", "thumbs.db",
+]);
+
+function isPublicSource(frontendRoot, source) {
+  const relative = path.relative(frontendRoot, source);
+  if (!relative) return true;
+  const segments = relative.toLowerCase().split(path.sep);
+  const name = segments[segments.length - 1];
+  if (segments[0] === "tests" || segments.some((segment) =>
+    privatePathSegments.has(segment) || segment.startsWith(".env")
+  )) return false;
+  if (/(?:^|\.)(?:spec|test|backup)\.[^.]+$/.test(name) ||
+      /^(?:playwright|vitest|jest)\.config\./.test(name) ||
+      /^(?:trace(?:[-.].*)?|playwright[-.]trace.*)\.zip$/.test(name) ||
+      /^(?:(?:playwright|test)[-.])?(?:report|screenshot)(?:[-.].*)?\.(?:html|json|xml|png|jpe?g|webp)$/.test(name) ||
+      /^test-(?:failed|finished)-\d+\.(?:png|jpe?g|webp)$/.test(name) ||
+      /(?:\.(?:tmp|temp|swp|swo|bak|log|tap)|~)$/.test(name)) return false;
+
+  // A symlink can point outside the public tree or into an excluded directory.
+  const entry = fs.lstatSync(source);
+  return entry.isFile() || entry.isDirectory();
+}
+
 function buildFrontend({mode,policy=readPolicy(),outputDir=path.join(root,"artifacts",`${mode}-frontend`)}) {
   if(!["production","staging"].includes(mode)) throw new Error("INVALID_BUILD_ENVIRONMENT");
   const artifacts=path.join(root,"artifacts");
@@ -29,8 +57,9 @@ function buildFrontend({mode,policy=readPolicy(),outputDir=path.join(root,"artif
     headers=headers.replace(match[0],`Content-Security-Policy: ${replaced}`);
   }
   fs.mkdirSync(artifacts,{recursive:true});
-  fs.cpSync(path.join(root,"frontend"),output,{recursive:true,force:false,errorOnExist:true,
-    filter:(source)=>!path.basename(source).startsWith(".env")});
+  const frontendRoot = path.join(root, "frontend");
+  fs.cpSync(frontendRoot,output,{recursive:true,force:false,errorOnExist:true,
+    filter:(source)=>isPublicSource(frontendRoot, source)});
   fs.writeFileSync(path.join(output,"js/deployment-policy.js"),`// Generated public targets; no credentials.\nexport const DEPLOYMENT = ${JSON.stringify({mode,production,staging},null,2)};\n`);
   fs.writeFileSync(path.join(output,"_headers"),headers);
   return output;

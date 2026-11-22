@@ -7,17 +7,22 @@ function quotaError(code, statusCode = 503) {
   return Object.assign(new Error("Upload failed."), { code, statusCode });
 }
 
+// Shared exact-label mapping for RPC and direct-insert quota errors.
+function mapUploadQuotaError(error) {
+  const code = String(error?.message || "");
+  const known = ["EVENT_STORAGE_QUOTA_EXCEEDED", "GUEST_STORAGE_QUOTA_EXCEEDED", "GUEST_UPLOAD_LIMIT_EXCEEDED",
+    "UPLOAD_IDEMPOTENCY_CONFLICT", "UPLOAD_IN_PROGRESS", "UPLOAD_ADMISSION_LOST", "UPLOAD_DISABLED"];
+  const match = known.find((item) => code === item);
+  const status = match?.includes("QUOTA_EXCEEDED") ? 413 : match === "GUEST_UPLOAD_LIMIT_EXCEEDED" ? 400
+    : ["UPLOAD_IDEMPOTENCY_CONFLICT", "UPLOAD_IN_PROGRESS"].includes(match) ? 409 : match === "UPLOAD_DISABLED" ? 403 : 503;
+  return quotaError(match || "UPLOAD_QUOTA_UNAVAILABLE", status);
+}
+
 function createUploadQuotaService({ supabase }) {
   async function rpc(name, args) {
     const result = await supabase.rpc(name, args).abortSignal(AbortSignal.timeout(10000));
     if (result.error) {
-      const code = String(result.error.message || "");
-      const known = ["EVENT_STORAGE_QUOTA_EXCEEDED", "GUEST_STORAGE_QUOTA_EXCEEDED", "GUEST_UPLOAD_LIMIT_EXCEEDED",
-        "UPLOAD_IDEMPOTENCY_CONFLICT", "UPLOAD_IN_PROGRESS", "UPLOAD_ADMISSION_LOST", "UPLOAD_DISABLED"];
-      const match = known.find((item) => code === item);
-      const status = match?.includes("QUOTA_EXCEEDED") ? 413 : match === "GUEST_UPLOAD_LIMIT_EXCEEDED" ? 400
-        : ["UPLOAD_IDEMPOTENCY_CONFLICT", "UPLOAD_IN_PROGRESS"].includes(match) ? 409 : match === "UPLOAD_DISABLED" ? 403 : 503;
-      throw quotaError(match || "UPLOAD_QUOTA_UNAVAILABLE", status);
+      throw mapUploadQuotaError(result.error);
     }
     return result.data;
   }
@@ -70,4 +75,4 @@ function createUploadQuotaService({ supabase }) {
   };
 }
 
-module.exports = { createUploadQuotaService, quotaError };
+module.exports = { createUploadQuotaService, quotaError, mapUploadQuotaError };

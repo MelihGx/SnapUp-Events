@@ -3,6 +3,7 @@ import { buildEventGalleryUrl } from "./event-url.js?v=event-slug-1";
 import { buildEventMapUrl } from "./location-map-picker.js?v=location-map-2";
 import { getEventCoverUrl } from "./media-delivery.js?v=cloudinary-bandwidth-1";
 import { mountTurnstile } from "./turnstile.js?v=turnstile-visible-2";
+import { getUploadErrorMessage } from "./upload-error-message.js?v=quota-errors-1";
 
 const API_BASE_URL = API_URL;
 const MAX_MEDIA_FILES = 15;
@@ -118,7 +119,7 @@ async function hydrateRegisteredUploaderName() {
 }
 
 function createApiError(response, data, fallbackMessage) {
-  const baseMessage = data.message || data.error || fallbackMessage;
+  const baseMessage = getUploadErrorMessage(response, data, fallbackMessage);
   const error = new Error(baseMessage);
 
   // Teknik hata bilgilerini kullanıcıya göstermiyoruz; uygulama mantığı ve
